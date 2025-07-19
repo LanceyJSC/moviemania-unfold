@@ -270,24 +270,24 @@ class TMDBService {
   }
 
   // Get latest trailers by category
-  async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = false): Promise<TMDBResponse<Movie>> {
+  async getLatestTrailers(category: 'popular' | 'now_playing' | 'upcoming' | 'top_rated' | 'tv_popular', fresh: boolean = false): Promise<TMDBResponse<Movie>> {
     let endpoint = '';
     
     switch (category) {
       case 'popular':
         endpoint = '/movie/popular';
         break;
-      case 'streaming':
-        endpoint = '/discover/movie?with_watch_providers=8|9|337|350&watch_region=US';
-        break;
-      case 'on_tv':
-        endpoint = '/tv/on_the_air';
-        break;
-      case 'for_rent':
-        endpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US';
-        break;
-      case 'in_theaters':
+      case 'now_playing':
         endpoint = '/movie/now_playing';
+        break;
+      case 'upcoming':
+        endpoint = '/movie/upcoming';
+        break;
+      case 'top_rated':
+        endpoint = '/movie/top_rated';
+        break;
+      case 'tv_popular':
+        endpoint = '/tv/popular';
         break;
     }
     

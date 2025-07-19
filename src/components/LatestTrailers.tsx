@@ -6,11 +6,11 @@ import { useTrailerContext } from "@/contexts/TrailerContext";
 import { cn } from "@/lib/utils";
 
 const TRAILER_CATEGORIES = [
-  { id: 'popular', label: 'Popular' },
-  { id: 'streaming', label: 'Streaming' },
-  { id: 'on_tv', label: 'On TV' },
-  { id: 'for_rent', label: 'For Rent' },
-  { id: 'in_theaters', label: 'In Theaters' }
+  { id: 'popular', label: 'Popular Movies' },
+  { id: 'now_playing', label: 'Now Playing' },
+  { id: 'upcoming', label: 'Upcoming' },
+  { id: 'top_rated', label: 'Top Rated' },
+  { id: 'tv_popular', label: 'Popular TV' }
 ] as const;
 
 type TrailerCategory = typeof TRAILER_CATEGORIES[number]['id'];
@@ -70,12 +70,12 @@ export const LatestTrailers = () => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Film className="h-8 w-8 text-primary" />
             <h2 className="font-cinematic text-3xl text-foreground tracking-wide">
-              LATEST TRAILERS
+              TRENDING TRAILERS
             </h2>
             <Video className="h-8 w-8 text-primary" />
           </div>
           <p className="text-muted-foreground mb-4">
-            Watch the newest trailers across all categories - Updated hourly
+            Watch trailers from trending movies and shows - Updated hourly
           </p>
           <div className="w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
