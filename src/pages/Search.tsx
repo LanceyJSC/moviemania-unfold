@@ -60,12 +60,21 @@ const Search = () => {
           if (sortBy === 'release_date') sortParam = 'release_date.desc';
           if (sortBy === 'title') sortParam = 'title.asc';
 
-          const results = await tmdbService.discoverMovies({
-            genre: parseInt(genreParam),
-            page: 1,
-            sortBy: sortParam
-          });
-          setSearchResults(results.results);
+          // Fetch multiple pages to get more results (up to 5 pages = 100 results)
+          const pagePromises = [];
+          for (let page = 1; page <= 5; page++) {
+            pagePromises.push(
+              tmdbService.discoverMovies({
+                genre: parseInt(genreParam),
+                page: page,
+                sortBy: sortParam
+              })
+            );
+          }
+
+          const allResults = await Promise.all(pagePromises);
+          const combinedResults = allResults.flatMap(result => result.results);
+          setSearchResults(combinedResults);
         } catch (error) {
           console.error("Genre search failed:", error);
         } finally {
@@ -122,15 +131,22 @@ const Search = () => {
           await handleSurpriseMe();
           return; // Exit early since handleSurpriseMe handles the loading state
         } else if (genreParam) {
-          // Apply filters to genre search
-          const results = await tmdbService.discoverMovies({
-            genre: parseInt(genreParam),
-            page: 1,
-            sortBy: filters.sortBy || 'popularity.desc',
-            rating: filters.ratingRange?.[0] || 0,
-            year: filters.yearRange?.[0] || 1900
-          });
-          setSearchResults(results.results);
+          // Apply filters to genre search - fetch multiple pages
+          const pagePromises = [];
+          for (let page = 1; page <= 5; page++) {
+            pagePromises.push(
+              tmdbService.discoverMovies({
+                genre: parseInt(genreParam),
+                page: page,
+                sortBy: filters.sortBy || 'popularity.desc',
+                rating: filters.ratingRange?.[0] || 0,
+                year: filters.yearRange?.[0] || 1900
+              })
+            );
+          }
+          const allResults = await Promise.all(pagePromises);
+          const combinedResults = allResults.flatMap(result => result.results);
+          setSearchResults(combinedResults);
         } else if (searchTerm && !searchTerm.includes("Surprise")) {
           // For text search, apply sort but note: TMDB search API doesn't support all filters
           let results;
