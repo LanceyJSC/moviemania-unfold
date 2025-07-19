@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, Star, Play } from "lucide-react";
+import { Calendar, Clock, Star, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
@@ -33,6 +33,7 @@ interface TVShow {
   id: number;
   name: string;
   poster_path: string | null;
+  backdrop_path: string | null;
 }
 
 const SeasonDetail = () => {
@@ -92,7 +93,10 @@ const SeasonDetail = () => {
   }
 
   const seasonPosterUrl = tmdbService.getPosterUrl(season.poster_path, 'w500');
-  const seasonBackdropUrl = tmdbService.getBackdropUrl(season.backdrop_path, 'original');
+  // Use season backdrop if available, otherwise fall back to TV show backdrop
+  const seasonBackdropUrl = season.backdrop_path 
+    ? tmdbService.getBackdropUrl(season.backdrop_path, 'original')
+    : tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -110,17 +114,6 @@ const SeasonDetail = () => {
 
         {/* Bottom Gradient Blend */}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
-
-        {/* Back Button */}
-        <Link 
-          to={`/tv/${id}`}
-          className="absolute top-4 left-4 z-30"
-        >
-          <Button variant="outline" size="sm" className="bg-black/50 border-white/20 text-white hover:bg-black/70">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Show
-          </Button>
-        </Link>
 
         {/* Season Info */}
         <div className="absolute bottom-6 left-4 right-4 z-30">
