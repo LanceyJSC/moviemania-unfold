@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
+import Movies from "./pages/Movies";
+import TVShows from "./pages/TVShows";
 import MovieDetail from "./pages/MovieDetail";
 import ActorDetail from "./pages/ActorDetail";
 import CategoryPage from "./pages/CategoryPage";
@@ -37,6 +39,8 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/movies" element={<Movies />} />
+              <Route path="/tv-shows" element={<TVShows />} />
               <Route path="/movie/:id" element={<MovieDetail />} />
               <Route path="/actor/:id" element={<ActorDetail />} />
               <Route path="/category/:category" element={<CategoryPage />} />
