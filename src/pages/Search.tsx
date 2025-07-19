@@ -238,32 +238,46 @@ const Search = () => {
       
       console.log("Fetching random pages - Movies:", randomMoviePage, "TV:", randomTVPage);
       
-      // Use discover endpoints for more random content
-      const [moviesResult, tvResult] = await Promise.all([
-        tmdbService.discoverMovies({ 
+      let combinedResults: any[] = [];
+
+      // Apply activeTab filter to determine what to fetch
+      if (activeTab === 'movies') {
+        // Only movies
+        const moviesResult = await tmdbService.discoverMovies({ 
           page: randomMoviePage,
           sortBy: 'popularity.desc'
-        }),
-        // For TV shows, use popular endpoint with random page
-        tmdbService.getPopularTVShows(randomTVPage)
-      ]);
+        });
+        const shuffledMovies = [...moviesResult.results].sort(() => Math.random() - 0.5).slice(0, 10);
+        combinedResults = shuffledMovies.map(movie => ({ ...movie, media_type: 'movie' }));
+      } else if (activeTab === 'tv') {
+        // Only TV shows
+        const tvResult = await tmdbService.getPopularTVShows(randomTVPage);
+        const shuffledTV = [...tvResult.results].sort(() => Math.random() - 0.5).slice(0, 10);
+        combinedResults = shuffledTV.map(tv => ({ ...tv, media_type: 'tv' }));
+      } else {
+        // All - mixed content (5 movies + 5 TV shows)
+        const [moviesResult, tvResult] = await Promise.all([
+          tmdbService.discoverMovies({ 
+            page: randomMoviePage,
+            sortBy: 'popularity.desc'
+          }),
+          tmdbService.getPopularTVShows(randomTVPage)
+        ]);
+        
+        const shuffledMovies = [...moviesResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
+        const shuffledTV = [...tvResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
+        
+        const moviesWithType = shuffledMovies.map(movie => ({ ...movie, media_type: 'movie' }));
+        const tvWithType = shuffledTV.map(tv => ({ ...tv, media_type: 'tv' }));
+        
+        combinedResults = [...moviesWithType, ...tvWithType].sort(() => Math.random() - 0.5);
+      }
       
-      console.log("Raw results - Movies:", moviesResult.results.length, "TV:", tvResult.results.length);
+      console.log("Raw results before filters:", combinedResults.length);
       
-      // Get 5 random movies and 5 random TV shows from the results
-      const shuffledMovies = [...moviesResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
-      const shuffledTV = [...tvResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
-      
-      // Add media_type to help with rendering
-      const moviesWithType = shuffledMovies.map(movie => ({ ...movie, media_type: 'movie' }));
-      const tvWithType = shuffledTV.map(tv => ({ ...tv, media_type: 'tv' }));
-      
-      // Combine and shuffle the final results
-      let combinedResults = [...moviesWithType, ...tvWithType].sort(() => Math.random() - 0.5);
-      
-      // Apply current filters to surprise results
+      // Apply advanced filters from AdvancedFilters component
       if (selectedFilters && Object.keys(selectedFilters).length > 0) {
-        console.log("Applying filters to surprise results:", selectedFilters);
+        console.log("Applying advanced filters to surprise results:", selectedFilters);
         
         // Apply rating filter
         if ((selectedFilters as any).ratingRange && (selectedFilters as any).ratingRange[0] > 0) {
@@ -280,25 +294,35 @@ const Search = () => {
             return year >= (selectedFilters as any).yearRange[0] && year <= (selectedFilters as any).yearRange[1];
           });
         }
-        
-        // Apply sort
-        if ((selectedFilters as any).sortBy) {
-          if ((selectedFilters as any).sortBy === 'vote_average.desc') {
-            combinedResults.sort((a: any, b: any) => b.vote_average - a.vote_average);
-          } else if ((selectedFilters as any).sortBy === 'release_date.desc') {
-            combinedResults.sort((a: any, b: any) => {
-              const dateA = a.release_date || a.first_air_date || '1900-01-01';
-              const dateB = b.release_date || b.first_air_date || '1900-01-01';
-              return new Date(dateB).getTime() - new Date(dateA).getTime();
-            });
-          }
-          // popularity.desc is already the default sort from API
-        }
       }
+
+      // Apply sortBy state (from the sort buttons)
+      console.log("Applying sort:", sortBy);
+      if (sortBy === 'rating') {
+        combinedResults.sort((a: any, b: any) => b.vote_average - a.vote_average);
+      } else if (sortBy === 'release_date') {
+        combinedResults.sort((a: any, b: any) => {
+          const dateA = a.release_date || a.first_air_date || '1900-01-01';
+          const dateB = b.release_date || b.first_air_date || '1900-01-01';
+          return new Date(dateB).getTime() - new Date(dateA).getTime();
+        });
+      } else if (sortBy === 'title') {
+        combinedResults.sort((a: any, b: any) => {
+          const titleA = a.title || a.name || '';
+          const titleB = b.title || b.name || '';
+          return titleA.localeCompare(titleB);
+        });
+      }
+      // popularity is already the default sort from API
       
-      console.log("Final surprise results after filters:", combinedResults);
+      console.log("Final surprise results after all filters:", combinedResults.length);
       setSearchResults(combinedResults);
-      setSearchTerm("Random Surprise Mix! (5 Movies + 5 TV Shows)");
+      
+      // Set appropriate search term based on active tab
+      const tabText = activeTab === 'movies' ? '10 Movies' : 
+                     activeTab === 'tv' ? '10 TV Shows' : 
+                     '5 Movies + 5 TV Shows';
+      setSearchTerm(`Random Surprise Mix! (${tabText})`);
       
       // Clear genre filter when using surprise me
       if (genreParam) {
