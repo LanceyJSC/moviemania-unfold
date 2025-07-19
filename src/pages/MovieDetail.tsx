@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Play, Heart, Plus, Star, Share, Loader2, Brain, Tv } from "lucide-react";
@@ -117,8 +118,8 @@ const MovieDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Hero Section */}
-      <div className={`relative overflow-hidden ${isMobile ? 'h-[85vh]' : 'h-screen'}`}>
+      {/* Hero Section - Fixed height for mobile */}
+      <div className={`relative overflow-hidden ${isMobile ? 'h-[75vh]' : 'h-screen'}`}>
         
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -130,18 +131,18 @@ const MovieDetail = () => {
 
         {/* Content */}
         <div className="relative z-10 h-full flex items-center">
-          <div className={`container mx-auto ${isMobile ? 'px-4' : 'px-6'}`}>
-            <div className={`flex items-center space-y-8 lg:space-y-0 lg:space-x-12 ${
+          <div className={`container mx-auto ${isMobile ? 'px-4 pt-8' : 'px-6'}`}>
+            <div className={`flex items-center space-y-6 lg:space-y-0 lg:space-x-12 ${
               isMobile ? 'flex-col text-center lg:flex-row lg:text-left lg:items-end' : 'flex-col lg:flex-row lg:items-end'
             }`}>
-              {/* Poster */}
+              {/* Poster - Adjusted size for mobile */}
               <div className="flex-shrink-0">
                 <img 
                   src={posterUrl} 
                   alt={movie.title}
                   className={`rounded-lg shadow-cinematic ${
-                    isMobile ? 'w-48 h-auto mx-auto lg:mx-0' : 'w-80 h-auto'
-                  }`}
+                    isMobile ? 'w-40 h-60 mx-auto lg:mx-0' : 'w-80 h-auto'
+                  } object-cover`}
                 />
               </div>
 
@@ -156,19 +157,19 @@ const MovieDetail = () => {
                 </div>
 
                 <h1 className={`font-cinematic text-foreground mb-4 tracking-wide ${
-                  isMobile ? 'text-3xl lg:text-5xl' : 'text-5xl md:text-7xl'
+                  isMobile ? 'text-2xl lg:text-5xl' : 'text-5xl md:text-7xl'
                 }`}>
                   {movie.title}
                 </h1>
 
-                <p className={`text-muted-foreground mb-6 max-w-2xl ${
+                <p className={`text-muted-foreground mb-4 max-w-2xl ${
                   isMobile ? 'text-base' : 'text-lg'
                 }`}>
                   {genres}
                 </p>
 
-                <p className={`text-muted-foreground leading-relaxed max-w-3xl mb-8 ${
-                  isMobile ? 'text-sm line-clamp-4' : 'text-lg'
+                <p className={`text-muted-foreground leading-relaxed max-w-3xl mb-6 ${
+                  isMobile ? 'text-sm line-clamp-3' : 'text-lg'
                 }`}>
                   {movie.overview}
                 </p>
@@ -192,12 +193,12 @@ const MovieDetail = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className={`flex gap-4 mb-8 ${
+                <div className={`flex gap-4 mb-6 ${
                   isMobile ? 'flex-col sm:flex-row justify-center lg:justify-start' : 'flex-wrap justify-center lg:justify-start'
                 }`}>
                   {trailerKey ? (
                     <Button 
-                      className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold ${
+                      className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold touch-target ${
                         isMobile ? 'w-full sm:w-auto px-6 py-3 text-base min-h-[44px]' : 'px-8 py-6 text-lg'
                       }`}
                       onClick={handleWatchTrailer}
@@ -206,7 +207,7 @@ const MovieDetail = () => {
                       Watch Trailer
                     </Button>
                   ) : (
-                    <Button className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold ${
+                    <Button className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold touch-target ${
                       isMobile ? 'w-full sm:w-auto px-6 py-3 text-base min-h-[44px]' : 'px-8 py-6 text-lg'
                     }`} disabled>
                       <Play className="mr-2 h-5 w-5" />
@@ -217,7 +218,7 @@ const MovieDetail = () => {
                   <div className={`flex gap-2 ${isMobile ? 'justify-center' : ''}`}>
                     <Button 
                       variant="outline" 
-                      className={`border-border hover:bg-card ${
+                      className={`border-border hover:bg-card touch-target ${
                         isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
                       } ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
                       onClick={() => toggleLike(movieId, movie.title, posterUrl)}
@@ -227,7 +228,7 @@ const MovieDetail = () => {
 
                     <Button 
                       variant="outline" 
-                      className={`border-border hover:bg-card ${
+                      className={`border-border hover:bg-card touch-target ${
                         isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
                       } ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
                       onClick={() => toggleWatchlist(movieId, movie.title, posterUrl)}
@@ -237,7 +238,7 @@ const MovieDetail = () => {
 
                     <Button 
                       variant="outline" 
-                      className={`border-border hover:bg-card ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`} 
+                      className={`border-border hover:bg-card touch-target ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`} 
                       onClick={handleShare}
                     >
                       <Share className="h-5 w-5" />
@@ -245,7 +246,7 @@ const MovieDetail = () => {
 
                     <Button 
                       variant="outline" 
-                      className={`border-border hover:bg-card ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
+                      className={`border-border hover:bg-card touch-target ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
                       onClick={() => setShowTrivia(true)}
                     >
                       <Brain className="h-5 w-5" />
@@ -262,7 +263,7 @@ const MovieDetail = () => {
                     <button
                       key={star}
                       onClick={() => setRating(movieId, star, movie.title)}
-                      className={`p-2 ${isMobile ? 'min-h-[44px] min-w-[44px]' : 'p-1'}`}
+                      className="touch-target p-2"
                     >
                       <Star 
                         className={`h-6 w-6 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}

@@ -20,7 +20,7 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe bg-cinema-black/95 border-t border-border backdrop-blur-sm">
       <div className="flex items-center justify-around py-4 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -31,10 +31,10 @@ export const Navigation = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`flex flex-col items-center space-y-2 h-auto py-3 px-2 w-full min-h-[60px] ${
+                className={`flex flex-col items-center space-y-2 h-auto py-3 px-2 w-full min-h-[60px] touch-target bg-transparent hover:bg-transparent ${
                   isActive 
-                    ? 'text-cinema-red bg-cinema-red/10 backdrop-blur-sm' 
-                    : 'text-foreground/70 bg-transparent'
+                    ? 'text-cinema-red' 
+                    : 'text-white/80 hover:text-white'
                 }`}
               >
                 <Icon className="h-6 w-6 flex-shrink-0" />

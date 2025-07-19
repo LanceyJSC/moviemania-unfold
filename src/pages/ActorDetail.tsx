@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Loader2, Calendar, MapPin } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Loader2, Calendar, MapPin, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "@/components/MovieCard";
 import { Navigation } from "@/components/Navigation";
@@ -9,6 +9,7 @@ import { tmdbService, Person } from "@/lib/tmdb";
 
 const ActorDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [actor, setActor] = useState<Person | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,6 +58,20 @@ const ActorDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      {/* Back Button Header */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-4 py-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="touch-target min-h-[44px] min-w-[44px] p-2 hover:bg-card"
+          >
+            <ArrowLeft className="h-6 w-6 mr-2" />
+            Back
+          </Button>
+        </div>
+      </div>
+
       {/* Actor Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8 items-start">

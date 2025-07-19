@@ -114,11 +114,11 @@ All colors MUST be HSL.
 @layer utilities {
   /* Mobile Safe Area Utilities */
   .pb-safe {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
   }
   
   .pt-safe {
-    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-top: max(1.5rem, env(safe-area-inset-top));
   }
   
   /* Scrollbar Hide Utility */
@@ -135,5 +135,23 @@ All colors MUST be HSL.
   .touch-target {
     min-height: 44px;
     min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Line clamp utilities for text truncation */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
