@@ -19,6 +19,7 @@ interface MovieFact {
 
 export const FunFacts = ({ movie }: FunFactsProps) => {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
+  console.log('FunFacts component rendering');
   const { isTrailerOpen } = useTrailerContext();
 
   // Generate real facts from movie data
