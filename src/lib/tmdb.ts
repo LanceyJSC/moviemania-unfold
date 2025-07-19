@@ -270,24 +270,25 @@ class TMDBService {
   }
 
   // Get latest trailers by category
-  async getLatestTrailers(category: 'popular' | 'now_playing' | 'upcoming' | 'top_rated' | 'tv_popular', fresh: boolean = false): Promise<TMDBResponse<Movie>> {
+  async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = false): Promise<TMDBResponse<Movie | TVShow>> {
     let endpoint = '';
     
     switch (category) {
       case 'popular':
         endpoint = '/movie/popular';
         break;
-      case 'now_playing':
+      case 'streaming':
+        // Major streaming services: Netflix (8), Amazon Prime (9), Hulu (15), Disney+ (337), HBO Max (384), Apple TV+ (350)
+        endpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US';
+        break;
+      case 'on_tv':
+        endpoint = '/tv/on_the_air';
+        break;
+      case 'for_rent':
+        endpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US';
+        break;
+      case 'in_theaters':
         endpoint = '/movie/now_playing';
-        break;
-      case 'upcoming':
-        endpoint = '/movie/upcoming';
-        break;
-      case 'top_rated':
-        endpoint = '/movie/top_rated';
-        break;
-      case 'tv_popular':
-        endpoint = '/tv/popular';
         break;
     }
     
@@ -297,7 +298,8 @@ class TMDBService {
     const itemsWithTrailers = [];
     for (const item of response.results.slice(0, 10)) {
       try {
-        const details = 'title' in item 
+        const isMovie = 'title' in item;
+        const details = isMovie 
           ? await this.getMovieDetails(item.id)
           : await this.getTVShowDetails(item.id);
         
@@ -313,7 +315,7 @@ class TMDBService {
     
     return {
       ...response,
-      results: itemsWithTrailers as Movie[]
+      results: itemsWithTrailers
     };
   }
 
