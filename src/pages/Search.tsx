@@ -87,7 +87,11 @@ const Search = () => {
       {/* Advanced Filters */}
       {showFilters && (
         <div className="container mx-auto mt-4">
-          <AdvancedFilters onChange={handleFilterChange} />
+          <AdvancedFilters 
+            onFiltersChange={handleFilterChange}
+            isOpen={showFilters}
+            onToggle={() => setShowFilters(!showFilters)}
+          />
         </div>
       )}
 
@@ -101,7 +105,7 @@ const Search = () => {
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {searchResults.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} cardSize="small" />
+            <MovieCard key={movie.id} movie={movie} size="small" />
           ))}
         </div>
       </div>
