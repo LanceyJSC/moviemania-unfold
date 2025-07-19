@@ -10,14 +10,14 @@ import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { TrailerModal } from "@/components/TrailerModal";
-import { tmdbService, Movie } from "@/lib/tmdb";
+import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [movie, setMovie] = useState<Movie | null>(null);
+  const [movie, setMovie] = useState<Movie | TVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
@@ -37,12 +37,19 @@ const MovieDetail = () => {
   const userRating = getRating(movieId);
 
   useEffect(() => {
-    const loadMovieDetails = async () => {
+    const loadDetails = async () => {
       if (!id) return;
       
       setIsLoading(true);
       try {
-        const movieData = await tmdbService.getMovieDetails(Number(id));
+        const isTV = window.location.pathname.includes('/tv/');
+        let movieData;
+        
+        if (isTV) {
+          movieData = await tmdbService.getTVShowDetails(Number(id));
+        } else {
+          movieData = await tmdbService.getMovieDetails(Number(id));
+        }
         setMovie(movieData);
         
         // Find trailer
@@ -59,15 +66,15 @@ const MovieDetail = () => {
       }
     };
 
-    loadMovieDetails();
+    loadDetails();
   }, [id]);
 
   const handleShare = async () => {
     if (navigator.share && movie) {
       try {
         await navigator.share({
-          title: movie.title,
-          text: `Check out ${movie.title} on CineScope!`,
+          title: title,
+          text: `Check out ${title} on CineScope!`,
           url: window.location.href,
         });
       } catch (error) {
@@ -113,8 +120,11 @@ const MovieDetail = () => {
 
   const backdropUrl = tmdbService.getBackdropUrl(movie.backdrop_path, 'original');
   const posterUrl = tmdbService.getPosterUrl(movie.poster_path, 'w500');
-  const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA';
-  const runtime = movie.runtime ? `${movie.runtime} min` : 'Unknown';
+  const isTV = 'name' in movie;
+  const title = isTV ? (movie as TVShow).name : (movie as Movie).title;
+  const releaseDate = isTV ? (movie as TVShow).first_air_date : (movie as Movie).release_date;
+  const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : 'TBA';
+  const runtime = isTV ? 'TV Series' : ((movie as Movie).runtime ? `${(movie as Movie).runtime} min` : 'Unknown');
   const genres = movie.genres?.map(g => g.name).join(', ') || 'Unknown';
   
   // Fixed cast and crew data access
@@ -128,7 +138,7 @@ const MovieDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <MobileHeader title={movie.title} />
+      <MobileHeader title={title} />
       
       {/* Hero Section with Poster Overlay */}
       <div className="relative overflow-hidden h-[50vh]">
@@ -144,7 +154,7 @@ const MovieDetail = () => {
         <div className="absolute bottom-6 left-4 z-20">
           <img 
             src={posterUrl} 
-            alt={movie.title}
+            alt={title}
             className="w-32 h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
           />
         </div>
@@ -158,7 +168,7 @@ const MovieDetail = () => {
           </div>
 
           <h1 className="font-cinematic text-white mb-2 tracking-wide text-xl leading-tight">
-            {movie.title}
+            {title}
           </h1>
 
           <p className="text-white/70 mb-3 text-sm">
@@ -196,7 +206,7 @@ const MovieDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
               }`}
-              onClick={() => toggleLike(movieId, movie.title, posterUrl)}
+              onClick={() => toggleLike(movieId, title, posterUrl)}
             >
               <Heart className={`h-4 w-4 ${isMovieLiked ? 'fill-current' : ''}`} />
             </Button>
@@ -206,7 +216,7 @@ const MovieDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
               }`}
-              onClick={() => toggleWatchlist(movieId, movie.title, posterUrl)}
+              onClick={() => toggleWatchlist(movieId, title, posterUrl)}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -227,7 +237,7 @@ const MovieDetail = () => {
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
-              onClick={() => setRating(movieId, star, movie.title)}
+              onClick={() => setRating(movieId, star, title)}
               className="p-2 touch-target"
             >
               <Star 
@@ -257,8 +267,8 @@ const MovieDetail = () => {
           </div>
         )}
 
-        {/* Fun Facts Carousel */}
-        <FunFacts movie={movie} />
+        {/* Fun Facts Carousel - Only show for movies */}
+        {!isTV && <FunFacts movie={movie as Movie} />}
       </div>
 
       {/* Additional Content */}
@@ -292,7 +302,7 @@ const MovieDetail = () => {
         )}
         
         {/* Streaming Availability */}
-        <StreamingAvailability movieId={movieId} movieTitle={movie.title} />
+        <StreamingAvailability movieId={movieId} movieTitle={title} />
         
         {/* Recommendations */}
         <MovieCarousel 
@@ -308,7 +318,7 @@ const MovieDetail = () => {
           isOpen={showTrailer} 
           onClose={() => setShowTrailer(false)} 
           trailerKey={trailerKey || ''} 
-          movieTitle={movie.title} 
+          movieTitle={title} 
         />
       )}
 
