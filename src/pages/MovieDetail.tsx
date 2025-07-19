@@ -4,7 +4,7 @@ import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal } from "lucide-
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
-import { StreamingAvailability } from "@/components/StreamingAvailability";
+
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
@@ -319,8 +319,6 @@ const MovieDetail = () => {
           </div>
         )}
         
-        {/* Streaming Availability */}
-        <StreamingAvailability movieId={movieId} movieTitle={title} />
         
         {/* Recommendations */}
         <MovieCarousel 
