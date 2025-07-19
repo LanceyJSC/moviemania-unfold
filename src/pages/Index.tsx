@@ -9,21 +9,21 @@ const Index = () => {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Content Sections */}
-      <div className="container mx-auto px-4 md:px-6 py-16 space-y-16 pb-24 md:pb-16">
+      {/* Content Sections - Improved mobile spacing */}
+      <div className="container mx-auto px-4 py-8 space-y-12 pb-32">
         <SwipeableMovieCarousel title="TRENDING NOW" category="trending" cardSize="medium" />
         <SwipeableMovieCarousel title="TOP RATED MOVIES" category="top_rated" cardSize="medium" />
         <SwipeableMovieCarousel title="POPULAR MOVIES" category="popular" cardSize="medium" />
         <SwipeableMovieCarousel title="UPCOMING RELEASES" category="upcoming" cardSize="medium" />
       </div>
 
-      {/* Footer */}
-      <footer className="bg-cinema-charcoal border-t border-border py-12">
-        <div className="container mx-auto px-4 md:px-6 text-center">
-          <h3 className="text-2xl font-cinematic text-foreground mb-4 tracking-wide">
+      {/* Footer - Mobile optimized */}
+      <footer className="bg-cinema-charcoal border-t border-border py-8 mb-20">
+        <div className="container mx-auto px-4 text-center">
+          <h3 className="text-xl font-cinematic text-foreground mb-3 tracking-wide">
             CINE<span className="text-cinema-red">SCOPE</span>
           </h3>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Discover, Save, and Experience Movies Like Never Before
           </p>
         </div>
