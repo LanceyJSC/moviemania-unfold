@@ -269,7 +269,7 @@ class TMDBService {
       poster: this.getPosterUrl(movie.poster_path),
       year: movie.release_date ? new Date(movie.release_date).getFullYear().toString() : 'TBA',
       rating: movie.vote_average.toFixed(1),
-      genre: movie.genres?.[0]?.name || 'Unknown'
+      genre: movie.genres?.[0]?.name || undefined
     };
   }
 
@@ -280,7 +280,7 @@ class TMDBService {
       poster: this.getPosterUrl(tvShow.poster_path),
       year: tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear().toString() : 'TBA',
       rating: tvShow.vote_average.toFixed(1),
-      genre: tvShow.genres?.[0]?.name || 'Unknown'
+      genre: tvShow.genres?.[0]?.name || undefined
     };
   }
 }

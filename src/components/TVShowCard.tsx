@@ -15,7 +15,7 @@ interface TVShowCardProps {
     poster: string;
     year: string;
     rating: string;
-    genre: string;
+    genre?: string;
   };
   size?: "small" | "medium" | "large";
 }
