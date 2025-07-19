@@ -201,7 +201,8 @@ All colors MUST be HSL.
   }
 
   .backdrop-image {
-    @apply absolute inset-0 bg-cover bg-center transition-transform duration-300;
+    @apply absolute inset-0 bg-contain bg-center bg-no-repeat transition-transform duration-300;
+    background-color: hsl(var(--cinema-black));
   }
 
   .backdrop-image:hover {
@@ -210,17 +211,16 @@ All colors MUST be HSL.
 
   /* Standard backdrop gradients */
   .backdrop-gradient-overlay {
-    @apply absolute inset-0;
+    @apply absolute inset-0 pointer-events-none;
+    background: linear-gradient(135deg, hsl(var(--cinema-black)) 0%, transparent 40%, transparent 60%, hsl(var(--cinema-black)) 100%),
+                linear-gradient(180deg, transparent 0%, transparent 50%, hsl(var(--cinema-black)) 100%);
   }
 
-  .backdrop-gradient-overlay::before {
-    @apply absolute inset-0 bg-gradient-to-r from-cinema-black/80 via-cinema-black/50 to-transparent;
-    content: "";
-  }
-
-  .backdrop-gradient-overlay::after {
-    @apply absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent;
-    content: "";
+  /* Alternative gradient for hero sections */
+  .backdrop-gradient-hero {
+    @apply absolute inset-0 pointer-events-none;
+    background: linear-gradient(135deg, hsl(var(--cinema-black)) 0%, hsl(var(--cinema-black)/0.7) 30%, transparent 50%, transparent 70%, hsl(var(--cinema-black)/0.5) 100%),
+                linear-gradient(180deg, transparent 0%, transparent 40%, hsl(var(--cinema-black)/0.8) 90%, hsl(var(--cinema-black)) 100%);
   }
 
   /* Hero specific gradients */
