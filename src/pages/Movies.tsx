@@ -42,7 +42,7 @@ const Movies = () => {
       {/* Hero-style gradient background */}
       <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
         {/* Filter Buttons */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border p-4 pt-8">
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 pt-8">
         <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
@@ -67,7 +67,7 @@ const Movies = () => {
         </div>
 
         {/* Content */}
-        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-32">
+        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
           {/* Featured Hero Section */}
           <FeaturedHero type="movie" />
 
