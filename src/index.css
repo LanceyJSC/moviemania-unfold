@@ -155,57 +155,102 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
-  /* Standard Poster Grid - Optimized for 6:9 mobile screens */
+  /* Mobile-First Design System for 6:9 iPhone Screens */
+  
+  /* Mobile-optimized poster grid */
   .poster-grid-standard {
-    @apply grid gap-2 p-3;
-    grid-template-columns: repeat(3, 1fr); /* Mobile: 3 across for better visibility on tall screens */
+    @apply grid gap-3 p-4;
+    grid-template-columns: repeat(3, 1fr); /* Mobile: 3 across for 6:9 screens */
   }
 
-  /* Small Mobile (very narrow screens) - 2 across */
-  @media (max-width: 380px) {
+  /* Small screens (very narrow phones) */
+  @media (max-width: 360px) {
     .poster-grid-standard {
-      @apply gap-2 p-2;
+      @apply gap-2 p-3;
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  /* Larger Mobile/Small Tablet - 4 across */
-  @media (min-width: 480px) {
+  /* Large mobile phones */
+  @media (min-width: 414px) {
     .poster-grid-standard {
-      @apply gap-3 p-3;
+      @apply gap-3 p-4;
       grid-template-columns: repeat(4, 1fr);
     }
   }
 
-  /* Tablet - 5 across */
-  @media (min-width: 640px) {
+  /* Tablet portrait */
+  @media (min-width: 768px) {
     .poster-grid-standard {
-      @apply gap-3 p-4;
+      @apply gap-4 p-5;
       grid-template-columns: repeat(5, 1fr);
     }
   }
 
-  /* Desktop - 6 across */
-  @media (min-width: 768px) {
+  /* Tablet landscape and small desktop */
+  @media (min-width: 1024px) {
     .poster-grid-standard {
-      @apply gap-4 p-4;
+      @apply gap-4 p-6;
       grid-template-columns: repeat(6, 1fr);
     }
   }
 
-  /* Large Desktop - 7 across */
-  @media (min-width: 1024px) {
+  /* Large desktop */
+  @media (min-width: 1280px) {
     .poster-grid-standard {
-      @apply gap-4 p-5;
+      @apply gap-5 p-6;
       grid-template-columns: repeat(7, 1fr);
     }
   }
 
-  /* Extra Large - 8 across */
-  @media (min-width: 1280px) {
-    .poster-grid-standard {
-      @apply gap-5 p-6;
-      grid-template-columns: repeat(8, 1fr);
+  /* Mobile-first typography */
+  .mobile-title {
+    @apply text-xl font-cinematic tracking-wide;
+  }
+
+  .mobile-subtitle {
+    @apply text-lg font-semibold;
+  }
+
+  .mobile-body {
+    @apply text-sm leading-relaxed;
+  }
+
+  .mobile-caption {
+    @apply text-xs text-muted-foreground;
+  }
+
+  /* Mobile-optimized spacing */
+  .mobile-section {
+    @apply py-6 px-4;
+  }
+
+  .mobile-card-spacing {
+    @apply p-4 space-y-4;
+  }
+
+  /* Safe areas for notched devices */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Mobile-optimized hero sections */
+  .mobile-hero {
+    @apply relative h-[60vh] overflow-hidden;
+  }
+
+  /* Responsive text sizing for mobile */
+  @media (max-width: 414px) {
+    .mobile-title {
+      @apply text-lg;
+    }
+    
+    .mobile-subtitle {
+      @apply text-base;
     }
   }
 }

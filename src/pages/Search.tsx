@@ -403,7 +403,7 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 max-h-screen overflow-y-auto">{/* Fixed scrolling */}
+    <div className="min-h-screen bg-background pb-20 max-h-screen overflow-y-auto safe-top safe-bottom">{/* Mobile-optimized with safe areas */}
       <MobileHeader title="Search" />
       {/* Header and Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">

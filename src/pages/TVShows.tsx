@@ -35,14 +35,14 @@ const TVShows = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background safe-top safe-bottom">
       <MobileHeader title="TV Shows" />
       
       {/* Hero-style gradient background */}
       <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
-        {/* Filter Buttons */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 pt-8">
-        <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
+        {/* Mobile-optimized filter buttons */}
+        <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
+        <div className="flex overflow-x-auto space-x-2 scrollbar-hide pb-1">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
             return (
@@ -50,7 +50,7 @@ const TVShows = () => {
                 key={filter.id}
                 variant={activeFilter === filter.id ? "default" : "outline"}
                 size="sm"
-                className={`flex-shrink-0 ${
+                className={`flex-shrink-0 touch-target ${
                   activeFilter === filter.id 
                     ? "bg-cinema-red text-white" 
                     : "bg-transparent border-border text-foreground"
@@ -65,20 +65,21 @@ const TVShows = () => {
         </div>
         </div>
 
-        {/* Content */}
-        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
-          {/* Featured Hero Section */}
-          <FeaturedHero type="tv" />
+        {/* Content - Mobile optimized */}
+        <div className="pb-20 space-y-6"> {/* Bottom padding for navigation */}
+          {/* Featured Hero Section - Mobile height */}
+          <div className="mobile-hero">
+            <FeaturedHero type="tv" />
+          </div>
 
-          {/* TV Shows Grid */}
-          <TVGrid 
-            title={getFilterTitle(activeFilter)} 
-            category={activeFilter as "all" | "popular" | "airing_today" | "on_the_air" | "top_rated"} 
-          />
+          {/* TV Shows Grid - Mobile spacing */}
+          <div className="mobile-section">
+            <TVGrid 
+              title={getFilterTitle(activeFilter)} 
+              category={activeFilter as "all" | "popular" | "airing_today" | "on_the_air" | "top_rated"} 
+            />
+          </div>
         </div>
-        
-        {/* Bottom gradient blend */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
       </div>
 
       {/* Mobile Navigation */}

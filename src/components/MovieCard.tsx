@@ -40,23 +40,23 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     setImageError(true);
   };
 
-  // Responsive sizing that works well in grid - flexible but maintains aspect ratio
+  // Mobile-optimized sizing for 6:9 screens
   const getCardClasses = () => {
     switch (size) {
       case "small":
-        return "w-full aspect-[2/3] max-h-[225px]"; // Flexible width, fixed aspect ratio
+        return "w-full aspect-[2/3] max-h-[200px]"; // Smaller for mobile
       case "medium":
-        return "w-full aspect-[2/3] max-h-[270px]"; 
+        return "w-full aspect-[2/3] max-h-[240px]"; // Optimized for mobile grid
       case "large":
-        return "w-full aspect-[2/3] max-h-[300px]"; 
+        return "w-full aspect-[2/3] max-h-[280px]"; 
       default:
-        return "w-full aspect-[2/3] max-h-[270px]";
+        return "w-full aspect-[2/3] max-h-[240px]";
     }
   };
 
   return (
-    <Link to={`/movie/${movie.id}`}>
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
+    <Link to={`/movie/${movie.id}`} className="touch-target">
+      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer flex-shrink-0 rounded-lg ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* Movie Poster */}
           {!imageError ? (
