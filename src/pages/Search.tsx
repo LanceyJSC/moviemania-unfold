@@ -26,7 +26,7 @@ const Search = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
-  const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date'>('popularity');
+  const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date' | 'title'>('popularity');
   const [showPhotoSearch, setShowPhotoSearch] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -57,6 +57,7 @@ const Search = () => {
           let sortParam = 'popularity.desc';
           if (sortBy === 'rating') sortParam = 'vote_average.desc';
           if (sortBy === 'release_date') sortParam = 'release_date.desc';
+          if (sortBy === 'title') sortParam = 'title.asc';
 
           const results = await tmdbService.discoverMovies({
             genre: parseInt(genreParam),
@@ -253,7 +254,7 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 overflow-y-auto">{/* Added overflow-y-auto for scrolling */}
+    <div className="min-h-screen bg-background pb-32 max-h-screen overflow-y-auto">{/* Fixed scrolling */}
       <MobileHeader title="Search" />
       {/* Header and Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
@@ -323,7 +324,7 @@ const Search = () => {
               </div>
             )}
 
-            {/* Sort Controls */}
+            {/* Sort Controls - Enhanced with more options */}
             {(searchTerm || genreParam) && (
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground">Sort by:</span>
@@ -353,6 +354,14 @@ const Search = () => {
                 >
                   <Clock className="h-3 w-3 mr-1" />
                   Recent
+                </Button>
+                <Button
+                  variant={sortBy === 'title' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('title')}
+                  className="rounded-full text-xs"
+                >
+                  A-Z
                 </Button>
               </div>
             )}
@@ -498,7 +507,7 @@ const Search = () => {
         {isSearching && (
           <div className="text-center text-muted-foreground">Searching...</div>
         )}
-        {!isSearching && searchResults.length === 0 && (searchTerm || genreParam) && (
+        {!isSearching && searchResults.length === 0 && (searchTerm || genreParam) && !searchTerm.includes("(Surprise Pick!)") && (
           <div className="text-center text-muted-foreground">No results found.</div>
         )}
         {searchResults.length > 0 && (
