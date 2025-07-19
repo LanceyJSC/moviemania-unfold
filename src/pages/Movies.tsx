@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
-import { SwipeableMovieCarousel } from "@/components/SwipeableMovieCarousel";
+import { MovieGrid } from "@/components/MovieGrid";
 import { Navigation } from "@/components/Navigation";
 import { MovieStats } from "@/components/MovieStats";
 import { FeaturedHero } from "@/components/FeaturedHero";
@@ -16,6 +16,21 @@ const Movies = () => {
     { id: "upcoming", label: "Upcoming", icon: Calendar },
     { id: "top_rated", label: "Top Rated", icon: Star },
   ];
+
+  const getFilterTitle = (filterId: string) => {
+    switch (filterId) {
+      case "popular":
+        return "POPULAR MOVIES";
+      case "now_playing":
+        return "NOW PLAYING";
+      case "upcoming":
+        return "UPCOMING RELEASES";
+      case "top_rated":
+        return "TOP RATED MOVIES";
+      default:
+        return "ALL MOVIES";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,11 +68,10 @@ const Movies = () => {
           {/* Featured Hero Section */}
           <FeaturedHero type="movie" />
 
-          {/* All Movies Section */}
-          <SwipeableMovieCarousel 
-            title="ALL MOVIES" 
+          {/* Movies Grid */}
+          <MovieGrid 
+            title={getFilterTitle(activeFilter)} 
             category={activeFilter as "popular" | "now_playing" | "upcoming" | "top_rated"} 
-            cardSize="medium" 
           />
         </div>
         
