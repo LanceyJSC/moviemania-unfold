@@ -91,37 +91,39 @@ const SeasonDetail = () => {
 
   const seasonPosterUrl = tmdbService.getPosterUrl(season.poster_path, 'w500');
   
-  // Create visual variation for each season using the same backdrop
+  // Use different backdrops from TMDB's backdrop collection for each season
   const getSeasonBackdrop = () => {
+    console.log('TV Show data:', tvShow);
+    console.log('TV Show images:', tvShow.images);
+    console.log('Available backdrops:', tvShow.images?.backdrops?.length);
+    
     // First try the direct season backdrop
     if (season.backdrop_path) {
+      console.log('Using season-specific backdrop');
       return tmdbService.getBackdropUrl(season.backdrop_path, 'original');
     }
     
-    // Use the TV show backdrop (this will be the same image but we'll apply CSS filters)
-    return tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
-  };
-  
-  // Create different visual styles for each season using CSS filters
-  const getSeasonStyle = () => {
-    const seasonNum = season.season_number;
-    const baseStyle = { backgroundImage: `url(${getSeasonBackdrop()})` };
-    
-    // Apply different filters based on season number to create visual variety
-    switch (seasonNum % 5) {
-      case 1:
-        return { ...baseStyle, filter: 'brightness(1.1) contrast(1.05)' };
-      case 2:
-        return { ...baseStyle, filter: 'brightness(0.9) contrast(1.1) saturate(1.1)' };
-      case 3:
-        return { ...baseStyle, filter: 'brightness(1.05) contrast(0.95) hue-rotate(10deg)' };
-      case 4:
-        return { ...baseStyle, filter: 'brightness(0.95) contrast(1.05) saturate(0.9)' };
-      case 0:
-        return { ...baseStyle, filter: 'brightness(1) contrast(1.1) sepia(0.1)' };
-      default:
-        return baseStyle;
+    // Use different backdrops from the show's collection based on season number
+    if (tvShow.images?.backdrops && tvShow.images.backdrops.length > 0) {
+      console.log(`Found ${tvShow.images.backdrops.length} backdrops for the show`);
+      
+      // Sort backdrops by rating to get the best quality ones first
+      const sortedBackdrops = tvShow.images.backdrops
+        .sort((a, b) => b.vote_average - a.vote_average);
+      
+      // Use season number to select different backdrop (cycle through available ones)
+      const backdropIndex = (season.season_number - 1) % sortedBackdrops.length;
+      const selectedBackdrop = sortedBackdrops[backdropIndex];
+      
+      console.log(`Season ${season.season_number}: Using backdrop ${backdropIndex + 1} of ${sortedBackdrops.length}`);
+      console.log('Selected backdrop:', selectedBackdrop);
+      
+      return tmdbService.getBackdropUrl(selectedBackdrop.file_path, 'original');
     }
+    
+    // Finally fall back to TV show backdrop
+    console.log('Using main TV show backdrop fallback');
+    return tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
   };
 
   return (
@@ -132,7 +134,7 @@ const SeasonDetail = () => {
       <div className="relative overflow-hidden h-[40vh]">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={getSeasonStyle()}
+          style={{ backgroundImage: `url(${getSeasonBackdrop()})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />

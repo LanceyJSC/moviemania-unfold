@@ -60,7 +60,10 @@ export interface TVShow {
     episode_count: number;
     air_date?: string;
   }[];
-  images?: { logos: { file_path: string }[] };
+  images?: { 
+    logos: { file_path: string }[];
+    backdrops: { file_path: string; vote_average: number }[];
+  };
 }
 
 export interface Person {
