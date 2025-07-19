@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Film, Star, Calendar, TrendingUp } from "lucide-react";
+import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { SwipeableMovieCarousel } from "@/components/SwipeableMovieCarousel";
 import { Navigation } from "@/components/Navigation";
 import { MovieStats } from "@/components/MovieStats";
@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 
 const Movies = () => {
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("popular");
 
   const filterButtons = [
-    { id: "all", label: "All Movies", icon: Film },
-    { id: "trending", label: "Trending", icon: TrendingUp },
-    { id: "top_rated", label: "Top Rated", icon: Star },
+    { id: "popular", label: "Popular", icon: TrendingUp },
+    { id: "now_playing", label: "Now Playing", icon: Play },
     { id: "upcoming", label: "Upcoming", icon: Calendar },
+    { id: "top_rated", label: "Top Rated", icon: Star },
   ];
 
   return (
@@ -53,36 +53,12 @@ const Movies = () => {
           {/* Featured Hero Section */}
           <FeaturedHero type="movie" />
 
-          {/* Movie Carousels based on active filter */}
-        {activeFilter === "all" && (
-          <>
-            <SwipeableMovieCarousel title="TRENDING NOW" category="trending" cardSize="medium" />
-            <SwipeableMovieCarousel title="TOP RATED" category="top_rated" cardSize="medium" />
-            <SwipeableMovieCarousel title="POPULAR" category="popular" cardSize="medium" />
-            <SwipeableMovieCarousel title="UPCOMING RELEASES" category="upcoming" cardSize="medium" />
-          </>
-        )}
-
-        {activeFilter === "trending" && (
-          <>
-            <SwipeableMovieCarousel title="TRENDING THIS WEEK" category="trending" cardSize="medium" />
-            <SwipeableMovieCarousel title="POPULAR RIGHT NOW" category="popular" cardSize="medium" />
-          </>
-        )}
-
-        {activeFilter === "top_rated" && (
-          <>
-            <SwipeableMovieCarousel title="HIGHEST RATED" category="top_rated" cardSize="medium" />
-            <SwipeableMovieCarousel title="CRITICALLY ACCLAIMED" category="popular" cardSize="medium" />
-          </>
-        )}
-
-        {activeFilter === "upcoming" && (
-          <>
-            <SwipeableMovieCarousel title="COMING SOON" category="upcoming" cardSize="medium" />
-            <SwipeableMovieCarousel title="POPULAR MOVIES" category="popular" cardSize="medium" />
-          </>
-          )}
+          {/* All Movies Section */}
+          <SwipeableMovieCarousel 
+            title="ALL MOVIES" 
+            category={activeFilter as "popular" | "now_playing" | "upcoming" | "top_rated"} 
+            cardSize="medium" 
+          />
         </div>
         
         {/* Bottom gradient blend */}

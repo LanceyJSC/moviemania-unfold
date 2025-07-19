@@ -155,6 +155,10 @@ class TMDBService {
     };
   }
 
+  async getNowPlayingMovies(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<Movie>> {
+    return this.fetchFromTMDB(`/movie/now_playing?page=${page}`, fresh);
+  }
+
   async getMovieDetails(movieId: number): Promise<Movie> {
     return this.fetchFromTMDB(`/movie/${movieId}?append_to_response=credits,videos`);
   }

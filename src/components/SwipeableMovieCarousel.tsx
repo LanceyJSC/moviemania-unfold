@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 interface SwipeableMovieCarouselProps {
   title: string;
-  category: "trending" | "popular" | "top_rated" | "upcoming";
+  category: "trending" | "popular" | "top_rated" | "upcoming" | "now_playing";
   cardSize?: "small" | "medium" | "large";
 }
 
@@ -46,6 +46,9 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
           break;
         case "upcoming":
           response = await tmdbService.getUpcomingMovies(1, fresh);
+          break;
+        case "now_playing":
+          response = await tmdbService.getNowPlayingMovies(1, fresh);
           break;
         default:
           response = await tmdbService.getPopularMovies(1, fresh);
