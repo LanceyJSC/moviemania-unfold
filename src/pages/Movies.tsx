@@ -49,8 +49,8 @@ const Movies = () => {
 
         {/* Content */}
         <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-24">
-          {/* Movie Stats */}
-          <MovieStats />
+          {/* Movie Stats - Hide title on movies page */}
+          <MovieStats hideTitle={true} />
 
         {/* Movie Carousels based on active filter */}
         {activeFilter === "all" && (

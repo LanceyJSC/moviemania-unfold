@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Film, TrendingUp, Star, Calendar } from "lucide-react";
 import { tmdbService } from "@/lib/tmdb";
 
-export const MovieStats = () => {
+export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
   const [stats, setStats] = useState({
     totalMovies: 0,
     trendingCount: 0,
@@ -49,12 +49,14 @@ export const MovieStats = () => {
 
   return (
     <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-2xl p-8 mb-12">
-      <div className="text-center mb-8">
-        <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
-          DISCOVER THE NUMBERS
-        </h2>
-        <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
-      </div>
+      {!hideTitle && (
+        <div className="text-center mb-8">
+          <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
+            DISCOVER THE NUMBERS
+          </h2>
+          <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
+        </div>
+      )}
       
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {statItems.map((item, index) => {
