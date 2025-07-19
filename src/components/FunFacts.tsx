@@ -7,7 +7,7 @@ import { Movie } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 
 interface FunFactsProps {
-  movie: Movie;
+  movie: Movie | null;
 }
 
 interface MovieFact {
@@ -21,6 +21,9 @@ export const FunFacts = ({ movie }: FunFactsProps) => {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const { isTrailerOpen } = useTrailerContext();
 
+  // Early return if no movie data
+  if (!movie) return null;
+
   // Generate real facts from movie data
   const facts: MovieFact[] = [
     {
@@ -32,19 +35,19 @@ export const FunFacts = ({ movie }: FunFactsProps) => {
     {
       id: '2',
       title: 'Release Year',
-      content: `Released in ${new Date(movie.release_date).getFullYear()}`,
+      content: movie.release_date ? `Released in ${new Date(movie.release_date).getFullYear()}` : 'Release date not available',
       icon: <Calendar className="h-4 w-4" />
     },
     {
       id: '3',
       title: 'Audience Score',
-      content: `Rated ${movie.vote_average.toFixed(1)}/10 by ${movie.vote_count.toLocaleString()} viewers`,
+      content: movie.vote_average ? `Rated ${movie.vote_average.toFixed(1)}/10 by ${movie.vote_count?.toLocaleString() || 0} viewers` : 'Rating not available',
       icon: <Trophy className="h-4 w-4" />
     },
     {
       id: '4',
       title: 'Language',
-      content: `Originally filmed in ${movie.original_language.toUpperCase()}`,
+      content: movie.original_language ? `Originally filmed in ${movie.original_language.toUpperCase()}` : 'Language information not available',
       icon: <Globe className="h-4 w-4" />
     },
     {
