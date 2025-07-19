@@ -29,7 +29,6 @@ const Search = () => {
   const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date' | 'title'>('popularity');
   const [showPhotoSearch, setShowPhotoSearch] = useState(false);
   const [isSurpriseMode, setIsSurpriseMode] = useState(false);
-  const [originalSurpriseResults, setOriginalSurpriseResults] = useState([]);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Load trending content for default display
@@ -121,22 +120,20 @@ const Search = () => {
 
   // Handle sorting and tab changes for surprise mode
   useEffect(() => {
-    if (isSurpriseMode && originalSurpriseResults.length > 0) {
-      // Start with original surprise results, not filtered ones
-      let sortedResults = [...originalSurpriseResults];
+    if (isSurpriseMode && searchResults.length > 0) {
+      // Apply sorting and filtering to current results without refetching
+      let sortedResults = [...searchResults];
       
-      // Apply activeTab filter to original results
+      // Apply activeTab filter
       if (activeTab === 'movies') {
-        sortedResults = sortedResults.filter(item => item.media_type === 'movie' || (item.title && !item.name));
+        sortedResults = sortedResults.filter(item => item.media_type === 'movie' || item.title);
       } else if (activeTab === 'tv') {
-        sortedResults = sortedResults.filter(item => item.media_type === 'tv' || (item.name && !item.title));
+        sortedResults = sortedResults.filter(item => item.media_type === 'tv' || item.name);
       }
-      // 'all' shows everything, no filtering needed
       
-      // Apply sorting based on current sortBy state
-      console.log("Applying sort in surprise mode:", sortBy, "to", sortedResults.length, "items");
+      // Apply sorting
       if (sortBy === 'rating') {
-        sortedResults.sort((a: any, b: any) => (b.vote_average || 0) - (a.vote_average || 0));
+        sortedResults.sort((a: any, b: any) => b.vote_average - a.vote_average);
       } else if (sortBy === 'release_date') {
         sortedResults.sort((a: any, b: any) => {
           const dateA = a.release_date || a.first_air_date || '1900-01-01';
@@ -149,8 +146,6 @@ const Search = () => {
           const titleB = b.title || b.name || '';
           return titleA.localeCompare(titleB);
         });
-      } else if (sortBy === 'popularity') {
-        sortedResults.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
       }
       
       setSearchResults(sortedResults);
@@ -159,13 +154,9 @@ const Search = () => {
       const tabText = activeTab === 'movies' ? 'Movies Only' : 
                      activeTab === 'tv' ? 'TV Shows Only' : 
                      'Mixed Content';
-      const sortText = sortBy === 'rating' ? ' (By Rating)' :
-                       sortBy === 'release_date' ? ' (By Date)' :
-                       sortBy === 'title' ? ' (A-Z)' :
-                       ' (By Popularity)';
-      setSearchTerm(`Random Surprise Mix! (${tabText}${sortText})`);
+      setSearchTerm(`Random Surprise Mix! (${tabText})`);
     }
-  }, [sortBy, activeTab, originalSurpriseResults]); // Use originalSurpriseResults as dependency
+  }, [sortBy, activeTab, isSurpriseMode]); // Only trigger when these change in surprise mode
 
   const handleFilterChange = async (filters: any) => {
     console.log("Filters changed:", filters);
@@ -237,7 +228,6 @@ const Search = () => {
   const clearSearch = () => {
     setSearchTerm("");
     setIsSurpriseMode(false); // Exit surprise mode
-    setOriginalSurpriseResults([]); // Clear original results
     if (!genreParam) {
       setSearchResults([]);
     }
@@ -275,10 +265,6 @@ const Search = () => {
   const handleSurpriseMe = async () => {
     console.log("Surprise Me clicked!");
     setIsSearching(true);
-    
-    // Clear previous surprise state first
-    setOriginalSurpriseResults([]);
-    setSearchResults([]);
     setIsSurpriseMode(true);
     
     // Clear search term immediately to prevent useEffect interference
@@ -370,9 +356,6 @@ const Search = () => {
       // popularity is already the default sort from API
       
       console.log("Final surprise results after all filters:", combinedResults.length);
-      
-      // Store original results for tab/sort filtering
-      setOriginalSurpriseResults(combinedResults);
       setSearchResults(combinedResults);
       
       // Set appropriate search term based on active tab
@@ -403,10 +386,10 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background safe-top safe-bottom">{/* Mobile-optimized with safe areas */}
+    <div className="min-h-screen bg-background pb-32 max-h-screen overflow-y-auto">{/* Fixed scrolling */}
       <MobileHeader title="Search" />
       {/* Header and Search Input */}
-      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-16 z-40">
+      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
         <div className="container mx-auto flex items-center">
           <div className="relative flex-grow">
             <Input
@@ -609,7 +592,7 @@ const Search = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
-               <div className="poster-grid-standard">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {trendingMovies.map((movie) => (
                   <MovieCard 
                     key={movie.id} 
@@ -630,7 +613,7 @@ const Search = () => {
                   Trending TV Shows
                 </h2>
               </div>
-               <div className="poster-grid-standard">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {trendingTVShows.map((tvShow) => (
                   <TVShowCard 
                     key={tvShow.id} 
@@ -652,32 +635,36 @@ const Search = () => {
       />
 
       {/* Search Results */}
-      <div className="pb-20"> {/* Bottom padding for navigation */}
+      <div className="container mx-auto px-4 mt-8 pb-8">
         {isSearching && (
-          <div className="text-center text-muted-foreground p-8">Searching...</div>
+          <div className="text-center text-muted-foreground">Searching...</div>
         )}
         {!isSearching && searchResults.length === 0 && (searchTerm || genreParam) && !searchTerm.includes("(Surprise Pick!)") && (
-          <div className="text-center text-muted-foreground p-8">No results found.</div>
+          <div className="text-center text-muted-foreground">No results found.</div>
         )}
         {searchResults.length > 0 && (
-          <div>
+          <div className="bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
             {/* Movie/TV Page Style Header */}
-            <div className="mobile-section">
-              <h1 className="mobile-title text-foreground mb-2">
-                {searchTerm && searchTerm.includes("Surprise") ? "YOUR SURPRISE MIX" : 
-                 genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : 
-                 "SEARCH RESULTS"}
-              </h1>
-              <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
-              <p className="mobile-caption">
-                {searchTerm && searchTerm.includes("Surprise") ? "A perfect mix of movies and TV shows picked just for you!" : 
-                 `Showing ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
-              </p>
+            <div className="bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-6">
+              <div className="container mx-auto">
+                <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wide mb-2">
+                  {searchTerm && searchTerm.includes("Surprise") ? "YOUR SURPRISE MIX" : 
+                   genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : 
+                   "SEARCH RESULTS"}
+                </h1>
+                <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
+                <p className="text-muted-foreground">
+                  {searchTerm && searchTerm.includes("Surprise") ? "A perfect mix of movies and TV shows picked just for you!" : 
+                   `Showing ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
+                </p>
+              </div>
             </div>
             
-            {/* Results Grid - Standardized with other pages */}
-            <div className="poster-grid-standard">
-              {searchResults.map((item) => renderMediaCard(item))}
+            {/* Results Grid - Movies Page Style */}
+            <div className="container mx-auto px-4 md:px-6 py-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                {searchResults.map((item) => renderMediaCard(item))}
+              </div>
             </div>
           </div>
         )}

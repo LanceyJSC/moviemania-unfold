@@ -106,12 +106,12 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
       </div>
 
       {/* TV Shows Grid */}
-      <div className="poster-grid-standard">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
         {isLoading && tvShows.length === 0 ? (
           // Loading skeleton
           Array.from({ length: 15 }).map((_, index) => (
             <div key={index} className="animate-fade-in">
-              <div className="poster-card bg-muted animate-pulse"></div>
+              <div className="bg-muted animate-pulse rounded-lg aspect-[2/3] w-full"></div>
             </div>
           ))
         ) : (
