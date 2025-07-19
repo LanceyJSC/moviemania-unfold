@@ -78,9 +78,15 @@ export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
             </div>
           )}
           
-          {/* Gradient Overlay - Matching hero section */}
+          {/* Gradient Overlay - Always visible like hero section */}
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
+          </div>
+          
+          {/* Hover Gradient Enhancement */}
           <div className={`absolute inset-0 transition-opacity duration-300 ${
-            isMobile ? 'opacity-60 group-active:opacity-100' : 'opacity-0 group-hover:opacity-100'
+            isMobile ? 'opacity-0 group-active:opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}>
             <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
