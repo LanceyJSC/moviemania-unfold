@@ -36,7 +36,7 @@ export const QuickGenres = () => {
               onClick={() => handleGenreClick(genre.id)}
               className="bg-card rounded-xl p-6 text-center cursor-pointer hover:bg-card/80 transition-colors group"
             >
-              <div className={`rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 ${genre.color} group-hover:scale-110 transition-transform`}>
+              <div className={`rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 bg-background border-2 border-primary/20 group-hover:scale-110 transition-transform`}>
                 <Icon className="h-8 w-8" />
               </div>
               <div className="font-semibold text-foreground group-hover:text-cinema-red transition-colors">
