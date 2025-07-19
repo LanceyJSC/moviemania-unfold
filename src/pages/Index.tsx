@@ -7,6 +7,7 @@ import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
+import { LatestTrailers } from "@/components/LatestTrailers";
 
 const Index = () => {
   return (
@@ -15,7 +16,7 @@ const Index = () => {
         <HeroSection />
 
         {/* Content Sections - Enhanced with TV shows */}
-        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-24">
+        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-32">
           {/* Quick Stats */}
           <MovieStats />
           
@@ -25,6 +26,7 @@ const Index = () => {
           {/* New Dynamic Content Sections */}
           <NewThisMonth />
           <FreshPicks />
+          <LatestTrailers />
         </div>
 
         {/* Footer - Mobile optimized */}

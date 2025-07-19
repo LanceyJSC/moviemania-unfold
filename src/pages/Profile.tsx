@@ -38,7 +38,7 @@ const Profile = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <MobileHeader title="Profile" />
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">

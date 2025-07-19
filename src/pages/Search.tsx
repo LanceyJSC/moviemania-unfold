@@ -145,7 +145,7 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <MobileHeader title="Search" />
       {/* Header and Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">

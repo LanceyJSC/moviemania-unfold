@@ -47,7 +47,7 @@ const TVShows = () => {
         </div>
 
         {/* Content */}
-        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-24">
+        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-32">
         {/* TV Show Carousels based on active filter */}
         {activeFilter === "all" && (
           <>

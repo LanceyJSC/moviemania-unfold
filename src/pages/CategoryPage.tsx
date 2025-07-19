@@ -123,7 +123,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <MobileHeader title={getCategoryTitle(category || '')} />
       
       <div className="container mx-auto px-4 py-6">

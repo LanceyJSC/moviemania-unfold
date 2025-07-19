@@ -265,6 +265,54 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`);
   }
 
+  // Get latest trailers by category
+  async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters'): Promise<TMDBResponse<Movie>> {
+    let endpoint = '';
+    
+    switch (category) {
+      case 'popular':
+        endpoint = '/movie/popular';
+        break;
+      case 'streaming':
+        endpoint = '/discover/movie?with_watch_providers=8|9|337|350&watch_region=US';
+        break;
+      case 'on_tv':
+        endpoint = '/tv/on_the_air';
+        break;
+      case 'for_rent':
+        endpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US';
+        break;
+      case 'in_theaters':
+        endpoint = '/movie/now_playing';
+        break;
+    }
+    
+    const response = await this.fetchFromTMDB<TMDBResponse<Movie | TVShow>>(endpoint);
+    
+    // Filter for items that have trailers
+    const itemsWithTrailers = [];
+    for (const item of response.results.slice(0, 10)) {
+      try {
+        const details = 'title' in item 
+          ? await this.getMovieDetails(item.id)
+          : await this.getTVShowDetails(item.id);
+        
+        if (details.videos?.results?.some(video => video.type === 'Trailer' && video.site === 'YouTube')) {
+          itemsWithTrailers.push(item);
+        }
+        
+        if (itemsWithTrailers.length >= 6) break;
+      } catch (error) {
+        console.error('Error checking for trailer:', error);
+      }
+    }
+    
+    return {
+      ...response,
+      results: itemsWithTrailers as Movie[]
+    };
+  }
+
   getPosterUrl(path: string | null, size: 'w300' | 'w500' | 'w780' | 'original' = 'w500'): string {
     if (!path) return '/placeholder.svg';
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
