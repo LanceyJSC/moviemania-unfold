@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 
 const Movies = () => {
-  const [activeFilter, setActiveFilter] = useState("popular");
+  const [activeFilter, setActiveFilter] = useState("all");
 
   const filterButtons = [
+    { id: "all", label: "All Movies", icon: Film },
     { id: "popular", label: "Popular", icon: TrendingUp },
     { id: "now_playing", label: "Now Playing", icon: Play },
     { id: "upcoming", label: "Upcoming", icon: Calendar },
@@ -19,6 +20,8 @@ const Movies = () => {
 
   const getFilterTitle = (filterId: string) => {
     switch (filterId) {
+      case "all":
+        return "ALL MOVIES";
       case "popular":
         return "POPULAR MOVIES";
       case "now_playing":
@@ -71,7 +74,7 @@ const Movies = () => {
           {/* Movies Grid */}
           <MovieGrid 
             title={getFilterTitle(activeFilter)} 
-            category={activeFilter as "popular" | "now_playing" | "upcoming" | "top_rated"} 
+            category={activeFilter as "all" | "popular" | "now_playing" | "upcoming" | "top_rated"} 
           />
         </div>
         

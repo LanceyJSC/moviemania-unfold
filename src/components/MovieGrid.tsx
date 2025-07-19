@@ -8,7 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MovieGridProps {
   title: string;
-  category: "popular" | "now_playing" | "upcoming" | "top_rated";
+  category: "all" | "popular" | "now_playing" | "upcoming" | "top_rated";
 }
 
 export const MovieGrid = ({ title, category }: MovieGridProps) => {
@@ -27,6 +27,9 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
 
       let response;
       switch (category) {
+        case "all":
+          response = await tmdbService.getPopularMovies(pageNum, fresh);
+          break;
         case "popular":
           response = await tmdbService.getPopularMovies(pageNum, fresh);
           break;
