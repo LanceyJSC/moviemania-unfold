@@ -54,9 +54,14 @@ const Search = () => {
       if (genreParam) {
         setIsSearching(true);
         try {
+          let sortParam = 'popularity.desc';
+          if (sortBy === 'rating') sortParam = 'vote_average.desc';
+          if (sortBy === 'release_date') sortParam = 'release_date.desc';
+
           const results = await tmdbService.discoverMovies({
             genre: parseInt(genreParam),
-            page: 1
+            page: 1,
+            sortBy: sortParam
           });
           setSearchResults(results.results);
         } catch (error) {
@@ -68,7 +73,7 @@ const Search = () => {
     };
 
     handleGenreSearch();
-  }, [genreParam]);
+  }, [genreParam, sortBy]);
 
   // Handle text-based search
   useEffect(() => {
@@ -144,13 +149,30 @@ const Search = () => {
 
   const handleSurpriseMe = async () => {
     try {
-      const randomMovies = await tmdbService.getTopRatedMovies();
-      const randomIndex = Math.floor(Math.random() * randomMovies.results.length);
-      const surpriseMovie = randomMovies.results[randomIndex];
-      setSearchResults([surpriseMovie]);
-      setSearchTerm(`${surpriseMovie.title} (Surprise Pick!)`);
+      // Get a mix of content from different sources for true surprise
+      const randomSources = [
+        () => tmdbService.getTrendingMovies(),
+        () => tmdbService.getPopularMovies(),
+        () => tmdbService.getTopRatedMovies(),
+        () => tmdbService.getTrendingTVShows(),
+        () => tmdbService.getPopularTVShows()
+      ];
+      
+      const randomSourceIndex = Math.floor(Math.random() * randomSources.length);
+      const results = await randomSources[randomSourceIndex]();
+      const randomIndex = Math.floor(Math.random() * results.results.length);
+      const surpriseItem = results.results[randomIndex];
+      
+      setSearchResults([surpriseItem]);
+      const title = (surpriseItem as any).title || (surpriseItem as any).name;
+      setSearchTerm(`${title} (Surprise Pick!)`);
+      
+      // Clear genre filter when using surprise me
+      if (genreParam) {
+        navigate('/search');
+      }
     } catch (error) {
-      console.error("Failed to get surprise movie:", error);
+      console.error("Failed to get surprise item:", error);
     }
   };
 
