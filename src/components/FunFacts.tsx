@@ -18,11 +18,11 @@ interface MovieFact {
 }
 
 export const FunFacts = ({ movie }: FunFactsProps) => {
+  // Early return if no movie data - MUST be before any hooks
+  if (!movie) return null;
+  
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const { isTrailerOpen } = useTrailerContext();
-
-  // Early return if no movie data
-  if (!movie) return null;
 
   // Generate real facts from movie data
   const facts: MovieFact[] = [
