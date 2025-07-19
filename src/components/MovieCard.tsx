@@ -62,10 +62,11 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
               onError={handleImageError}
             />
           ) : (
-            <div className="w-full h-full bg-cinema-charcoal flex items-center justify-center">
-              <div className="text-center p-4">
-                <div className="text-4xl mb-2">🎬</div>
-                <p className="text-xs text-muted-foreground line-clamp-2">{movie.title}</p>
+            <div className="w-full h-full bg-gradient-to-br from-cinema-charcoal to-cinema-black flex items-center justify-center border border-border">
+              <div className="text-center p-2">
+                <div className="text-2xl mb-1">🎬</div>
+                <p className="text-xs text-foreground font-medium line-clamp-3 leading-tight">{movie.title}</p>
+                <p className="text-xs text-muted-foreground mt-1">{movie.year}</p>
               </div>
             </div>
           )}
