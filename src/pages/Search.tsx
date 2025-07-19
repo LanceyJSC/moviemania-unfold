@@ -80,8 +80,8 @@ const Search = () => {
   // Handle text-based search
   useEffect(() => {
     const searchContent = async () => {
-      // Don't search if we're in surprise mode or no search term
-      if (!debouncedSearchTerm || isSurpriseMode) {
+      // Don't search if we're in surprise mode, no search term, or search term is surprise-related
+      if (!debouncedSearchTerm || isSurpriseMode || debouncedSearchTerm.includes("Surprise")) {
         if (!genreParam && !isSurpriseMode) {
           setSearchResults([]);
         }
@@ -206,42 +206,38 @@ const Search = () => {
     console.log("Surprise Me clicked!");
     setIsSearching(true);
     setIsSurpriseMode(true); // Enter surprise mode
+    
+    // Clear search term immediately to prevent useEffect interference
+    setSearchTerm("");
+    
     try {
-      // Get a mix of content from different sources for true surprise
-      const randomSources = [
-        () => tmdbService.getTrendingMovies(),
-        () => tmdbService.getPopularMovies(),
-        () => tmdbService.getTopRatedMovies(),
-        () => tmdbService.getTrendingTVShows(),
-        () => tmdbService.getPopularTVShows()
-      ];
+      // Get 5 movies and 5 TV shows
+      const [moviesResult, tvResult] = await Promise.all([
+        tmdbService.getTrendingMovies(),
+        tmdbService.getTrendingTVShows()
+      ]);
       
-      const randomSourceIndex = Math.floor(Math.random() * randomSources.length);
-      console.log("Random source index:", randomSourceIndex);
-      const results = await randomSources[randomSourceIndex]();
-      console.log("Results from API:", results);
-      const randomIndex = Math.floor(Math.random() * results.results.length);
-      const surpriseItem = results.results[randomIndex];
-      console.log("Surprise item:", surpriseItem);
+      // Get 5 random movies and 5 random TV shows
+      const shuffledMovies = [...moviesResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
+      const shuffledTV = [...tvResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
       
       // Add media_type to help with rendering
-      const itemWithMediaType = {
-        ...surpriseItem,
-        media_type: (surpriseItem as any).title ? 'movie' : 'tv'
-      };
+      const moviesWithType = shuffledMovies.map(movie => ({ ...movie, media_type: 'movie' }));
+      const tvWithType = shuffledTV.map(tv => ({ ...tv, media_type: 'tv' }));
       
-      console.log("Setting search results:", [itemWithMediaType]);
-      setSearchResults([itemWithMediaType]);
-      const title = (surpriseItem as any).title || (surpriseItem as any).name;
-      setSearchTerm(`${title} (Surprise Pick!)`);
-      console.log("Set search term:", `${title} (Surprise Pick!)`);
+      // Combine and shuffle the final results
+      const combinedResults = [...moviesWithType, ...tvWithType].sort(() => Math.random() - 0.5);
+      
+      console.log("Setting surprise results:", combinedResults);
+      setSearchResults(combinedResults);
+      setSearchTerm("Surprise Mix! (5 Movies + 5 TV Shows)");
       
       // Clear genre filter when using surprise me
       if (genreParam) {
         navigate('/search');
       }
     } catch (error) {
-      console.error("Failed to get surprise item:", error);
+      console.error("Failed to get surprise items:", error);
     } finally {
       setIsSearching(false);
     }
@@ -520,13 +516,13 @@ const Search = () => {
             <div className="bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-6">
               <div className="container mx-auto">
                 <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wide mb-2">
-                  {searchTerm && searchTerm.includes("(Surprise Pick!)") ? "YOUR SURPRISE PICK" : 
+                  {searchTerm && searchTerm.includes("Surprise") ? "YOUR SURPRISE MIX" : 
                    genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : 
                    "SEARCH RESULTS"}
                 </h1>
                 <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
                 <p className="text-muted-foreground">
-                  {searchTerm && searchTerm.includes("(Surprise Pick!)") ? "Discover something new and exciting!" : 
+                  {searchTerm && searchTerm.includes("Surprise") ? "A perfect mix of movies and TV shows picked just for you!" : 
                    `Showing ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
                 </p>
               </div>
