@@ -84,10 +84,10 @@ export const FreshPicks = () => {
             </h2>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
-          <div className="flex space-x-4 overflow-hidden">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="flex-shrink-0 w-36 aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
-            ))}
+           <div className="flex space-x-4 overflow-hidden">
+             {Array.from({ length: 6 }).map((_, index) => (
+               <div key={index} className="flex-shrink-0 w-44 aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+             ))}
           </div>
         </div>
       </div>
@@ -126,14 +126,14 @@ export const FreshPicks = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleEnd}
           >
-            {movies.map((movie) => (
-              <div key={`fresh-${movie.id}`} className="flex-shrink-0 w-36">
-                <MovieCard 
-                  movie={tmdbService.formatMovieForCard(movie)} 
-                  size="small" 
-                />
-              </div>
-            ))}
+             {movies.map((movie) => (
+               <div key={`fresh-${movie.id}`} className="flex-shrink-0 w-44">
+                 <MovieCard 
+                   movie={tmdbService.formatMovieForCard(movie)} 
+                   size="medium" 
+                 />
+               </div>
+             ))}
           </div>
         ) : (
           <div className="text-center text-muted-foreground">
