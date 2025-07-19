@@ -25,7 +25,9 @@ export const LatestTrailers = () => {
   const fetchTrailers = async (fresh: boolean = false) => {
     try {
       setLoading(true);
+      console.log(`Fetching trailers for category: ${activeCategory}`);
       const response = await tmdbService.getLatestTrailers(activeCategory, fresh);
+      console.log(`Received ${response.results.length} items for ${activeCategory}:`, response.results.slice(0, 3));
       setItems(response.results);
     } catch (error) {
       console.error('Error fetching trailers:', error);
