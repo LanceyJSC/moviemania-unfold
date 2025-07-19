@@ -460,7 +460,7 @@ const Search = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {trendingMovies.map((movie) => (
                   <MovieCard 
                     key={movie.id} 
@@ -481,7 +481,7 @@ const Search = () => {
                   Trending TV Shows
                 </h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {trendingTVShows.map((tvShow) => (
                   <TVShowCard 
                     key={tvShow.id} 
@@ -503,7 +503,7 @@ const Search = () => {
       />
 
       {/* Search Results */}
-      <div className="container mx-auto px-4 mt-8">
+      <div className="container mx-auto px-4 mt-8 pb-8">
         {isSearching && (
           <div className="text-center text-muted-foreground">Searching...</div>
         )}
@@ -511,9 +511,22 @@ const Search = () => {
           <div className="text-center text-muted-foreground">No results found.</div>
         )}
         {searchResults.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {searchResults.map((item) => renderMediaCard(item))}
-          </div>
+          <>
+            {/* Results Header */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {searchTerm && searchTerm.includes("(Surprise Pick!)") ? "Your Surprise Pick!" : 
+                 genreParam ? `${getGenreName(genreParam)} Movies` : 
+                 `Search Results (${searchResults.length})`}
+              </h3>
+              <div className="w-16 h-0.5 bg-cinema-gold"></div>
+            </div>
+            
+            {/* Results Grid - Fixed responsive layout */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+              {searchResults.map((item) => renderMediaCard(item))}
+            </div>
+          </>
         )}
       </div>
       

@@ -40,17 +40,17 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     setImageError(true);
   };
 
-  // Consistent sizing based on size prop - Fixed dimensions
+  // Consistent sizing based on size prop - Better responsive dimensions
   const getCardClasses = () => {
     switch (size) {
       case "small":
-        return "w-36 h-[216px]"; // Fixed 2:3 aspect ratio (36*6 = 216)
+        return "w-full aspect-[2/3] min-h-[200px] max-w-[180px]"; // Responsive with consistent aspect ratio
       case "medium":
-        return "w-44 h-[264px]"; // Fixed 2:3 aspect ratio (44*6 = 264)
+        return "w-full aspect-[2/3] min-h-[240px] max-w-[200px]"; 
       case "large":
-        return "w-52 h-[312px]"; // Fixed 2:3 aspect ratio (52*6 = 312)
+        return "w-full aspect-[2/3] min-h-[280px] max-w-[220px]"; 
       default:
-        return "w-44 h-[264px]";
+        return "w-full aspect-[2/3] min-h-[240px] max-w-[200px]";
     }
   };
 
