@@ -155,7 +155,7 @@ const MovieDetail = () => {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
 
         {/* Poster positioned on top and to the left */}
-        <div className="absolute bottom-6 left-4 z-20">
+        <div className="absolute bottom-6 left-4 z-30">
           <img 
             src={posterUrl} 
             alt={title}
@@ -163,8 +163,8 @@ const MovieDetail = () => {
           />
         </div>
 
-        {/* Movie Info positioned to the right of poster */}
-        <div className="absolute bottom-6 left-40 right-4 z-10">
+        {/* Movie Info positioned to the right of poster - Now z-30 to be above gradient */}
+        <div className="absolute bottom-6 left-40 right-4 z-30">
           <div className="flex items-center space-x-3 mb-2">
             <span className="text-cinema-gold font-semibold text-sm">★ {movie.vote_average.toFixed(1)}</span>
             <span className="text-white/80 text-sm">{releaseYear}</span>
@@ -180,8 +180,8 @@ const MovieDetail = () => {
           </p>
 
           <div className="relative mb-4">
-            <div className="bg-cinema-black/80 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
-              <p className="text-white font-medium leading-relaxed text-sm line-clamp-3">
+            <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3 border border-white/10">
+              <p className="text-white leading-relaxed text-sm line-clamp-3">
                 {movie.overview || "No synopsis available."}
               </p>
               {movie.overview && movie.overview.length > 120 && (
