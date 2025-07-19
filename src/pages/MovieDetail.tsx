@@ -138,7 +138,7 @@ const MovieDetail = () => {
   ).slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <MobileHeader title={title} />
       
       {/* Hero Section with Poster Overlay */}
