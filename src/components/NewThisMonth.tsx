@@ -109,19 +109,20 @@ export const NewThisMonth = () => {
 
   return (
     <div className="mb-12">
-      <div className="text-center mb-8">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Calendar className="h-8 w-8 text-cinema-gold" />
-          <h2 className="font-cinematic text-3xl text-foreground tracking-wide">
-            NEW THIS MONTH
-          </h2>
-          <TrendingUp className="h-8 w-8 text-cinema-gold" />
+      <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-2xl p-8">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Calendar className="h-8 w-8 text-cinema-gold" />
+            <h2 className="font-cinematic text-3xl text-foreground tracking-wide">
+              NEW THIS MONTH
+            </h2>
+            <TrendingUp className="h-8 w-8 text-cinema-gold" />
+          </div>
+          <p className="text-muted-foreground mb-4">
+            Recent releases from {currentMonth} - Updated regularly
+          </p>
+          <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
-        <p className="text-muted-foreground mb-4">
-          Recent releases from {currentMonth} - Updated regularly
-        </p>
-        <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
-      </div>
       
       {movies.length > 0 ? (
         <div 
@@ -151,7 +152,8 @@ export const NewThisMonth = () => {
         <div className="text-center text-muted-foreground">
           No new releases found for this month
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
