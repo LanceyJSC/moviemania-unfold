@@ -1,13 +1,16 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon, Filter, X, TrendingUp, Film, Tv, ArrowRight } from "lucide-react";
+import { Search as SearchIcon, Filter, X, TrendingUp, Film, Tv, ArrowRight, Shuffle, Star, Clock, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
 import { PhotoSearch } from "@/components/PhotoSearch";
+import { QuickGenres } from "@/components/QuickGenres";
+import { FunFacts } from "@/components/FunFacts";
+import { MovieTrivia } from "@/components/MovieTrivia";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
 import { tmdbService } from "@/lib/tmdb";
@@ -26,6 +29,9 @@ const Search = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
+  const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date'>('popularity');
+  const [showPhotoSearch, setShowPhotoSearch] = useState(false);
+  const [showTrivia, setShowTrivia] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Load trending content for default display
@@ -134,6 +140,24 @@ const Search = () => {
     navigate('/category/trending');
   };
 
+  const handlePhotoSearchMovie = (movie: any) => {
+    // Simulate finding the movie and showing it in results
+    setSearchResults([movie]);
+    setShowPhotoSearch(false);
+  };
+
+  const handleSurpriseMe = async () => {
+    try {
+      const randomMovies = await tmdbService.getTopRatedMovies();
+      const randomIndex = Math.floor(Math.random() * randomMovies.results.length);
+      const surpriseMovie = randomMovies.results[randomIndex];
+      setSearchResults([surpriseMovie]);
+      setSearchTerm(`${surpriseMovie.title} (Surprise Pick!)`);
+    } catch (error) {
+      console.error("Failed to get surprise movie:", error);
+    }
+  };
+
   const showDefaultContent = !searchTerm && !genreParam && searchResults.length === 0;
 
   const renderMediaCard = (item: any) => {
@@ -180,39 +204,98 @@ const Search = () => {
           </Button>
         </div>
 
-        {/* Search Type Tabs */}
-        {searchTerm && (
-          <div className="container mx-auto mt-4">
-            <div className="flex space-x-2">
+        {/* Interactive Tools */}
+        <div className="container mx-auto mt-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Search Type Tabs */}
+            {searchTerm && (
+              <div className="flex space-x-2">
+                <Button
+                  variant={activeTab === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveTab('all')}
+                  className="rounded-full"
+                >
+                  All
+                </Button>
+                <Button
+                  variant={activeTab === 'movies' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveTab('movies')}
+                  className="rounded-full"
+                >
+                  <Film className="h-4 w-4 mr-1" />
+                  Movies
+                </Button>
+                <Button
+                  variant={activeTab === 'tv' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveTab('tv')}
+                  className="rounded-full"
+                >
+                  <Tv className="h-4 w-4 mr-1" />
+                  TV Shows
+                </Button>
+              </div>
+            )}
+
+            {/* Sort Controls */}
+            {(searchTerm || genreParam) && (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-muted-foreground">Sort by:</span>
+                <Button
+                  variant={sortBy === 'popularity' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('popularity')}
+                  className="rounded-full text-xs"
+                >
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Popular
+                </Button>
+                <Button
+                  variant={sortBy === 'rating' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('rating')}
+                  className="rounded-full text-xs"
+                >
+                  <Star className="h-3 w-3 mr-1" />
+                  Rating
+                </Button>
+                <Button
+                  variant={sortBy === 'release_date' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('release_date')}
+                  className="rounded-full text-xs"
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  Recent
+                </Button>
+              </div>
+            )}
+
+            {/* Interactive Tools */}
+            <div className="flex items-center space-x-2">
               <Button
-                variant={activeTab === 'all' ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
-                onClick={() => setActiveTab('all')}
-                className="rounded-full"
+                onClick={handleSurpriseMe}
+                className="rounded-full hover:bg-cinema-red/10 hover:border-cinema-red hover:text-cinema-red"
               >
-                All
+                <Shuffle className="h-4 w-4 mr-1" />
+                Surprise Me!
               </Button>
               <Button
-                variant={activeTab === 'movies' ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
-                onClick={() => setActiveTab('movies')}
-                className="rounded-full"
+                onClick={() => setShowTrivia(!showTrivia)}
+                className="rounded-full hover:bg-cinema-gold/10 hover:border-cinema-gold hover:text-cinema-gold"
               >
-                <Film className="h-4 w-4 mr-1" />
-                Movies
-              </Button>
-              <Button
-                variant={activeTab === 'tv' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setActiveTab('tv')}
-                className="rounded-full"
-              >
-                <Tv className="h-4 w-4 mr-1" />
-                TV Shows
+                <PlayCircle className="h-4 w-4 mr-1" />
+                Movie Quiz
               </Button>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Genre Header */}
@@ -236,9 +319,9 @@ const Search = () => {
         </div>
       )}
 
-      {/* Default Content - Search Suggestions */}
+      {/* Default Content - Discovery Hub */}
       {showDefaultContent && (
-        <div className="container mx-auto px-4 mt-8 space-y-8">
+        <div className="container mx-auto px-4 mt-8 space-y-12">
           {/* Welcome Header */}
           <div className="text-center">
             <h1 className="font-cinematic text-4xl text-foreground tracking-wide mb-4">
@@ -249,6 +332,14 @@ const Search = () => {
             </p>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
+
+          {/* Quick Genre Exploration */}
+          <QuickGenres />
+
+          {/* Fun Facts Section */}
+          <FunFacts 
+            movie={trendingMovies.length > 0 ? trendingMovies[0] : null}
+          />
 
           {/* Popular Searches */}
           <div>
@@ -323,6 +414,38 @@ const Search = () => {
           )}
         </div>
       )}
+
+      {/* Movie Trivia Modal */}
+      {showTrivia && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-cinematic text-2xl text-foreground">MOVIE TRIVIA CHALLENGE</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowTrivia(false)}
+                className="rounded-full"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <MovieTrivia 
+              movie={trendingMovies.length > 0 ? trendingMovies[0] : null}
+              isOpen={showTrivia}
+              onClose={() => setShowTrivia(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Photo Search Component */}
+      <PhotoSearch 
+        onMovieFound={handlePhotoSearchMovie}
+        isOpen={showPhotoSearch}
+        onToggle={() => setShowPhotoSearch(!showPhotoSearch)}
+      />
+
 
       {/* Search Results */}
       <div className="container mx-auto px-4 mt-8">
