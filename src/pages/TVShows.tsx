@@ -16,20 +16,8 @@ const TVShows = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-cinema-gold to-cinema-red text-white p-6 pt-12">
-        <div className="text-center">
-          <h1 className="font-cinematic text-4xl tracking-wide mb-2">
-            📺 TV SHOWS
-          </h1>
-          <p className="text-white/90 text-lg">
-            Explore Television Excellence
-          </p>
-        </div>
-      </div>
-
       {/* Filter Buttons */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border p-4">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border p-4 pt-8">
         <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
