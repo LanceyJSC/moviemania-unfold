@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Play, Info } from "lucide-react";
@@ -78,15 +77,12 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground">
-        {/* Hero Background with proper proportions */}
+      <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground w-screen -mx-4 md:-mx-8">
+        {/* Hero Background with lighter overlay */}
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: heroBackdrop 
-              ? `linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%), url(${heroBackdrop})`
-              : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-            backgroundBlendMode: heroBackdrop ? 'overlay' : 'normal'
+            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent" />
