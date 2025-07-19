@@ -3,13 +3,15 @@ import { useState, useEffect } from "react";
 import { Heart, Clock, Eye, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "@/components/MovieCard";
-import { useUserState } from "@/hooks/useUserState";
+import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useAuth } from "@/hooks/useAuth";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { Link } from "react-router-dom";
 
 const Watchlist = () => {
   const [activeTab, setActiveTab] = useState<'watchLater' | 'liked' | 'currentlyWatching'>('watchLater');
-  const { userState, toggleWatchlist, toggleLike, toggleCurrentlyWatching } = useUserState();
+  const { user } = useAuth();
+  const { userState, toggleWatchlist, toggleLike, toggleCurrentlyWatching } = useSupabaseUserState();
   const [movies, setMovies] = useState<{
     watchLater: any[];
     liked: any[];
@@ -54,22 +56,27 @@ const Watchlist = () => {
 
   const activeTabData = tabs.find(tab => tab.id === activeTab);
 
-  const handleRemoveFromList = (movieId: number) => {
+  const handleRemoveFromList = async (movieId: number) => {
+    const movie = activeTabData?.data.find(m => m.id === movieId);
+    if (!movie) return;
+
     switch (activeTab) {
       case 'watchLater':
-        toggleWatchlist(movieId);
+        await toggleWatchlist(movieId, movie.title, movie.poster);
         break;
       case 'liked':
-        toggleLike(movieId);
+        await toggleLike(movieId, movie.title, movie.poster);
         break;
       case 'currentlyWatching':
-        toggleCurrentlyWatching(movieId);
+        await toggleCurrentlyWatching(movieId, movie.title, movie.poster);
         break;
     }
   };
 
-  const handleMarkAsWatched = (movieId: number) => {
-    toggleCurrentlyWatching(movieId);
+  const handleMarkAsWatched = async (movieId: number) => {
+    const movie = activeTabData?.data.find(m => m.id === movieId);
+    if (!movie) return;
+    await toggleCurrentlyWatching(movieId, movie.title, movie.poster);
   };
 
   return (
@@ -111,7 +118,21 @@ const Watchlist = () => {
 
         {/* Content */}
         <div>
-          {isLoading ? (
+          {!user ? (
+            <div className="text-center py-16">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                Sign in to view your watchlist
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Create an account to save and organize your movies
+              </p>
+              <Link to="/auth">
+                <Button className="bg-cinema-red hover:bg-cinema-red/90">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+          ) : isLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
               {Array.from({ length: 6 }).map((_, index) => (
                 <div key={index} className="w-48 h-72 bg-muted animate-pulse rounded-lg"></div>

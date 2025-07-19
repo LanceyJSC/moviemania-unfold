@@ -1,8 +1,10 @@
 
-import { useState } from "react";
-import { User, Settings, Calendar, Star, Trophy, Film } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Settings, Calendar, Star, Trophy, Film, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 // Mock user data - will be replaced with real user data later
 const mockUserData = {
@@ -25,6 +27,14 @@ const mockUserData = {
 
 const Profile = () => {
   const [activeSection, setActiveSection] = useState<'timeline' | 'settings'>('timeline');
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,9 +47,9 @@ const Profile = () => {
             </div>
             <div>
               <h1 className="text-3xl font-cinematic text-foreground tracking-wide">
-                {mockUserData.name}
-              </h1>
-              <p className="text-muted-foreground">{mockUserData.email}</p>
+                 {user?.user_metadata?.full_name || user?.email || 'Movie Enthusiast'}
+               </h1>
+               <p className="text-muted-foreground">{user?.email}</p>
               <p className="text-sm text-muted-foreground">Member since {mockUserData.joinDate}</p>
             </div>
           </div>
@@ -95,14 +105,22 @@ const Profile = () => {
                 <Calendar className="h-4 w-4 mr-2" />
                 Movie Timeline
               </Button>
-              <Button
-                variant={activeSection === 'settings' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveSection('settings')}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
+               <Button
+                 variant={activeSection === 'settings' ? 'default' : 'ghost'}
+                 className="w-full justify-start"
+                 onClick={() => setActiveSection('settings')}
+               >
+                 <Settings className="h-4 w-4 mr-2" />
+                 Settings
+               </Button>
+               <Button
+                 variant="ghost"
+                 className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                 onClick={signOut}
+               >
+                 <LogOut className="h-4 w-4 mr-2" />
+                 Sign Out
+               </Button>
             </div>
           </div>
 

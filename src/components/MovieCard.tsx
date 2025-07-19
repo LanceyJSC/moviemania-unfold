@@ -3,7 +3,7 @@ import { Heart, Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { useUserState } from "@/hooks/useUserState";
+import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 
 interface MovieCardProps {
   movie: {
@@ -18,7 +18,7 @@ interface MovieCardProps {
 }
 
 export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
-  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useUserState();
+  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
   
   const sizeClasses = {
     small: "w-32 h-48",
@@ -26,16 +26,16 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     large: "w-64 h-96"
   };
 
-  const handleLikeClick = (e: React.MouseEvent) => {
+  const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleLike(movie.id);
+    await toggleLike(movie.id, movie.title, movie.poster);
   };
 
-  const handleWatchlistClick = (e: React.MouseEvent) => {
+  const handleWatchlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleWatchlist(movie.id);
+    await toggleWatchlist(movie.id, movie.title, movie.poster);
   };
 
   return (

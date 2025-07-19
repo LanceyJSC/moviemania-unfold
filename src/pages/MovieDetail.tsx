@@ -7,7 +7,7 @@ import { MovieCarousel } from "@/components/MovieCarousel";
 import { MovieTrivia } from "@/components/MovieTrivia";
 import { StreamingAvailability } from "@/components/StreamingAvailability";
 import { tmdbService, Movie } from "@/lib/tmdb";
-import { useUserState } from "@/hooks/useUserState";
+import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +22,7 @@ const MovieDetail = () => {
     isLiked,
     isInWatchlist,
     getRating
-  } = useUserState();
+  } = useSupabaseUserState();
 
   const movieId = Number(id);
   const isMovieLiked = isLiked(movieId);
@@ -181,7 +181,7 @@ const MovieDetail = () => {
                   <Button 
                     variant="outline" 
                     className={`border-border hover:bg-card px-6 py-6 ${isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''}`}
-                    onClick={() => toggleLike(movieId)}
+                    onClick={() => toggleLike(movieId, movie.title, posterUrl)}
                   >
                     <Heart className={`h-5 w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
                   </Button>
@@ -189,7 +189,7 @@ const MovieDetail = () => {
                   <Button 
                     variant="outline" 
                     className={`border-border hover:bg-card px-6 py-6 ${isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''}`}
-                    onClick={() => toggleWatchlist(movieId)}
+                    onClick={() => toggleWatchlist(movieId, movie.title, posterUrl)}
                   >
                     <Plus className="h-5 w-5" />
                   </Button>
@@ -213,7 +213,7 @@ const MovieDetail = () => {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      onClick={() => setRating(movieId, star)}
+                      onClick={() => setRating(movieId, star, movie.title)}
                       className="transition-colors"
                     >
                       <Star 
