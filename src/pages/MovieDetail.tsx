@@ -1,48 +1,101 @@
 
-import { useState } from "react";
-import { Play, Heart, Plus, Star, Share, ArrowLeft } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Play, Heart, Plus, Star, Share, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
-import { Link } from "react-router-dom";
-
-// Mock movie data - will be replaced with API data later
-const movieData = {
-  id: 1,
-  title: "The Dark Knight",
-  backdrop: "https://images.unsplash.com/photo-1509647084632-bc2540fba87a?w=1920&h=1080&fit=crop",
-  poster: "https://images.unsplash.com/photo-1509647084632-bc2540fba87a?w=400&h=600&fit=crop",
-  year: "2008",
-  runtime: "152 min",
-  rating: "9.0",
-  genre: "Action, Crime, Drama",
-  plot: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-  cast: ["Christian Bale", "Heath Ledger", "Aaron Eckhart", "Michael Caine"],
-  director: "Christopher Nolan"
-};
-
-const recommendedMovies = [
-  {
-    id: 2,
-    title: "Batman Begins",
-    poster: "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=400&h=600&fit=crop",
-    year: "2005",
-    rating: "8.2",
-    genre: "Action"
-  },
-  {
-    id: 3,
-    title: "The Dark Knight Rises",
-    poster: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400&h=600&fit=crop",
-    year: "2012",
-    rating: "8.4",
-    genre: "Action"
-  }
-];
+import { tmdbService, Movie } from "@/lib/tmdb";
+import { useUserState } from "@/hooks/useUserState";
 
 const MovieDetail = () => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
-  const [userRating, setUserRating] = useState(0);
+  const { id } = useParams<{ id: string }>();
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const {
+    toggleLike,
+    toggleWatchlist,
+    setRating,
+    isLiked,
+    isInWatchlist,
+    getRating
+  } = useUserState();
+
+  const movieId = Number(id);
+  const isMovieLiked = isLiked(movieId);
+  const isMovieInWatchlist = isInWatchlist(movieId);
+  const userRating = getRating(movieId);
+
+  useEffect(() => {
+    const loadMovieDetails = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      try {
+        const movieData = await tmdbService.getMovieDetails(Number(id));
+        setMovie(movieData);
+        
+        // Find trailer
+        const trailer = movieData.videos?.results.find(
+          video => video.type === 'Trailer' && video.site === 'YouTube'
+        );
+        if (trailer) {
+          setTrailerKey(trailer.key);
+        }
+      } catch (error) {
+        console.error('Failed to load movie details:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMovieDetails();
+  }, [id]);
+
+  const handleShare = async () => {
+    if (navigator.share && movie) {
+      try {
+        await navigator.share({
+          title: movie.title,
+          text: `Check out ${movie.title} on CineScope!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        // Fallback to copying URL
+        navigator.clipboard.writeText(window.location.href);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
+      </div>
+    );
+  }
+
+  if (!movie) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Movie not found</h1>
+          <Link to="/">
+            <Button>Back to Home</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const backdropUrl = tmdbService.getBackdropUrl(movie.backdrop_path, 'original');
+  const posterUrl = tmdbService.getPosterUrl(movie.poster_path, 'w500');
+  const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA';
+  const runtime = movie.runtime ? `${movie.runtime} min` : 'Unknown';
+  const genres = movie.genres?.map(g => g.name).join(', ') || 'Unknown';
+  const cast = movie.cast?.slice(0, 5).map(c => c.name).join(', ') || 'Cast information unavailable';
 
   return (
     <div className="min-h-screen bg-background">
@@ -50,7 +103,7 @@ const MovieDetail = () => {
       <div className="relative h-screen overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${movieData.backdrop})` }}
+          style={{ backgroundImage: `url(${backdropUrl})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black via-cinema-black/80 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black via-transparent to-transparent" />
@@ -73,8 +126,8 @@ const MovieDetail = () => {
               {/* Poster */}
               <div className="flex-shrink-0">
                 <img 
-                  src={movieData.poster} 
-                  alt={movieData.title}
+                  src={posterUrl} 
+                  alt={movie.title}
                   className="w-80 h-auto rounded-lg shadow-cinematic"
                 />
               </div>
@@ -82,53 +135,63 @@ const MovieDetail = () => {
               {/* Movie Info */}
               <div className="flex-1 text-center lg:text-left">
                 <div className="flex items-center justify-center lg:justify-start space-x-4 mb-4">
-                  <span className="text-cinema-gold text-xl font-semibold">★ {movieData.rating}</span>
-                  <span className="text-muted-foreground">{movieData.year}</span>
-                  <span className="text-muted-foreground">{movieData.runtime}</span>
+                  <span className="text-cinema-gold text-xl font-semibold">★ {movie.vote_average.toFixed(1)}</span>
+                  <span className="text-muted-foreground">{releaseYear}</span>
+                  <span className="text-muted-foreground">{runtime}</span>
                 </div>
 
                 <h1 className="text-5xl md:text-7xl font-cinematic text-foreground mb-4 tracking-wide">
-                  {movieData.title}
+                  {movie.title}
                 </h1>
 
                 <p className="text-lg text-muted-foreground mb-6 max-w-2xl">
-                  {movieData.genre}
+                  {genres}
                 </p>
 
                 <p className="text-lg text-muted-foreground mb-8 max-w-3xl leading-relaxed">
-                  {movieData.plot}
+                  {movie.overview}
                 </p>
 
                 {/* Cast */}
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold text-foreground mb-2">Cast</h3>
-                  <p className="text-muted-foreground">{movieData.cast.join(", ")}</p>
+                  <p className="text-muted-foreground">{cast}</p>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
-                  <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white px-8 py-6 text-lg font-semibold">
-                    <Play className="mr-2 h-5 w-5" />
-                    Watch Trailer
-                  </Button>
+                  {trailerKey ? (
+                    <Button 
+                      className="bg-cinema-red hover:bg-cinema-red/90 text-white px-8 py-6 text-lg font-semibold"
+                      onClick={() => window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank')}
+                    >
+                      <Play className="mr-2 h-5 w-5" />
+                      Watch Trailer
+                    </Button>
+                  ) : (
+                    <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white px-8 py-6 text-lg font-semibold" disabled>
+                      <Play className="mr-2 h-5 w-5" />
+                      No Trailer Available
+                    </Button>
+                  )}
                   
                   <Button 
                     variant="outline" 
-                    className={`border-border hover:bg-card px-6 py-6 ${isLiked ? 'bg-cinema-red border-cinema-red text-white' : ''}`}
-                    onClick={() => setIsLiked(!isLiked)}
+                    className={`border-border hover:bg-card px-6 py-6 ${isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''}`}
+                    onClick={() => toggleLike(movieId)}
                   >
-                    <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+                    <Heart className={`h-5 w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
                   </Button>
 
                   <Button 
                     variant="outline" 
-                    className={`border-border hover:bg-card px-6 py-6 ${isInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''}`}
-                    onClick={() => setIsInWatchlist(!isInWatchlist)}
+                    className={`border-border hover:bg-card px-6 py-6 ${isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''}`}
+                    onClick={() => toggleWatchlist(movieId)}
                   >
                     <Plus className="h-5 w-5" />
                   </Button>
 
-                  <Button variant="outline" className="border-border hover:bg-card px-6 py-6">
+                  <Button variant="outline" className="border-border hover:bg-card px-6 py-6" onClick={handleShare}>
                     <Share className="h-5 w-5" />
                   </Button>
                 </div>
@@ -139,7 +202,7 @@ const MovieDetail = () => {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      onClick={() => setUserRating(star)}
+                      onClick={() => setRating(movieId, star)}
                       className="transition-colors"
                     >
                       <Star 
