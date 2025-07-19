@@ -134,7 +134,7 @@ const TVShowDetail = () => {
       <MobileHeader title={tvShow.name} />
       
       {/* Hero Section with Poster Overlay */}
-      <div className="relative overflow-hidden h-[50vh]">
+      <div className="relative overflow-hidden h-[50vh] w-screen -mx-4 md:-mx-8">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
