@@ -269,52 +269,67 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Get latest trailers by category - exactly matching TMDB's homepage
+  // Get latest trailers by category - using trending and mixed content to match TMDB
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = false): Promise<TMDBResponse<Movie | TVShow>> {
-    let endpoint = '';
-    const today = new Date().toISOString().split('T')[0];
-    const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    let movieEndpoint = '';
+    let tvEndpoint = '';
     
     switch (category) {
       case 'popular':
-        // Get recent releases sorted by popularity that have trailers
-        endpoint = `/discover/movie?sort_by=popularity.desc&primary_release_date.gte=${twoWeeksAgo}&primary_release_date.lte=${today}&page=1`;
+        movieEndpoint = '/trending/movie/day';
+        tvEndpoint = '/trending/tv/day';
         break;
       case 'streaming':
-        // Movies recently available on streaming platforms
-        endpoint = `/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc&primary_release_date.gte=${twoWeeksAgo}&page=1`;
+        movieEndpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
+        tvEndpoint = '/discover/tv?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
         break;
       case 'on_tv':
-        // TV shows currently airing with recent episodes
-        endpoint = '/tv/airing_today?page=1';
+        movieEndpoint = '/trending/movie/day';
+        tvEndpoint = '/tv/airing_today';
         break;
       case 'for_rent':
-        // Recent movies available for digital rent
-        endpoint = `/discover/movie?with_watch_monetization_types=rent&watch_region=US&sort_by=release_date.desc&primary_release_date.gte=${twoWeeksAgo}&page=1`;
+        movieEndpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US&sort_by=popularity.desc';
+        tvEndpoint = '/discover/tv?with_watch_monetization_types=rent&watch_region=US&sort_by=popularity.desc';
         break;
       case 'in_theaters':
-        // Movies currently playing in theaters
-        endpoint = '/movie/now_playing?page=1';
+        movieEndpoint = '/movie/now_playing';
+        tvEndpoint = '/tv/on_the_air';
         break;
     }
     
-    const response = await this.fetchFromTMDB<TMDBResponse<Movie | TVShow>>(endpoint, fresh);
+    // Fetch both movies and TV shows and mix them like TMDB does
+    const [movieResponse, tvResponse] = await Promise.all([
+      this.fetchFromTMDB<TMDBResponse<Movie>>(movieEndpoint, fresh),
+      this.fetchFromTMDB<TMDBResponse<TVShow>>(tvEndpoint, fresh)
+    ]);
     
-    // For "Latest Trailers", we need to mix recent releases with some popular ongoing content
-    if (category === 'popular' && response.results.length < 10) {
-      // If not enough recent releases, supplement with current popular movies
-      const popularResponse = await this.fetchFromTMDB<TMDBResponse<Movie>>('/movie/popular?page=1', fresh);
-      const combinedResults = [...response.results, ...popularResponse.results.slice(0, 20 - response.results.length)];
-      
-      return {
-        ...response,
-        results: combinedResults.slice(0, 20)
-      };
+    // Mix movies and TV shows alternating like TMDB
+    const mixedResults: (Movie | TVShow)[] = [];
+    const maxItems = 20;
+    let movieIndex = 0;
+    let tvIndex = 0;
+    
+    for (let i = 0; i < maxItems; i++) {
+      if (i % 3 === 0 && tvIndex < tvResponse.results.length) {
+        // Every 3rd item is a TV show
+        mixedResults.push(tvResponse.results[tvIndex]);
+        tvIndex++;
+      } else if (movieIndex < movieResponse.results.length) {
+        mixedResults.push(movieResponse.results[movieIndex]);
+        movieIndex++;
+      } else if (tvIndex < tvResponse.results.length) {
+        mixedResults.push(tvResponse.results[tvIndex]);
+        tvIndex++;
+      } else {
+        break;
+      }
     }
     
     return {
-      ...response,
-      results: response.results.slice(0, 20)
+      page: 1,
+      results: mixedResults,
+      total_pages: 1,
+      total_results: mixedResults.length
     };
   }
 
