@@ -27,6 +27,39 @@ export interface Movie {
   videos?: { results: { id: string; key: string; name: string; type: string; site: string }[] };
 }
 
+export interface TVShow {
+  id: number;
+  name: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  overview: string;
+  first_air_date: string;
+  vote_average: number;
+  vote_count: number;
+  genre_ids: number[];
+  adult: boolean;
+  original_language: string;
+  original_name: string;
+  popularity: number;
+  origin_country: string[];
+  number_of_episodes?: number;
+  number_of_seasons?: number;
+  genres?: { id: number; name: string }[];
+  created_by?: { id: number; name: string; profile_path: string | null }[];
+  credits?: {
+    cast: { id: number; name: string; character: string; profile_path: string | null }[];
+    crew: { id: number; name: string; job: string; profile_path: string | null }[];
+  };
+  videos?: { results: { id: string; key: string; name: string; type: string; site: string }[] };
+  seasons?: {
+    id: number;
+    name: string;
+    poster_path: string | null;
+    season_number: number;
+    episode_count: number;
+  }[];
+}
+
 export interface Person {
   id: number;
   name: string;
@@ -55,11 +88,17 @@ export interface TMDBResponse<T> {
 }
 
 class TMDBService {
-  private async fetchFromTMDB<T>(endpoint: string): Promise<T> {
+  private async fetchFromTMDB<T>(endpoint: string, bustCache: boolean = false): Promise<T> {
     const url = `${TMDB_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_API_KEY}`;
     
+    const fetchOptions: RequestInit = {
+      headers: {
+        'Cache-Control': bustCache ? 'no-cache' : 'public, max-age=300'
+      }
+    };
+    
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, fetchOptions);
       if (!response.ok) {
         throw new Error(`TMDB API error: ${response.status}`);
       }
@@ -70,32 +109,27 @@ class TMDBService {
     }
   }
 
-  // Search movies
+  // Movie methods
   async searchMovies(query: string, page: number = 1): Promise<TMDBResponse<Movie>> {
     return this.fetchFromTMDB(`/search/movie?query=${encodeURIComponent(query)}&page=${page}`);
   }
 
-  // Get trending movies - Enhanced with time window
-  async getTrendingMovies(timeWindow: 'day' | 'week' = 'week'): Promise<TMDBResponse<Movie>> {
-    return this.fetchFromTMDB(`/trending/movie/${timeWindow}`);
+  async getTrendingMovies(timeWindow: 'day' | 'week' = 'week', fresh: boolean = false): Promise<TMDBResponse<Movie>> {
+    return this.fetchFromTMDB(`/trending/movie/${timeWindow}`, fresh);
   }
 
-  // Get top rated movies
-  async getTopRatedMovies(page: number = 1): Promise<TMDBResponse<Movie>> {
-    return this.fetchFromTMDB(`/movie/top_rated?page=${page}`);
+  async getTopRatedMovies(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<Movie>> {
+    return this.fetchFromTMDB(`/movie/top_rated?page=${page}`, fresh);
   }
 
-  // Get popular movies
-  async getPopularMovies(page: number = 1): Promise<TMDBResponse<Movie>> {
-    return this.fetchFromTMDB(`/movie/popular?page=${page}`);
+  async getPopularMovies(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<Movie>> {
+    return this.fetchFromTMDB(`/movie/popular?page=${page}`, fresh);
   }
 
-  // Get upcoming movies - Filter to only show future releases
-  async getUpcomingMovies(page: number = 1): Promise<TMDBResponse<Movie>> {
-    const response = await this.fetchFromTMDB<TMDBResponse<Movie>>(`/movie/upcoming?page=${page}`);
+  async getUpcomingMovies(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<Movie>> {
+    const response = await this.fetchFromTMDB<TMDBResponse<Movie>>(`/movie/upcoming?page=${page}`, fresh);
     const today = new Date().toISOString().split('T')[0];
     
-    // Filter to only include movies with release dates in the future
     const filteredResults = response.results.filter(movie => 
       movie.release_date && movie.release_date > today
     );
@@ -106,17 +140,53 @@ class TMDBService {
     };
   }
 
-  // Get movie details - Fixed to properly append credits
   async getMovieDetails(movieId: number): Promise<Movie> {
     return this.fetchFromTMDB(`/movie/${movieId}?append_to_response=credits,videos`);
   }
 
-  // Get genres
+  // TV Show methods
+  async searchTVShows(query: string, page: number = 1): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/search/tv?query=${encodeURIComponent(query)}&page=${page}`);
+  }
+
+  async getTrendingTVShows(timeWindow: 'day' | 'week' = 'week', fresh: boolean = false): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/trending/tv/${timeWindow}`, fresh);
+  }
+
+  async getTopRatedTVShows(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/tv/top_rated?page=${page}`, fresh);
+  }
+
+  async getPopularTVShows(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/tv/popular?page=${page}`, fresh);
+  }
+
+  async getAiringTodayTVShows(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/tv/airing_today?page=${page}`, fresh);
+  }
+
+  async getOnTheAirTVShows(page: number = 1, fresh: boolean = false): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/tv/on_the_air?page=${page}`, fresh);
+  }
+
+  async getTVShowDetails(tvId: number): Promise<TVShow> {
+    return this.fetchFromTMDB(`/tv/${tvId}?append_to_response=credits,videos`);
+  }
+
+  // Combined search
+  async searchMulti(query: string, page: number = 1): Promise<TMDBResponse<Movie | TVShow>> {
+    return this.fetchFromTMDB(`/search/multi?query=${encodeURIComponent(query)}&page=${page}`);
+  }
+
+  // Genre methods
   async getGenres(): Promise<{ genres: { id: number; name: string }[] }> {
     return this.fetchFromTMDB(`/genre/movie/list`);
   }
 
-  // Enhanced discover movies with filters
+  async getTVGenres(): Promise<{ genres: { id: number; name: string }[] }> {
+    return this.fetchFromTMDB(`/genre/tv/list`);
+  }
+
   async discoverMovies(filters: {
     genre?: number;
     year?: number;
@@ -139,7 +209,6 @@ class TMDBService {
     return this.fetchFromTMDB(`/discover/movie?${queryString}`);
   }
 
-  // Enhanced: Get movies released this month
   async getThisMonthMovies(): Promise<TMDBResponse<Movie>> {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -154,7 +223,6 @@ class TMDBService {
     });
   }
 
-  // Enhanced: Get movies released this week
   async getThisWeekMovies(): Promise<TMDBResponse<Movie>> {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -168,12 +236,10 @@ class TMDBService {
     });
   }
 
-  // Get person details
   async getPersonDetails(personId: number): Promise<Person> {
     return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits`);
   }
 
-  // Image URL helpers
   getPosterUrl(path: string | null, size: 'w300' | 'w500' | 'w780' | 'original' = 'w500'): string {
     if (!path) return '/placeholder.svg';
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
@@ -184,12 +250,10 @@ class TMDBService {
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
   }
 
-  // Enhanced profile URL with better fallback handling
   getProfileUrl(path: string | null, size: 'w185' | 'w632' | 'original' = 'w185'): string {
     if (!path || path.trim() === '') {
       return '/placeholder.svg';
     }
-    // Try different sizes if the main one fails
     try {
       return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
     } catch (error) {
@@ -198,7 +262,6 @@ class TMDBService {
     }
   }
 
-  // Format movie data for components
   formatMovieForCard(movie: Movie) {
     return {
       id: movie.id,
@@ -207,6 +270,17 @@ class TMDBService {
       year: movie.release_date ? new Date(movie.release_date).getFullYear().toString() : 'TBA',
       rating: movie.vote_average.toFixed(1),
       genre: movie.genres?.[0]?.name || 'Unknown'
+    };
+  }
+
+  formatTVShowForCard(tvShow: TVShow) {
+    return {
+      id: tvShow.id,
+      title: tvShow.name,
+      poster: this.getPosterUrl(tvShow.poster_path),
+      year: tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear().toString() : 'TBA',
+      rating: tvShow.vote_average.toFixed(1),
+      genre: tvShow.genres?.[0]?.name || 'Unknown'
     };
   }
 }

@@ -1,74 +1,64 @@
 
-import { Loader2, ArrowRight, RefreshCw } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MovieCard } from "./MovieCard";
+import { TVShowCard } from "./TVShowCard";
 import { useState, useRef, useEffect } from "react";
-import { tmdbService, Movie } from "@/lib/tmdb";
+import { tmdbService, TVShow } from "@/lib/tmdb";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 
-interface SwipeableMovieCarouselProps {
+interface SwipeableTVCarouselProps {
   title: string;
-  category: "trending" | "popular" | "top_rated" | "upcoming";
+  category: "trending" | "popular" | "top_rated" | "airing_today" | "on_the_air";
   cardSize?: "small" | "medium" | "large";
 }
 
-export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }: SwipeableMovieCarouselProps) => {
+export const SwipeableTVCarousel = ({ title, category, cardSize = "medium" }: SwipeableTVCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [tvShows, setTVShows] = useState<TVShow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
-  // Load movies based on category
-  const loadMovies = async (fresh: boolean = false) => {
-    if (fresh) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-    
-    try {
-      let response;
-      switch (category) {
-        case "trending":
-          response = await tmdbService.getTrendingMovies('week', fresh);
-          break;
-        case "popular":
-          response = await tmdbService.getPopularMovies(1, fresh);
-          break;
-        case "top_rated":
-          response = await tmdbService.getTopRatedMovies(1, fresh);
-          break;
-        case "upcoming":
-          response = await tmdbService.getUpcomingMovies(1, fresh);
-          break;
-        default:
-          response = await tmdbService.getPopularMovies(1, fresh);
-      }
-      setMovies(response.results);
-    } catch (error) {
-      console.error(`Failed to load ${category} movies:`, error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
   useEffect(() => {
-    loadMovies();
+    const loadTVShows = async () => {
+      setIsLoading(true);
+      try {
+        let response;
+        switch (category) {
+          case "trending":
+            response = await tmdbService.getTrendingTVShows();
+            break;
+          case "popular":
+            response = await tmdbService.getPopularTVShows();
+            break;
+          case "top_rated":
+            response = await tmdbService.getTopRatedTVShows();
+            break;
+          case "airing_today":
+            response = await tmdbService.getAiringTodayTVShows();
+            break;
+          case "on_the_air":
+            response = await tmdbService.getOnTheAirTVShows();
+            break;
+          default:
+            response = await tmdbService.getPopularTVShows();
+        }
+        setTVShows(response.results);
+      } catch (error) {
+        console.error(`Failed to load ${category} TV shows:`, error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadTVShows();
   }, [category]);
 
-  const handleRefresh = () => {
-    loadMovies(true);
-  };
-
   const handleViewAll = () => {
-    navigate(`/category/${category}`);
+    navigate(`/category/tv/${category}`);
   };
 
   // Touch/Mouse event handlers for swipe functionality
@@ -114,30 +104,18 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
         }`}>
           {title}
         </h2>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 text-cinema-gold hover:text-cinema-gold/80 hover:bg-cinema-gold/10"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {!isMobile && 'Refresh'}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleViewAll}
-            className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
-          >
-            View All
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleViewAll}
+          className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
+        >
+          View All
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Movie Cards Container */}
+      {/* TV Show Cards Container */}
       <div 
         ref={scrollRef}
         className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 ${
@@ -162,10 +140,10 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
             </div>
           ))
         ) : (
-          movies.map((movie) => (
-            <div key={movie.id} className="flex-shrink-0">
-              <MovieCard 
-                movie={tmdbService.formatMovieForCard(movie)} 
+          tvShows.map((tvShow) => (
+            <div key={tvShow.id} className="flex-shrink-0">
+              <TVShowCard 
+                tvShow={tmdbService.formatTVShowForCard(tvShow)} 
                 size={isMobile ? "small" : cardSize} 
               />
             </div>

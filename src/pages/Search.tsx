@@ -1,10 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon, Filter, X, TrendingUp, Film, ArrowRight } from "lucide-react";
+import { Search as SearchIcon, Filter, X, TrendingUp, Film, Tv, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
+import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
 import { PhotoSearch } from "@/components/PhotoSearch";
 import { Navigation } from "@/components/Navigation";
@@ -19,23 +20,29 @@ const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
+  const [trendingTVShows, setTrendingTVShows] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  // Load trending movies for default content
+  // Load trending content for default display
   useEffect(() => {
-    const loadTrendingMovies = async () => {
+    const loadTrendingContent = async () => {
       try {
-        const results = await tmdbService.getTrendingMovies();
-        setTrendingMovies(results.results.slice(0, 8));
+        const [moviesResult, tvResult] = await Promise.all([
+          tmdbService.getTrendingMovies(undefined, true),
+          tmdbService.getTrendingTVShows(undefined, true)
+        ]);
+        setTrendingMovies(moviesResult.results.slice(0, 6));
+        setTrendingTVShows(tvResult.results.slice(0, 6));
       } catch (error) {
-        console.error("Failed to load trending movies:", error);
+        console.error("Failed to load trending content:", error);
       }
     };
 
-    loadTrendingMovies();
+    loadTrendingContent();
   }, []);
 
   // Handle genre-based search on component mount
@@ -62,9 +69,8 @@ const Search = () => {
 
   // Handle text-based search
   useEffect(() => {
-    const searchMovies = async () => {
+    const searchContent = async () => {
       if (!debouncedSearchTerm) {
-        // If there's no search term but there's a genre param, keep genre results
         if (!genreParam) {
           setSearchResults([]);
         }
@@ -73,7 +79,14 @@ const Search = () => {
 
       setIsSearching(true);
       try {
-        const results = await tmdbService.searchMovies(debouncedSearchTerm);
+        let results;
+        if (activeTab === 'movies') {
+          results = await tmdbService.searchMovies(debouncedSearchTerm);
+        } else if (activeTab === 'tv') {
+          results = await tmdbService.searchTVShows(debouncedSearchTerm);
+        } else {
+          results = await tmdbService.searchMulti(debouncedSearchTerm);
+        }
         setSearchResults(results.results);
       } catch (error) {
         console.error("Search failed:", error);
@@ -82,8 +95,8 @@ const Search = () => {
       }
     };
 
-    searchMovies();
-  }, [debouncedSearchTerm, genreParam]);
+    searchContent();
+  }, [debouncedSearchTerm, genreParam, activeTab]);
 
   const handleFilterChange = (filters: any) => {
     setSelectedFilters(filters);
@@ -122,6 +135,14 @@ const Search = () => {
 
   const showDefaultContent = !searchTerm && !genreParam && searchResults.length === 0;
 
+  const renderMediaCard = (item: any) => {
+    if (item.media_type === 'tv' || item.name) {
+      return <TVShowCard key={item.id} tvShow={tmdbService.formatTVShowForCard(item)} size="small" />;
+    } else {
+      return <MovieCard key={item.id} movie={tmdbService.formatMovieForCard(item)} size="small" />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header and Search Input */}
@@ -130,7 +151,7 @@ const Search = () => {
           <div className="relative flex-grow">
             <Input
               type="search"
-              placeholder={genreParam ? `Search in ${getGenreName(genreParam)} movies...` : "Search for movies..."}
+              placeholder={genreParam ? `Search in ${getGenreName(genreParam)} movies...` : "Search for movies and TV shows..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="rounded-full pl-10 pr-16 min-h-[44px]"
@@ -156,6 +177,40 @@ const Search = () => {
             <Filter className="h-5 w-5" />
           </Button>
         </div>
+
+        {/* Search Type Tabs */}
+        {searchTerm && (
+          <div className="container mx-auto mt-4">
+            <div className="flex space-x-2">
+              <Button
+                variant={activeTab === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveTab('all')}
+                className="rounded-full"
+              >
+                All
+              </Button>
+              <Button
+                variant={activeTab === 'movies' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveTab('movies')}
+                className="rounded-full"
+              >
+                <Film className="h-4 w-4 mr-1" />
+                Movies
+              </Button>
+              <Button
+                variant={activeTab === 'tv' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveTab('tv')}
+                className="rounded-full"
+              >
+                <Tv className="h-4 w-4 mr-1" />
+                TV Shows
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Genre Header */}
@@ -185,10 +240,10 @@ const Search = () => {
           {/* Welcome Header */}
           <div className="text-center">
             <h1 className="font-cinematic text-4xl text-foreground tracking-wide mb-4">
-              DISCOVER MOVIES
+              DISCOVER MOVIES & TV SHOWS
             </h1>
             <p className="text-muted-foreground text-lg mb-6">
-              Search for your favorite films or explore what's trending
+              Search for your favorite films and series or explore what's trending
             </p>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
@@ -214,13 +269,13 @@ const Search = () => {
             </div>
           </div>
 
-          {/* Trending Movies with View All */}
+          {/* Trending Movies */}
           {trendingMovies.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-foreground flex items-center">
                   <Film className="h-5 w-5 mr-2 text-cinema-red" />
-                  Trending Now
+                  Trending Movies
                 </h2>
                 <Button
                   variant="ghost"
@@ -243,6 +298,27 @@ const Search = () => {
               </div>
             </div>
           )}
+
+          {/* Trending TV Shows */}
+          {trendingTVShows.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-foreground flex items-center">
+                  <Tv className="h-5 w-5 mr-2 text-cinema-red" />
+                  Trending TV Shows
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {trendingTVShows.map((tvShow) => (
+                  <TVShowCard 
+                    key={tvShow.id} 
+                    tvShow={tmdbService.formatTVShowForCard(tvShow)} 
+                    size="small" 
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -256,13 +332,7 @@ const Search = () => {
         )}
         {searchResults.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {searchResults.map((movie) => (
-              <MovieCard 
-                key={movie.id} 
-                movie={tmdbService.formatMovieForCard(movie)} 
-                size="small" 
-              />
-            ))}
+            {searchResults.map((item) => renderMediaCard(item))}
           </div>
         )}
       </div>

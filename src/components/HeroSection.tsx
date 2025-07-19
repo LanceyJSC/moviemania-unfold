@@ -52,6 +52,10 @@ export const HeroSection = () => {
     }
   };
 
+  const handleCloseTrailer = () => {
+    setIsTrailerOpen(false);
+  };
+
   // Always show the hero section, even when loading
   const heroBackdrop = heroMovie ? tmdbService.getBackdropUrl(heroMovie.backdrop_path, 'original') : null;
 
@@ -146,7 +150,7 @@ export const HeroSection = () => {
       {isTrailerOpen && trailerKey && heroMovie && (
         <TrailerModal
           isOpen={isTrailerOpen}
-          onClose={() => setIsTrailerOpen(false)}
+          onClose={handleCloseTrailer}
           trailerKey={trailerKey}
           movieTitle={heroMovie.title}
         />
