@@ -4,7 +4,7 @@ import { Calendar, Clock, Star, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
-import { tmdbService } from "@/lib/tmdb";
+import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 
 interface Episode {
   id: number;
@@ -32,17 +32,11 @@ interface Season {
   };
 }
 
-interface TVShow {
-  id: number;
-  name: string;
-  poster_path: string | null;
-  backdrop_path: string | null;
-}
 
 const SeasonDetail = () => {
   const { id, seasonNumber } = useParams<{ id: string; seasonNumber: string }>();
   const [season, setSeason] = useState<Season | null>(null);
-  const [tvShow, setTVShow] = useState<TVShow | null>(null);
+  const [tvShow, setTVShow] = useState<TMDBTVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -51,7 +45,7 @@ const SeasonDetail = () => {
       
       setIsLoading(true);
       try {
-        // Get basic TV show info
+        // Get basic TV show info with images
         const tvShowData = await tmdbService.getTVShowDetails(Number(id));
         setTVShow(tvShowData);
 
@@ -97,31 +91,38 @@ const SeasonDetail = () => {
 
   const seasonPosterUrl = tmdbService.getPosterUrl(season.poster_path, 'w500');
   
-  // Priority for backdrop selection:
-  // 1. Season-specific backdrop from season.backdrop_path
-  // 2. Random episode still from the season (creates season-specific look)
-  // 3. Fall back to TV show backdrop
+  // Create visual variation for each season using the same backdrop
   const getSeasonBackdrop = () => {
     // First try the direct season backdrop
     if (season.backdrop_path) {
       return tmdbService.getBackdropUrl(season.backdrop_path, 'original');
     }
     
-    // Use a random episode still from this season as backdrop for uniqueness
-    if (season.episodes && season.episodes.length > 0) {
-      const episodesWithStills = season.episodes.filter(ep => ep.still_path);
-      if (episodesWithStills.length > 0) {
-        // Use first episode still (or random) to create season-specific backdrop
-        const selectedEpisode = episodesWithStills[0]; // Could randomize: Math.floor(Math.random() * episodesWithStills.length)
-        return tmdbService.getImageUrl(selectedEpisode.still_path, 'original');
-      }
-    }
-    
-    // Finally fall back to TV show backdrop
+    // Use the TV show backdrop (this will be the same image but we'll apply CSS filters)
     return tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
   };
   
-  const seasonBackdropUrl = getSeasonBackdrop();
+  // Create different visual styles for each season using CSS filters
+  const getSeasonStyle = () => {
+    const seasonNum = season.season_number;
+    const baseStyle = { backgroundImage: `url(${getSeasonBackdrop()})` };
+    
+    // Apply different filters based on season number to create visual variety
+    switch (seasonNum % 5) {
+      case 1:
+        return { ...baseStyle, filter: 'brightness(1.1) contrast(1.05)' };
+      case 2:
+        return { ...baseStyle, filter: 'brightness(0.9) contrast(1.1) saturate(1.1)' };
+      case 3:
+        return { ...baseStyle, filter: 'brightness(1.05) contrast(0.95) hue-rotate(10deg)' };
+      case 4:
+        return { ...baseStyle, filter: 'brightness(0.95) contrast(1.05) saturate(0.9)' };
+      case 0:
+        return { ...baseStyle, filter: 'brightness(1) contrast(1.1) sepia(0.1)' };
+      default:
+        return baseStyle;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -131,7 +132,7 @@ const SeasonDetail = () => {
       <div className="relative overflow-hidden h-[40vh]">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${seasonBackdropUrl})` }}
+          style={getSeasonStyle()}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
