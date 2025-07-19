@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tv, Star, Calendar, TrendingUp } from "lucide-react";
 import { SwipeableTVCarousel } from "@/components/SwipeableTVCarousel";
+import { FeaturedHero } from "@/components/FeaturedHero";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -48,7 +49,10 @@ const TVShows = () => {
 
         {/* Content */}
         <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-32">
-        {/* TV Show Carousels based on active filter */}
+          {/* Featured Hero Section */}
+          <FeaturedHero type="tv" />
+          
+          {/* TV Show Carousels based on active filter */}
         {activeFilter === "all" && (
           <>
             <SwipeableTVCarousel title="TRENDING NOW" category="trending" cardSize="medium" />

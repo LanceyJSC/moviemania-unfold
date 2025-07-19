@@ -3,6 +3,7 @@ import { Film, Star, Calendar, TrendingUp } from "lucide-react";
 import { SwipeableMovieCarousel } from "@/components/SwipeableMovieCarousel";
 import { Navigation } from "@/components/Navigation";
 import { MovieStats } from "@/components/MovieStats";
+import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 
@@ -49,8 +50,10 @@ const Movies = () => {
 
         {/* Content */}
         <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-32">
+          {/* Featured Hero Section */}
+          <FeaturedHero type="movie" />
 
-        {/* Movie Carousels based on active filter */}
+          {/* Movie Carousels based on active filter */}
         {activeFilter === "all" && (
           <>
             <SwipeableMovieCarousel title="TRENDING NOW" category="trending" cardSize="medium" />

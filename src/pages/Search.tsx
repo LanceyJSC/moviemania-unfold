@@ -9,7 +9,6 @@ import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
 import { PhotoSearch } from "@/components/PhotoSearch";
 import { QuickGenres } from "@/components/QuickGenres";
-import { FunFacts } from "@/components/FunFacts";
 import { MovieTrivia } from "@/components/MovieTrivia";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -335,11 +334,6 @@ const Search = () => {
 
           {/* Quick Genre Exploration */}
           <QuickGenres />
-
-          {/* Fun Facts Section */}
-          <FunFacts 
-            movie={trendingMovies.length > 0 ? trendingMovies[0] : null}
-          />
 
           {/* Popular Searches */}
           <div>
