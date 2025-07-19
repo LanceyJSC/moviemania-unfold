@@ -114,9 +114,7 @@ export const FreshPicks = () => {
         {movies.length > 0 ? (
           <div 
             ref={scrollRef}
-            className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 ${
-              isMobile ? 'cursor-grab active:cursor-grabbing' : ''
-            } ${isDragging ? 'select-none' : ''}`}
+            className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
