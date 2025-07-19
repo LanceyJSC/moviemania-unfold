@@ -142,15 +142,15 @@ const MovieDetail = () => {
     <div className="min-h-screen bg-background pb-32">
       <MobileHeader title={title} />
       
-      {/* Hero Section with Poster Overlay - Full width edge to edge */}
-      <div className="relative w-screen overflow-hidden h-[50vh] -mx-4 sm:-mx-6 md:-mx-8">
+      {/* Hero Section with Poster Overlay */}
+      <div className="relative overflow-hidden h-[50vh]">
         <div 
-          className="backdrop-image"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
-        />
-        
-        {/* Standard backdrop gradients */}
-        <div className="backdrop-gradient-overlay" />
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
+        </div>
 
         {/* Bottom Gradient Blend - Creates smooth transition to page background */}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />

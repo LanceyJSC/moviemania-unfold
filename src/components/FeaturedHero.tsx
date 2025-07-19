@@ -77,7 +77,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   if (isLoading || !featuredContent) {
     return (
-      <div className="backdrop-hero-medium bg-gradient-to-r from-cinema-charcoal to-cinema-black mb-8">
+      <div className="relative h-96 bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-xl overflow-hidden mb-8">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-muted-foreground">Loading featured {type}...</div>
         </div>
@@ -95,17 +95,17 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   return (
-    <div className="backdrop-hero-medium mb-8 group">
+    <div className="relative h-96 rounded-xl overflow-hidden mb-8 group">
       {/* Background Image */}
       {backdropUrl && (
         <div 
-          className="backdrop-image group-hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
           style={{ backgroundImage: `url(${backdropUrl})` }}
         />
       )}
       
-      {/* Standard backdrop gradients */}
-      <div className="backdrop-gradient-overlay" />
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
       
       {/* Stats Cards - Moved to top-right to avoid overlap */}
       <div className="absolute top-6 right-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">

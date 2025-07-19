@@ -40,14 +40,23 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     setImageError(true);
   };
 
-  // Consistent poster sizing - always 2:3 aspect ratio
+  // Consistent sizing based on size prop - Fixed dimensions for grid consistency
   const getCardClasses = () => {
-    return "poster-card"; // Use standardized poster card class
+    switch (size) {
+      case "small":
+        return "w-[150px] h-[225px]"; // Fixed 2:3 aspect ratio
+      case "medium":
+        return "w-[180px] h-[270px]"; // Fixed 2:3 aspect ratio
+      case "large":
+        return "w-[200px] h-[300px]"; // Fixed 2:3 aspect ratio
+      default:
+        return "w-[180px] h-[270px]";
+    }
   };
 
   return (
-    <Link to={`/movie/${movie.id}`} className="touch-target">
-      <Card className={`group relative bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer ${getCardClasses()}`}>
+    <Link to={`/movie/${movie.id}`}>
+      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* Movie Poster */}
           {!imageError ? (
