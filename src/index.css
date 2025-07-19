@@ -155,16 +155,32 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
-  /* Standard Poster Grid - Mobile-first with 4 across on mobile */
+  /* Standard Poster Grid - Optimized for 6:9 mobile screens */
   .poster-grid-standard {
-    @apply grid gap-2 p-2;
-    grid-template-columns: repeat(4, 1fr); /* Mobile: 4 across */
+    @apply grid gap-2 p-3;
+    grid-template-columns: repeat(3, 1fr); /* Mobile: 3 across for better visibility on tall screens */
+  }
+
+  /* Small Mobile (very narrow screens) - 2 across */
+  @media (max-width: 380px) {
+    .poster-grid-standard {
+      @apply gap-2 p-2;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Larger Mobile/Small Tablet - 4 across */
+  @media (min-width: 480px) {
+    .poster-grid-standard {
+      @apply gap-3 p-3;
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 
   /* Tablet - 5 across */
   @media (min-width: 640px) {
     .poster-grid-standard {
-      @apply gap-3 p-3;
+      @apply gap-3 p-4;
       grid-template-columns: repeat(5, 1fr);
     }
   }
@@ -180,7 +196,7 @@ All colors MUST be HSL.
   /* Large Desktop - 7 across */
   @media (min-width: 1024px) {
     .poster-grid-standard {
-      @apply gap-5 p-5;
+      @apply gap-4 p-5;
       grid-template-columns: repeat(7, 1fr);
     }
   }
@@ -188,7 +204,7 @@ All colors MUST be HSL.
   /* Extra Large - 8 across */
   @media (min-width: 1280px) {
     .poster-grid-standard {
-      @apply gap-6 p-6;
+      @apply gap-5 p-6;
       grid-template-columns: repeat(8, 1fr);
     }
   }
