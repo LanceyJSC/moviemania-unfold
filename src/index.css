@@ -186,6 +186,58 @@ All colors MUST be HSL.
     @apply w-full h-full object-cover;
   }
 
+  /* Backdrop/Hero Image System - Landscape 16:9 ratio with gradients */
+  .backdrop-hero {
+    @apply relative overflow-hidden;
+    aspect-ratio: 16/9;
+  }
+
+  .backdrop-hero-tall {
+    @apply relative h-[60vh] md:h-[75vh] lg:h-[90vh] overflow-hidden;
+  }
+
+  .backdrop-hero-medium {
+    @apply relative h-96 rounded-xl overflow-hidden;
+  }
+
+  .backdrop-image {
+    @apply absolute inset-0 bg-cover bg-center transition-transform duration-300;
+  }
+
+  .backdrop-image:hover {
+    @apply scale-105;
+  }
+
+  /* Standard backdrop gradients */
+  .backdrop-gradient-overlay {
+    @apply absolute inset-0;
+  }
+
+  .backdrop-gradient-overlay::before {
+    @apply absolute inset-0 bg-gradient-to-r from-cinema-black/80 via-cinema-black/50 to-transparent;
+    content: "";
+  }
+
+  .backdrop-gradient-overlay::after {
+    @apply absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent;
+    content: "";
+  }
+
+  /* Hero specific gradients */
+  .hero-gradient-overlay {
+    @apply absolute inset-0;
+  }
+
+  .hero-gradient-overlay::before {
+    @apply absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent;
+    content: "";
+  }
+
+  .hero-gradient-overlay::after {
+    @apply absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent;
+    content: "";
+  }
+
   /* Mobile-first typography */
   .mobile-title {
     @apply text-xl font-cinematic tracking-wide;
