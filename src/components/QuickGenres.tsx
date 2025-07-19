@@ -6,12 +6,12 @@ export const QuickGenres = () => {
   const navigate = useNavigate();
 
   const genres = [
-    { id: 28, name: "Action", icon: Zap, color: "bg-red-500/20 text-red-400" },
-    { id: 35, name: "Comedy", icon: Laugh, color: "bg-yellow-500/20 text-yellow-400" },
-    { id: 27, name: "Horror", icon: Ghost, color: "bg-purple-500/20 text-purple-400" },
-    { id: 10749, name: "Romance", icon: Heart, color: "bg-pink-500/20 text-pink-400" },
-    { id: 878, name: "Sci-Fi", icon: Rocket, color: "bg-blue-500/20 text-blue-400" },
-    { id: 12, name: "Adventure", icon: Sword, color: "bg-green-500/20 text-green-400" }
+    { id: 28, name: "Action", icon: Zap, color: "bg-primary/20 text-primary" },
+    { id: 35, name: "Comedy", icon: Laugh, color: "bg-primary/20 text-primary" },
+    { id: 27, name: "Horror", icon: Ghost, color: "bg-primary/20 text-primary" },
+    { id: 10749, name: "Romance", icon: Heart, color: "bg-primary/20 text-primary" },
+    { id: 878, name: "Sci-Fi", icon: Rocket, color: "bg-primary/20 text-primary" },
+    { id: 12, name: "Adventure", icon: Sword, color: "bg-primary/20 text-primary" }
   ];
 
   const handleGenreClick = (genreId: number) => {
