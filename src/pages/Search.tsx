@@ -148,6 +148,7 @@ const Search = () => {
   };
 
   const handleSurpriseMe = async () => {
+    setIsSearching(true);
     try {
       // Get a mix of content from different sources for true surprise
       const randomSources = [
@@ -163,7 +164,13 @@ const Search = () => {
       const randomIndex = Math.floor(Math.random() * results.results.length);
       const surpriseItem = results.results[randomIndex];
       
-      setSearchResults([surpriseItem]);
+      // Add media_type to help with rendering
+      const itemWithMediaType = {
+        ...surpriseItem,
+        media_type: (surpriseItem as any).title ? 'movie' : 'tv'
+      };
+      
+      setSearchResults([itemWithMediaType]);
       const title = (surpriseItem as any).title || (surpriseItem as any).name;
       setSearchTerm(`${title} (Surprise Pick!)`);
       
@@ -173,6 +180,8 @@ const Search = () => {
       }
     } catch (error) {
       console.error("Failed to get surprise item:", error);
+    } finally {
+      setIsSearching(false);
     }
   };
 
