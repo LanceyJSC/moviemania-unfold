@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, Brain } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
-import { MovieTrivia } from "@/components/MovieTrivia";
+import { FunFacts } from "@/components/FunFacts";
 import { StreamingAvailability } from "@/components/StreamingAvailability";
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -21,7 +21,6 @@ const MovieDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
-  const [showTrivia, setShowTrivia] = useState(false);
   const isMobile = useIsMobile();
   const {
     toggleLike,
@@ -72,7 +71,6 @@ const MovieDetail = () => {
           url: window.location.href,
         });
       } catch (error) {
-        // Fallback to copying URL
         navigator.clipboard.writeText(window.location.href);
       }
     } else {
@@ -132,51 +130,44 @@ const MovieDetail = () => {
     <div className="min-h-screen bg-background pb-24">
       <MobileHeader title={movie.title} />
       
-      {/* Hero Section - Optimized layout */}
+      {/* Hero Section with Poster Overlay */}
       <div className="relative overflow-hidden h-[50vh]">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black via-cinema-black/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/60 via-cinema-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/80 via-transparent to-transparent" />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 h-full flex items-end">
-          <div className="container mx-auto px-4 pb-6">
-            <div className="flex items-end space-x-4">
-              {/* Poster - Positioned better */}
-              <div className="flex-shrink-0">
-                <img 
-                  src={posterUrl} 
-                  alt={movie.title}
-                  className="w-20 h-30 rounded-lg shadow-cinematic object-cover"
-                />
-              </div>
+        {/* Poster positioned on top and to the left */}
+        <div className="absolute bottom-6 left-4 z-20">
+          <img 
+            src={posterUrl} 
+            alt={movie.title}
+            className="w-32 h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
+          />
+        </div>
 
-              {/* Movie Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-3 mb-2">
-                  <span className="text-cinema-gold font-semibold text-sm">★ {movie.vote_average.toFixed(1)}</span>
-                  <span className="text-muted-foreground text-sm">{releaseYear}</span>
-                  <span className="text-muted-foreground text-sm">{runtime}</span>
-                </div>
-
-                <h1 className="font-cinematic text-foreground mb-2 tracking-wide text-xl leading-tight">
-                  {movie.title}
-                </h1>
-
-                <p className="text-muted-foreground mb-3 text-sm">
-                  {genres}
-                </p>
-
-                <p className="text-muted-foreground leading-relaxed text-xs line-clamp-2">
-                  {movie.overview}
-                </p>
-              </div>
-            </div>
+        {/* Movie Info positioned to the right of poster */}
+        <div className="absolute bottom-6 left-40 right-4 z-10">
+          <div className="flex items-center space-x-3 mb-2">
+            <span className="text-cinema-gold font-semibold text-sm">★ {movie.vote_average.toFixed(1)}</span>
+            <span className="text-white/80 text-sm">{releaseYear}</span>
+            <span className="text-white/80 text-sm">{runtime}</span>
           </div>
+
+          <h1 className="font-cinematic text-white mb-2 tracking-wide text-xl leading-tight">
+            {movie.title}
+          </h1>
+
+          <p className="text-white/70 mb-3 text-sm">
+            {genres}
+          </p>
+
+          <p className="text-white/70 leading-relaxed text-xs line-clamp-3">
+            {movie.overview}
+          </p>
         </div>
       </div>
 
@@ -227,14 +218,6 @@ const MovieDetail = () => {
             >
               <Share className="h-4 w-4" />
             </Button>
-
-            <Button 
-              variant="outline" 
-              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]"
-              onClick={() => setShowTrivia(true)}
-            >
-              <Brain className="h-4 w-4" />
-            </Button>
           </div>
         </div>
 
@@ -273,6 +256,9 @@ const MovieDetail = () => {
             </div>
           </div>
         )}
+
+        {/* Fun Facts Carousel */}
+        <FunFacts movie={movie} />
       </div>
 
       {/* Additional Content */}
@@ -291,8 +277,8 @@ const MovieDetail = () => {
           </div>
         )}
 
-        {/* Enhanced Cast Section */}
-        {cast.length > 0 && (
+        {/* Cast Section - Fixed to ensure it displays */}
+        {cast && cast.length > 0 && (
           <div>
             <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
               CAST
@@ -323,15 +309,6 @@ const MovieDetail = () => {
           onClose={() => setShowTrailer(false)} 
           trailerKey={trailerKey || ''} 
           movieTitle={movie.title} 
-        />
-      )}
-
-      {/* Movie Trivia Modal */}
-      {showTrivia && (
-        <MovieTrivia 
-          movie={movie} 
-          isOpen={showTrivia} 
-          onClose={() => setShowTrivia(false)} 
         />
       )}
 

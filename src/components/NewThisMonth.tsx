@@ -1,22 +1,26 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Calendar, TrendingUp } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { tmdbService, Movie } from "@/lib/tmdb";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const NewThisMonth = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const loadNewMovies = async () => {
       try {
-        // Use popular movies with recent release date filtering
         const response = await tmdbService.getPopularMovies();
         const now = new Date();
         const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
         
-        // Filter for movies released in the last 60 days and have posters
         const recentMovies = response.results.filter(movie => {
           if (!movie.poster_path || !movie.release_date) return false;
           const releaseDate = new Date(movie.release_date);
@@ -26,7 +30,6 @@ export const NewThisMonth = () => {
         if (recentMovies.length >= 8) {
           setMovies(recentMovies.slice(0, 8));
         } else {
-          // Fallback to popular movies with posters
           const moviesWithPosters = response.results
             .filter(movie => movie.poster_path)
             .slice(0, 8);
@@ -34,7 +37,6 @@ export const NewThisMonth = () => {
         }
       } catch (error) {
         console.error('Failed to load new movies:', error);
-        // Final fallback to trending movies
         try {
           const fallbackResponse = await tmdbService.getTrendingMovies();
           const moviesWithPosters = fallbackResponse.results
@@ -51,6 +53,40 @@ export const NewThisMonth = () => {
     loadNewMovies();
   }, []);
 
+  // Touch/Mouse event handlers for swipe functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleEnd = () => {
+    setIsDragging(false);
+  };
+
   if (isLoading) {
     return (
       <div className="mb-12">
@@ -60,9 +96,9 @@ export const NewThisMonth = () => {
           </h2>
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        <div className="flex space-x-4 overflow-hidden">
           {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+            <div key={index} className="flex-shrink-0 w-40 aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -88,13 +124,27 @@ export const NewThisMonth = () => {
       </div>
       
       {movies.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        <div 
+          ref={scrollRef}
+          className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 ${
+            isMobile ? 'cursor-grab active:cursor-grabbing' : ''
+          } ${isDragging ? 'select-none' : ''}`}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleEnd}
+        >
           {movies.map((movie) => (
-            <MovieCard 
-              key={`new-${movie.id}`} 
-              movie={tmdbService.formatMovieForCard(movie)} 
-              size="small" 
-            />
+            <div key={`new-${movie.id}`} className="flex-shrink-0 w-40">
+              <MovieCard 
+                movie={tmdbService.formatMovieForCard(movie)} 
+                size="small" 
+              />
+            </div>
           ))}
         </div>
       ) : (
