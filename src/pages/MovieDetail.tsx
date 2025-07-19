@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, Brain, Tv } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { MovieTrivia } from "@/components/MovieTrivia";
@@ -132,8 +132,8 @@ const MovieDetail = () => {
     <div className="min-h-screen bg-background pb-24">
       <MobileHeader title={movie.title} />
       
-      {/* Hero Section - Optimized for mobile */}
-      <div className="relative overflow-hidden h-[60vh]">
+      {/* Hero Section - Optimized layout */}
+      <div className="relative overflow-hidden h-[50vh]">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
@@ -144,14 +144,14 @@ const MovieDetail = () => {
 
         {/* Content */}
         <div className="relative z-10 h-full flex items-end">
-          <div className="container mx-auto px-4 pb-8">
+          <div className="container mx-auto px-4 pb-6">
             <div className="flex items-end space-x-4">
-              {/* Poster - Smaller for mobile */}
+              {/* Poster - Positioned better */}
               <div className="flex-shrink-0">
                 <img 
                   src={posterUrl} 
                   alt={movie.title}
-                  className="w-24 h-36 rounded-lg shadow-cinematic object-cover"
+                  className="w-20 h-30 rounded-lg shadow-cinematic object-cover"
                 />
               </div>
 

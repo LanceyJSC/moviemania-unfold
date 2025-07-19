@@ -11,18 +11,22 @@ export const FreshPicks = () => {
   useEffect(() => {
     const loadFreshPicks = async () => {
       try {
-        // Use trending this week as primary source for more reliable data
+        // Use trending this week as primary source
         const response = await tmdbService.getTrendingMovies('week');
-        // Filter out movies without posters for better display
-        const moviesWithPosters = response.results.filter(movie => movie.poster_path);
-        setMovies(moviesWithPosters.slice(0, 6));
+        // Filter out movies without posters and take first 6
+        const moviesWithPosters = response.results
+          .filter(movie => movie.poster_path)
+          .slice(0, 6);
+        setMovies(moviesWithPosters);
       } catch (error) {
         console.error('Failed to load fresh picks:', error);
-        // Fallback to popular movies if trending fails
+        // Fallback to popular movies
         try {
           const fallbackResponse = await tmdbService.getPopularMovies();
-          const moviesWithPosters = fallbackResponse.results.filter(movie => movie.poster_path);
-          setMovies(moviesWithPosters.slice(0, 6));
+          const moviesWithPosters = fallbackResponse.results
+            .filter(movie => movie.poster_path)
+            .slice(0, 6);
+          setMovies(moviesWithPosters);
         } catch (fallbackError) {
           console.error('Fallback also failed:', fallbackError);
         }
@@ -43,7 +47,11 @@ export const FreshPicks = () => {
             </h2>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
-          <div className="text-center text-muted-foreground">Loading weekly highlights...</div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -68,8 +76,12 @@ export const FreshPicks = () => {
         
         {movies.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {movies.map((movie, index) => (
-              <MovieCard key={`fresh-${movie.id}-${index}`} movie={tmdbService.formatMovieForCard(movie)} size="small" />
+            {movies.map((movie) => (
+              <MovieCard 
+                key={`fresh-${movie.id}`} 
+                movie={tmdbService.formatMovieForCard(movie)} 
+                size="small" 
+              />
             ))}
           </div>
         ) : (

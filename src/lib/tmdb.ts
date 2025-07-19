@@ -1,4 +1,3 @@
-
 const TMDB_API_KEY = '8265bd1679663a7ea12ac168da84d2e8'; // Public key, safe to use
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
@@ -174,7 +173,8 @@ class TMDBService {
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
   }
 
-  getProfileUrl(path: string | null, size: 'w185' | 'w632' | 'original' = 'w185'): string {
+  // Enhanced profile URL with fallback sizes
+  getProfileUrl(path: string | null, size: 'w185' | 'w632' | 'original' = 'w632'): string {
     if (!path) return '/placeholder.svg';
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
   }

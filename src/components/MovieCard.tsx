@@ -23,12 +23,6 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
   const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
-  
-  const sizeClasses = {
-    small: isMobile ? "w-40 h-60" : "w-32 h-48",
-    medium: isMobile ? "w-48 h-72" : "w-48 h-72",
-    large: isMobile ? "w-56 h-84" : "w-64 h-96"
-  };
 
   const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,9 +42,7 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
 
   return (
     <Link to={`/movie/${movie.id}`}>
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer aspect-[2/3] ${
-        isMobile ? 'active:scale-95' : ''
-      }`}>
+      <Card className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer aspect-[2/3]">
         <div className="w-full h-full relative">
           {/* Movie Poster */}
           {!imageError ? (

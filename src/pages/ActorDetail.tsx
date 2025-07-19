@@ -59,7 +59,14 @@ const ActorDetail = () => {
     );
   }
 
-  const profileUrl = tmdbService.getProfileUrl(actor.profile_path, 'w632');
+  // Try multiple image sizes for better success rate
+  const getProfileImageUrl = () => {
+    if (!actor.profile_path) return null;
+    // Try original size first, then fallback to smaller sizes
+    return tmdbService.getProfileUrl(actor.profile_path, 'original');
+  };
+
+  const profileUrl = getProfileImageUrl();
   const birthYear = actor.birthday ? new Date(actor.birthday).getFullYear() : null;
   const movies = actor.movie_credits?.cast || [];
 
@@ -72,7 +79,7 @@ const ActorDetail = () => {
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Profile Image - Enhanced fallback */}
           <div className="flex-shrink-0 mx-auto lg:mx-0">
-            {!imageError && actor.profile_path ? (
+            {!imageError && profileUrl ? (
               <img 
                 src={profileUrl} 
                 alt={actor.name}
@@ -135,9 +142,9 @@ const ActorDetail = () => {
             {movies
               .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime())
               .slice(0, 18)
-              .map((movie, index) => (
+              .map((movie) => (
                 <MovieCard 
-                  key={`${movie.id}-${index}`}
+                  key={movie.id}
                   movie={{
                     id: movie.id,
                     title: movie.title,

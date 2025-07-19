@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Search as SearchIcon, Filter, X, TrendingUp, Film } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Search as SearchIcon, Filter, X, TrendingUp, Film, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
@@ -13,6 +13,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const genreParam = searchParams.get('genre');
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,6 +116,10 @@ const Search = () => {
     setSearchTerm(term);
   };
 
+  const handleViewAllTrending = () => {
+    navigate('/category/trending');
+  };
+
   const showDefaultContent = !searchTerm && !genreParam && searchResults.length === 0;
 
   return (
@@ -209,13 +214,24 @@ const Search = () => {
             </div>
           </div>
 
-          {/* Trending Movies */}
+          {/* Trending Movies with View All */}
           {trendingMovies.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                <Film className="h-5 w-5 mr-2 text-cinema-red" />
-                Trending Now
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-foreground flex items-center">
+                  <Film className="h-5 w-5 mr-2 text-cinema-red" />
+                  Trending Now
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleViewAllTrending}
+                  className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
+                >
+                  View All
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {trendingMovies.map((movie) => (
                   <MovieCard 
