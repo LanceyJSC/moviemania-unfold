@@ -29,6 +29,7 @@ const Search = () => {
   const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date' | 'title'>('popularity');
   const [showPhotoSearch, setShowPhotoSearch] = useState(false);
   const [isSurpriseMode, setIsSurpriseMode] = useState(false);
+  const [originalSurpriseResults, setOriginalSurpriseResults] = useState([]);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Load trending content for default display
@@ -120,19 +121,20 @@ const Search = () => {
 
   // Handle sorting and tab changes for surprise mode
   useEffect(() => {
-    if (isSurpriseMode && searchResults.length > 0) {
-      // Apply sorting and filtering to current results without refetching
-      let sortedResults = [...searchResults];
+    if (isSurpriseMode && originalSurpriseResults.length > 0) {
+      // Start with original surprise results, not filtered ones
+      let sortedResults = [...originalSurpriseResults];
       
-      // Apply activeTab filter
+      // Apply activeTab filter to original results
       if (activeTab === 'movies') {
-        sortedResults = sortedResults.filter(item => item.media_type === 'movie' || item.title);
+        sortedResults = sortedResults.filter(item => item.media_type === 'movie' || (item.title && !item.name));
       } else if (activeTab === 'tv') {
-        sortedResults = sortedResults.filter(item => item.media_type === 'tv' || item.name);
+        sortedResults = sortedResults.filter(item => item.media_type === 'tv' || (item.name && !item.title));
       }
+      // 'all' shows everything, no filtering needed
       
       // Apply sorting based on current sortBy state
-      console.log("Applying sort in surprise mode:", sortBy);
+      console.log("Applying sort in surprise mode:", sortBy, "to", sortedResults.length, "items");
       if (sortBy === 'rating') {
         sortedResults.sort((a: any, b: any) => (b.vote_average || 0) - (a.vote_average || 0));
       } else if (sortBy === 'release_date') {
@@ -163,7 +165,7 @@ const Search = () => {
                        ' (By Popularity)';
       setSearchTerm(`Random Surprise Mix! (${tabText}${sortText})`);
     }
-  }, [sortBy, activeTab]); // Remove isSurpriseMode from dependencies to avoid infinite loop
+  }, [sortBy, activeTab, originalSurpriseResults]); // Use originalSurpriseResults as dependency
 
   const handleFilterChange = async (filters: any) => {
     console.log("Filters changed:", filters);
@@ -235,6 +237,7 @@ const Search = () => {
   const clearSearch = () => {
     setSearchTerm("");
     setIsSurpriseMode(false); // Exit surprise mode
+    setOriginalSurpriseResults([]); // Clear original results
     if (!genreParam) {
       setSearchResults([]);
     }
@@ -363,6 +366,9 @@ const Search = () => {
       // popularity is already the default sort from API
       
       console.log("Final surprise results after all filters:", combinedResults.length);
+      
+      // Store original results for tab/sort filtering
+      setOriginalSurpriseResults(combinedResults);
       setSearchResults(combinedResults);
       
       // Set appropriate search term based on active tab
@@ -620,7 +626,7 @@ const Search = () => {
                   Trending TV Shows
                 </h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+               <div className="poster-grid-responsive">
                 {trendingTVShows.map((tvShow) => (
                   <TVShowCard 
                     key={tvShow.id} 
@@ -669,7 +675,7 @@ const Search = () => {
             
             {/* Results Grid - Movies Page Style */}
             <div className="container mx-auto px-4 md:px-6 py-8">
-               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+               <div className="poster-grid-responsive">
                 {searchResults.map((item) => renderMediaCard(item))}
               </div>
             </div>
