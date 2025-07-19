@@ -118,6 +118,46 @@ const Search = () => {
     searchContent();
   }, [debouncedSearchTerm, genreParam, activeTab, isSurpriseMode]);
 
+  // Handle sorting and tab changes for surprise mode
+  useEffect(() => {
+    if (isSurpriseMode && searchResults.length > 0) {
+      // Apply sorting and filtering to current results without refetching
+      let sortedResults = [...searchResults];
+      
+      // Apply activeTab filter
+      if (activeTab === 'movies') {
+        sortedResults = sortedResults.filter(item => item.media_type === 'movie' || item.title);
+      } else if (activeTab === 'tv') {
+        sortedResults = sortedResults.filter(item => item.media_type === 'tv' || item.name);
+      }
+      
+      // Apply sorting
+      if (sortBy === 'rating') {
+        sortedResults.sort((a: any, b: any) => b.vote_average - a.vote_average);
+      } else if (sortBy === 'release_date') {
+        sortedResults.sort((a: any, b: any) => {
+          const dateA = a.release_date || a.first_air_date || '1900-01-01';
+          const dateB = b.release_date || b.first_air_date || '1900-01-01';
+          return new Date(dateB).getTime() - new Date(dateA).getTime();
+        });
+      } else if (sortBy === 'title') {
+        sortedResults.sort((a: any, b: any) => {
+          const titleA = a.title || a.name || '';
+          const titleB = b.title || b.name || '';
+          return titleA.localeCompare(titleB);
+        });
+      }
+      
+      setSearchResults(sortedResults);
+      
+      // Update search term to reflect current state
+      const tabText = activeTab === 'movies' ? 'Movies Only' : 
+                     activeTab === 'tv' ? 'TV Shows Only' : 
+                     'Mixed Content';
+      setSearchTerm(`Random Surprise Mix! (${tabText})`);
+    }
+  }, [sortBy, activeTab, isSurpriseMode]); // Only trigger when these change in surprise mode
+
   const handleFilterChange = async (filters: any) => {
     console.log("Filters changed:", filters);
     setSelectedFilters(filters);
@@ -385,7 +425,7 @@ const Search = () => {
         <div className="container mx-auto mt-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Search Type Tabs */}
-            {searchTerm && (
+            {(searchTerm || isSurpriseMode) && (
               <div className="flex space-x-2">
                 <Button
                   variant={activeTab === 'all' ? 'default' : 'outline'}
@@ -417,7 +457,7 @@ const Search = () => {
             )}
 
             {/* Sort Controls - Enhanced with more options */}
-            {(searchTerm || genreParam) && (
+            {(searchTerm || genreParam || isSurpriseMode) && (
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground">Sort by:</span>
                 <Button
