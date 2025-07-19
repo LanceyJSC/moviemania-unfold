@@ -68,7 +68,8 @@ export default {
 					charcoal: 'hsl(var(--cinema-charcoal))',
 					red: 'hsl(var(--cinema-red))',
 					gold: 'hsl(var(--cinema-gold))',
-					silver: 'hsl(var(--cinema-silver))'
+					silver: 'hsl(var(--cinema-silver))',
+					green: 'hsl(var(--cinema-green))'
 				}
 			},
 			backgroundImage: {

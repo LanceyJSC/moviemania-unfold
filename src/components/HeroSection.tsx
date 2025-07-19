@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Search, Mic, Camera, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DesktopNavigation } from "./DesktopNavigation";
 import heroBackdrop from "@/assets/hero-backdrop.jpg";
 
 const featuredMovies = [
@@ -67,6 +69,9 @@ export const HeroSection = () => {
               CINE<span className="text-cinema-red">SCOPE</span>
             </h1>
           </div>
+          
+          {/* Desktop Navigation */}
+          <DesktopNavigation />
         </header>
 
         {/* Main Content */}

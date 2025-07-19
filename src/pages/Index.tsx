@@ -1,5 +1,6 @@
 import { HeroSection } from "@/components/HeroSection";
 import { MovieCarousel } from "@/components/MovieCarousel";
+import { Navigation } from "@/components/Navigation";
 
 // Mock data - in a real app, this would come from APIs
 const trendingMovies = [
@@ -138,7 +139,7 @@ const Index = () => {
       <HeroSection />
 
       {/* Content Sections */}
-      <div className="container mx-auto px-6 py-16 space-y-16">
+      <div className="container mx-auto px-6 py-16 space-y-16 pb-24 md:pb-16">
         {/* Trending Now */}
         <MovieCarousel 
           title="TRENDING NOW" 
@@ -172,6 +173,9 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

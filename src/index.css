@@ -46,6 +46,7 @@ All colors MUST be HSL.
     --cinema-red: 350 85% 44%;
     --cinema-gold: 51 100% 50%;
     --cinema-silver: 0 0% 66%;
+    --cinema-green: 120 60% 50%;
     
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)));
