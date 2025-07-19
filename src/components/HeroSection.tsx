@@ -77,7 +77,7 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="backdrop-hero-tall text-foreground">
+      <div className="relative overflow-hidden h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground">
         {/* Hero Background with gradients */}
         <div 
           className="backdrop-image"
@@ -86,7 +86,7 @@ export const HeroSection = () => {
           }}
         />
         
-        {/* Backdrop gradients for proper blending */}
+        {/* Standard backdrop gradients - same as movie detail pages */}
         <div className="backdrop-gradient-overlay" />
 
         {/* Bottom Gradient Blend - Creates smooth transition to page background */}
