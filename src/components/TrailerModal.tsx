@@ -2,6 +2,7 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { useTrailerContext } from "@/contexts/TrailerContext";
 
 interface TrailerModalProps {
   isOpen: boolean;
@@ -12,6 +13,12 @@ interface TrailerModalProps {
 
 export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: TrailerModalProps) => {
   const [videoError, setVideoError] = useState(false);
+  const { setIsTrailerOpen } = useTrailerContext();
+
+  const handleClose = () => {
+    setIsTrailerOpen(false);
+    onClose();
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -44,7 +51,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={handleClose}
             className="text-muted-foreground hover:text-foreground p-2"
           >
             <X className="h-6 w-6" />

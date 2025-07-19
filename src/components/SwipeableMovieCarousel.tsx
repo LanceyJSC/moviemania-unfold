@@ -157,7 +157,7 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
           Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="flex-shrink-0">
               <div className={`bg-muted animate-pulse rounded-lg ${
-                isMobile ? 'w-40 h-60' : 'w-48 h-72'
+                isMobile ? 'w-36 h-[216px]' : 'w-44 h-[264px]'
               }`}></div>
             </div>
           ))

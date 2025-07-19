@@ -18,9 +18,9 @@ interface TVShowCardProps {
 
 export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
   const sizeClasses = {
-    small: "w-32 h-48",
-    medium: "w-40 h-60", 
-    large: "w-48 h-72"
+    small: "w-36 h-[216px]",
+    medium: "w-44 h-[264px]", 
+    large: "w-52 h-[312px]"
   };
 
   return (
