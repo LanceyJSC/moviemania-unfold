@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search as SearchIcon, Filter, X, TrendingUp, Film, Tv, ArrowRight, Shuffle, Star, Clock, PlayCircle } from "lucide-react";
@@ -9,7 +8,6 @@ import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
 import { PhotoSearch } from "@/components/PhotoSearch";
 import { QuickGenres } from "@/components/QuickGenres";
-import { MovieTrivia } from "@/components/MovieTrivia";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
 import { tmdbService } from "@/lib/tmdb";
@@ -30,7 +28,6 @@ const Search = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
   const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date'>('popularity');
   const [showPhotoSearch, setShowPhotoSearch] = useState(false);
-  const [showTrivia, setShowTrivia] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Load trending content for default display
@@ -283,15 +280,7 @@ const Search = () => {
                 <Shuffle className="h-4 w-4 mr-1" />
                 Surprise Me!
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTrivia(!showTrivia)}
-                className="rounded-full hover:bg-cinema-gold/10 hover:border-cinema-gold hover:text-cinema-gold"
-              >
-                <PlayCircle className="h-4 w-4 mr-1" />
-                Movie Quiz
-              </Button>
+              
             </div>
           </div>
         </div>
@@ -409,37 +398,12 @@ const Search = () => {
         </div>
       )}
 
-      {/* Movie Trivia Modal */}
-      {showTrivia && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-cinematic text-2xl text-foreground">MOVIE TRIVIA CHALLENGE</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowTrivia(false)}
-                className="rounded-full"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <MovieTrivia 
-              movie={trendingMovies.length > 0 ? trendingMovies[0] : null}
-              isOpen={showTrivia}
-              onClose={() => setShowTrivia(false)}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Photo Search Component */}
       <PhotoSearch 
         onMovieFound={handlePhotoSearchMovie}
         isOpen={showPhotoSearch}
         onToggle={() => setShowPhotoSearch(!showPhotoSearch)}
       />
-
 
       {/* Search Results */}
       <div className="container mx-auto px-4 mt-8">
