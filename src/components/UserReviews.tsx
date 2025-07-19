@@ -19,12 +19,12 @@ export const UserReviews = ({ movieId, isTV = false }: UserReviewsProps) => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchReviews = async (fresh: boolean = false) => {
       try {
         setLoading(true);
         const response = isTV 
-          ? await tmdbService.getTVShowReviews(movieId)
-          : await tmdbService.getMovieReviews(movieId);
+          ? await tmdbService.getTVShowReviews(movieId, 1, fresh)
+          : await tmdbService.getMovieReviews(movieId, 1, fresh);
         
         setReviews(response.results.slice(0, 1)); // Only show top review initially
         setAllReviews(response.results);
@@ -36,6 +36,13 @@ export const UserReviews = ({ movieId, isTV = false }: UserReviewsProps) => {
     };
 
     fetchReviews();
+
+    // Periodic refresh every hour to stay updated with TMDB
+    const refreshInterval = setInterval(() => {
+      fetchReviews(true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, [movieId, isTV]);
 
   const formatContent = (content: string, maxLength: number = 200) => {

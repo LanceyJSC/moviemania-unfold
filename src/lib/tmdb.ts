@@ -108,7 +108,7 @@ class TMDBService {
     
     const fetchOptions: RequestInit = {
       headers: {
-        'Cache-Control': bustCache ? 'no-cache' : 'public, max-age=300'
+        'Cache-Control': bustCache ? 'no-cache' : 'max-age=3600' // 1 hour max cache
       }
     };
     
@@ -159,8 +159,8 @@ class TMDBService {
     return this.fetchFromTMDB(`/movie/now_playing?page=${page}`, fresh);
   }
 
-  async getMovieDetails(movieId: number): Promise<Movie> {
-    return this.fetchFromTMDB(`/movie/${movieId}?append_to_response=credits,videos`);
+  async getMovieDetails(movieId: number, fresh: boolean = false): Promise<Movie> {
+    return this.fetchFromTMDB(`/movie/${movieId}?append_to_response=credits,videos`, fresh);
   }
 
   // TV Show methods
@@ -188,8 +188,8 @@ class TMDBService {
     return this.fetchFromTMDB(`/tv/on_the_air?page=${page}`, fresh);
   }
 
-  async getTVShowDetails(tvId: number): Promise<TVShow> {
-    return this.fetchFromTMDB(`/tv/${tvId}?append_to_response=credits,videos`);
+  async getTVShowDetails(tvId: number, fresh: boolean = false): Promise<TVShow> {
+    return this.fetchFromTMDB(`/tv/${tvId}?append_to_response=credits,videos`, fresh);
   }
 
   // Combined search
@@ -255,36 +255,39 @@ class TMDBService {
     });
   }
 
-  async getPersonDetails(personId: number): Promise<Person> {
-    return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits`);
+  async getPersonDetails(personId: number, fresh: boolean = false): Promise<Person> {
+    return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits`, fresh);
   }
 
   // Get movie reviews
-  async getMovieReviews(movieId: number, page: number = 1): Promise<TMDBResponse<Review>> {
-    return this.fetchFromTMDB<TMDBResponse<Review>>(`/movie/${movieId}/reviews?page=${page}`);
+  async getMovieReviews(movieId: number, page: number = 1, fresh: boolean = false): Promise<TMDBResponse<Review>> {
+    return this.fetchFromTMDB<TMDBResponse<Review>>(`/movie/${movieId}/reviews?page=${page}`, fresh);
   }
 
   // Get TV show reviews
-  async getTVShowReviews(tvId: number, page: number = 1): Promise<TMDBResponse<Review>> {
-    return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`);
+  async getTVShowReviews(tvId: number, page: number = 1, fresh: boolean = false): Promise<TMDBResponse<Review>> {
+    return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Get latest trailers by category
+  // Get latest trailers by category - exactly matching TMDB's homepage
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = false): Promise<TMDBResponse<Movie | TVShow>> {
     let endpoint = '';
     
     switch (category) {
       case 'popular':
-        endpoint = '/movie/popular?page=1';
+        // Get currently popular movies that are already released
+        endpoint = '/discover/movie?sort_by=popularity.desc&primary_release_date.lte=' + new Date().toISOString().split('T')[0] + '&page=1';
         break;
       case 'streaming':
-        // Major streaming services with recent releases
-        endpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=release_date.desc&page=1';
+        // Movies available on major streaming platforms, recently released
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        endpoint = `/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&primary_release_date.gte=${thirtyDaysAgo}&sort_by=popularity.desc&page=1`;
         break;
       case 'on_tv':
         endpoint = '/tv/on_the_air?page=1';
         break;
       case 'for_rent':
+        // Movies available for rent, sorted by recent popularity
         endpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US&sort_by=popularity.desc&page=1';
         break;
       case 'in_theaters':
