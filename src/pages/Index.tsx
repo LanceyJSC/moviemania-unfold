@@ -7,11 +7,9 @@ import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
-import { TrailerProvider } from "@/contexts/TrailerContext";
 
 const Index = () => {
   return (
-    <TrailerProvider>
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
         <HeroSection />
@@ -44,7 +42,6 @@ const Index = () => {
         {/* Mobile Navigation */}
         <Navigation />
       </div>
-    </TrailerProvider>
   );
 };
 
