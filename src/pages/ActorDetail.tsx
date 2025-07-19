@@ -138,7 +138,7 @@ const ActorDetail = () => {
           <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
             FILMOGRAPHY
           </h2>
-          <div className="poster-grid-responsive">
+          <div className="poster-grid-standard">
             {movies
               .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime())
               .slice(0, 18)

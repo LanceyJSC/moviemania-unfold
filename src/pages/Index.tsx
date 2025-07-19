@@ -8,42 +8,55 @@ import { Navigation } from "@/components/Navigation";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
+import { MobileHeader } from "@/components/MobileHeader";
 
 const Index = () => {
   return (
-      <div className="min-h-screen bg-background">
-        {/* Hero Section */}
+    <div className="min-h-screen bg-background safe-top safe-bottom">
+      <MobileHeader title="Cinescope" showBack={false} />
+      
+      {/* Mobile-optimized content with proper spacing */}
+      <div className="pb-20">
         <HeroSection />
 
-        {/* Content Sections - Enhanced with TV shows */}
-        <div className="container mx-auto px-2 py-6 space-y-8 pb-32">
-          {/* Quick Stats */}
-          <MovieStats />
+        <div className="space-y-6">
+          <div className="px-4 py-6">
+            <MovieStats />
+          </div>
           
-          {/* Genre Navigation */}
-          <QuickGenres />
+          <div className="px-4 py-6">
+            <QuickGenres />
+          </div>
 
-          {/* New Dynamic Content Sections */}
-          <NewThisMonth />
-          <FreshPicks />
-          <LatestTrailers />
+          <div className="px-4 py-6">
+            <NewThisMonth />
+          </div>
+
+          <div className="px-4 py-6">
+            <FreshPicks />
+          </div>
+
+          <div className="px-4 py-6">
+            <LatestTrailers />
+          </div>
         </div>
 
         {/* Footer - Mobile optimized */}
-        <footer className="bg-cinema-charcoal border-t border-border py-8 mb-24">
-          <div className="container mx-auto px-2 text-center">
-            <h3 className="text-xl font-cinematic text-foreground mb-3 tracking-wide">
+        <footer className="bg-cinema-charcoal border-t border-border py-6 mx-4 rounded-lg">
+          <div className="text-center">
+            <h3 className="mobile-subtitle text-foreground mb-2 tracking-wide">
               CINE<span className="text-cinema-red">SCOPE</span>
             </h3>
-            <p className="text-muted-foreground text-sm">
-              Discover, Save, and Experience Movies & TV Shows Like Never Before
+            <p className="mobile-caption">
+              Discover Movies & TV Shows
             </p>
           </div>
         </footer>
-
-        {/* Mobile Navigation */}
-        <Navigation />
       </div>
+
+      {/* Mobile Navigation */}
+      <Navigation />
+    </div>
   );
 };
 

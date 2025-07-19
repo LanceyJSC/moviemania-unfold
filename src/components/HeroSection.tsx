@@ -77,17 +77,17 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground w-screen -mx-4 md:-mx-8">
-        {/* Hero Background with lighter overlay */}
+      <div className="relative w-screen overflow-hidden h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground -mx-4 sm:-mx-6 md:-mx-8">
+        {/* Hero Background with gradients */}
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="backdrop-image"
           style={{ 
             backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
           }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
-        </div>
+        />
+        
+        {/* Standard backdrop gradients - same as movie detail pages */}
+        <div className="backdrop-gradient-overlay" />
 
         {/* Bottom Gradient Blend - Creates smooth transition to page background */}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />

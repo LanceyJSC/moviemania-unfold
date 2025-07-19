@@ -41,23 +41,14 @@ export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
     setImageError(true);
   };
 
-  // Consistent sizing based on size prop - Fixed dimensions matching MovieCard
+  // Consistent poster sizing - always 2:3 aspect ratio
   const getCardClasses = () => {
-    switch (size) {
-      case "small":
-        return "w-[150px] h-[225px]"; // Fixed 2:3 aspect ratio - matches MovieCard
-      case "medium":
-        return "w-[180px] h-[270px]"; // Fixed 2:3 aspect ratio - matches MovieCard
-      case "large":
-        return "w-[200px] h-[300px]"; // Fixed 2:3 aspect ratio - matches MovieCard
-      default:
-        return "w-[180px] h-[270px]";
-    }
+    return "poster-card"; // Use standardized poster card class
   };
 
   return (
-    <Link to={`/tv/${tvShow.id}`}>
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
+    <Link to={`/tv/${tvShow.id}`} className="touch-target">
+      <Card className={`group relative bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* TV Show Poster */}
           {!imageError ? (
