@@ -4,6 +4,7 @@ import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal } from "lucide-
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
+import { UserReviews } from "@/components/UserReviews";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -287,6 +288,9 @@ const MovieDetail = () => {
 
         {/* Fun Facts Carousel - Only show for movies */}
         {!isTV && <FunFacts movie={movie as Movie} />}
+        
+        {/* User Reviews Section */}
+        <UserReviews movieId={movie.id} isTV={isTV} />
       </div>
 
       {/* Additional Content */}

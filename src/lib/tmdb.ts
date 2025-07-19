@@ -80,6 +80,21 @@ export interface Person {
   };
 }
 
+export interface Review {
+  id: string;
+  author: string;
+  author_details: {
+    name: string;
+    username: string;
+    avatar_path: string | null;
+    rating: number | null;
+  };
+  content: string;
+  created_at: string;
+  updated_at: string;
+  url: string;
+}
+
 export interface TMDBResponse<T> {
   page: number;
   results: T[];
@@ -238,6 +253,16 @@ class TMDBService {
 
   async getPersonDetails(personId: number): Promise<Person> {
     return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits`);
+  }
+
+  // Get movie reviews
+  async getMovieReviews(movieId: number, page: number = 1): Promise<TMDBResponse<Review>> {
+    return this.fetchFromTMDB<TMDBResponse<Review>>(`/movie/${movieId}/reviews?page=${page}`);
+  }
+
+  // Get TV show reviews
+  async getTVShowReviews(tvId: number, page: number = 1): Promise<TMDBResponse<Review>> {
+    return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`);
   }
 
   getPosterUrl(path: string | null, size: 'w300' | 'w500' | 'w780' | 'original' = 'w500'): string {
