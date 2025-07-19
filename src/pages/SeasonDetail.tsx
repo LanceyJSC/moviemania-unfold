@@ -57,6 +57,9 @@ const SeasonDetail = () => {
 
         // Get season details with episodes
         const seasonData = await tmdbService.getSeasonDetails(Number(id), Number(seasonNumber)) as Season;
+        console.log('Season data received:', seasonData);
+        console.log('Season backdrop_path:', seasonData.backdrop_path);
+        console.log('Season images:', seasonData.images);
         setSeason(seasonData);
       } catch (error) {
         console.error('Failed to load season details:', error);
@@ -102,19 +105,28 @@ const SeasonDetail = () => {
   // 2. Season images from season.images.backdrops (highest rated)
   // 3. Fall back to TV show backdrop
   const getSeasonBackdrop = () => {
+    console.log('Getting season backdrop...');
+    console.log('Season backdrop_path:', season.backdrop_path);
+    console.log('Season images:', season.images);
+    console.log('TV Show backdrop_path:', tvShow.backdrop_path);
+    
     // First try the direct season backdrop
     if (season.backdrop_path) {
+      console.log('Using season backdrop_path');
       return tmdbService.getBackdropUrl(season.backdrop_path, 'original');
     }
     
     // Then try season images (use highest rated backdrop)
     if (season.images?.backdrops && season.images.backdrops.length > 0) {
+      console.log('Using season images backdrop, found:', season.images.backdrops.length, 'backdrops');
       const bestBackdrop = season.images.backdrops
         .sort((a, b) => b.vote_average - a.vote_average)[0];
+      console.log('Selected best backdrop:', bestBackdrop);
       return tmdbService.getBackdropUrl(bestBackdrop.file_path, 'original');
     }
     
     // Finally fall back to TV show backdrop
+    console.log('Using TV show backdrop fallback');
     return tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
   };
   
