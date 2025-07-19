@@ -275,6 +275,10 @@ const Search = () => {
   const handleSurpriseMe = async () => {
     console.log("Surprise Me clicked!");
     setIsSearching(true);
+    
+    // Clear previous surprise state first
+    setOriginalSurpriseResults([]);
+    setSearchResults([]);
     setIsSurpriseMode(true);
     
     // Clear search term immediately to prevent useEffect interference
