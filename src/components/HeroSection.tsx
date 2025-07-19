@@ -101,6 +101,9 @@ export const HeroSection = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
         </div>
 
+        {/* Bottom Gradient Blend - Creates smooth transition to page background */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
+
         {/* CINESCOPE Branding - Always visible */}
         <div className="absolute top-8 left-8 z-20">
           <h1 className="font-cinematic text-3xl md:text-4xl lg:text-5xl tracking-wide text-foreground">
