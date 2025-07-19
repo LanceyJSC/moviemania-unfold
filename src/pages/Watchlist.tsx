@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Heart, Clock, Eye, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "@/components/MovieCard";
+import { Navigation } from "@/components/Navigation";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useAuth } from "@/hooks/useAuth";
 import { tmdbService, Movie } from "@/lib/tmdb";
@@ -80,7 +80,7 @@ const Watchlist = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-8">
@@ -198,6 +198,9 @@ const Watchlist = () => {
           )}
         </div>
       </div>
+
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { User, Settings, Calendar, Star, Trophy, Film, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Navigation } from "@/components/Navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -37,7 +37,7 @@ const Profile = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-8">
@@ -218,6 +218,9 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

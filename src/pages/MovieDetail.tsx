@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { MovieTrivia } from "@/components/MovieTrivia";
 import { StreamingAvailability } from "@/components/StreamingAvailability";
+import { Navigation } from "@/components/Navigation";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -102,9 +103,10 @@ const MovieDetail = () => {
   const cast = movie.cast?.slice(0, 5).map(c => c.name).join(', ') || 'Cast information unavailable';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Hero Section */}
       <div className={`relative overflow-hidden ${isMobile ? 'h-[85vh]' : 'h-screen'}`}>
+        
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
@@ -280,6 +282,9 @@ const MovieDetail = () => {
           onClose={() => setShowTrivia(false)} 
         />
       )}
+
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

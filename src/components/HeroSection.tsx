@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Search, Mic, Camera, Play, Info } from "lucide-react";
+import { Play, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { TrailerModal } from "@/components/TrailerModal";
 import { tmdbService } from "@/lib/tmdb";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +10,6 @@ import heroBackdrop from "@/assets/hero-backdrop.jpg";
 export const HeroSection = () => {
   const navigate = useNavigate();
   const [currentMovie, setCurrentMovie] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
   const [showTrailer, setShowTrailer] = useState(false);
   const [featuredMovies, setFeaturedMovies] = useState([
     {
@@ -77,13 +75,6 @@ export const HeroSection = () => {
 
   const movie = featuredMovies[currentMovie];
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-
   const handleWatchTrailer = () => {
     if (movie.trailerKey) {
       setShowTrailer(true);
@@ -120,41 +111,19 @@ export const HeroSection = () => {
 
           {/* Main Content */}
           <div className="flex-1 flex items-center justify-center px-4">
-            <div className="max-w-4xl w-full">
-              {/* Search Section */}
-              <div className="text-center mb-8 animate-fade-in">
+            <div className="max-w-4xl w-full text-center">
+              {/* Branding Section */}
+              <div className="mb-8 animate-fade-in">
                 <h2 className="font-cinematic text-foreground mb-4 text-3xl tracking-wide">
                   DISCOVER
                 </h2>
                 <p className="text-muted-foreground mb-8 max-w-2xl mx-auto text-sm px-2">
-                  Search millions of movies and TV shows. Find your next favorite film.
+                  Your ultimate destination for movie discovery and entertainment
                 </p>
-                
-                {/* Search Bar */}
-                <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      type="text"
-                      placeholder="Search for movies or TV shows..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-12 pr-20 bg-card/50 backdrop-blur-sm border-border focus:border-cinema-red transition-all duration-300 py-4 text-base"
-                    />
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
-                      <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground p-2">
-                        <Mic className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground p-2">
-                        <Camera className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </form>
               </div>
 
               {/* Featured Movie Info */}
-              <div className="text-center animate-scale-in">
+              <div className="animate-scale-in">
                 <div className="flex items-center justify-center space-x-4 mb-4">
                   <span className="text-cinema-gold font-semibold text-base">★ {movie.rating}</span>
                   <span className="text-muted-foreground text-sm">{movie.year}</span>
