@@ -28,6 +28,7 @@ const Search = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
   const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date' | 'title'>('popularity');
   const [showPhotoSearch, setShowPhotoSearch] = useState(false);
+  const [isSurpriseMode, setIsSurpriseMode] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Load trending content for default display
@@ -79,8 +80,9 @@ const Search = () => {
   // Handle text-based search
   useEffect(() => {
     const searchContent = async () => {
-      if (!debouncedSearchTerm) {
-        if (!genreParam) {
+      // Don't search if we're in surprise mode or no search term
+      if (!debouncedSearchTerm || isSurpriseMode) {
+        if (!genreParam && !isSurpriseMode) {
           setSearchResults([]);
         }
         return;
@@ -105,7 +107,7 @@ const Search = () => {
     };
 
     searchContent();
-  }, [debouncedSearchTerm, genreParam, activeTab]);
+  }, [debouncedSearchTerm, genreParam, activeTab, isSurpriseMode]);
 
   const handleFilterChange = async (filters: any) => {
     console.log("Filters changed:", filters);
@@ -165,6 +167,7 @@ const Search = () => {
 
   const clearSearch = () => {
     setSearchTerm("");
+    setIsSurpriseMode(false); // Exit surprise mode
     if (!genreParam) {
       setSearchResults([]);
     }
@@ -202,6 +205,7 @@ const Search = () => {
   const handleSurpriseMe = async () => {
     console.log("Surprise Me clicked!");
     setIsSearching(true);
+    setIsSurpriseMode(true); // Enter surprise mode
     try {
       // Get a mix of content from different sources for true surprise
       const randomSources = [
@@ -243,7 +247,7 @@ const Search = () => {
     }
   };
 
-  const showDefaultContent = !searchTerm && !genreParam && searchResults.length === 0;
+  const showDefaultContent = !searchTerm && !genreParam && searchResults.length === 0 && !isSurpriseMode;
 
   const renderMediaCard = (item: any) => {
     if (item.media_type === 'tv' || item.name) {
@@ -511,22 +515,30 @@ const Search = () => {
           <div className="text-center text-muted-foreground">No results found.</div>
         )}
         {searchResults.length > 0 && (
-          <>
-            {/* Results Header */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                {searchTerm && searchTerm.includes("(Surprise Pick!)") ? "Your Surprise Pick!" : 
-                 genreParam ? `${getGenreName(genreParam)} Movies` : 
-                 `Search Results (${searchResults.length})`}
-              </h3>
-              <div className="w-16 h-0.5 bg-cinema-gold"></div>
+          <div className="bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
+            {/* Movie/TV Page Style Header */}
+            <div className="bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-6">
+              <div className="container mx-auto">
+                <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wide mb-2">
+                  {searchTerm && searchTerm.includes("(Surprise Pick!)") ? "YOUR SURPRISE PICK" : 
+                   genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : 
+                   "SEARCH RESULTS"}
+                </h1>
+                <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
+                <p className="text-muted-foreground">
+                  {searchTerm && searchTerm.includes("(Surprise Pick!)") ? "Discover something new and exciting!" : 
+                   `Showing ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
+                </p>
+              </div>
             </div>
             
-            {/* Results Grid - Fixed responsive layout */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-              {searchResults.map((item) => renderMediaCard(item))}
+            {/* Results Grid - Movies Page Style */}
+            <div className="container mx-auto px-4 md:px-6 py-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                {searchResults.map((item) => renderMediaCard(item))}
+              </div>
             </div>
-          </>
+          </div>
         )}
       </div>
       
