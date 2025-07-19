@@ -155,24 +155,41 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
-  /* Standard Poster Grid - 4 across with consistent spacing */
+  /* Standard Poster Grid - Mobile-first with 4 across on mobile */
   .poster-grid-standard {
-    @apply grid gap-4 p-4;
-    grid-template-columns: repeat(4, 1fr);
+    @apply grid gap-2 p-2;
+    grid-template-columns: repeat(4, 1fr); /* Mobile: 4 across */
   }
 
-  /* Responsive adjustments for smaller screens */
-  @media (max-width: 768px) {
+  /* Tablet - 5 across */
+  @media (min-width: 640px) {
     .poster-grid-standard {
-      grid-template-columns: repeat(2, 1fr);
       @apply gap-3 p-3;
+      grid-template-columns: repeat(5, 1fr);
     }
   }
 
-  @media (max-width: 480px) {
+  /* Desktop - 6 across */
+  @media (min-width: 768px) {
     .poster-grid-standard {
-      grid-template-columns: repeat(2, 1fr);
-      @apply gap-2 p-2;
+      @apply gap-4 p-4;
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  /* Large Desktop - 7 across */
+  @media (min-width: 1024px) {
+    .poster-grid-standard {
+      @apply gap-5 p-5;
+      grid-template-columns: repeat(7, 1fr);
+    }
+  }
+
+  /* Extra Large - 8 across */
+  @media (min-width: 1280px) {
+    .poster-grid-standard {
+      @apply gap-6 p-6;
+      grid-template-columns: repeat(8, 1fr);
     }
   }
 }
