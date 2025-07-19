@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play, Star } from "lucide-react";
+import { Play, Star, Film, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -55,34 +55,43 @@ export const LatestTrailers = () => {
   };
 
   return (
-    <section className="py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-cinematic text-foreground tracking-wide">
-          LATEST TRAILERS
-        </h2>
-      </div>
+    <div className="mb-12 pt-4">
+      <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Film className="h-8 w-8 text-primary" />
+            <h2 className="font-cinematic text-3xl text-foreground tracking-wide">
+              LATEST TRAILERS
+            </h2>
+            <Video className="h-8 w-8 text-primary" />
+          </div>
+          <p className="text-muted-foreground mb-4">
+            Watch the newest trailers across all categories - Updated daily
+          </p>
+          <div className="w-16 h-0.5 bg-primary mx-auto"></div>
+        </div>
 
-      {/* Category Tabs */}
-      <div className="flex space-x-2 mb-6 overflow-x-auto scrollbar-hide">
-        {TRAILER_CATEGORIES.map((category) => (
-          <Button
-            key={category.id}
-            variant={activeCategory === category.id ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveCategory(category.id)}
-            className={cn(
-              "whitespace-nowrap transition-colors",
-              activeCategory === category.id
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {category.label}
-          </Button>
-        ))}
-      </div>
+        {/* Category Tabs */}
+        <div className="flex justify-center space-x-2 mb-6 overflow-x-auto scrollbar-hide">
+          {TRAILER_CATEGORIES.map((category) => (
+            <Button
+              key={category.id}
+              variant={activeCategory === category.id ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveCategory(category.id)}
+              className={cn(
+                "whitespace-nowrap transition-colors",
+                activeCategory === category.id
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {category.label}
+            </Button>
+          ))}
+        </div>
 
-      {/* Trailers Grid */}
+        {/* Trailers Grid */}
       {loading ? (
         <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
           {[...Array(6)].map((_, i) => (
@@ -155,6 +164,7 @@ export const LatestTrailers = () => {
           ))}
         </div>
       )}
-    </section>
+      </div>
+    </div>
   );
 };
