@@ -14,7 +14,7 @@ const Index = () => {
       <HeroSection />
 
       {/* Content Sections - Enhanced with new components */}
-      <div className="container mx-auto px-4 py-8 space-y-12 pb-32">
+      <div className="container mx-auto px-4 py-8 space-y-12 pb-24">
         {/* Quick Stats */}
         <MovieStats />
         
@@ -33,7 +33,7 @@ const Index = () => {
       </div>
 
       {/* Footer - Mobile optimized */}
-      <footer className="bg-cinema-charcoal border-t border-border py-8 mb-20">
+      <footer className="bg-cinema-charcoal border-t border-border py-8 mb-24">
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-xl font-cinematic text-foreground mb-3 tracking-wide">
             CINE<span className="text-cinema-red">SCOPE</span>

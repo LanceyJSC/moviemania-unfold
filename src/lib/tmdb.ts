@@ -90,9 +90,20 @@ class TMDBService {
     return this.fetchFromTMDB(`/movie/popular?page=${page}`);
   }
 
-  // Get upcoming movies
+  // Get upcoming movies - Filter to only show future releases
   async getUpcomingMovies(page: number = 1): Promise<TMDBResponse<Movie>> {
-    return this.fetchFromTMDB(`/movie/upcoming?page=${page}`);
+    const response = await this.fetchFromTMDB<TMDBResponse<Movie>>(`/movie/upcoming?page=${page}`);
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Filter to only include movies with release dates in the future
+    const filteredResults = response.results.filter(movie => 
+      movie.release_date && movie.release_date > today
+    );
+    
+    return {
+      ...response,
+      results: filteredResults
+    };
   }
 
   // Get movie details - Fixed to properly append credits
