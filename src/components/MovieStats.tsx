@@ -48,7 +48,7 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
   ];
 
   return (
-    <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-2xl p-8 mb-12">
+    <div className="bg-background rounded-2xl p-8 mb-12">
       {!hideTitle && (
         <div className="text-center mb-8">
           <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
