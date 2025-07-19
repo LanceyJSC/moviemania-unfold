@@ -1,8 +1,12 @@
 
 import { Link } from "react-router-dom";
-import { Star, Calendar } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Star, Heart, Plus, Calendar } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
 
 interface TVShowCardProps {
   tvShow: {
@@ -17,54 +21,124 @@ interface TVShowCardProps {
 }
 
 export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
-  const sizeClasses = {
-    small: "w-36 h-[216px]",
-    medium: "w-44 h-[264px]", 
-    large: "w-52 h-[312px]"
+  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
+  const isMobile = useIsMobile();
+  const [imageError, setImageError] = useState(false);
+
+  const handleLikeClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleLike(tvShow.id, tvShow.title, tvShow.poster);
+  };
+
+  const handleWatchlistClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster);
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  // Consistent sizing based on size prop - Fixed dimensions
+  const getCardClasses = () => {
+    switch (size) {
+      case "small":
+        return "w-36 h-[216px]"; // Fixed 2:3 aspect ratio (36*6 = 216)
+      case "medium":
+        return "w-44 h-[264px]"; // Fixed 2:3 aspect ratio (44*6 = 264)
+      case "large":
+        return "w-52 h-[312px]"; // Fixed 2:3 aspect ratio (52*6 = 312)
+      default:
+        return "w-44 h-[264px]";
+    }
   };
 
   return (
-    <Link to={`/tv/${tvShow.id}`} className="group block">
-      <Card className={`${sizeClasses[size]} overflow-hidden hover:scale-105 transition-transform duration-300 bg-card border-border`}>
-        <CardContent className="p-0 h-full">
-          <div className="relative h-4/5">
-            <img
-              src={tvShow.poster}
+    <Link to={`/tv/${tvShow.id}`}>
+      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
+        <div className="w-full h-full relative">
+          {/* TV Show Poster */}
+          {!imageError ? (
+            <img 
+              src={tvShow.poster} 
               alt={tvShow.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               loading="lazy"
+              onError={handleImageError}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            {/* Rating Badge */}
-            <div className="absolute top-2 right-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1">
-              <div className="flex items-center space-x-1 text-xs">
-                <Star className="h-3 w-3 fill-cinema-gold text-cinema-gold" />
-                <span className="text-white font-medium">{tvShow.rating}</span>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-cinema-charcoal to-cinema-black flex items-center justify-center border border-border">
+              <div className="text-center p-3">
+                <div className="text-3xl mb-2">📺</div>
+                <p className="text-xs text-foreground font-medium line-clamp-3 leading-tight px-1">{tvShow.title}</p>
+                <p className="text-xs text-muted-foreground mt-2">{tvShow.year}</p>
               </div>
             </div>
-
-            {/* Show Type Badge */}
-            <div className="absolute top-2 left-2">
-              <Badge variant="secondary" className="text-xs bg-cinema-red/90 text-white">
-                TV Show
-              </Badge>
-            </div>
-          </div>
+          )}
           
-          <div className="p-3 h-1/5 flex flex-col justify-between">
-            <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-cinema-red transition-colors">
+          {/* Gradient Overlay */}
+          <div className={`absolute inset-0 bg-gradient-to-t from-cinema-black via-transparent to-transparent transition-opacity duration-300 ${
+            isMobile ? 'opacity-60 group-active:opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`} />
+          
+          {/* Rating Badge */}
+          <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+            <Star className="h-3 w-3 text-cinema-gold fill-current" />
+            <span className="text-foreground font-semibold text-xs">{tvShow.rating}</span>
+          </div>
+
+          {/* Show Type Badge */}
+          <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+            <Badge variant="secondary" className="text-xs bg-cinema-red/90 text-white">
+              TV Show
+            </Badge>
+          </div>
+
+          {/* Action Buttons */}
+          <div className={`absolute top-2 right-2 transition-opacity duration-300 space-y-2 ${
+            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}>
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
+                isMobile ? 'active:scale-95' : ''
+              } ${
+                isLiked(tvShow.id) ? 'bg-cinema-red border-cinema-red text-white' : 'bg-cinema-charcoal/80'
+              }`}
+              onClick={handleLikeClick}
+            >
+              <Heart className={`h-4 w-4 ${isLiked(tvShow.id) ? 'fill-current' : ''}`} />
+            </Button>
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
+                isMobile ? 'active:scale-95' : ''
+              } ${
+                isInWatchlist(tvShow.id) ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : 'bg-cinema-charcoal/80'
+              }`}
+              onClick={handleWatchlistClick}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* TV Show Info Overlay */}
+          <div className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
+            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}>
+            <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
               {tvShow.title}
             </h3>
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-              <div className="flex items-center space-x-1">
-                <Calendar className="h-3 w-3" />
-                <span>{tvShow.year}</span>
-              </div>
-              <span className="truncate ml-2">{tvShow.genre}</span>
+            <div className="flex items-center justify-between text-muted-foreground text-xs">
+              <span>{tvShow.year}</span>
+              {tvShow.genre && <span className="truncate ml-2">{tvShow.genre}</span>}
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </Link>
   );
