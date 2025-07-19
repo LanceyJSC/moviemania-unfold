@@ -183,7 +183,7 @@ const MovieDetail = () => {
 
       {/* Synopsis Section - Positioned below the hero */}
       <div className="container mx-auto px-4 -mt-4 relative z-30">
-        <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-white/10 max-w-md">
+        <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-white/10">
           <p className="text-white leading-relaxed text-sm line-clamp-3">
             {movie.overview || "No synopsis available."}
           </p>
