@@ -77,7 +77,7 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="relative overflow-hidden h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground">
+      <div className="relative w-screen overflow-hidden h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground -mx-4 sm:-mx-6 md:-mx-8">
         {/* Hero Background with gradients */}
         <div 
           className="backdrop-image"
