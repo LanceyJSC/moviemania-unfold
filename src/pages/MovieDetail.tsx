@@ -161,39 +161,25 @@ const MovieDetail = () => {
             alt={title}
             className="w-32 h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
           />
-        </div>
-
-        {/* Movie Info positioned to the right of poster - Now z-30 to be above gradient */}
-        <div className="absolute bottom-6 left-40 right-4 z-30">
-          <div className="flex items-center space-x-3 mb-2">
-            <span className="text-cinema-gold font-semibold text-sm">★ {movie.vote_average.toFixed(1)}</span>
-            <span className="text-white/80 text-sm">{releaseYear}</span>
-            <span className="text-white/80 text-sm">{runtime}</span>
-          </div>
-
-          <h1 className="font-cinematic text-white mb-2 tracking-wide text-xl leading-tight">
-            {title}
-          </h1>
-
-          <p className="text-white/70 mb-3 text-sm">
-            {genres}
-          </p>
-
-          <div className="relative mb-4">
-            <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-              <p className="text-white leading-relaxed text-sm line-clamp-3">
-                {movie.overview || "No synopsis available."}
-              </p>
-              {movie.overview && movie.overview.length > 120 && (
-                <button
-                  onClick={() => setShowSynopsis(true)}
-                  className="mt-2 inline-flex items-center gap-1 text-cinema-gold hover:text-cinema-gold/80 transition-colors text-sm font-semibold"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                  Read More
-                </button>
-              )}
+          
+          {/* Movie Info positioned below poster */}
+          <div className="mt-4 w-32">
+            <div className="flex items-center justify-center mb-2">
+              <span className="text-cinema-gold font-semibold text-xs">★ {movie.vote_average.toFixed(1)}</span>
             </div>
+            
+            <div className="text-center space-y-1">
+              <div className="text-white/80 text-xs">{releaseYear}</div>
+              <div className="text-white/80 text-xs">{runtime}</div>
+            </div>
+
+            <h1 className="font-cinematic text-white mt-2 tracking-wide text-sm leading-tight text-center">
+              {title}
+            </h1>
+
+            <p className="text-white/70 mt-2 text-xs text-center">
+              {genres}
+            </p>
           </div>
         </div>
       </div>
