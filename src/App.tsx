@@ -11,6 +11,8 @@ import Search from "./pages/Search";
 import Movies from "./pages/Movies";
 import TVShows from "./pages/TVShows";
 import MovieDetail from "./pages/MovieDetail";
+import TVShowDetail from "./pages/TVShowDetail";
+import SeasonDetail from "./pages/SeasonDetail";
 import ActorDetail from "./pages/ActorDetail";
 import CategoryPage from "./pages/CategoryPage";
 import Watchlist from "./pages/Watchlist";
@@ -44,7 +46,8 @@ const App = () => {
               <Route path="/movies" element={<Movies />} />
               <Route path="/tv-shows" element={<TVShows />} />
               <Route path="/movie/:id" element={<MovieDetail />} />
-              <Route path="/tv/:id" element={<MovieDetail />} />
+              <Route path="/tv/:id" element={<TVShowDetail />} />
+              <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
               <Route path="/actor/:id" element={<ActorDetail />} />
               <Route path="/category/:category" element={<CategoryPage />} />
               <Route path="/watchlist" element={<Watchlist />} />

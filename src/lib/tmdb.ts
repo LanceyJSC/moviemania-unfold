@@ -25,6 +25,7 @@ export interface Movie {
     crew: { id: number; name: string; job: string; profile_path: string | null }[];
   };
   videos?: { results: { id: string; key: string; name: string; type: string; site: string }[] };
+  images?: { logos: { file_path: string }[] };
 }
 
 export interface TVShow {
@@ -57,7 +58,9 @@ export interface TVShow {
     poster_path: string | null;
     season_number: number;
     episode_count: number;
+    air_date?: string;
   }[];
+  images?: { logos: { file_path: string }[] };
 }
 
 export interface Person {
@@ -189,7 +192,7 @@ class TMDBService {
   }
 
   async getTVShowDetails(tvId: number, fresh: boolean = false): Promise<TVShow> {
-    return this.fetchFromTMDB(`/tv/${tvId}?append_to_response=credits,videos`, fresh);
+    return this.fetchFromTMDB(`/tv/${tvId}?append_to_response=credits,videos,images`, fresh);
   }
 
   // Combined search
@@ -375,6 +378,15 @@ class TMDBService {
       rating: tvShow.vote_average.toFixed(1),
       genre: tvShow.genres?.[0]?.name || undefined
     };
+  }
+
+  getImageUrl(path: string | null, size: 'w300' | 'w500' | 'w780' | 'original' = 'w500'): string {
+    if (!path) return '/placeholder.svg';
+    return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
+  }
+
+  async getSeasonDetails(tvId: number, seasonNumber: number, fresh: boolean = false) {
+    return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}`, fresh);
   }
 
 }
