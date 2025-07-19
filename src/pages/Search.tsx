@@ -114,10 +114,14 @@ const Search = () => {
     setSelectedFilters(filters);
     
     // Apply filters to search results
-    if (genreParam || searchTerm) {
+    if (genreParam || searchTerm || isSurpriseMode) {
       setIsSearching(true);
       try {
-        if (genreParam) {
+        if (isSurpriseMode) {
+          // Re-run surprise me with new filters
+          await handleSurpriseMe();
+          return; // Exit early since handleSurpriseMe handles the loading state
+        } else if (genreParam) {
           // Apply filters to genre search
           const results = await tmdbService.discoverMovies({
             genre: parseInt(genreParam),
@@ -127,7 +131,7 @@ const Search = () => {
             year: filters.yearRange?.[0] || 1900
           });
           setSearchResults(results.results);
-        } else if (searchTerm) {
+        } else if (searchTerm && !searchTerm.includes("Surprise")) {
           // For text search, apply sort but note: TMDB search API doesn't support all filters
           let results;
           if (activeTab === 'movies') {
@@ -205,19 +209,32 @@ const Search = () => {
   const handleSurpriseMe = async () => {
     console.log("Surprise Me clicked!");
     setIsSearching(true);
-    setIsSurpriseMode(true); // Enter surprise mode
+    setIsSurpriseMode(true);
     
     // Clear search term immediately to prevent useEffect interference
     setSearchTerm("");
     
     try {
-      // Get 5 movies and 5 TV shows
+      // Get truly random content from the entire database
+      // TMDB has thousands of pages, so we'll pick random pages
+      const randomMoviePage = Math.floor(Math.random() * 100) + 1; // Random page 1-100
+      const randomTVPage = Math.floor(Math.random() * 100) + 1;
+      
+      console.log("Fetching random pages - Movies:", randomMoviePage, "TV:", randomTVPage);
+      
+      // Use discover endpoints for more random content
       const [moviesResult, tvResult] = await Promise.all([
-        tmdbService.getTrendingMovies(),
-        tmdbService.getTrendingTVShows()
+        tmdbService.discoverMovies({ 
+          page: randomMoviePage,
+          sortBy: 'popularity.desc'
+        }),
+        // For TV shows, use popular endpoint with random page
+        tmdbService.getPopularTVShows(randomTVPage)
       ]);
       
-      // Get 5 random movies and 5 random TV shows
+      console.log("Raw results - Movies:", moviesResult.results.length, "TV:", tvResult.results.length);
+      
+      // Get 5 random movies and 5 random TV shows from the results
       const shuffledMovies = [...moviesResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
       const shuffledTV = [...tvResult.results].sort(() => Math.random() - 0.5).slice(0, 5);
       
@@ -226,11 +243,46 @@ const Search = () => {
       const tvWithType = shuffledTV.map(tv => ({ ...tv, media_type: 'tv' }));
       
       // Combine and shuffle the final results
-      const combinedResults = [...moviesWithType, ...tvWithType].sort(() => Math.random() - 0.5);
+      let combinedResults = [...moviesWithType, ...tvWithType].sort(() => Math.random() - 0.5);
       
-      console.log("Setting surprise results:", combinedResults);
+      // Apply current filters to surprise results
+      if (selectedFilters && Object.keys(selectedFilters).length > 0) {
+        console.log("Applying filters to surprise results:", selectedFilters);
+        
+        // Apply rating filter
+        if ((selectedFilters as any).ratingRange && (selectedFilters as any).ratingRange[0] > 0) {
+          combinedResults = combinedResults.filter((item: any) => 
+            item.vote_average >= (selectedFilters as any).ratingRange[0]
+          );
+        }
+        
+        // Apply year filter
+        if ((selectedFilters as any).yearRange && (selectedFilters as any).yearRange[0] > 1900) {
+          combinedResults = combinedResults.filter((item: any) => {
+            const year = item.release_date ? new Date(item.release_date).getFullYear() : 
+                         item.first_air_date ? new Date(item.first_air_date).getFullYear() : 0;
+            return year >= (selectedFilters as any).yearRange[0] && year <= (selectedFilters as any).yearRange[1];
+          });
+        }
+        
+        // Apply sort
+        if ((selectedFilters as any).sortBy) {
+          if ((selectedFilters as any).sortBy === 'vote_average.desc') {
+            combinedResults.sort((a: any, b: any) => b.vote_average - a.vote_average);
+          } else if ((selectedFilters as any).sortBy === 'release_date.desc') {
+            combinedResults.sort((a: any, b: any) => {
+              const dateA = a.release_date || a.first_air_date || '1900-01-01';
+              const dateB = b.release_date || b.first_air_date || '1900-01-01';
+              return new Date(dateB).getTime() - new Date(dateA).getTime();
+            });
+          }
+          // popularity.desc is already the default sort from API
+        }
+      }
+      
+      console.log("Final surprise results after filters:", combinedResults);
       setSearchResults(combinedResults);
-      setSearchTerm("Surprise Mix! (5 Movies + 5 TV Shows)");
+      setSearchTerm("Random Surprise Mix! (5 Movies + 5 TV Shows)");
       
       // Clear genre filter when using surprise me
       if (genreParam) {
