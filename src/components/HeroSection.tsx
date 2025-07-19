@@ -86,8 +86,8 @@ export const HeroSection = () => {
           }}
         />
         
-        {/* Consistent hero gradients */}
-        <div className="hero-gradient-overlay" />
+        {/* Backdrop gradients for proper blending */}
+        <div className="backdrop-gradient-overlay" />
 
         {/* Bottom Gradient Blend - Creates smooth transition to page background */}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
