@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { RefreshCw } from "lucide-react";
 import { tmdbService } from "@/lib/tmdb";
 import { Movie } from "@/lib/tmdb";
 import { MovieCard } from "@/components/MovieCard";
-import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MovieGridProps {
@@ -14,7 +12,6 @@ interface MovieGridProps {
 export const MovieGrid = ({ title, category }: MovieGridProps) => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const isMobile = useIsMobile();
@@ -57,14 +54,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
       console.error(`Failed to load ${category} movies:`, error);
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    setPage(1);
-    await loadMovies(1, true);
   };
 
   const loadMore = () => {
@@ -78,6 +68,16 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   useEffect(() => {
     setPage(1);
     loadMovies(1);
+  }, [category]);
+
+  // Periodic refresh every hour to stay updated with TMDB
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      setPage(1);
+      loadMovies(1, true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, [category]);
 
   useEffect(() => {
@@ -103,16 +103,6 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
         }`}>
           {title}
         </h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="flex items-center gap-2 text-cinema-gold hover:text-cinema-gold/80 hover:bg-cinema-gold/10"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {!isMobile && 'Refresh'}
-        </Button>
       </div>
 
       {/* Movies Grid */}
