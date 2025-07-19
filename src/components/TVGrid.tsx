@@ -111,7 +111,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
           // Loading skeleton
           Array.from({ length: 15 }).map((_, index) => (
             <div key={index} className="animate-fade-in">
-              <div className="bg-muted animate-pulse rounded-lg aspect-[2/3] w-full"></div>
+              <div className="poster-card bg-muted animate-pulse"></div>
             </div>
           ))
         ) : (
