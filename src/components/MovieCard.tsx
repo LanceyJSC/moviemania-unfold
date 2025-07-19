@@ -48,10 +48,10 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
 
   return (
     <Link to={`/movie/${movie.id}`}>
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer ${
+      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer aspect-[2/3] ${
         isMobile ? 'active:scale-95' : ''
       }`}>
-        <div className={`${sizeClasses[size]} relative`}>
+        <div className="w-full h-full relative">
           {/* Movie Poster */}
           {!imageError ? (
             <img 
@@ -63,10 +63,10 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-cinema-charcoal to-cinema-black flex items-center justify-center border border-border">
-              <div className="text-center p-2">
-                <div className="text-2xl mb-1">🎬</div>
-                <p className="text-xs text-foreground font-medium line-clamp-3 leading-tight">{movie.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">{movie.year}</p>
+              <div className="text-center p-3">
+                <div className="text-3xl mb-2">🎬</div>
+                <p className="text-xs text-foreground font-medium line-clamp-3 leading-tight px-1">{movie.title}</p>
+                <p className="text-xs text-muted-foreground mt-2">{movie.year}</p>
               </div>
             </div>
           )}
@@ -79,7 +79,7 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
           {/* Rating Badge */}
           <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
             <Star className="h-3 w-3 text-cinema-gold fill-current" />
-            <span className={`text-foreground font-semibold ${isMobile ? 'text-xs' : 'text-xs'}`}>{movie.rating}</span>
+            <span className="text-foreground font-semibold text-xs">{movie.rating}</span>
           </div>
 
           {/* Action Buttons */}
@@ -89,8 +89,8 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
             <Button 
               size="sm" 
               variant="secondary" 
-              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red ${
-                isMobile ? 'h-8 w-8 active:scale-95' : 'h-8 w-8'
+              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
+                isMobile ? 'active:scale-95' : ''
               } ${
                 isLiked(movie.id) ? 'bg-cinema-red border-cinema-red text-white' : 'bg-cinema-charcoal/80'
               }`}
@@ -101,8 +101,8 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
             <Button 
               size="sm" 
               variant="secondary" 
-              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red ${
-                isMobile ? 'h-8 w-8 active:scale-95' : 'h-8 w-8'
+              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
+                isMobile ? 'active:scale-95' : ''
               } ${
                 isInWatchlist(movie.id) ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : 'bg-cinema-charcoal/80'
               }`}
@@ -113,17 +113,13 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
           </div>
 
           {/* Movie Info Overlay */}
-          <div className={`absolute bottom-0 left-0 right-0 p-4 transition-opacity duration-300 ${
+          <div className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
             isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}>
-            <h3 className={`text-foreground font-semibold mb-1 line-clamp-2 ${
-              isMobile ? 'text-xs' : 'text-sm'
-            }`}>
+            <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
               {movie.title}
             </h3>
-            <div className={`flex items-center justify-between text-muted-foreground ${
-              isMobile ? 'text-xs' : 'text-xs'
-            }`}>
+            <div className="flex items-center justify-between text-muted-foreground text-xs">
               <span>{movie.year}</span>
               {movie.genre && <span className="truncate ml-2">{movie.genre}</span>}
             </div>

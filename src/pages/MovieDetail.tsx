@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Play, Heart, Plus, Star, Share, Loader2, Brain, Tv } from "lucide-react";
@@ -6,6 +7,7 @@ import { MovieCarousel } from "@/components/MovieCarousel";
 import { MovieTrivia } from "@/components/MovieTrivia";
 import { StreamingAvailability } from "@/components/StreamingAvailability";
 import { ActorCard } from "@/components/ActorCard";
+import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { TrailerModal } from "@/components/TrailerModal";
 import { tmdbService, Movie } from "@/lib/tmdb";
@@ -86,20 +88,26 @@ const MovieDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
+      <div className="min-h-screen bg-background">
+        <MobileHeader title="Loading..." />
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
+        </div>
       </div>
     );
   }
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Movie not found</h1>
-          <Link to="/">
-            <Button>Back to Home</Button>
-          </Link>
+      <div className="min-h-screen bg-background">
+        <MobileHeader title="Movie Not Found" />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Movie not found</h1>
+            <Link to="/">
+              <Button>Back to Home</Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -122,9 +130,10 @@ const MovieDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Hero Section - Fixed height for mobile */}
-      <div className={`relative overflow-hidden ${isMobile ? 'h-[75vh]' : 'h-screen'}`}>
-        
+      <MobileHeader title={movie.title} />
+      
+      {/* Hero Section - Optimized for mobile */}
+      <div className="relative overflow-hidden h-[60vh]">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
@@ -134,159 +143,144 @@ const MovieDetail = () => {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 h-full flex items-center">
-          <div className={`container mx-auto ${isMobile ? 'px-4 pt-8' : 'px-6'}`}>
-            <div className={`flex items-center space-y-6 lg:space-y-0 lg:space-x-12 ${
-              isMobile ? 'flex-col text-center lg:flex-row lg:text-left lg:items-end' : 'flex-col lg:flex-row lg:items-end'
-            }`}>
-              {/* Poster - Adjusted size for mobile */}
+        <div className="relative z-10 h-full flex items-end">
+          <div className="container mx-auto px-4 pb-8">
+            <div className="flex items-end space-x-4">
+              {/* Poster - Smaller for mobile */}
               <div className="flex-shrink-0">
                 <img 
                   src={posterUrl} 
                   alt={movie.title}
-                  className={`rounded-lg shadow-cinematic ${
-                    isMobile ? 'w-40 h-60 mx-auto lg:mx-0' : 'w-80 h-auto'
-                  } object-cover`}
+                  className="w-24 h-36 rounded-lg shadow-cinematic object-cover"
                 />
               </div>
 
               {/* Movie Info */}
-              <div className="flex-1">
-                <div className={`flex items-center space-x-4 mb-4 ${
-                  isMobile ? 'justify-center lg:justify-start' : 'justify-center lg:justify-start'
-                }`}>
-                  <span className={`text-cinema-gold font-semibold ${isMobile ? 'text-lg' : 'text-xl'}`}>★ {movie.vote_average.toFixed(1)}</span>
-                  <span className="text-muted-foreground">{releaseYear}</span>
-                  <span className="text-muted-foreground">{runtime}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-3 mb-2">
+                  <span className="text-cinema-gold font-semibold text-sm">★ {movie.vote_average.toFixed(1)}</span>
+                  <span className="text-muted-foreground text-sm">{releaseYear}</span>
+                  <span className="text-muted-foreground text-sm">{runtime}</span>
                 </div>
 
-                <h1 className={`font-cinematic text-foreground mb-4 tracking-wide ${
-                  isMobile ? 'text-2xl lg:text-5xl' : 'text-5xl md:text-7xl'
-                }`}>
+                <h1 className="font-cinematic text-foreground mb-2 tracking-wide text-xl leading-tight">
                   {movie.title}
                 </h1>
 
-                <p className={`text-muted-foreground mb-4 max-w-2xl ${
-                  isMobile ? 'text-base' : 'text-lg'
-                }`}>
+                <p className="text-muted-foreground mb-3 text-sm">
                   {genres}
                 </p>
 
-                <p className={`text-muted-foreground leading-relaxed max-w-3xl mb-6 ${
-                  isMobile ? 'text-sm line-clamp-3' : 'text-lg'
-                }`}>
+                <p className="text-muted-foreground leading-relaxed text-xs line-clamp-2">
                   {movie.overview}
                 </p>
-
-                {/* Director and Producer */}
-                <div className="mb-6">
-                  <div className="flex flex-wrap gap-6">
-                    {director && (
-                      <div>
-                        <h4 className="font-semibold text-foreground text-sm">Director</h4>
-                        <p className="text-muted-foreground text-sm">{director.name}</p>
-                      </div>
-                    )}
-                    {producer && (
-                      <div>
-                        <h4 className="font-semibold text-foreground text-sm">Producer</h4>
-                        <p className="text-muted-foreground text-sm">{producer.name}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className={`flex gap-4 mb-6 ${
-                  isMobile ? 'flex-col sm:flex-row justify-center lg:justify-start' : 'flex-wrap justify-center lg:justify-start'
-                }`}>
-                  {trailerKey ? (
-                    <Button 
-                      className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold touch-target ${
-                        isMobile ? 'w-full sm:w-auto px-6 py-3 text-base min-h-[44px]' : 'px-8 py-6 text-lg'
-                      }`}
-                      onClick={handleWatchTrailer}
-                    >
-                      <Play className="mr-2 h-5 w-5" />
-                      Watch Trailer
-                    </Button>
-                  ) : (
-                    <Button className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold touch-target ${
-                      isMobile ? 'w-full sm:w-auto px-6 py-3 text-base min-h-[44px]' : 'px-8 py-6 text-lg'
-                    }`} disabled>
-                      <Play className="mr-2 h-5 w-5" />
-                      No Trailer Available
-                    </Button>
-                  )}
-                  
-                  <div className={`flex gap-2 ${isMobile ? 'justify-center' : ''}`}>
-                    <Button 
-                      variant="outline" 
-                      className={`border-border hover:bg-card touch-target ${
-                        isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
-                      } ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
-                      onClick={() => toggleLike(movieId, movie.title, posterUrl)}
-                    >
-                      <Heart className={`h-5 w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      className={`border-border hover:bg-card touch-target ${
-                        isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
-                      } ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
-                      onClick={() => toggleWatchlist(movieId, movie.title, posterUrl)}
-                    >
-                      <Plus className="h-5 w-5" />
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      className={`border-border hover:bg-card touch-target ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`} 
-                      onClick={handleShare}
-                    >
-                      <Share className="h-5 w-5" />
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      className={`border-border hover:bg-card touch-target ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
-                      onClick={() => setShowTrivia(true)}
-                    >
-                      <Brain className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Rating */}
-                <div className={`flex items-center space-x-2 ${
-                  isMobile ? 'justify-center lg:justify-start' : 'justify-center lg:justify-start'
-                }`}>
-                  <span className="text-foreground">Your Rating:</span>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setRating(movieId, star, movie.title)}
-                      className="touch-target p-2"
-                    >
-                      <Star 
-                        className={`h-6 w-6 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}
-                      />
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Action Section */}
+      <div className="container mx-auto px-4 py-6">
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-6">
+          {trailerKey ? (
+            <Button 
+              className="flex-1 bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]"
+              onClick={handleWatchTrailer}
+            >
+              <Play className="mr-2 h-4 w-4" />
+              Watch Trailer
+            </Button>
+          ) : (
+            <Button className="flex-1 bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]" disabled>
+              <Play className="mr-2 h-4 w-4" />
+              No Trailer
+            </Button>
+          )}
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
+                isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
+              }`}
+              onClick={() => toggleLike(movieId, movie.title, posterUrl)}
+            >
+              <Heart className={`h-4 w-4 ${isMovieLiked ? 'fill-current' : ''}`} />
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
+                isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
+              }`}
+              onClick={() => toggleWatchlist(movieId, movie.title, posterUrl)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
+              onClick={handleShare}
+            >
+              <Share className="h-4 w-4" />
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]"
+              onClick={() => setShowTrivia(true)}
+            >
+              <Brain className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Rating */}
+        <div className="flex items-center justify-center space-x-2 mb-6">
+          <span className="text-foreground text-sm">Your Rating:</span>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => setRating(movieId, star, movie.title)}
+              className="p-2 touch-target"
+            >
+              <Star 
+                className={`h-5 w-5 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}
+              />
+            </button>
+          ))}
+        </div>
+
+        {/* Director and Producer */}
+        {(director || producer) && (
+          <div className="mb-6 text-center">
+            <div className="flex flex-wrap gap-6 justify-center">
+              {director && (
+                <div>
+                  <h4 className="font-semibold text-foreground text-sm">Director</h4>
+                  <p className="text-muted-foreground text-sm">{director.name}</p>
+                </div>
+              )}
+              {producer && (
+                <div>
+                  <h4 className="font-semibold text-foreground text-sm">Producer</h4>
+                  <p className="text-muted-foreground text-sm">{producer.name}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Additional Content */}
-      <div className={`container mx-auto py-16 space-y-16 ${isMobile ? 'px-4' : 'px-6'}`}>
+      <div className="container mx-auto px-4 space-y-8">
         {/* Key Crew Section */}
         {keyCrewMembers.length > 0 && (
           <div>
-            <h2 className="text-3xl font-cinematic text-foreground mb-8 tracking-wide">
+            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
               KEY CREW
             </h2>
             <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
@@ -300,7 +294,7 @@ const MovieDetail = () => {
         {/* Enhanced Cast Section */}
         {cast.length > 0 && (
           <div>
-            <h2 className="text-3xl font-cinematic text-foreground mb-8 tracking-wide">
+            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
               CAST
             </h2>
             <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">

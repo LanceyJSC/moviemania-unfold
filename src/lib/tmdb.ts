@@ -76,7 +76,7 @@ class TMDBService {
     return this.fetchFromTMDB(`/search/movie?query=${encodeURIComponent(query)}&page=${page}`);
   }
 
-  // Get trending movies
+  // Get trending movies - Enhanced with time window
   async getTrendingMovies(timeWindow: 'day' | 'week' = 'week'): Promise<TMDBResponse<Movie>> {
     return this.fetchFromTMDB(`/trending/movie/${timeWindow}`);
   }
@@ -129,7 +129,7 @@ class TMDBService {
     return this.fetchFromTMDB(`/discover/movie?${queryString}`);
   }
 
-  // NEW: Get movies released this month
+  // Enhanced: Get movies released this month
   async getThisMonthMovies(): Promise<TMDBResponse<Movie>> {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -144,7 +144,7 @@ class TMDBService {
     });
   }
 
-  // NEW: Get movies released this week
+  // Enhanced: Get movies released this week
   async getThisWeekMovies(): Promise<TMDBResponse<Movie>> {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

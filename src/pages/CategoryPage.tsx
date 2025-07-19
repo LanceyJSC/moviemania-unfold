@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
+import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,10 @@ const CategoryPage = () => {
   const { category } = useParams<{ category: string }>();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [seenMovieIds] = useState(new Set<number>());
 
   const getCategoryTitle = (cat: string) => {
     switch (cat) {
@@ -30,71 +33,104 @@ const CategoryPage = () => {
   };
 
   useEffect(() => {
-    const loadMovies = async () => {
-      if (!category) return;
-      
+    // Reset state when category changes
+    setMovies([]);
+    setPage(1);
+    setHasMore(true);
+    seenMovieIds.clear();
+    loadMovies(1, true);
+  }, [category]);
+
+  const loadMovies = async (pageNumber: number, isInitial: boolean = false) => {
+    if (!category) return;
+    
+    if (isInitial) {
       setIsLoading(true);
-      try {
-        let response;
-        switch (category) {
-          case "trending":
-            response = await tmdbService.getTrendingMovies();
-            break;
-          case "popular":
-            response = await tmdbService.getPopularMovies(page);
-            break;
-          case "top_rated":
-            response = await tmdbService.getTopRatedMovies(page);
-            break;
-          case "upcoming":
-            response = await tmdbService.getUpcomingMovies(page);
-            break;
-          default:
-            response = await tmdbService.getPopularMovies(page);
-        }
-        
-        if (page === 1) {
-          setMovies(response.results);
-        } else {
-          setMovies(prev => [...prev, ...response.results]);
-        }
-        
-        setHasMore(page < response.total_pages && page < 10); // Limit to 10 pages
-      } catch (error) {
-        console.error(`Failed to load ${category} movies:`, error);
-      } finally {
-        setIsLoading(false);
+    } else {
+      setIsLoadingMore(true);
+    }
+
+    try {
+      let response;
+      switch (category) {
+        case "trending":
+          // Fixed: Use page parameter for trending movies
+          response = await tmdbService.getTrendingMovies();
+          // For trending, we simulate pagination by slicing results
+          const startIndex = (pageNumber - 1) * 20;
+          const endIndex = startIndex + 20;
+          response.results = response.results.slice(startIndex, endIndex);
+          break;
+        case "popular":
+          response = await tmdbService.getPopularMovies(pageNumber);
+          break;
+        case "top_rated":
+          response = await tmdbService.getTopRatedMovies(pageNumber);
+          break;
+        case "upcoming":
+          response = await tmdbService.getUpcomingMovies(pageNumber);
+          break;
+        default:
+          response = await tmdbService.getPopularMovies(pageNumber);
       }
-    };
-
-    loadMovies();
-  }, [category, page]);
-
-  const loadMore = () => {
-    if (!isLoading && hasMore) {
-      setPage(prev => prev + 1);
+      
+      // Filter out duplicates
+      const newMovies = response.results.filter(movie => {
+        if (seenMovieIds.has(movie.id)) {
+          return false;
+        }
+        seenMovieIds.add(movie.id);
+        return true;
+      });
+      
+      if (isInitial) {
+        setMovies(newMovies);
+      } else {
+        setMovies(prev => [...prev, ...newMovies]);
+      }
+      
+      // Check if we have more pages (limit to 10 pages max)
+      setHasMore(
+        newMovies.length > 0 && 
+        pageNumber < Math.min(response.total_pages || 1, 10) &&
+        (category !== "trending" || pageNumber < 3) // Trending has limited results
+      );
+    } catch (error) {
+      console.error(`Failed to load ${category} movies:`, error);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
-  if (isLoading && page === 1) {
+  const loadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadMovies(nextPage, false);
+    }
+  };
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
+      <div className="min-h-screen bg-background">
+        <MobileHeader title={getCategoryTitle(category || '')} />
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="font-cinematic text-3xl text-foreground mb-8 tracking-wide text-center">
-          {getCategoryTitle(category || '')}
-        </h1>
-        
+      <MobileHeader title={getCategoryTitle(category || '')} />
+      
+      <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
-          {movies.map((movie) => (
+          {movies.map((movie, index) => (
             <MovieCard 
-              key={movie.id} 
+              key={`${movie.id}-${index}`}
               movie={tmdbService.formatMovieForCard(movie)} 
               size="small" 
             />
@@ -105,10 +141,10 @@ const CategoryPage = () => {
           <div className="text-center">
             <Button
               onClick={loadMore}
-              disabled={isLoading}
+              disabled={isLoadingMore}
               className="bg-cinema-red hover:bg-cinema-red/80 text-white px-8 py-3"
             >
-              {isLoading ? (
+              {isLoadingMore ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Loading...

@@ -11,13 +11,14 @@ export const FreshPicks = () => {
   useEffect(() => {
     const loadFreshPicks = async () => {
       try {
-        const response = await tmdbService.getThisWeekMovies();
+        // Use trending this week as primary source for more reliable data
+        const response = await tmdbService.getTrendingMovies('week');
         // Filter out movies without posters for better display
         const moviesWithPosters = response.results.filter(movie => movie.poster_path);
         setMovies(moviesWithPosters.slice(0, 6));
       } catch (error) {
         console.error('Failed to load fresh picks:', error);
-        // Fallback to popular movies if week movies fail
+        // Fallback to popular movies if trending fails
         try {
           const fallbackResponse = await tmdbService.getPopularMovies();
           const moviesWithPosters = fallbackResponse.results.filter(movie => movie.poster_path);
@@ -60,15 +61,15 @@ export const FreshPicks = () => {
             <Clock className="h-8 w-8 text-cinema-red" />
           </div>
           <p className="text-muted-foreground mb-4">
-            This week's hottest releases - Refreshed weekly
+            Trending this week - Updated weekly
           </p>
           <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
         </div>
         
         {movies.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {movies.map((movie) => (
-              <MovieCard key={movie.id} movie={tmdbService.formatMovieForCard(movie)} size="small" />
+            {movies.map((movie, index) => (
+              <MovieCard key={`fresh-${movie.id}-${index}`} movie={tmdbService.formatMovieForCard(movie)} size="small" />
             ))}
           </div>
         ) : (

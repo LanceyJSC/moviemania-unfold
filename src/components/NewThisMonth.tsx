@@ -11,15 +11,30 @@ export const NewThisMonth = () => {
   useEffect(() => {
     const loadNewMovies = async () => {
       try {
-        const response = await tmdbService.getThisMonthMovies();
-        // Filter out movies without posters for better display
-        const moviesWithPosters = response.results.filter(movie => movie.poster_path);
-        setMovies(moviesWithPosters.slice(0, 8));
+        // Use popular movies with recent release date filtering for more reliable data
+        const response = await tmdbService.getPopularMovies();
+        // Filter for movies released in the last 60 days and have posters
+        const now = new Date();
+        const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+        
+        const recentMovies = response.results.filter(movie => {
+          if (!movie.poster_path || !movie.release_date) return false;
+          const releaseDate = new Date(movie.release_date);
+          return releaseDate >= twoMonthsAgo && releaseDate <= now;
+        });
+
+        if (recentMovies.length >= 6) {
+          setMovies(recentMovies.slice(0, 8));
+        } else {
+          // Fallback to popular movies with posters if not enough recent releases
+          const moviesWithPosters = response.results.filter(movie => movie.poster_path);
+          setMovies(moviesWithPosters.slice(0, 8));
+        }
       } catch (error) {
         console.error('Failed to load new movies:', error);
-        // Fallback to recent popular movies
+        // Final fallback to trending movies
         try {
-          const fallbackResponse = await tmdbService.getPopularMovies();
+          const fallbackResponse = await tmdbService.getTrendingMovies();
           const moviesWithPosters = fallbackResponse.results.filter(movie => movie.poster_path);
           setMovies(moviesWithPosters.slice(0, 8));
         } catch (fallbackError) {
@@ -59,15 +74,15 @@ export const NewThisMonth = () => {
           <TrendingUp className="h-8 w-8 text-cinema-gold" />
         </div>
         <p className="text-muted-foreground mb-4">
-          Fresh releases from {currentMonth} - Updated automatically
+          Recent releases from {currentMonth} - Updated regularly
         </p>
         <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
       </div>
       
       {movies.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={tmdbService.formatMovieForCard(movie)} size="small" />
+          {movies.map((movie, index) => (
+            <MovieCard key={`new-${movie.id}-${index}`} movie={tmdbService.formatMovieForCard(movie)} size="small" />
           ))}
         </div>
       ) : (
