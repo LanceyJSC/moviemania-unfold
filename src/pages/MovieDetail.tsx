@@ -179,19 +179,21 @@ const MovieDetail = () => {
             {genres}
           </p>
 
-          <div className="relative">
-            <p className="text-white leading-relaxed text-xs line-clamp-3 bg-cinema-black/60 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-              {movie.overview}
-            </p>
-            {movie.overview && movie.overview.length > 150 && (
-              <button
-                onClick={() => setShowSynopsis(true)}
-                className="absolute bottom-2 right-2 text-cinema-gold hover:text-cinema-gold/80 transition-colors text-xs font-medium flex items-center gap-1"
-              >
-                <MoreHorizontal className="h-3 w-3" />
-                More
-              </button>
-            )}
+          <div className="relative mb-4">
+            <div className="bg-cinema-black/80 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+              <p className="text-white font-medium leading-relaxed text-sm line-clamp-3">
+                {movie.overview || "No synopsis available."}
+              </p>
+              {movie.overview && movie.overview.length > 120 && (
+                <button
+                  onClick={() => setShowSynopsis(true)}
+                  className="mt-2 inline-flex items-center gap-1 text-cinema-gold hover:text-cinema-gold/80 transition-colors text-sm font-semibold"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  Read More
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
