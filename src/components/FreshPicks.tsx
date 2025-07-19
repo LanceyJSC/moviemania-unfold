@@ -56,7 +56,7 @@ export const FreshPicks = () => {
         {movies.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {movies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} size="small" />
+              <MovieCard key={movie.id} movie={tmdbService.formatMovieForCard(movie)} size="small" />
             ))}
           </div>
         ) : (

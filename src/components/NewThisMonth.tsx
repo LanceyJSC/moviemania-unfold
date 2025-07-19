@@ -57,7 +57,7 @@ export const NewThisMonth = () => {
       {movies.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} size="small" />
+            <MovieCard key={movie.id} movie={tmdbService.formatMovieForCard(movie)} size="small" />
           ))}
         </div>
       ) : (
