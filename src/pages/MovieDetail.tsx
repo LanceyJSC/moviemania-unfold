@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { MovieTrivia } from "@/components/MovieTrivia";
 import { StreamingAvailability } from "@/components/StreamingAvailability";
+import { ActorCard } from "@/components/ActorCard";
 import { Navigation } from "@/components/Navigation";
 import { TrailerModal } from "@/components/TrailerModal";
 import { tmdbService, Movie } from "@/lib/tmdb";
@@ -108,7 +109,11 @@ const MovieDetail = () => {
   const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA';
   const runtime = movie.runtime ? `${movie.runtime} min` : 'Unknown';
   const genres = movie.genres?.map(g => g.name).join(', ') || 'Unknown';
-  const cast = movie.cast?.slice(0, 5).map(c => c.name).join(', ') || 'Cast information unavailable';
+  
+  // Enhanced cast and crew data
+  const cast = movie.cast?.slice(0, 8) || [];
+  const director = movie.crew?.find(person => person.job === 'Director');
+  const producer = movie.crew?.find(person => person.job === 'Producer');
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -168,10 +173,22 @@ const MovieDetail = () => {
                   {movie.overview}
                 </p>
 
-                {/* Cast */}
-                <div className="mb-8">
-                  <h3 className={`font-semibold text-foreground mb-2 ${isMobile ? 'text-lg' : 'text-xl'}`}>Cast</h3>
-                  <p className={`text-muted-foreground ${isMobile ? 'text-sm line-clamp-2' : ''}`}>{cast}</p>
+                {/* Director and Producer */}
+                <div className="mb-6">
+                  <div className="flex flex-wrap gap-6">
+                    {director && (
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm">Director</h4>
+                        <p className="text-muted-foreground text-sm">{director.name}</p>
+                      </div>
+                    )}
+                    {producer && (
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm">Producer</h4>
+                        <p className="text-muted-foreground text-sm">{producer.name}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -261,6 +278,20 @@ const MovieDetail = () => {
 
       {/* Additional Content */}
       <div className={`container mx-auto py-16 space-y-16 ${isMobile ? 'px-4' : 'px-6'}`}>
+        {/* Enhanced Cast Section */}
+        {cast.length > 0 && (
+          <div>
+            <h2 className="text-3xl font-cinematic text-foreground mb-8 tracking-wide">
+              CAST
+            </h2>
+            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
+              {cast.map((actor) => (
+                <ActorCard key={actor.id} actor={actor} />
+              ))}
+            </div>
+          </div>
+        )}
+        
         {/* Streaming Availability */}
         <StreamingAvailability movieId={movieId} movieTitle={movie.title} />
         

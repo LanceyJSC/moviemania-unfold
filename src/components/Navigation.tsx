@@ -34,7 +34,7 @@ export const Navigation = () => {
                 className={`flex flex-col items-center space-y-1 h-auto py-3 px-2 w-full ${
                   isActive 
                     ? 'text-cinema-red bg-cinema-red/20' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    : 'text-muted-foreground'
                 }`}
               >
                 <Icon className="h-6 w-6" />

@@ -1,6 +1,8 @@
 
 import { HeroSection } from "@/components/HeroSection";
 import { SwipeableMovieCarousel } from "@/components/SwipeableMovieCarousel";
+import { MovieStats } from "@/components/MovieStats";
+import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
 
 const Index = () => {
@@ -9,8 +11,15 @@ const Index = () => {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Content Sections - Improved mobile spacing */}
+      {/* Content Sections - Enhanced with new components */}
       <div className="container mx-auto px-4 py-8 space-y-12 pb-32">
+        {/* Quick Stats */}
+        <MovieStats />
+        
+        {/* Genre Navigation */}
+        <QuickGenres />
+        
+        {/* Movie Carousels */}
         <SwipeableMovieCarousel title="TRENDING NOW" category="trending" cardSize="medium" />
         <SwipeableMovieCarousel title="TOP RATED MOVIES" category="top_rated" cardSize="medium" />
         <SwipeableMovieCarousel title="POPULAR MOVIES" category="popular" cardSize="medium" />

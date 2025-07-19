@@ -25,6 +25,26 @@ export interface Movie {
   videos?: { results: { id: string; key: string; name: string; type: string; site: string }[] };
 }
 
+export interface Person {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  biography: string;
+  birthday: string | null;
+  place_of_birth: string | null;
+  known_for_department: string;
+  movie_credits?: {
+    cast: Array<{
+      id: number;
+      title: string;
+      character: string;
+      poster_path: string | null;
+      release_date: string;
+      vote_average: number;
+    }>;
+  };
+}
+
 export interface TMDBResponse<T> {
   page: number;
   results: T[];
@@ -101,6 +121,11 @@ class TMDBService {
     return this.fetchFromTMDB(`/discover/movie?${queryString}`);
   }
 
+  // NEW: Get person details
+  async getPersonDetails(personId: number): Promise<Person> {
+    return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits`);
+  }
+
   // Image URL helpers
   getPosterUrl(path: string | null, size: 'w300' | 'w500' | 'w780' | 'original' = 'w500'): string {
     if (!path) return '/placeholder.svg';
@@ -108,6 +133,12 @@ class TMDBService {
   }
 
   getBackdropUrl(path: string | null, size: 'w780' | 'w1280' | 'original' = 'w1280'): string {
+    if (!path) return '/placeholder.svg';
+    return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
+  }
+
+  // NEW: Get profile image URL
+  getProfileUrl(path: string | null, size: 'w185' | 'w632' | 'original' = 'w185'): string {
     if (!path) return '/placeholder.svg';
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
   }

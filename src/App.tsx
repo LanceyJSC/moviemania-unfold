@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import MovieDetail from "./pages/MovieDetail";
+import ActorDetail from "./pages/ActorDetail";
 import Watchlist from "./pages/Watchlist";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
@@ -36,6 +37,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/search" element={<Search />} />
               <Route path="/movie/:id" element={<MovieDetail />} />
+              <Route path="/actor/:id" element={<ActorDetail />} />
               <Route path="/watchlist" element={<Watchlist />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/auth" element={<Auth />} />

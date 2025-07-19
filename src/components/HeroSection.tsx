@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Play, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ export const HeroSection = () => {
   const navigate = useNavigate();
   const [currentMovie, setCurrentMovie] = useState(0);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [isCarouselPaused, setIsCarouselPaused] = useState(false);
   const [featuredMovies, setFeaturedMovies] = useState([
     {
       id: 1,
@@ -67,18 +67,26 @@ export const HeroSection = () => {
   }, []);
 
   useEffect(() => {
+    if (isCarouselPaused) return;
+    
     const timer = setInterval(() => {
       setCurrentMovie((prev) => (prev + 1) % featuredMovies.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [featuredMovies.length]);
+  }, [featuredMovies.length, isCarouselPaused]);
 
   const movie = featuredMovies[currentMovie];
 
   const handleWatchTrailer = () => {
     if (movie.trailerKey) {
+      setIsCarouselPaused(true);
       setShowTrailer(true);
     }
+  };
+
+  const handleCloseTrailer = () => {
+    setShowTrailer(false);
+    setIsCarouselPaused(false);
   };
 
   const handleLearnMore = () => {
@@ -197,7 +205,7 @@ export const HeroSection = () => {
       {/* Trailer Modal */}
       <TrailerModal
         isOpen={showTrailer}
-        onClose={() => setShowTrailer(false)}
+        onClose={handleCloseTrailer}
         trailerKey={movie.trailerKey || ''}
         movieTitle={movie.title}
       />
