@@ -89,12 +89,6 @@ export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
             <span className="text-foreground font-semibold text-xs">{tvShow.rating}</span>
           </div>
 
-          {/* Show Type Badge */}
-          <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-            <Badge variant="secondary" className="text-xs bg-cinema-red/90 text-white">
-              TV Show
-            </Badge>
-          </div>
 
           {/* Action Buttons */}
           <div className={`absolute top-2 right-2 transition-opacity duration-300 space-y-2 ${
@@ -135,7 +129,7 @@ export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
             </h3>
             <div className="flex items-center justify-between text-muted-foreground text-xs">
               <span>{tvShow.year}</span>
-              {tvShow.genre && <span className="truncate ml-2">{tvShow.genre}</span>}
+              <span className="truncate ml-2">TV Show</span>
             </div>
           </div>
         </div>

@@ -127,7 +127,7 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
             </h3>
             <div className="flex items-center justify-between text-muted-foreground text-xs">
               <span>{movie.year}</span>
-              {movie.genre && <span className="truncate ml-2">{movie.genre}</span>}
+              <span className="truncate ml-2">Movie</span>
             </div>
           </div>
         </div>
