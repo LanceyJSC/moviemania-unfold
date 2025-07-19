@@ -10,7 +10,6 @@ import Index from "./pages/Index";
 import Search from "./pages/Search";
 import Movies from "./pages/Movies";
 import TVShows from "./pages/TVShows";
-import MovieDetail from "./pages/MovieDetail";
 import TVShowDetail from "./pages/TVShowDetail";
 import SeasonDetail from "./pages/SeasonDetail";
 import ActorDetail from "./pages/ActorDetail";
@@ -19,6 +18,9 @@ import Watchlist from "./pages/Watchlist";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+
+// Import MovieDetail separately to resolve bundling issue
+import MovieDetail from "./pages/MovieDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
