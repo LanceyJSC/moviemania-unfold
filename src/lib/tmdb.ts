@@ -173,10 +173,18 @@ class TMDBService {
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
   }
 
-  // Enhanced profile URL with fallback sizes
-  getProfileUrl(path: string | null, size: 'w185' | 'w632' | 'original' = 'w632'): string {
-    if (!path) return '/placeholder.svg';
-    return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
+  // Enhanced profile URL with better fallback handling
+  getProfileUrl(path: string | null, size: 'w185' | 'w632' | 'original' = 'w185'): string {
+    if (!path || path.trim() === '') {
+      return '/placeholder.svg';
+    }
+    // Try different sizes if the main one fails
+    try {
+      return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
+    } catch (error) {
+      console.log('Profile image error:', error);
+      return '/placeholder.svg';
+    }
   }
 
   // Format movie data for components

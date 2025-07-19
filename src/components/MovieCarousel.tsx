@@ -1,3 +1,4 @@
+
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "./MovieCard";
@@ -51,7 +52,7 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = cardSize === 'small' ? 280 : cardSize === 'medium' ? 400 : 520;
+      const scrollAmount = cardSize === 'small' ? 176 : cardSize === 'medium' ? 208 : 240; // Based on card widths + gap
       const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       
       scrollRef.current.scrollTo({
@@ -69,6 +70,25 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
           );
         }
       }, 300);
+    }
+  };
+
+  // Get skeleton width based on card size
+  const getSkeletonWidth = () => {
+    switch (cardSize) {
+      case "small": return "w-40";
+      case "medium": return "w-48";
+      case "large": return "w-56";
+      default: return "w-48";
+    }
+  };
+
+  const getSkeletonHeight = () => {
+    switch (cardSize) {
+      case "small": return "h-60";
+      case "medium": return "h-72";
+      case "large": return "h-84";
+      default: return "h-72";
     }
   };
 
@@ -108,17 +128,17 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {isLoading ? (
-          // Loading skeleton
+          // Loading skeleton with consistent sizing
           Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="flex-shrink-0">
-              <div className="w-48 h-72 bg-muted animate-pulse rounded-lg"></div>
-            </div>
+            <div key={index} className={`flex-shrink-0 ${getSkeletonWidth()} ${getSkeletonHeight()} bg-muted animate-pulse rounded-lg`}></div>
           ))
         ) : (
           movies.map((movie) => (
-            <div key={movie.id} className="flex-shrink-0">
-              <MovieCard movie={tmdbService.formatMovieForCard(movie)} size={cardSize} />
-            </div>
+            <MovieCard 
+              key={movie.id} 
+              movie={tmdbService.formatMovieForCard(movie)} 
+              size={cardSize} 
+            />
           ))
         )}
       </div>

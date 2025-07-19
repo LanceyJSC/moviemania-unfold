@@ -40,16 +40,23 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     setImageError(true);
   };
 
-  // Consistent sizing based on size prop
-  const cardClasses = {
-    small: "w-40 aspect-[2/3]",
-    medium: "w-48 aspect-[2/3]", 
-    large: "w-56 aspect-[2/3]"
+  // Consistent sizing based on size prop - Fixed dimensions
+  const getCardClasses = () => {
+    switch (size) {
+      case "small":
+        return "w-40 h-60"; // Fixed 2:3 aspect ratio
+      case "medium":
+        return "w-48 h-72"; // Fixed 2:3 aspect ratio
+      case "large":
+        return "w-56 h-84"; // Fixed 2:3 aspect ratio
+      default:
+        return "w-48 h-72";
+    }
   };
 
   return (
     <Link to={`/movie/${movie.id}`}>
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer ${cardClasses[size]}`}>
+      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* Movie Poster */}
           {!imageError ? (
