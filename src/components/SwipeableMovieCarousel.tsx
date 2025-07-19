@@ -1,10 +1,11 @@
 
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "./MovieCard";
 import { useState, useRef, useEffect } from "react";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 interface SwipeableMovieCarouselProps {
   title: string;
@@ -14,14 +15,13 @@ interface SwipeableMovieCarouselProps {
 
 export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }: SwipeableMovieCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // Load movies based on category
   useEffect(() => {
@@ -55,27 +55,8 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
     loadMovies();
   }, [category]);
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = cardSize === 'small' ? 280 : cardSize === 'medium' ? 400 : 520;
-      const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-      
-      scrollRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-      });
-      
-      // Update button states
-      setTimeout(() => {
-        if (scrollRef.current) {
-          setCanScrollLeft(scrollRef.current.scrollLeft > 0);
-          setCanScrollRight(
-            scrollRef.current.scrollLeft < 
-            scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 10
-          );
-        }
-      }, 300);
-    }
+  const handleViewAll = () => {
+    navigate(`/category/${category}`);
   };
 
   // Touch/Mouse event handlers for swipe functionality
@@ -110,13 +91,6 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
 
   const handleEnd = () => {
     setIsDragging(false);
-    if (scrollRef.current) {
-      setCanScrollLeft(scrollRef.current.scrollLeft > 0);
-      setCanScrollRight(
-        scrollRef.current.scrollLeft < 
-        scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 10
-      );
-    }
   };
 
   return (
@@ -128,28 +102,15 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
         }`}>
           {title}
         </h2>
-        {!isMobile && (
-          <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
-              className="h-10 w-10 p-0 bg-cinema-charcoal/60 backdrop-blur-sm hover:bg-cinema-red disabled:opacity-30"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
-              className="h-10 w-10 p-0 bg-cinema-charcoal/60 backdrop-blur-sm hover:bg-cinema-red disabled:opacity-30"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleViewAll}
+          className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
+        >
+          View All
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Movie Cards Container */}

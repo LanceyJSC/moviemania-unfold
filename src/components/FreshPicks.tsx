@@ -12,9 +12,19 @@ export const FreshPicks = () => {
     const loadFreshPicks = async () => {
       try {
         const response = await tmdbService.getThisWeekMovies();
-        setMovies(response.results.slice(0, 6));
+        // Filter out movies without posters for better display
+        const moviesWithPosters = response.results.filter(movie => movie.poster_path);
+        setMovies(moviesWithPosters.slice(0, 6));
       } catch (error) {
         console.error('Failed to load fresh picks:', error);
+        // Fallback to popular movies if week movies fail
+        try {
+          const fallbackResponse = await tmdbService.getPopularMovies();
+          const moviesWithPosters = fallbackResponse.results.filter(movie => movie.poster_path);
+          setMovies(moviesWithPosters.slice(0, 6));
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -25,13 +35,15 @@ export const FreshPicks = () => {
   if (isLoading) {
     return (
       <div className="mb-12">
-        <div className="text-center mb-8">
-          <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
-            FRESH PICKS
-          </h2>
-          <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
+        <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-2xl p-8">
+          <div className="text-center mb-8">
+            <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
+              FRESH PICKS
+            </h2>
+            <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
+          </div>
+          <div className="text-center text-muted-foreground">Loading weekly highlights...</div>
         </div>
-        <div className="text-center text-muted-foreground">Loading weekly highlights...</div>
       </div>
     );
   }

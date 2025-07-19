@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Loader2, Calendar, MapPin, ArrowLeft } from "lucide-react";
+import { Loader2, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "@/components/MovieCard";
 import { Navigation } from "@/components/Navigation";
@@ -12,6 +12,7 @@ const ActorDetail = () => {
   const navigate = useNavigate();
   const [actor, setActor] = useState<Person | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const loadActorDetails = async () => {
@@ -30,6 +31,10 @@ const ActorDetail = () => {
 
     loadActorDetails();
   }, [id]);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
 
   if (isLoading) {
     return (
@@ -58,39 +63,35 @@ const ActorDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Back Button Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="touch-target min-h-[44px] min-w-[44px] p-2 hover:bg-card"
-          >
-            <ArrowLeft className="h-6 w-6 mr-2" />
-            Back
-          </Button>
-        </div>
-      </div>
-
       {/* Actor Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* Profile Image */}
-          <div className="flex-shrink-0">
-            <img 
-              src={profileUrl} 
-              alt={actor.name}
-              className="w-64 h-80 object-cover rounded-lg shadow-cinematic mx-auto lg:mx-0"
-            />
+          <div className="flex-shrink-0 mx-auto lg:mx-0">
+            {!imageError && actor.profile_path ? (
+              <img 
+                src={profileUrl} 
+                alt={actor.name}
+                className="w-64 h-80 object-cover rounded-lg shadow-cinematic"
+                onError={handleImageError}
+              />
+            ) : (
+              <div className="w-64 h-80 bg-cinema-charcoal rounded-lg shadow-cinematic flex items-center justify-center">
+                <div className="text-center p-6">
+                  <div className="text-6xl mb-4">👤</div>
+                  <p className="text-sm text-muted-foreground">{actor.name}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Actor Info */}
           <div className="flex-1">
-            <h1 className="font-cinematic text-4xl text-foreground mb-4 tracking-wide">
+            <h1 className="font-cinematic text-4xl text-foreground mb-4 tracking-wide text-center lg:text-left">
               {actor.name}
             </h1>
             
-            <div className="flex flex-wrap gap-4 mb-6 text-muted-foreground">
+            <div className="flex flex-wrap gap-4 mb-6 text-muted-foreground justify-center lg:justify-start">
               <div className="flex items-center space-x-2">
                 <span className="font-semibold text-foreground">Known for:</span>
                 <span>{actor.known_for_department}</span>

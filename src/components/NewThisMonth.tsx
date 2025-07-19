@@ -12,9 +12,19 @@ export const NewThisMonth = () => {
     const loadNewMovies = async () => {
       try {
         const response = await tmdbService.getThisMonthMovies();
-        setMovies(response.results.slice(0, 8));
+        // Filter out movies without posters for better display
+        const moviesWithPosters = response.results.filter(movie => movie.poster_path);
+        setMovies(moviesWithPosters.slice(0, 8));
       } catch (error) {
         console.error('Failed to load new movies:', error);
+        // Fallback to recent popular movies
+        try {
+          const fallbackResponse = await tmdbService.getPopularMovies();
+          const moviesWithPosters = fallbackResponse.results.filter(movie => movie.poster_path);
+          setMovies(moviesWithPosters.slice(0, 8));
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+        }
       } finally {
         setIsLoading(false);
       }
