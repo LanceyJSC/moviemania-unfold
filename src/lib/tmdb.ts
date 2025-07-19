@@ -376,6 +376,7 @@ class TMDBService {
       genre: tvShow.genres?.[0]?.name || undefined
     };
   }
+
 }
 
 export const tmdbService = new TMDBService();

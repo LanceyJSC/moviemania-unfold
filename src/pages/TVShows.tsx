@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Tv, Star, Calendar, TrendingUp } from "lucide-react";
-import { SwipeableTVCarousel } from "@/components/SwipeableTVCarousel";
-import { FeaturedHero } from "@/components/FeaturedHero";
+import { Tv, Star, Calendar, TrendingUp, Play } from "lucide-react";
+import { TVGrid } from "@/components/TVGrid";
 import { Navigation } from "@/components/Navigation";
+import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 
@@ -11,10 +11,28 @@ const TVShows = () => {
 
   const filterButtons = [
     { id: "all", label: "All Shows", icon: Tv },
-    { id: "trending", label: "Trending", icon: TrendingUp },
+    { id: "popular", label: "Popular", icon: TrendingUp },
+    { id: "airing_today", label: "Airing Today", icon: Play },
+    { id: "on_the_air", label: "On The Air", icon: Calendar },
     { id: "top_rated", label: "Top Rated", icon: Star },
-    { id: "airing", label: "Airing Today", icon: Calendar },
   ];
+
+  const getFilterTitle = (filterId: string) => {
+    switch (filterId) {
+      case "all":
+        return "ALL TV SHOWS";
+      case "popular":
+        return "POPULAR TV SHOWS";
+      case "airing_today":
+        return "AIRING TODAY";
+      case "on_the_air":
+        return "ON THE AIR";
+      case "top_rated":
+        return "TOP RATED TV SHOWS";
+      default:
+        return "ALL TV SHOWS";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -23,7 +41,7 @@ const TVShows = () => {
       {/* Hero-style gradient background */}
       <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
         {/* Filter Buttons */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border p-4 pt-8">
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 pt-8">
         <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
@@ -34,7 +52,7 @@ const TVShows = () => {
                 size="sm"
                 className={`flex-shrink-0 ${
                   activeFilter === filter.id 
-                    ? "bg-cinema-gold text-cinema-black font-semibold" 
+                    ? "bg-cinema-red text-white" 
                     : "bg-transparent border-border text-foreground"
                 }`}
                 onClick={() => setActiveFilter(filter.id)}
@@ -48,41 +66,15 @@ const TVShows = () => {
         </div>
 
         {/* Content */}
-        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-32">
+        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
           {/* Featured Hero Section */}
           <FeaturedHero type="tv" />
-          
-          {/* TV Show Carousels based on active filter */}
-        {activeFilter === "all" && (
-          <>
-            <SwipeableTVCarousel title="TRENDING NOW" category="trending" cardSize="medium" />
-            <SwipeableTVCarousel title="TOP RATED" category="top_rated" cardSize="medium" />
-            <SwipeableTVCarousel title="POPULAR" category="popular" cardSize="medium" />
-            <SwipeableTVCarousel title="AIRING TODAY" category="airing_today" cardSize="medium" />
-            <SwipeableTVCarousel title="ON THE AIR" category="on_the_air" cardSize="medium" />
-          </>
-        )}
 
-        {activeFilter === "trending" && (
-          <>
-            <SwipeableTVCarousel title="TRENDING THIS WEEK" category="trending" cardSize="medium" />
-            <SwipeableTVCarousel title="POPULAR RIGHT NOW" category="popular" cardSize="medium" />
-          </>
-        )}
-
-        {activeFilter === "top_rated" && (
-          <>
-            <SwipeableTVCarousel title="HIGHEST RATED" category="top_rated" cardSize="medium" />
-            <SwipeableTVCarousel title="CRITICALLY ACCLAIMED" category="popular" cardSize="medium" />
-          </>
-        )}
-
-        {activeFilter === "airing" && (
-          <>
-            <SwipeableTVCarousel title="AIRING TODAY" category="airing_today" cardSize="medium" />
-            <SwipeableTVCarousel title="ON THE AIR" category="on_the_air" cardSize="medium" />
-          </>
-          )}
+          {/* TV Shows Grid */}
+          <TVGrid 
+            title={getFilterTitle(activeFilter)} 
+            category={activeFilter as "all" | "popular" | "airing_today" | "on_the_air" | "top_rated"} 
+          />
         </div>
         
         {/* Bottom gradient blend */}
