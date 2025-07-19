@@ -403,10 +403,10 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 max-h-screen overflow-y-auto safe-top safe-bottom">{/* Mobile-optimized with safe areas */}
+    <div className="min-h-screen bg-background safe-top safe-bottom">{/* Mobile-optimized with safe areas */}
       <MobileHeader title="Search" />
       {/* Header and Search Input */}
-      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
+      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-16 z-40">
         <div className="container mx-auto flex items-center">
           <div className="relative flex-grow">
             <Input
@@ -609,7 +609,7 @@ const Search = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
-               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+               <div className="poster-grid-standard">
                 {trendingMovies.map((movie) => (
                   <MovieCard 
                     key={movie.id} 
@@ -652,36 +652,32 @@ const Search = () => {
       />
 
       {/* Search Results */}
-      <div className="container mx-auto px-4 mt-8 pb-8">
+      <div className="pb-20"> {/* Bottom padding for navigation */}
         {isSearching && (
-          <div className="text-center text-muted-foreground">Searching...</div>
+          <div className="text-center text-muted-foreground p-8">Searching...</div>
         )}
         {!isSearching && searchResults.length === 0 && (searchTerm || genreParam) && !searchTerm.includes("(Surprise Pick!)") && (
-          <div className="text-center text-muted-foreground">No results found.</div>
+          <div className="text-center text-muted-foreground p-8">No results found.</div>
         )}
         {searchResults.length > 0 && (
-          <div className="bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
+          <div>
             {/* Movie/TV Page Style Header */}
-            <div className="bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-6">
-              <div className="container mx-auto">
-                <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wide mb-2">
-                  {searchTerm && searchTerm.includes("Surprise") ? "YOUR SURPRISE MIX" : 
-                   genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : 
-                   "SEARCH RESULTS"}
-                </h1>
-                <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
-                <p className="text-muted-foreground">
-                  {searchTerm && searchTerm.includes("Surprise") ? "A perfect mix of movies and TV shows picked just for you!" : 
-                   `Showing ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
-                </p>
-              </div>
+            <div className="mobile-section">
+              <h1 className="mobile-title text-foreground mb-2">
+                {searchTerm && searchTerm.includes("Surprise") ? "YOUR SURPRISE MIX" : 
+                 genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : 
+                 "SEARCH RESULTS"}
+              </h1>
+              <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
+              <p className="mobile-caption">
+                {searchTerm && searchTerm.includes("Surprise") ? "A perfect mix of movies and TV shows picked just for you!" : 
+                 `Showing ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
+              </p>
             </div>
             
-            {/* Results Grid - Movies Page Style */}
-            <div className="container mx-auto px-4 md:px-6 py-8">
-               <div className="poster-grid-standard">
-                {searchResults.map((item) => renderMediaCard(item))}
-              </div>
+            {/* Results Grid - Standardized with other pages */}
+            <div className="poster-grid-standard">
+              {searchResults.map((item) => renderMediaCard(item))}
             </div>
           </div>
         )}
