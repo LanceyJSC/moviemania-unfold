@@ -147,8 +147,8 @@ const MovieDetail = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
         </div>
 
         {/* Bottom Gradient Blend - Creates smooth transition to page background */}
