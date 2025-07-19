@@ -77,7 +77,7 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground w-screen -mx-4 md:-mx-8">
+      <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground">
         {/* Hero Background with lighter overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center"

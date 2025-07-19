@@ -154,6 +154,7 @@ All colors MUST be HSL.
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  }
 
   /* Standard Movie/TV Poster Grid Layout */
   .poster-grid {
