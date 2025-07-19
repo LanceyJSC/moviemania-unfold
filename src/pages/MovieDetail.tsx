@@ -110,10 +110,10 @@ const MovieDetail = () => {
   const runtime = movie.runtime ? `${movie.runtime} min` : 'Unknown';
   const genres = movie.genres?.map(g => g.name).join(', ') || 'Unknown';
   
-  // Enhanced cast and crew data
-  const cast = movie.cast?.slice(0, 8) || [];
-  const director = movie.crew?.find(person => person.job === 'Director');
-  const producer = movie.crew?.find(person => person.job === 'Producer');
+  // Fixed cast and crew data access
+  const cast = movie.credits?.cast?.slice(0, 8) || [];
+  const director = movie.credits?.crew?.find(person => person.job === 'Director');
+  const producer = movie.credits?.crew?.find(person => person.job === 'Producer');
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -198,7 +198,7 @@ const MovieDetail = () => {
                   {trailerKey ? (
                     <Button 
                       className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold ${
-                        isMobile ? 'w-full sm:w-auto px-6 py-3 text-base' : 'px-8 py-6 text-lg'
+                        isMobile ? 'w-full sm:w-auto px-6 py-3 text-base min-h-[44px]' : 'px-8 py-6 text-lg'
                       }`}
                       onClick={handleWatchTrailer}
                     >
@@ -207,7 +207,7 @@ const MovieDetail = () => {
                     </Button>
                   ) : (
                     <Button className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold ${
-                      isMobile ? 'w-full sm:w-auto px-6 py-3 text-base' : 'px-8 py-6 text-lg'
+                      isMobile ? 'w-full sm:w-auto px-6 py-3 text-base min-h-[44px]' : 'px-8 py-6 text-lg'
                     }`} disabled>
                       <Play className="mr-2 h-5 w-5" />
                       No Trailer Available
@@ -219,7 +219,7 @@ const MovieDetail = () => {
                       variant="outline" 
                       className={`border-border hover:bg-card ${
                         isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
-                      } ${isMobile ? 'px-4 py-3' : 'px-6 py-6'}`}
+                      } ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
                       onClick={() => toggleLike(movieId, movie.title, posterUrl)}
                     >
                       <Heart className={`h-5 w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
@@ -229,7 +229,7 @@ const MovieDetail = () => {
                       variant="outline" 
                       className={`border-border hover:bg-card ${
                         isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
-                      } ${isMobile ? 'px-4 py-3' : 'px-6 py-6'}`}
+                      } ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
                       onClick={() => toggleWatchlist(movieId, movie.title, posterUrl)}
                     >
                       <Plus className="h-5 w-5" />
@@ -237,7 +237,7 @@ const MovieDetail = () => {
 
                     <Button 
                       variant="outline" 
-                      className={`border-border hover:bg-card ${isMobile ? 'px-4 py-3' : 'px-6 py-6'}`} 
+                      className={`border-border hover:bg-card ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`} 
                       onClick={handleShare}
                     >
                       <Share className="h-5 w-5" />
@@ -245,7 +245,7 @@ const MovieDetail = () => {
 
                     <Button 
                       variant="outline" 
-                      className={`border-border hover:bg-card ${isMobile ? 'px-4 py-3' : 'px-6 py-6'}`}
+                      className={`border-border hover:bg-card ${isMobile ? 'px-4 py-3 min-h-[44px] min-w-[44px]' : 'px-6 py-6'}`}
                       onClick={() => setShowTrivia(true)}
                     >
                       <Brain className="h-5 w-5" />
@@ -262,7 +262,7 @@ const MovieDetail = () => {
                     <button
                       key={star}
                       onClick={() => setRating(movieId, star, movie.title)}
-                      className="p-1"
+                      className={`p-2 ${isMobile ? 'min-h-[44px] min-w-[44px]' : 'p-1'}`}
                     >
                       <Star 
                         className={`h-6 w-6 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}

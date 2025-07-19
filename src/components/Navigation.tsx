@@ -20,25 +20,25 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border z-50 safe-area-pb">
-      <div className="flex items-center justify-around py-3">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
+      <div className="flex items-center justify-around py-4 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           
           return (
-            <Link key={item.path} to={item.path} className="flex-1">
+            <Link key={item.path} to={item.path} className="flex-1 min-w-0">
               <Button
                 variant="ghost"
                 size="sm"
-                className={`flex flex-col items-center space-y-1 h-auto py-3 px-2 w-full ${
+                className={`flex flex-col items-center space-y-2 h-auto py-3 px-2 w-full min-h-[60px] ${
                   isActive 
-                    ? 'text-cinema-red bg-cinema-red/20' 
-                    : 'text-muted-foreground'
+                    ? 'text-cinema-red bg-cinema-red/10 backdrop-blur-sm' 
+                    : 'text-foreground/70 bg-transparent'
                 }`}
               >
-                <Icon className="h-6 w-6" />
-                <span className="text-xs font-medium">
+                <Icon className="h-6 w-6 flex-shrink-0" />
+                <span className="text-xs font-medium leading-none">
                   {item.label}
                 </span>
               </Button>

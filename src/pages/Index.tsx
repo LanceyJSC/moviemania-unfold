@@ -4,6 +4,8 @@ import { SwipeableMovieCarousel } from "@/components/SwipeableMovieCarousel";
 import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
+import { NewThisMonth } from "@/components/NewThisMonth";
+import { FreshPicks } from "@/components/FreshPicks";
 
 const Index = () => {
   return (
@@ -18,6 +20,10 @@ const Index = () => {
         
         {/* Genre Navigation */}
         <QuickGenres />
+
+        {/* New Dynamic Content Sections */}
+        <NewThisMonth />
+        <FreshPicks />
         
         {/* Movie Carousels */}
         <SwipeableMovieCarousel title="TRENDING NOW" category="trending" cardSize="medium" />

@@ -1,3 +1,4 @@
+
 const TMDB_API_KEY = '8265bd1679663a7ea12ac168da84d2e8'; // Public key, safe to use
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
@@ -20,8 +21,10 @@ export interface Movie {
   runtime?: number;
   genres?: { id: number; name: string }[];
   production_companies?: { id: number; name: string; logo_path: string | null }[];
-  cast?: { id: number; name: string; character: string; profile_path: string | null }[];
-  crew?: { id: number; name: string; job: string; profile_path: string | null }[];
+  credits?: {
+    cast: { id: number; name: string; character: string; profile_path: string | null }[];
+    crew: { id: number; name: string; job: string; profile_path: string | null }[];
+  };
   videos?: { results: { id: string; key: string; name: string; type: string; site: string }[] };
 }
 
@@ -93,7 +96,7 @@ class TMDBService {
     return this.fetchFromTMDB(`/movie/upcoming?page=${page}`);
   }
 
-  // Get movie details
+  // Get movie details - Fixed to properly append credits
   async getMovieDetails(movieId: number): Promise<Movie> {
     return this.fetchFromTMDB(`/movie/${movieId}?append_to_response=credits,videos`);
   }
@@ -103,12 +106,14 @@ class TMDBService {
     return this.fetchFromTMDB(`/genre/movie/list`);
   }
 
-  // Discover movies with filters
+  // Enhanced discover movies with filters
   async discoverMovies(filters: {
     genre?: number;
     year?: number;
     rating?: number;
     page?: number;
+    sortBy?: string;
+    releaseDate?: { gte?: string; lte?: string };
   } = {}): Promise<TMDBResponse<Movie>> {
     const params = new URLSearchParams();
     
@@ -116,12 +121,44 @@ class TMDBService {
     if (filters.year) params.append('year', filters.year.toString());
     if (filters.rating) params.append('vote_average.gte', filters.rating.toString());
     if (filters.page) params.append('page', filters.page.toString());
+    if (filters.sortBy) params.append('sort_by', filters.sortBy);
+    if (filters.releaseDate?.gte) params.append('release_date.gte', filters.releaseDate.gte);
+    if (filters.releaseDate?.lte) params.append('release_date.lte', filters.releaseDate.lte);
     
     const queryString = params.toString();
     return this.fetchFromTMDB(`/discover/movie?${queryString}`);
   }
 
-  // NEW: Get person details
+  // NEW: Get movies released this month
+  async getThisMonthMovies(): Promise<TMDBResponse<Movie>> {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    return this.discoverMovies({
+      releaseDate: {
+        gte: firstDay.toISOString().split('T')[0],
+        lte: lastDay.toISOString().split('T')[0]
+      },
+      sortBy: 'release_date.desc'
+    });
+  }
+
+  // NEW: Get movies released this week
+  async getThisWeekMovies(): Promise<TMDBResponse<Movie>> {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    return this.discoverMovies({
+      releaseDate: {
+        gte: weekAgo.toISOString().split('T')[0],
+        lte: now.toISOString().split('T')[0]
+      },
+      sortBy: 'release_date.desc'
+    });
+  }
+
+  // Get person details
   async getPersonDetails(personId: number): Promise<Person> {
     return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits`);
   }
@@ -137,7 +174,6 @@ class TMDBService {
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
   }
 
-  // NEW: Get profile image URL
   getProfileUrl(path: string | null, size: 'w185' | 'w632' | 'original' = 'w185'): string {
     if (!path) return '/placeholder.svg';
     return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
