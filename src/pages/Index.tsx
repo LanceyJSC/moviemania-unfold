@@ -16,28 +16,27 @@ const Index = () => {
       <MobileHeader title="Cinescope" showBack={false} />
       
       {/* Mobile-optimized content with proper spacing */}
-      <div className="pb-20"> {/* Bottom padding for navigation */}
-        {/* Hero Section - Full height */}
+      <div className="pb-20">
         <HeroSection />
 
-        <div className="mobile-section space-y-6">
-          <div className="mobile-section">
+        <div className="space-y-6">
+          <div className="px-4 py-6">
             <MovieStats />
           </div>
           
-          <div className="mobile-section">
+          <div className="px-4 py-6">
             <QuickGenres />
           </div>
 
-          <div className="mobile-section">
+          <div className="px-4 py-6">
             <NewThisMonth />
           </div>
 
-          <div className="mobile-section">
+          <div className="px-4 py-6">
             <FreshPicks />
           </div>
 
-          <div className="mobile-section">
+          <div className="px-4 py-6">
             <LatestTrailers />
           </div>
         </div>
