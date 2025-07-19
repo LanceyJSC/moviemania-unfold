@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { Play } from "lucide-react";
+import { Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { cn } from "@/lib/utils";
@@ -86,29 +84,41 @@ export const LatestTrailers = () => {
 
       {/* Trailers Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="aspect-[2/3] animate-pulse bg-muted" />
+            <div key={i} className="flex-shrink-0 w-44 h-[264px] bg-muted animate-pulse rounded-lg" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
           {movies.map((movie) => (
-            <Card
+            <div
               key={movie.id}
-              className="group relative overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-lg aspect-[2/3]"
+              className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 w-44 h-[264px] rounded-lg"
               onClick={() => handlePlayTrailer(movie)}
             >
-              <div className="relative w-full h-full">
+              <div className="w-full h-full relative">
                 <img
                   src={tmdbService.getPosterUrl(movie.poster_path, 'w500')}
                   alt={movie.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 rounded-lg"
                   loading="lazy"
                 />
                 
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                {/* Base Gradient Overlay */}
+                <div className="absolute inset-0 rounded-lg">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent rounded-lg" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent rounded-lg" />
+                </div>
+                
+                {/* Hover Enhancement */}
+                <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 rounded-lg">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent rounded-lg" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent rounded-lg" />
+                </div>
+                
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
                   <div className="flex flex-col items-center space-y-2">
                     <Button
                       size="lg"
@@ -124,22 +134,24 @@ export const LatestTrailers = () => {
                 
                 {/* Rating Badge */}
                 {movie.vote_average > 0 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="absolute top-2 right-2 bg-black/70 text-white text-xs"
-                  >
-                    {movie.vote_average.toFixed(1)}
-                  </Badge>
+                  <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+                    <Star className="h-3 w-3 text-cinema-gold fill-current" />
+                    <span className="text-foreground font-semibold text-xs">{movie.vote_average.toFixed(1)}</span>
+                  </div>
                 )}
+                
+                {/* Movie Info Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                  <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
+                    {movie.title}
+                  </h3>
+                  <div className="flex items-center justify-between text-muted-foreground text-xs">
+                    <span>{movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}</span>
+                    <span className="truncate ml-2">Trailer</span>
+                  </div>
+                </div>
               </div>
-              
-              {/* Movie Title */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                <h3 className="text-white font-medium text-sm line-clamp-2">
-                  {movie.title}
-                </h3>
-              </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
