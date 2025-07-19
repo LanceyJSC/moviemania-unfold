@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search as SearchIcon, Filter, X } from "lucide-react";
+import { Search as SearchIcon, Filter, X, TrendingUp, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
@@ -16,10 +17,25 @@ const Search = () => {
   
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({});
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  // Load trending movies for default content
+  useEffect(() => {
+    const loadTrendingMovies = async () => {
+      try {
+        const results = await tmdbService.getTrendingMovies();
+        setTrendingMovies(results.results.slice(0, 8));
+      } catch (error) {
+        console.error("Failed to load trending movies:", error);
+      }
+    };
+
+    loadTrendingMovies();
+  }, []);
 
   // Handle genre-based search on component mount
   useEffect(() => {
@@ -93,6 +109,14 @@ const Search = () => {
     return genreMap[genreId] || 'Genre';
   };
 
+  const popularSearches = ['Marvel', 'Disney', 'Horror', 'Comedy', 'Action', 'Romance'];
+
+  const handlePopularSearch = (term: string) => {
+    setSearchTerm(term);
+  };
+
+  const showDefaultContent = !searchTerm && !genreParam && searchResults.length === 0;
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header and Search Input */}
@@ -150,6 +174,62 @@ const Search = () => {
         </div>
       )}
 
+      {/* Default Content - Search Suggestions */}
+      {showDefaultContent && (
+        <div className="container mx-auto px-4 mt-8 space-y-8">
+          {/* Welcome Header */}
+          <div className="text-center">
+            <h1 className="font-cinematic text-4xl text-foreground tracking-wide mb-4">
+              DISCOVER MOVIES
+            </h1>
+            <p className="text-muted-foreground text-lg mb-6">
+              Search for your favorite films or explore what's trending
+            </p>
+            <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
+          </div>
+
+          {/* Popular Searches */}
+          <div>
+            <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+              <TrendingUp className="h-5 w-5 mr-2 text-cinema-gold" />
+              Popular Searches
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {popularSearches.map((term) => (
+                <Button
+                  key={term}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePopularSearch(term)}
+                  className="rounded-full border-border hover:border-cinema-red hover:text-cinema-red"
+                >
+                  {term}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Trending Movies */}
+          {trendingMovies.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+                <Film className="h-5 w-5 mr-2 text-cinema-red" />
+                Trending Now
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {trendingMovies.map((movie) => (
+                  <MovieCard 
+                    key={movie.id} 
+                    movie={tmdbService.formatMovieForCard(movie)} 
+                    size="small" 
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Search Results */}
       <div className="container mx-auto px-4 mt-8">
         {isSearching && (
@@ -158,11 +238,17 @@ const Search = () => {
         {!isSearching && searchResults.length === 0 && (searchTerm || genreParam) && (
           <div className="text-center text-muted-foreground">No results found.</div>
         )}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {searchResults.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} size="small" />
-          ))}
-        </div>
+        {searchResults.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {searchResults.map((movie) => (
+              <MovieCard 
+                key={movie.id} 
+                movie={tmdbService.formatMovieForCard(movie)} 
+                size="small" 
+              />
+            ))}
+          </div>
+        )}
       </div>
       
       {/* Mobile Navigation */}

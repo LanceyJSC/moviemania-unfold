@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
 
 interface MovieCardProps {
   movie: {
@@ -21,6 +22,7 @@ interface MovieCardProps {
 export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
   const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
   const isMobile = useIsMobile();
+  const [imageError, setImageError] = useState(false);
   
   const sizeClasses = {
     small: isMobile ? "w-40 h-60" : "w-32 h-48",
@@ -40,6 +42,10 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     await toggleWatchlist(movie.id, movie.title, movie.poster);
   };
 
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <Link to={`/movie/${movie.id}`}>
       <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer ${
@@ -47,12 +53,22 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
       }`}>
         <div className={`${sizeClasses[size]} relative`}>
           {/* Movie Poster */}
-          <img 
-            src={movie.poster} 
-            alt={movie.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-            loading="lazy"
-          />
+          {!imageError ? (
+            <img 
+              src={movie.poster} 
+              alt={movie.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              loading="lazy"
+              onError={handleImageError}
+            />
+          ) : (
+            <div className="w-full h-full bg-cinema-charcoal flex items-center justify-center">
+              <div className="text-center p-4">
+                <div className="text-4xl mb-2">🎬</div>
+                <p className="text-xs text-muted-foreground line-clamp-2">{movie.title}</p>
+              </div>
+            </div>
+          )}
           
           {/* Gradient Overlay */}
           <div className={`absolute inset-0 bg-gradient-to-t from-cinema-black via-transparent to-transparent transition-opacity duration-300 ${

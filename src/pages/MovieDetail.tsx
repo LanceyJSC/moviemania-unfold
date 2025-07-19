@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Play, Heart, Plus, Star, Share, Loader2, Brain, Tv } from "lucide-react";
@@ -12,6 +11,7 @@ import { TrailerModal } from "@/components/TrailerModal";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CrewCard } from "@/components/CrewCard";
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -113,8 +113,12 @@ const MovieDetail = () => {
   
   // Fixed cast and crew data access
   const cast = movie.credits?.cast?.slice(0, 8) || [];
-  const director = movie.credits?.crew?.find(person => person.job === 'Director');
-  const producer = movie.credits?.crew?.find(person => person.job === 'Producer');
+  const crew = movie.credits?.crew || [];
+  const director = crew.find(person => person.job === 'Director');
+  const producer = crew.find(person => person.job === 'Producer');
+  const keyCrewMembers = crew.filter(person => 
+    ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer'].includes(person.job)
+  ).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -279,6 +283,20 @@ const MovieDetail = () => {
 
       {/* Additional Content */}
       <div className={`container mx-auto py-16 space-y-16 ${isMobile ? 'px-4' : 'px-6'}`}>
+        {/* Key Crew Section */}
+        {keyCrewMembers.length > 0 && (
+          <div>
+            <h2 className="text-3xl font-cinematic text-foreground mb-8 tracking-wide">
+              KEY CREW
+            </h2>
+            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
+              {keyCrewMembers.map((person) => (
+                <CrewCard key={`${person.id}-${person.job}`} person={person} />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Enhanced Cast Section */}
         {cast.length > 0 && (
           <div>
