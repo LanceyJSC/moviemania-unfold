@@ -142,8 +142,8 @@ const MovieDetail = () => {
     <div className="min-h-screen bg-background pb-32">
       <MobileHeader title={title} />
       
-      {/* Hero Section with Poster Overlay */}
-      <div className="relative overflow-hidden h-[50vh]">
+      {/* Hero Section with Poster Overlay - Full width */}
+      <div className="relative w-full overflow-hidden h-[50vh]">
         <div 
           className="backdrop-image"
           style={{ backgroundImage: `url(${backdropUrl})` }}
