@@ -9,6 +9,7 @@ import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
 import { PhotoSearch } from "@/components/PhotoSearch";
 import { Navigation } from "@/components/Navigation";
+import { MobileHeader } from "@/components/MobileHeader";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -145,6 +146,7 @@ const Search = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <MobileHeader title="Search" />
       {/* Header and Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
         <div className="container mx-auto flex items-center">

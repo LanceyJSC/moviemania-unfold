@@ -3,6 +3,7 @@ import { User, Settings, Calendar, Star, Trophy, Film, LogOut } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navigation } from "@/components/Navigation";
+import { MobileHeader } from "@/components/MobileHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -38,6 +39,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <MobileHeader title="Profile" />
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-8">

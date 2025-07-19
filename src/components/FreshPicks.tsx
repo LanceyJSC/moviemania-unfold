@@ -2,12 +2,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Sparkles, Clock } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
-import { tmdbService, Movie } from "@/lib/tmdb";
+import { TVShowCard } from "@/components/TVShowCard";
+import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+type MediaItem = Movie | TVShow;
 
 export const FreshPicks = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -17,19 +20,30 @@ export const FreshPicks = () => {
   useEffect(() => {
     const loadFreshPicks = async () => {
       try {
-        const response = await tmdbService.getTrendingMovies('week');
-        const moviesWithPosters = response.results
-          .filter(movie => movie.poster_path)
-          .slice(0, 8);
-        setMovies(moviesWithPosters);
+        // Get trending movies and TV shows for this week
+        const [trendingMovies, trendingTV] = await Promise.all([
+          tmdbService.getTrendingMovies('week'),
+          tmdbService.getTrendingTVShows('week')
+        ]);
+        
+        // Combine and shuffle movies and TV shows
+        const allContent: MediaItem[] = [
+          ...trendingMovies.results.filter(item => item.poster_path).slice(0, 4),
+          ...trendingTV.results.filter(item => item.poster_path).slice(0, 4)
+        ];
+        
+        // Shuffle the combined array
+        const shuffled = allContent.sort(() => Math.random() - 0.5);
+        setContent(shuffled.slice(0, 8));
       } catch (error) {
         console.error('Failed to load fresh picks:', error);
         try {
+          // Fallback to popular movies only
           const fallbackResponse = await tmdbService.getPopularMovies();
           const moviesWithPosters = fallbackResponse.results
             .filter(movie => movie.poster_path)
             .slice(0, 8);
-          setMovies(moviesWithPosters);
+          setContent(moviesWithPosters);
         } catch (fallbackError) {
           console.error('Fallback also failed:', fallbackError);
         }
@@ -106,12 +120,12 @@ export const FreshPicks = () => {
             <Clock className="h-8 w-8 text-cinema-red" />
           </div>
           <p className="text-muted-foreground mb-4">
-            Trending this week - Updated weekly
+            Trending movies & TV shows this week - Updated weekly
           </p>
           <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
         </div>
         
-        {movies.length > 0 ? (
+        {content.length > 0 ? (
           <div 
             ref={scrollRef}
             className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
@@ -124,15 +138,25 @@ export const FreshPicks = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleEnd}
           >
-             {movies.map((movie) => (
-               <div key={`fresh-${movie.id}`} className="flex-shrink-0 w-44">
-                 <MovieCard 
-                   movie={tmdbService.formatMovieForCard(movie)} 
-                   size="medium" 
-                 />
-               </div>
-             ))}
-          </div>
+             {content.map((item) => {
+               const isMovie = 'title' in item;
+               return (
+                 <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0 w-44">
+                   {isMovie ? (
+                     <MovieCard 
+                       movie={tmdbService.formatMovieForCard(item as Movie)} 
+                       size="medium" 
+                     />
+                   ) : (
+                     <TVShowCard 
+                       tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                       size="medium" 
+                     />
+                   )}
+                 </div>
+               );
+             })}
+           </div>
         ) : (
           <div className="text-center text-muted-foreground">
             No fresh picks available this week

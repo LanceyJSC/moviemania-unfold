@@ -4,6 +4,7 @@ import { SwipeableMovieCarousel } from "@/components/SwipeableMovieCarousel";
 import { Navigation } from "@/components/Navigation";
 import { MovieStats } from "@/components/MovieStats";
 import { Button } from "@/components/ui/button";
+import { MobileHeader } from "@/components/MobileHeader";
 
 const Movies = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -17,8 +18,12 @@ const Movies = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Filter Buttons */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border p-4 pt-8">
+      <MobileHeader title="Movies" />
+      
+      {/* Hero-style gradient background */}
+      <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
+        {/* Filter Buttons */}
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border p-4 pt-8">
         <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
@@ -40,12 +45,12 @@ const Movies = () => {
             );
           })}
         </div>
-      </div>
+        </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-24">
-        {/* Movie Stats */}
-        <MovieStats />
+        {/* Content */}
+        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-24">
+          {/* Movie Stats */}
+          <MovieStats />
 
         {/* Movie Carousels based on active filter */}
         {activeFilter === "all" && (
@@ -76,7 +81,11 @@ const Movies = () => {
             <SwipeableMovieCarousel title="COMING SOON" category="upcoming" cardSize="medium" />
             <SwipeableMovieCarousel title="POPULAR MOVIES" category="popular" cardSize="medium" />
           </>
-        )}
+          )}
+        </div>
+        
+        {/* Bottom gradient blend */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
       </div>
 
       {/* Mobile Navigation */}

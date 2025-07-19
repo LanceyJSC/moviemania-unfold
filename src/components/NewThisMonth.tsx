@@ -2,12 +2,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Calendar, TrendingUp } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
-import { tmdbService, Movie } from "@/lib/tmdb";
+import { TVShowCard } from "@/components/TVShowCard";
+import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+type MediaItem = Movie | TVShow;
 
 export const NewThisMonth = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -15,34 +18,58 @@ export const NewThisMonth = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    const loadNewMovies = async () => {
+    const loadNewContent = async () => {
       try {
-        const response = await tmdbService.getPopularMovies();
         const now = new Date();
         const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
         
-        const recentMovies = response.results.filter(movie => {
+        // Get both movies and TV shows
+        const [moviesResponse, tvShowsResponse] = await Promise.all([
+          tmdbService.getPopularMovies(),
+          tmdbService.getPopularTVShows()
+        ]);
+        
+        // Filter recent releases for movies
+        const recentMovies = moviesResponse.results.filter(movie => {
           if (!movie.poster_path || !movie.release_date) return false;
           const releaseDate = new Date(movie.release_date);
           return releaseDate >= twoMonthsAgo && releaseDate <= now;
         });
+        
+        // Filter recent releases for TV shows
+        const recentTVShows = tvShowsResponse.results.filter(show => {
+          if (!show.poster_path || !show.first_air_date) return false;
+          const releaseDate = new Date(show.first_air_date);
+          return releaseDate >= twoMonthsAgo && releaseDate <= now;
+        });
 
-        if (recentMovies.length >= 8) {
-          setMovies(recentMovies.slice(0, 8));
-        } else {
-          const moviesWithPosters = response.results
-            .filter(movie => movie.poster_path)
-            .slice(0, 8);
-          setMovies(moviesWithPosters);
+        // Combine recent content
+        let allContent: MediaItem[] = [...recentMovies, ...recentTVShows];
+        
+        // If we don't have enough recent content, add popular content
+        if (allContent.length < 8) {
+          const additionalMovies = moviesResponse.results
+            .filter(movie => movie.poster_path && !recentMovies.includes(movie))
+            .slice(0, 4);
+          const additionalTVShows = tvShowsResponse.results
+            .filter(show => show.poster_path && !recentTVShows.includes(show))
+            .slice(0, 4);
+          
+          allContent = [...allContent, ...additionalMovies, ...additionalTVShows];
         }
+        
+        // Shuffle and limit to 8 items
+        const shuffled = allContent.sort(() => Math.random() - 0.5);
+        setContent(shuffled.slice(0, 8));
       } catch (error) {
-        console.error('Failed to load new movies:', error);
+        console.error('Failed to load new content:', error);
         try {
+          // Fallback to trending movies
           const fallbackResponse = await tmdbService.getTrendingMovies();
           const moviesWithPosters = fallbackResponse.results
             .filter(movie => movie.poster_path)
             .slice(0, 8);
-          setMovies(moviesWithPosters);
+          setContent(moviesWithPosters);
         } catch (fallbackError) {
           console.error('Fallback also failed:', fallbackError);
         }
@@ -50,7 +77,7 @@ export const NewThisMonth = () => {
         setIsLoading(false);
       }
     };
-    loadNewMovies();
+    loadNewContent();
   }, []);
 
   // Touch/Mouse event handlers for swipe functionality
@@ -119,12 +146,12 @@ export const NewThisMonth = () => {
             <TrendingUp className="h-8 w-8 text-cinema-gold" />
           </div>
           <p className="text-muted-foreground mb-4">
-            Recent releases from {currentMonth} - Updated regularly
+            Recent movies & TV shows from {currentMonth} - Updated regularly
           </p>
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
       
-      {movies.length > 0 ? (
+      {content.length > 0 ? (
         <div 
           ref={scrollRef}
           className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 ${
@@ -139,14 +166,24 @@ export const NewThisMonth = () => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleEnd}
         >
-          {movies.map((movie) => (
-            <div key={`new-${movie.id}`} className="flex-shrink-0 w-44">
-              <MovieCard 
-                movie={tmdbService.formatMovieForCard(movie)} 
-                size="medium" 
-              />
-            </div>
-          ))}
+          {content.map((item) => {
+            const isMovie = 'title' in item;
+            return (
+              <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0 w-44">
+                {isMovie ? (
+                  <MovieCard 
+                    movie={tmdbService.formatMovieForCard(item as Movie)} 
+                    size="medium" 
+                  />
+                ) : (
+                  <TVShowCard 
+                    tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                    size="medium" 
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="text-center text-muted-foreground">
