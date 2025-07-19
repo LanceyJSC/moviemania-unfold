@@ -98,7 +98,7 @@ export const NewThisMonth = () => {
         </div>
         <div className="flex space-x-4 overflow-hidden">
           {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="flex-shrink-0 w-40 aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+            <div key={index} className="flex-shrink-0 w-36 aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -139,7 +139,7 @@ export const NewThisMonth = () => {
           onTouchEnd={handleEnd}
         >
           {movies.map((movie) => (
-            <div key={`new-${movie.id}`} className="flex-shrink-0 w-40">
+            <div key={`new-${movie.id}`} className="flex-shrink-0 w-36">
               <MovieCard 
                 movie={tmdbService.formatMovieForCard(movie)} 
                 size="small" 

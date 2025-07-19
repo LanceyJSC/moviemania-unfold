@@ -73,7 +73,7 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
 
   // Touch/Mouse event handlers for swipe functionality
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!isMobile || !scrollRef.current) return;
+    if (!scrollRef.current) return;
     setIsDragging(true);
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
@@ -140,9 +140,7 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
       {/* Movie Cards Container */}
       <div 
         ref={scrollRef}
-        className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 ${
-          isMobile ? 'cursor-grab active:cursor-grabbing' : ''
-        } ${isDragging ? 'select-none' : ''}`}
+        className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
