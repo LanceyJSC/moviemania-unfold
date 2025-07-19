@@ -386,7 +386,7 @@ class TMDBService {
   }
 
   async getSeasonDetails(tvId: number, seasonNumber: number, fresh: boolean = false) {
-    return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}`, fresh);
+    return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}?append_to_response=images`, fresh);
   }
 
 }

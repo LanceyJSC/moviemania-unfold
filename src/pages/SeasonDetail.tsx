@@ -27,6 +27,9 @@ interface Season {
   episode_count: number;
   season_number: number;
   episodes: Episode[];
+  images?: {
+    backdrops: { file_path: string; vote_average: number }[];
+  };
 }
 
 interface TVShow {
@@ -93,10 +96,29 @@ const SeasonDetail = () => {
   }
 
   const seasonPosterUrl = tmdbService.getPosterUrl(season.poster_path, 'w500');
-  // Use season backdrop if available, otherwise fall back to TV show backdrop
-  const seasonBackdropUrl = season.backdrop_path 
-    ? tmdbService.getBackdropUrl(season.backdrop_path, 'original')
-    : tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
+  
+  // Priority for backdrop selection:
+  // 1. Season-specific backdrop from season.backdrop_path
+  // 2. Season images from season.images.backdrops (highest rated)
+  // 3. Fall back to TV show backdrop
+  const getSeasonBackdrop = () => {
+    // First try the direct season backdrop
+    if (season.backdrop_path) {
+      return tmdbService.getBackdropUrl(season.backdrop_path, 'original');
+    }
+    
+    // Then try season images (use highest rated backdrop)
+    if (season.images?.backdrops && season.images.backdrops.length > 0) {
+      const bestBackdrop = season.images.backdrops
+        .sort((a, b) => b.vote_average - a.vote_average)[0];
+      return tmdbService.getBackdropUrl(bestBackdrop.file_path, 'original');
+    }
+    
+    // Finally fall back to TV show backdrop
+    return tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
+  };
+  
+  const seasonBackdropUrl = getSeasonBackdrop();
 
   return (
     <div className="min-h-screen bg-background pb-32">
