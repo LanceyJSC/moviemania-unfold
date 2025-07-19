@@ -272,35 +272,49 @@ class TMDBService {
   // Get latest trailers by category - exactly matching TMDB's homepage
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = false): Promise<TMDBResponse<Movie | TVShow>> {
     let endpoint = '';
+    const today = new Date().toISOString().split('T')[0];
+    const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
     switch (category) {
       case 'popular':
-        // Get currently popular movies that are already released
-        endpoint = '/discover/movie?sort_by=popularity.desc&primary_release_date.lte=' + new Date().toISOString().split('T')[0] + '&page=1';
+        // Get recent releases sorted by popularity that have trailers
+        endpoint = `/discover/movie?sort_by=popularity.desc&primary_release_date.gte=${twoWeeksAgo}&primary_release_date.lte=${today}&page=1`;
         break;
       case 'streaming':
-        // Movies available on major streaming platforms, recently released
-        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        endpoint = `/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&primary_release_date.gte=${thirtyDaysAgo}&sort_by=popularity.desc&page=1`;
+        // Movies recently available on streaming platforms
+        endpoint = `/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc&primary_release_date.gte=${twoWeeksAgo}&page=1`;
         break;
       case 'on_tv':
-        endpoint = '/tv/on_the_air?page=1';
+        // TV shows currently airing with recent episodes
+        endpoint = '/tv/airing_today?page=1';
         break;
       case 'for_rent':
-        // Movies available for rent, sorted by recent popularity
-        endpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US&sort_by=popularity.desc&page=1';
+        // Recent movies available for digital rent
+        endpoint = `/discover/movie?with_watch_monetization_types=rent&watch_region=US&sort_by=release_date.desc&primary_release_date.gte=${twoWeeksAgo}&page=1`;
         break;
       case 'in_theaters':
+        // Movies currently playing in theaters
         endpoint = '/movie/now_playing?page=1';
         break;
     }
     
     const response = await this.fetchFromTMDB<TMDBResponse<Movie | TVShow>>(endpoint, fresh);
     
-    // Return the results directly without filtering for trailers to match TMDB behavior
+    // For "Latest Trailers", we need to mix recent releases with some popular ongoing content
+    if (category === 'popular' && response.results.length < 10) {
+      // If not enough recent releases, supplement with current popular movies
+      const popularResponse = await this.fetchFromTMDB<TMDBResponse<Movie>>('/movie/popular?page=1', fresh);
+      const combinedResults = [...response.results, ...popularResponse.results.slice(0, 20 - response.results.length)];
+      
+      return {
+        ...response,
+        results: combinedResults.slice(0, 20)
+      };
+    }
+    
     return {
       ...response,
-      results: response.results.slice(0, 20) // Take first 20 items like TMDB does
+      results: response.results.slice(0, 20)
     };
   }
 
