@@ -23,38 +23,48 @@ export const SwipeableTVCarousel = ({ title, category, cardSize = "medium" }: Sw
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadTVShows = async () => {
-      setIsLoading(true);
-      try {
-        let response;
-        switch (category) {
-          case "trending":
-            response = await tmdbService.getTrendingTVShows();
-            break;
-          case "popular":
-            response = await tmdbService.getPopularTVShows();
-            break;
-          case "top_rated":
-            response = await tmdbService.getTopRatedTVShows();
-            break;
-          case "airing_today":
-            response = await tmdbService.getAiringTodayTVShows();
-            break;
-          case "on_the_air":
-            response = await tmdbService.getOnTheAirTVShows();
-            break;
-          default:
-            response = await tmdbService.getPopularTVShows();
-        }
-        setTVShows(response.results);
-      } catch (error) {
-        console.error(`Failed to load ${category} TV shows:`, error);
-      } finally {
-        setIsLoading(false);
+  const loadTVShows = async (fresh: boolean = false) => {
+    setIsLoading(true);
+    try {
+      let response;
+      switch (category) {
+        case "trending":
+          response = await tmdbService.getTrendingTVShows('week', fresh);
+          break;
+        case "popular":
+          response = await tmdbService.getPopularTVShows(1, fresh);
+          break;
+        case "top_rated":
+          response = await tmdbService.getTopRatedTVShows(1, fresh);
+          break;
+        case "airing_today":
+          response = await tmdbService.getAiringTodayTVShows(1, fresh);
+          break;
+        case "on_the_air":
+          response = await tmdbService.getOnTheAirTVShows(1, fresh);
+          break;
+        default:
+          response = await tmdbService.getPopularTVShows(1, fresh);
       }
-    };
+      setTVShows(response.results);
+    } catch (error) {
+      console.error(`Failed to load ${category} TV shows:`, error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadTVShows();
+  }, [category]);
+
+  // Periodic refresh every hour to stay updated with TMDB
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      loadTVShows(true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, [category]);
 
   const handleViewAll = () => {

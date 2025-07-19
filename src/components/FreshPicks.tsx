@@ -17,41 +17,51 @@ export const FreshPicks = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    const loadFreshPicks = async () => {
+  const loadFreshPicks = async (fresh: boolean = false) => {
+    try {
+      // Get trending movies and TV shows for this week
+      const [trendingMovies, trendingTV] = await Promise.all([
+        tmdbService.getTrendingMovies('week', fresh),
+        tmdbService.getTrendingTVShows('week', fresh)
+      ]);
+      
+      // Combine and shuffle movies and TV shows
+      const allContent: MediaItem[] = [
+        ...trendingMovies.results.filter(item => item.poster_path).slice(0, 4),
+        ...trendingTV.results.filter(item => item.poster_path).slice(0, 4)
+      ];
+      
+      // Shuffle the combined array
+      const shuffled = allContent.sort(() => Math.random() - 0.5);
+      setContent(shuffled.slice(0, 8));
+    } catch (error) {
+      console.error('Failed to load fresh picks:', error);
       try {
-        // Get trending movies and TV shows for this week
-        const [trendingMovies, trendingTV] = await Promise.all([
-          tmdbService.getTrendingMovies('week'),
-          tmdbService.getTrendingTVShows('week')
-        ]);
-        
-        // Combine and shuffle movies and TV shows
-        const allContent: MediaItem[] = [
-          ...trendingMovies.results.filter(item => item.poster_path).slice(0, 4),
-          ...trendingTV.results.filter(item => item.poster_path).slice(0, 4)
-        ];
-        
-        // Shuffle the combined array
-        const shuffled = allContent.sort(() => Math.random() - 0.5);
-        setContent(shuffled.slice(0, 8));
-      } catch (error) {
-        console.error('Failed to load fresh picks:', error);
-        try {
-          // Fallback to popular movies only
-          const fallbackResponse = await tmdbService.getPopularMovies();
-          const moviesWithPosters = fallbackResponse.results
-            .filter(movie => movie.poster_path)
-            .slice(0, 8);
-          setContent(moviesWithPosters);
-        } catch (fallbackError) {
-          console.error('Fallback also failed:', fallbackError);
-        }
-      } finally {
-        setIsLoading(false);
+        // Fallback to popular movies only
+        const fallbackResponse = await tmdbService.getPopularMovies(1, fresh);
+        const moviesWithPosters = fallbackResponse.results
+          .filter(movie => movie.poster_path)
+          .slice(0, 8);
+        setContent(moviesWithPosters);
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
       }
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadFreshPicks();
+  }, []);
+
+  // Periodic refresh every hour to stay updated with TMDB
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      loadFreshPicks(true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   // Touch/Mouse event handlers for swipe functionality
@@ -120,7 +130,7 @@ export const FreshPicks = () => {
             <Clock className="h-8 w-8 text-cinema-red" />
           </div>
           <p className="text-muted-foreground mb-4">
-            Trending movies & TV shows this week - Updated weekly
+            Trending movies & TV shows this week - Updated hourly
           </p>
           <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
         </div>

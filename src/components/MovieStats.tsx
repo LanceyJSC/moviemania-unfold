@@ -11,33 +11,43 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
     upcomingCount: 0
   });
 
+  const loadStats = async (fresh: boolean = false) => {
+    try {
+      const [trending, topRated, upcoming] = await Promise.all([
+        tmdbService.getTrendingMovies('week', fresh),
+        tmdbService.getTopRatedMovies(1, fresh),
+        tmdbService.getUpcomingMovies(1, fresh)
+      ]);
+      
+      setStats({
+        totalMovies: trending.total_results > 1000000 ? Math.floor(trending.total_results / 1000) * 1000 : trending.total_results,
+        trendingCount: trending.results.length,
+        topRatedCount: topRated.results.length,
+        upcomingCount: upcoming.results.length
+      });
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+      // Fallback to reasonable estimates
+      setStats({
+        totalMovies: 500000,
+        trendingCount: 20,
+        topRatedCount: 20,
+        upcomingCount: 20
+      });
+    }
+  };
+
   useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const [trending, topRated, upcoming] = await Promise.all([
-          tmdbService.getTrendingMovies(),
-          tmdbService.getTopRatedMovies(),
-          tmdbService.getUpcomingMovies()
-        ]);
-        
-        setStats({
-          totalMovies: trending.total_results > 1000000 ? Math.floor(trending.total_results / 1000) * 1000 : trending.total_results,
-          trendingCount: trending.results.length,
-          topRatedCount: topRated.results.length,
-          upcomingCount: upcoming.results.length
-        });
-      } catch (error) {
-        console.error('Failed to load stats:', error);
-        // Fallback to reasonable estimates
-        setStats({
-          totalMovies: 500000,
-          trendingCount: 20,
-          topRatedCount: 20,
-          upcomingCount: 20
-        });
-      }
-    };
     loadStats();
+  }, []);
+
+  // Periodic refresh every hour to stay updated with TMDB
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      loadStats(true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const statItems = [

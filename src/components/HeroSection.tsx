@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Play, Info } from "lucide-react";
@@ -16,62 +15,51 @@ export const HeroSection = () => {
   const { isTrailerOpen, setIsTrailerOpen } = useTrailerContext();
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    const loadHeroMovies = async () => {
-      try {
-        const trending = await tmdbService.getTrendingMovies();
-        if (trending.results && trending.results.length > 0) {
-          // Get the first 5 movies with backdrop images
-          const moviesWithBackdrops = trending.results
-            .filter(movie => movie.backdrop_path)
-            .slice(0, 5);
-          
-          // Get full movie details including videos for each movie
-          const movieDetailsPromises = moviesWithBackdrops.map(movie => 
-            tmdbService.getMovieDetails(movie.id)
-          );
-          const movieDetails = await Promise.all(movieDetailsPromises);
-          
-          setHeroMovies(movieDetails);
-          
-          // Find trailer for the first movie
-          const firstMovie = movieDetails[0];
-          const trailer = firstMovie?.videos?.results.find(
-            video => video.type === 'Trailer' && video.site === 'YouTube'
-          );
-          if (trailer) {
-            setTrailerKey(trailer.key);
-          }
+  const loadHeroMovies = async (fresh: boolean = false) => {
+    try {
+      const trending = await tmdbService.getTrendingMovies('week', fresh);
+      if (trending.results && trending.results.length > 0) {
+        // Get the first 5 movies with backdrop images
+        const moviesWithBackdrops = trending.results
+          .filter(movie => movie.backdrop_path)
+          .slice(0, 5);
+        
+        // Get full movie details including videos for each movie
+        const movieDetailsPromises = moviesWithBackdrops.map(movie => 
+          tmdbService.getMovieDetails(movie.id)
+        );
+        const movieDetails = await Promise.all(movieDetailsPromises);
+        
+        setHeroMovies(movieDetails);
+        
+        // Find trailer for the first movie
+        const firstMovie = movieDetails[0];
+        const trailer = firstMovie?.videos?.results.find(
+          video => video.type === 'Trailer' && video.site === 'YouTube'
+        );
+        if (trailer) {
+          setTrailerKey(trailer.key);
         }
-      } catch (error) {
-        console.error("Failed to load hero movies:", error);
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Failed to load hero movies:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadHeroMovies();
   }, []);
 
-  // Auto-rotate hero images every 5 seconds
+  // Periodic refresh every hour to stay updated with TMDB
   useEffect(() => {
-    if (heroMovies.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentIndex((prev) => {
-          const nextIndex = (prev + 1) % heroMovies.length;
-          // Update trailer key for the new movie
-          const nextMovie = heroMovies[nextIndex];
-          const trailer = nextMovie?.videos?.results.find(
-            video => video.type === 'Trailer' && video.site === 'YouTube'
-          );
-          setTrailerKey(trailer?.key || null);
-          return nextIndex;
-        });
-      }, 5000);
+    const refreshInterval = setInterval(() => {
+      loadHeroMovies(true);
+    }, 3600000); // 1 hour in milliseconds
 
-      return () => clearInterval(interval);
-    }
-  }, [heroMovies]);
+    return () => clearInterval(refreshInterval);
+  }, []);
 
   const handleWatchNow = () => {
     if (trailerKey) {

@@ -1,4 +1,3 @@
-
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "./MovieCard";
@@ -19,35 +18,45 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
   const [isLoading, setIsLoading] = useState(true);
 
   // Load movies based on category
-  useEffect(() => {
-    const loadMovies = async () => {
-      setIsLoading(true);
-      try {
-        let response;
-        switch (category) {
-          case "trending":
-            response = await tmdbService.getTrendingMovies();
-            break;
-          case "popular":
-            response = await tmdbService.getPopularMovies();
-            break;
-          case "top_rated":
-            response = await tmdbService.getTopRatedMovies();
-            break;
-          case "upcoming":
-            response = await tmdbService.getUpcomingMovies();
-            break;
-          default:
-            response = await tmdbService.getPopularMovies();
-        }
-        setMovies(response.results);
-      } catch (error) {
-        console.error(`Failed to load ${category} movies:`, error);
-      } finally {
-        setIsLoading(false);
+  const loadMovies = async (fresh: boolean = false) => {
+    setIsLoading(true);
+    try {
+      let response;
+      switch (category) {
+        case "trending":
+          response = await tmdbService.getTrendingMovies('week', fresh);
+          break;
+        case "popular":
+          response = await tmdbService.getPopularMovies(1, fresh);
+          break;
+        case "top_rated":
+          response = await tmdbService.getTopRatedMovies(1, fresh);
+          break;
+        case "upcoming":
+          response = await tmdbService.getUpcomingMovies(1, fresh);
+          break;
+        default:
+          response = await tmdbService.getPopularMovies(1, fresh);
       }
-    };
+      setMovies(response.results);
+    } catch (error) {
+      console.error(`Failed to load ${category} movies:`, error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadMovies();
+  }, [category]);
+
+  // Periodic refresh every hour to stay updated with TMDB
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      loadMovies(true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, [category]);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -73,7 +82,6 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
     }
   };
 
-  // Get skeleton width based on card size
   const getSkeletonWidth = () => {
     switch (cardSize) {
       case "small": return "w-40";

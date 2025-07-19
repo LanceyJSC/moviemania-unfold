@@ -1,4 +1,3 @@
-
 import { Loader2, ArrowRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "./MovieCard";
@@ -64,6 +63,15 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
 
   useEffect(() => {
     loadMovies();
+  }, [category]);
+
+  // Periodic refresh every hour to stay updated with TMDB
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      loadMovies(true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, [category]);
 
   const handleRefresh = () => {

@@ -21,20 +21,29 @@ export const LatestTrailers = () => {
   const [loading, setLoading] = useState(false);
   const { setTrailerKey, setMovieTitle, setIsTrailerOpen } = useTrailerContext();
 
-  useEffect(() => {
-    const fetchTrailers = async () => {
-      try {
-        setLoading(true);
-        const response = await tmdbService.getLatestTrailers(activeCategory);
-        setMovies(response.results);
-      } catch (error) {
-        console.error('Error fetching trailers:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchTrailers = async (fresh: boolean = false) => {
+    try {
+      setLoading(true);
+      const response = await tmdbService.getLatestTrailers(activeCategory, fresh);
+      setMovies(response.results);
+    } catch (error) {
+      console.error('Error fetching trailers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTrailers();
+  }, [activeCategory]);
+
+  // Periodic refresh every hour to stay updated with TMDB
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      fetchTrailers(true);
+    }, 3600000); // 1 hour in milliseconds
+
+    return () => clearInterval(refreshInterval);
   }, [activeCategory]);
 
   const handlePlayTrailer = async (movie: Movie) => {
@@ -66,7 +75,7 @@ export const LatestTrailers = () => {
             <Video className="h-8 w-8 text-primary" />
           </div>
           <p className="text-muted-foreground mb-4">
-            Watch the newest trailers across all categories - Updated daily
+            Watch the newest trailers across all categories - Updated hourly
           </p>
           <div className="w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
@@ -114,19 +123,17 @@ export const LatestTrailers = () => {
                   loading="lazy"
                 />
                 
-                {/* Base Gradient Overlay */}
+                {/* gradient overlays, play button, rating badge, movie info */}
                 <div className="absolute inset-0 rounded-lg">
                   <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent rounded-lg" />
                   <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent rounded-lg" />
                 </div>
                 
-                {/* Hover Enhancement */}
                 <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 rounded-lg">
                   <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent rounded-lg" />
                   <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent rounded-lg" />
                 </div>
                 
-                {/* Play Button Overlay */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
                   <div className="flex flex-col items-center space-y-2">
                     <Button
@@ -141,7 +148,6 @@ export const LatestTrailers = () => {
                   </div>
                 </div>
                 
-                {/* Rating Badge */}
                 {movie.vote_average > 0 && (
                   <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
                     <Star className="h-3 w-3 text-cinema-gold fill-current" />
@@ -149,7 +155,6 @@ export const LatestTrailers = () => {
                   </div>
                 )}
                 
-                {/* Movie Info Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
                   <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
                     {movie.title}
