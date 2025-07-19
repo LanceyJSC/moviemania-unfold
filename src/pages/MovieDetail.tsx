@@ -1,9 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, ArrowLeft, Loader2 } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, ArrowLeft, Loader2, Brain, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
+import { MovieTrivia } from "@/components/MovieTrivia";
+import { StreamingAvailability } from "@/components/StreamingAvailability";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useUserState } from "@/hooks/useUserState";
 
@@ -12,6 +14,7 @@ const MovieDetail = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [showTrivia, setShowTrivia] = useState(false);
   const {
     toggleLike,
     toggleWatchlist,
@@ -194,6 +197,14 @@ const MovieDetail = () => {
                   <Button variant="outline" className="border-border hover:bg-card px-6 py-6" onClick={handleShare}>
                     <Share className="h-5 w-5" />
                   </Button>
+
+                  <Button 
+                    variant="outline" 
+                    className="border-border hover:bg-card px-6 py-6"
+                    onClick={() => setShowTrivia(true)}
+                  >
+                    <Brain className="h-5 w-5" />
+                  </Button>
                 </div>
 
                 {/* Rating */}
@@ -217,14 +228,27 @@ const MovieDetail = () => {
         </div>
       </div>
 
-      {/* Recommendations */}
-      <div className="container mx-auto px-6 py-16">
+      {/* Additional Content */}
+      <div className="container mx-auto px-6 py-16 space-y-16">
+        {/* Streaming Availability */}
+        <StreamingAvailability movieId={movieId} movieTitle={movie.title} />
+        
+        {/* Recommendations */}
         <MovieCarousel 
           title="YOU MIGHT ALSO LIKE" 
           category="popular"
           cardSize="medium"
         />
       </div>
+
+      {/* Movie Trivia Modal */}
+      {showTrivia && (
+        <MovieTrivia 
+          movie={movie} 
+          isOpen={showTrivia} 
+          onClose={() => setShowTrivia(false)} 
+        />
+      )}
     </div>
   );
 };

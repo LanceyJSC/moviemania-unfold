@@ -1,16 +1,21 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search as SearchIcon, Mic, Camera, Filter, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MovieCard } from "@/components/MovieCard";
+import { AdvancedFilters, FilterState } from "@/components/AdvancedFilters";
+import { PhotoSearch } from "@/components/PhotoSearch";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useToast } from "@/hooks/use-toast";
 
 const Search = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showPhotoSearch, setShowPhotoSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -19,6 +24,37 @@ const Search = () => {
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedRating, setSelectedRating] = useState<string>("");
   const { toast } = useToast();
+
+  const handleAdvancedFiltersChange = async (filters: FilterState) => {
+    setIsLoading(true);
+    try {
+      // Convert genre names to genre IDs
+      const genreId = filters.genres.length > 0 
+        ? genres.find(g => g.name === filters.genres[0])?.id 
+        : undefined;
+        
+      const response = await tmdbService.discoverMovies({
+        genre: genreId,
+        year: filters.yearRange[0] !== 1900 ? filters.yearRange[0] : undefined,
+        rating: filters.ratingRange[0] !== 0 ? filters.ratingRange[0] : undefined,
+        // Note: sort_by not implemented in discover service yet
+      });
+      setSearchResults(response.results);
+    } catch (error) {
+      console.error('Advanced filter search failed:', error);
+      toast({
+        title: "Filter Error",
+        description: "Failed to apply advanced filters. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePhotoSearchResult = (movie: Movie) => {
+    navigate(`/movie/${movie.id}`);
+  };
 
   // Load genres on component mount
   useEffect(() => {
@@ -182,7 +218,12 @@ const Search = () => {
               >
                 <Mic className="h-4 w-4" />
               </Button>
-              <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => setShowPhotoSearch(!showPhotoSearch)}
+              >
                 <Camera className="h-4 w-4" />
               </Button>
             </div>
@@ -196,7 +237,7 @@ const Search = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               className="border-border hover:bg-card"
             >
               <Filter className="h-4 w-4 mr-2" />
@@ -204,8 +245,8 @@ const Search = () => {
             </Button>
           </div>
 
-          {/* Filters Section */}
-          {showFilters && (
+          {/* Basic Filters Section - Keep for backwards compatibility */}
+          {false && (
             <div className="bg-card border border-border rounded-lg p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
@@ -296,6 +337,20 @@ const Search = () => {
             <p className="text-sm text-muted-foreground mt-2">Or use voice search by clicking the microphone</p>
           </div>
         )}
+
+        {/* Advanced Filters Component */}
+        <AdvancedFilters
+          onFiltersChange={handleAdvancedFiltersChange}
+          isOpen={showAdvancedFilters}
+          onToggle={() => setShowAdvancedFilters(!showAdvancedFilters)}
+        />
+
+        {/* Photo Search Component */}
+        <PhotoSearch
+          onMovieFound={handlePhotoSearchResult}
+          isOpen={showPhotoSearch}
+          onToggle={() => setShowPhotoSearch(!showPhotoSearch)}
+        />
       </div>
     </div>
   );
