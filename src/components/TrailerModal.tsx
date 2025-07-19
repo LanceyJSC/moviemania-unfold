@@ -1,7 +1,7 @@
 
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface TrailerModalProps {
   isOpen: boolean;
@@ -11,6 +11,8 @@ interface TrailerModalProps {
 }
 
 export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: TrailerModalProps) => {
+  const [videoError, setVideoError] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -24,6 +26,12 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleVideoError = () => {
+    setVideoError(true);
+  };
+
+  const youtubeEmbedUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0`;
 
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
@@ -46,18 +54,33 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
         {/* Video Container */}
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-4xl aspect-video bg-cinema-charcoal rounded-lg overflow-hidden">
-            <iframe
-              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&modestbranding=1`}
-              title={`${movieTitle} Trailer`}
-              className="w-full h-full"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {videoError ? (
+              <div className="w-full h-full flex items-center justify-center text-center">
+                <div>
+                  <p className="text-muted-foreground mb-4">Unable to load trailer</p>
+                  <Button 
+                    onClick={() => window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank')}
+                    className="bg-cinema-red hover:bg-cinema-red/90"
+                  >
+                    Open in YouTube
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <iframe
+                src={youtubeEmbedUrl}
+                title={`${movieTitle} Trailer`}
+                className="w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowFullScreen
+                onError={handleVideoError}
+              />
+            )}
           </div>
         </div>
 
-        {/* Mobile tap to close hint */}
+        {/* Close hint */}
         <div className="p-4 text-center">
           <p className="text-sm text-muted-foreground">
             Tap the X button to close

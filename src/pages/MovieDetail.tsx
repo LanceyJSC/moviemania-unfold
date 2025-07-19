@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, ArrowLeft, Loader2, Brain, Tv } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, Brain, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { MovieTrivia } from "@/components/MovieTrivia";
 import { StreamingAvailability } from "@/components/StreamingAvailability";
 import { Navigation } from "@/components/Navigation";
+import { TrailerModal } from "@/components/TrailerModal";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -15,6 +16,7 @@ const MovieDetail = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [showTrailer, setShowTrailer] = useState(false);
   const [showTrivia, setShowTrivia] = useState(false);
   const isMobile = useIsMobile();
   const {
@@ -74,6 +76,12 @@ const MovieDetail = () => {
     }
   };
 
+  const handleWatchTrailer = () => {
+    if (trailerKey) {
+      setShowTrailer(true);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -113,16 +121,6 @@ const MovieDetail = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black via-cinema-black/80 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black via-transparent to-transparent" />
-        </div>
-
-        {/* Back Button */}
-        <div className={`absolute top-6 left-6 z-10 ${isMobile ? 'top-4 left-4' : ''}`}>
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="bg-cinema-charcoal/60 backdrop-blur-sm hover:bg-cinema-red">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
         </div>
 
         {/* Content */}
@@ -185,7 +183,7 @@ const MovieDetail = () => {
                       className={`bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold ${
                         isMobile ? 'w-full sm:w-auto px-6 py-3 text-base' : 'px-8 py-6 text-lg'
                       }`}
-                      onClick={() => window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank')}
+                      onClick={handleWatchTrailer}
                     >
                       <Play className="mr-2 h-5 w-5" />
                       Watch Trailer
@@ -247,7 +245,7 @@ const MovieDetail = () => {
                     <button
                       key={star}
                       onClick={() => setRating(movieId, star, movie.title)}
-                      className="transition-colors p-1"
+                      className="p-1"
                     >
                       <Star 
                         className={`h-6 w-6 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}
@@ -273,6 +271,16 @@ const MovieDetail = () => {
           cardSize="medium"
         />
       </div>
+
+      {/* Trailer Modal */}
+      {showTrailer && (
+        <TrailerModal 
+          isOpen={showTrailer} 
+          onClose={() => setShowTrailer(false)} 
+          trailerKey={trailerKey || ''} 
+          movieTitle={movie.title} 
+        />
+      )}
 
       {/* Movie Trivia Modal */}
       {showTrivia && (

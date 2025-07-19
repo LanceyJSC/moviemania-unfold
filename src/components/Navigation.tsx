@@ -31,14 +31,14 @@ export const Navigation = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`flex flex-col items-center space-y-1 h-auto py-3 px-2 w-full transition-all duration-300 active:scale-95 ${
+                className={`flex flex-col items-center space-y-1 h-auto py-3 px-2 w-full ${
                   isActive 
-                    ? 'text-cinema-red bg-cinema-red/20 scale-105 shadow-glow' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted/70'
+                    ? 'text-cinema-red bg-cinema-red/20' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
-                <Icon className={`h-6 w-6 transition-all duration-200 ${isActive ? 'animate-pulse scale-110' : ''}`} />
-                <span className={`text-xs font-medium transition-all duration-200 ${isActive ? 'font-semibold' : ''}`}>
+                <Icon className="h-6 w-6" />
+                <span className="text-xs font-medium">
                   {item.label}
                 </span>
               </Button>

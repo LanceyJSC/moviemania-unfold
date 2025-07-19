@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Navigation } from '@/components/Navigation';
 import { toast } from 'sonner';
 import { Film } from 'lucide-react';
 
@@ -61,7 +63,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex items-center justify-center p-4 pb-24">
       <Card className="w-full max-w-md bg-background/80 backdrop-blur border-border">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -153,6 +155,9 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
+      
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };
