@@ -109,7 +109,7 @@ export const FreshPicks = () => {
   }
 
   return (
-    <div className="mb-12">
+    <div className="mb-12 pt-4">
       <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2 } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
@@ -13,6 +13,7 @@ import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
+import { SynopsisModal } from "@/components/SynopsisModal";
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ const MovieDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [showSynopsis, setShowSynopsis] = useState(false);
   const isMobile = useIsMobile();
   const {
     toggleLike,
@@ -177,9 +179,20 @@ const MovieDetail = () => {
             {genres}
           </p>
 
-          <p className="text-white/70 leading-relaxed text-xs line-clamp-3">
-            {movie.overview}
-          </p>
+          <div className="relative">
+            <p className="text-white leading-relaxed text-xs line-clamp-3 bg-cinema-black/60 backdrop-blur-sm rounded-lg p-3 border border-white/10">
+              {movie.overview}
+            </p>
+            {movie.overview && movie.overview.length > 150 && (
+              <button
+                onClick={() => setShowSynopsis(true)}
+                className="absolute bottom-2 right-2 text-cinema-gold hover:text-cinema-gold/80 transition-colors text-xs font-medium flex items-center gap-1"
+              >
+                <MoreHorizontal className="h-3 w-3" />
+                More
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -321,6 +334,17 @@ const MovieDetail = () => {
           onClose={() => setShowTrailer(false)} 
           trailerKey={trailerKey || ''} 
           movieTitle={title} 
+        />
+      )}
+
+      {/* Synopsis Modal */}
+      {showSynopsis && (
+        <SynopsisModal
+          isOpen={showSynopsis}
+          onClose={() => setShowSynopsis(false)}
+          title={title}
+          synopsis={movie.overview || ""}
+          posterUrl={posterUrl}
         />
       )}
 
