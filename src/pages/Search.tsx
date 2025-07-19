@@ -106,9 +106,60 @@ const Search = () => {
     searchContent();
   }, [debouncedSearchTerm, genreParam, activeTab]);
 
-  const handleFilterChange = (filters: any) => {
+  const handleFilterChange = async (filters: any) => {
+    console.log("Filters changed:", filters);
     setSelectedFilters(filters);
-    // Apply filters to searchResults here
+    
+    // Apply filters to search results
+    if (genreParam || searchTerm) {
+      setIsSearching(true);
+      try {
+        if (genreParam) {
+          // Apply filters to genre search
+          const results = await tmdbService.discoverMovies({
+            genre: parseInt(genreParam),
+            page: 1,
+            sortBy: filters.sortBy || 'popularity.desc',
+            rating: filters.ratingRange?.[0] || 0,
+            year: filters.yearRange?.[0] || 1900
+          });
+          setSearchResults(results.results);
+        } else if (searchTerm) {
+          // For text search, apply sort but note: TMDB search API doesn't support all filters
+          let results;
+          if (activeTab === 'movies') {
+            results = await tmdbService.searchMovies(searchTerm);
+          } else if (activeTab === 'tv') {
+            results = await tmdbService.searchTVShows(searchTerm);
+          } else {
+            results = await tmdbService.searchMulti(searchTerm);
+          }
+          
+          // Client-side filtering for search results (limited but better than nothing)
+          let filteredResults = results.results;
+          
+          if (filters.ratingRange && filters.ratingRange[0] > 0) {
+            filteredResults = filteredResults.filter((item: any) => 
+              item.vote_average >= filters.ratingRange[0]
+            );
+          }
+          
+          if (filters.yearRange && filters.yearRange[0] > 1900) {
+            filteredResults = filteredResults.filter((item: any) => {
+              const year = item.release_date ? new Date(item.release_date).getFullYear() : 
+                           item.first_air_date ? new Date(item.first_air_date).getFullYear() : 0;
+              return year >= filters.yearRange[0] && year <= filters.yearRange[1];
+            });
+          }
+          
+          setSearchResults(filteredResults);
+        }
+      } catch (error) {
+        console.error("Failed to apply filters:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    }
   };
 
   const clearSearch = () => {
@@ -148,6 +199,7 @@ const Search = () => {
   };
 
   const handleSurpriseMe = async () => {
+    console.log("Surprise Me clicked!");
     setIsSearching(true);
     try {
       // Get a mix of content from different sources for true surprise
@@ -160,9 +212,12 @@ const Search = () => {
       ];
       
       const randomSourceIndex = Math.floor(Math.random() * randomSources.length);
+      console.log("Random source index:", randomSourceIndex);
       const results = await randomSources[randomSourceIndex]();
+      console.log("Results from API:", results);
       const randomIndex = Math.floor(Math.random() * results.results.length);
       const surpriseItem = results.results[randomIndex];
+      console.log("Surprise item:", surpriseItem);
       
       // Add media_type to help with rendering
       const itemWithMediaType = {
@@ -170,9 +225,11 @@ const Search = () => {
         media_type: (surpriseItem as any).title ? 'movie' : 'tv'
       };
       
+      console.log("Setting search results:", [itemWithMediaType]);
       setSearchResults([itemWithMediaType]);
       const title = (surpriseItem as any).title || (surpriseItem as any).name;
       setSearchTerm(`${title} (Surprise Pick!)`);
+      console.log("Set search term:", `${title} (Surprise Pick!)`);
       
       // Clear genre filter when using surprise me
       if (genreParam) {
@@ -196,7 +253,7 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 overflow-y-auto">{/* Added overflow-y-auto for scrolling */}
       <MobileHeader title="Search" />
       {/* Header and Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
