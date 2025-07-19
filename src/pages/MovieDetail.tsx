@@ -158,7 +158,7 @@ const MovieDetail = () => {
       <div className="container mx-auto px-6 py-16">
         <MovieCarousel 
           title="YOU MIGHT ALSO LIKE" 
-          movies={recommendedMovies}
+          category="popular"
           cardSize="medium"
         />
       </div>

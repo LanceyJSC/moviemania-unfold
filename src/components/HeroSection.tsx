@@ -4,45 +4,50 @@ import { Search, Mic, Camera, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DesktopNavigation } from "./DesktopNavigation";
+import { tmdbService } from "@/lib/tmdb";
 import heroBackdrop from "@/assets/hero-backdrop.jpg";
-
-const featuredMovies = [
-  {
-    id: 1,
-    title: "Oppenheimer",
-    backdrop: "https://images.unsplash.com/photo-1509647084632-bc2540fba87a?w=1920&h=1080&fit=crop",
-    description: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
-    year: "2023",
-    rating: "8.4"
-  },
-  {
-    id: 2,
-    title: "Dune: Part Two", 
-    backdrop: "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=1920&h=1080&fit=crop",
-    description: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
-    year: "2024",
-    rating: "8.6"
-  },
-  {
-    id: 3,
-    title: "Interstellar",
-    backdrop: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=1920&h=1080&fit=crop",
-    description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-    year: "2014", 
-    rating: "8.7"
-  }
-];
 
 export const HeroSection = () => {
   const [currentMovie, setCurrentMovie] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [featuredMovies, setFeaturedMovies] = useState([
+    {
+      id: 1,
+      title: "Loading...",
+      backdrop: heroBackdrop,
+      description: "Discover amazing movies and shows",
+      year: "2024",
+      rating: "8.0"
+    }
+  ]);
+
+  // Load trending movies for hero section
+  useEffect(() => {
+    const loadTrendingMovies = async () => {
+      try {
+        const response = await tmdbService.getTrendingMovies('day');
+        const movies = response.results.slice(0, 5).map(movie => ({
+          id: movie.id,
+          title: movie.title,
+          backdrop: tmdbService.getBackdropUrl(movie.backdrop_path),
+          description: movie.overview,
+          year: movie.release_date ? new Date(movie.release_date).getFullYear().toString() : '2024',
+          rating: movie.vote_average.toFixed(1)
+        }));
+        setFeaturedMovies(movies);
+      } catch (error) {
+        console.error('Failed to load trending movies:', error);
+      }
+    };
+    loadTrendingMovies();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentMovie((prev) => (prev + 1) % featuredMovies.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [featuredMovies.length]);
 
   const movie = featuredMovies[currentMovie];
 

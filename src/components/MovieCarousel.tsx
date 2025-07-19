@@ -1,27 +1,53 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "./MovieCard";
-import { useState, useRef } from "react";
-
-interface Movie {
-  id: number;
-  title: string;
-  poster: string;
-  year: string;
-  rating: string;
-  genre?: string;
-}
+import { useState, useRef, useEffect } from "react";
+import { tmdbService, Movie } from "@/lib/tmdb";
 
 interface MovieCarouselProps {
   title: string;
-  movies: Movie[];
+  category: "trending" | "popular" | "top_rated" | "upcoming";
   cardSize?: "small" | "medium" | "large";
 }
 
-export const MovieCarousel = ({ title, movies, cardSize = "medium" }: MovieCarouselProps) => {
+export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load movies based on category
+  useEffect(() => {
+    const loadMovies = async () => {
+      setIsLoading(true);
+      try {
+        let response;
+        switch (category) {
+          case "trending":
+            response = await tmdbService.getTrendingMovies();
+            break;
+          case "popular":
+            response = await tmdbService.getPopularMovies();
+            break;
+          case "top_rated":
+            response = await tmdbService.getTopRatedMovies();
+            break;
+          case "upcoming":
+            response = await tmdbService.getUpcomingMovies();
+            break;
+          default:
+            response = await tmdbService.getPopularMovies();
+        }
+        setMovies(response.results);
+      } catch (error) {
+        console.error(`Failed to load ${category} movies:`, error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadMovies();
+  }, [category]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -81,11 +107,20 @@ export const MovieCarousel = ({ title, movies, cardSize = "medium" }: MovieCarou
         className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {movies.map((movie) => (
-          <div key={movie.id} className="flex-shrink-0">
-            <MovieCard movie={movie} size={cardSize} />
-          </div>
-        ))}
+        {isLoading ? (
+          // Loading skeleton
+          Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="flex-shrink-0">
+              <div className="w-48 h-72 bg-muted animate-pulse rounded-lg"></div>
+            </div>
+          ))
+        ) : (
+          movies.map((movie) => (
+            <div key={movie.id} className="flex-shrink-0">
+              <MovieCard movie={tmdbService.formatMovieForCard(movie)} size={cardSize} />
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
