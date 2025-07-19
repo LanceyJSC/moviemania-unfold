@@ -275,47 +275,29 @@ class TMDBService {
     
     switch (category) {
       case 'popular':
-        endpoint = '/movie/popular';
+        endpoint = '/movie/popular?page=1';
         break;
       case 'streaming':
-        // Major streaming services: Netflix (8), Amazon Prime (9), Hulu (15), Disney+ (337), HBO Max (384), Apple TV+ (350)
-        endpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US';
+        // Major streaming services with recent releases
+        endpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=release_date.desc&page=1';
         break;
       case 'on_tv':
-        endpoint = '/tv/on_the_air';
+        endpoint = '/tv/on_the_air?page=1';
         break;
       case 'for_rent':
-        endpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US';
+        endpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US&sort_by=popularity.desc&page=1';
         break;
       case 'in_theaters':
-        endpoint = '/movie/now_playing';
+        endpoint = '/movie/now_playing?page=1';
         break;
     }
     
     const response = await this.fetchFromTMDB<TMDBResponse<Movie | TVShow>>(endpoint, fresh);
     
-    // Filter for items that have trailers
-    const itemsWithTrailers = [];
-    for (const item of response.results.slice(0, 10)) {
-      try {
-        const isMovie = 'title' in item;
-        const details = isMovie 
-          ? await this.getMovieDetails(item.id)
-          : await this.getTVShowDetails(item.id);
-        
-        if (details.videos?.results?.some(video => video.type === 'Trailer' && video.site === 'YouTube')) {
-          itemsWithTrailers.push(item);
-        }
-        
-        if (itemsWithTrailers.length >= 6) break;
-      } catch (error) {
-        console.error('Error checking for trailer:', error);
-      }
-    }
-    
+    // Return the results directly without filtering for trailers to match TMDB behavior
     return {
       ...response,
-      results: itemsWithTrailers
+      results: response.results.slice(0, 20) // Take first 20 items like TMDB does
     };
   }
 
