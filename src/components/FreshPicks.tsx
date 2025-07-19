@@ -91,7 +91,7 @@ export const FreshPicks = () => {
   if (isLoading) {
     return (
       <div className="mb-12">
-        <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
+        <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
           <div className="text-center mb-8">
             <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
               FRESH PICKS
@@ -110,7 +110,7 @@ export const FreshPicks = () => {
 
   return (
     <div className="mb-12 pt-4">
-      <div className="bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
+      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Sparkles className="h-8 w-8 text-cinema-red" />
