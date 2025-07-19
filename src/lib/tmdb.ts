@@ -270,7 +270,7 @@ class TMDBService {
   }
 
   // Get latest trailers by category
-  async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters'): Promise<TMDBResponse<Movie>> {
+  async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = false): Promise<TMDBResponse<Movie>> {
     let endpoint = '';
     
     switch (category) {
@@ -291,7 +291,7 @@ class TMDBService {
         break;
     }
     
-    const response = await this.fetchFromTMDB<TMDBResponse<Movie | TVShow>>(endpoint);
+    const response = await this.fetchFromTMDB<TMDBResponse<Movie | TVShow>>(endpoint, fresh);
     
     // Filter for items that have trailers
     const itemsWithTrailers = [];
