@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, DollarSign, Trophy, Calendar, Users, Globe } from "lucide-react";
 import { Movie } from "@/lib/tmdb";
+import { useTrailerContext } from "@/contexts/TrailerContext";
 
 interface FunFactsProps {
   movie: Movie;
@@ -18,6 +19,7 @@ interface MovieFact {
 
 export const FunFacts = ({ movie }: FunFactsProps) => {
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
+  const { isTrailerOpen } = useTrailerContext();
 
   // Generate real facts from movie data
   const facts: MovieFact[] = [
@@ -53,16 +55,16 @@ export const FunFacts = ({ movie }: FunFactsProps) => {
     }
   ].filter(fact => fact.content && !fact.content.includes('not available'));
 
-  // Auto-rotate facts every 10 seconds
+  // Auto-rotate facts every 10 seconds, but pause when trailer is open
   useEffect(() => {
-    if (facts.length === 0) return;
+    if (facts.length === 0 || isTrailerOpen) return;
     
     const interval = setInterval(() => {
       setCurrentFactIndex((prev) => (prev + 1) % facts.length);
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [facts.length]);
+  }, [facts.length, isTrailerOpen]);
 
   if (facts.length === 0) return null;
 
