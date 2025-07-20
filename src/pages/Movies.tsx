@@ -39,8 +39,8 @@ const Movies = () => {
     <div className="min-h-screen bg-background">
       <MobileHeader title="Movies" />
       
-      {/* Hero-style gradient background */}
-      <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
+      {/* Content container */}
+      <div className="relative">
         {/* Filter Buttons */}
         <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 pt-8">
         <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
