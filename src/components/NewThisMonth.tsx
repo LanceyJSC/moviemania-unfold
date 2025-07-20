@@ -163,20 +163,11 @@ export const NewThisMonth = () => {
       {content.length > 0 ? (
         <div 
           ref={scrollRef}
-          className={`flex space-x-3 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing transition-all duration-200 ease-out ${isDragging ? 'select-none' : ''}`}
+          className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4"
           style={{ 
             scrollbarWidth: 'none', 
-            msOverflowStyle: 'none',
-            scrollBehavior: 'smooth',
-            WebkitOverflowScrolling: 'touch'
+            msOverflowStyle: 'none'
           }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleEnd}
-          onMouseLeave={handleEnd}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleEnd}
         >
           {content.map((item) => {
             const isMovie = 'title' in item;
