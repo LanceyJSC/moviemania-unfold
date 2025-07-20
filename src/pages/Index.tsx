@@ -1,49 +1,94 @@
 
+import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/HeroSection";
-import { SwipeableMovieCarousel } from "@/components/SwipeableMovieCarousel";
-import { SwipeableTVCarousel } from "@/components/SwipeableTVCarousel";
 import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
-import { Navigation } from "@/components/Navigation";
+import { IOSTabBar } from "@/components/IOSTabBar";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
+import { FallbackHomepage } from "@/components/FallbackHomepage";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const Index = () => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simple initialization check
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+
+    // Error handling for any uncaught errors
+    const handleError = (event: ErrorEvent) => {
+      console.error('Uncaught error on homepage:', event.error);
+      setHasError(true);
+    };
+
+    window.addEventListener('error', handleError);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  if (hasError) {
+    return <FallbackHomepage />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cinema-red mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading CineScope...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
+    <ErrorBoundary fallback={<FallbackHomepage />}>
       <div className="min-h-screen bg-background">
-        {/* Hero Section */}
-        <HeroSection />
+        {/* Hero Section - Mobile-first */}
+        <ErrorBoundary>
+          <HeroSection />
+        </ErrorBoundary>
 
-        {/* Content Sections - Enhanced with TV shows */}
-        <div className="container mx-auto px-1 md:px-4 py-8 space-y-12 pb-32">
-          {/* Quick Stats */}
-          <MovieStats />
+        {/* Content Sections - Mobile-optimized spacing */}
+        <div className="px-4 py-6 space-y-8 pb-32">
+          {/* Quick Stats - More compact on mobile */}
+          <ErrorBoundary>
+            <MovieStats />
+          </ErrorBoundary>
           
-          {/* Genre Navigation */}
-          <QuickGenres />
+          {/* Genre Navigation - Horizontal scroll on mobile */}
+          <ErrorBoundary>
+            <QuickGenres />
+          </ErrorBoundary>
 
-          {/* New Dynamic Content Sections */}
-          <NewThisMonth />
-          <FreshPicks />
-          <LatestTrailers />
+          {/* Dynamic Content Sections - Optimized for mobile */}
+          <ErrorBoundary>
+            <NewThisMonth />
+          </ErrorBoundary>
+          
+          <ErrorBoundary>
+            <FreshPicks />
+          </ErrorBoundary>
+          
+          <ErrorBoundary>
+            <LatestTrailers />
+          </ErrorBoundary>
         </div>
 
-        {/* Footer - Mobile optimized */}
-        <footer className="bg-cinema-charcoal border-t border-border py-8 mb-24">
-          <div className="container mx-auto px-1 md:px-4 text-center">
-            <h3 className="text-xl font-cinematic text-foreground mb-3 tracking-wide">
-              CINE<span className="text-cinema-red">SCOPE</span>
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              Discover, Save, and Experience Movies & TV Shows Like Never Before
-            </p>
-          </div>
-        </footer>
-
-        {/* Mobile Navigation */}
-        <Navigation />
+        {/* iOS-style Tab Bar */}
+        <ErrorBoundary>
+          <IOSTabBar />
+        </ErrorBoundary>
       </div>
+    </ErrorBoundary>
   );
 };
 
