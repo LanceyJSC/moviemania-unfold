@@ -19,6 +19,7 @@ import Watchlist from "./pages/Watchlist";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Genres from "./pages/Genres";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -51,6 +52,7 @@ const App = () => {
                       <Route path="/search" element={<Search />} />
                       <Route path="/movies" element={<Movies />} />
                       <Route path="/tv-shows" element={<TVShows />} />
+                      <Route path="/genres" element={<Genres />} />
                       <Route path="/movie/:id" element={<MovieDetail />} />
                       <Route path="/tv/:id" element={<TVShowDetail />} />
                       <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />

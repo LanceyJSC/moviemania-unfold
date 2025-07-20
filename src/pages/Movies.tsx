@@ -54,17 +54,17 @@ const Movies = () => {
               {filterButtons.map((filter) => {
                 const Icon = filter.icon;
                 return (
-                  <Button
-                    key={filter.id}
-                    variant={activeFilter === filter.id ? "default" : "outline"}
-                    size="sm"
-                    className={`flex-shrink-0 ${
-                      activeFilter === filter.id 
-                        ? "bg-cinema-red text-white" 
-                        : "bg-transparent border-border text-foreground"
-                    }`}
-                    onClick={() => setActiveFilter(filter.id)}
-                  >
+                   <Button
+                     key={filter.id}
+                     variant={activeFilter === filter.id ? "default" : "outline"}
+                     size="sm"
+                     className={`flex-shrink-0 touch-target focus-ring ${
+                       activeFilter === filter.id 
+                         ? "bg-cinema-red text-white" 
+                         : "bg-transparent border-border text-foreground"
+                     }`}
+                     onClick={() => setActiveFilter(filter.id)}
+                   >
                     <Icon className="h-4 w-4 mr-2" />
                     {filter.label}
                   </Button>

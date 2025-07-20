@@ -5,6 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { X, Filter } from "lucide-react";
+import { MobileAdvancedFilters } from "./MobileAdvancedFilters";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface AdvancedFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
@@ -36,6 +39,7 @@ const SORT_OPTIONS = [
 ];
 
 export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedFiltersProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [filters, setFilters] = useState<FilterState>({
     genres: [],
     yearRange: [1900, new Date().getFullYear()],
@@ -69,12 +73,17 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
     onFiltersChange(resetFilters);
   };
 
+  // Use mobile component on small screens
+  if (isMobile) {
+    return <MobileAdvancedFilters onFiltersChange={onFiltersChange} isOpen={isOpen} onToggle={onToggle} />;
+  }
+
   if (!isOpen) {
     return (
       <Button 
         variant="outline" 
         onClick={onToggle}
-        className="fixed top-20 right-4 z-50 border-border hover:bg-card"
+        className="fixed top-20 right-4 z-50 border-border hover:bg-card touch-target focus-ring"
       >
         <Filter className="h-4 w-4 mr-2" />
         Filters
@@ -86,7 +95,7 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
     <Card className="fixed top-20 right-4 w-80 p-4 z-50 bg-card border border-border max-h-[80vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-foreground">Advanced Filters</h3>
-        <Button variant="ghost" size="sm" onClick={onToggle}>
+        <Button variant="ghost" size="sm" onClick={onToggle} className="touch-target focus-ring">
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -116,7 +125,10 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
             <Badge
               key={genre}
               variant={filters.genres.includes(genre) ? "default" : "outline"}
-              className="cursor-pointer hover:bg-primary/90 text-xs"
+              className={cn(
+                "cursor-pointer hover:bg-primary/90 text-xs touch-target focus-ring",
+                "min-h-[var(--touch-target)] min-w-[var(--touch-target)] flex items-center justify-center"
+              )}
               onClick={() => toggleGenre(genre)}
             >
               {genre}
@@ -170,7 +182,7 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
         />
       </div>
 
-      <Button variant="outline" onClick={clearFilters} className="w-full">
+      <Button variant="outline" onClick={clearFilters} className="w-full touch-target focus-ring">
         Clear All Filters
       </Button>
     </Card>

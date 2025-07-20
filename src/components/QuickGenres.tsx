@@ -21,15 +21,28 @@ export const QuickGenres = () => {
     navigate(`/search?genre=${genreId}`);
   };
 
+  const handleViewAllClick = () => {
+    navigate("/genres");
+  };
+
   return (
     <div className="space-y-4">
-      <div className="px-4">
-        <h2 className="font-cinematic text-xl tracking-wide text-foreground">
-          Explore by Genre
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Find your perfect movie
-        </p>
+      <div className="px-4 flex items-center justify-between">
+        <div>
+          <h2 className="font-cinematic text-xl tracking-wide text-foreground">
+            Explore by Genre
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Find your perfect movie
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          onClick={handleViewAllClick}
+          className="text-primary hover:text-primary/80 text-sm font-medium"
+        >
+          View All
+        </Button>
       </div>
       
       {/* Mobile-first horizontal scroll */}
