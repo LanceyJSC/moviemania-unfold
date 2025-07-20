@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/HeroSection";
 import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Navigation } from "@/components/Navigation";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
@@ -85,7 +85,7 @@ const Index = () => {
 
         {/* iOS-style Tab Bar */}
         <ErrorBoundary>
-          <IOSTabBar />
+          <Navigation />
         </ErrorBoundary>
       </div>
     </ErrorBoundary>

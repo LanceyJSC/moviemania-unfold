@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Navigation } from "@/components/Navigation";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
 import { cn } from "@/lib/utils";
@@ -257,7 +257,7 @@ const Search = () => {
       </div>
 
       {/* iOS Tab Bar */}
-      <IOSTabBar />
+      <Navigation />
     </div>
   );
 };
