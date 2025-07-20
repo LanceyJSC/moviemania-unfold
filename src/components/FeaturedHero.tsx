@@ -52,7 +52,14 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   if (isLoading || !featuredContent) {
     return (
-      <div className="relative h-96 bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-xl overflow-hidden mb-8">
+      <div 
+        className="relative bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-xl overflow-hidden mb-8"
+        style={{
+          height: 'clamp(350px, 45vh, 500px)',
+          minHeight: '350px',
+          maxHeight: '500px'
+        }}
+      >
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-muted-foreground">Loading featured {type}...</div>
         </div>
@@ -70,7 +77,14 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   return (
-    <div className="relative h-80 iphone-65:h-96 md:h-[24rem] lg:h-96 rounded-2xl overflow-hidden mb-8 group">
+    <div 
+      className="relative rounded-2xl overflow-hidden mb-8 group"
+      style={{
+        height: 'clamp(350px, 45vh, 500px)',
+        minHeight: '350px',
+        maxHeight: '500px'
+      }}
+    >
       {/* Background Image */}
       {backdropUrl && (
         <div 
