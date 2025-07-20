@@ -95,7 +95,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   return (
-    <div className="relative h-96 rounded-2xl overflow-hidden mb-8 group">
+    <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 group">
       {/* Background Image */}
       {backdropUrl && (
         <div 
