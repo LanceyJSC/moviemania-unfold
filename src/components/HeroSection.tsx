@@ -235,13 +235,16 @@ export const HeroSection = () => {
   return (
     <>
       <div 
-        className="relative w-full aspect-video text-foreground overflow-hidden rounded-2xl"
+        className="relative text-foreground overflow-hidden"
+        style={{ 
+          aspectRatio: '16/9' // TMDB backdrop aspect ratio
+        }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Hero Background - TMDB 16:9 aspect ratio */}
+        {/* Hero Background - iPhone optimized with smooth transitions and rounded corners */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out overflow-hidden"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out rounded-2xl overflow-hidden"
           style={{ 
             backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))',
             backgroundColor: 'hsl(var(--background))'
