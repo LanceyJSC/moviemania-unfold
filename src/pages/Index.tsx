@@ -10,8 +10,8 @@ import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
 
 const Index = () => {
-  return (
-      <div className="min-h-screen bg-background">
+    return (
+      <div className="min-h-screen bg-background m-0 p-0">
         {/* Hero Section */}
         <HeroSection />
 
