@@ -1,139 +1,181 @@
-
-import { Heart, Plus, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
-import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Heart, Star, Play, Info, Plus } from "lucide-react";
+import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { Link } from "react-router-dom";
 
-interface MovieCardProps {
-  movie: {
-    id: number;
-    title: string;
-    poster: string;
-    year: string;
-    rating: string;
-    genre?: string;
-  };
-  size?: "small" | "medium" | "large";
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  backdrop_path?: string | null;
+  release_date: string;
+  vote_average: number;
+  genre_ids?: number[];
+  overview?: string;
 }
 
-export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
-  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
-  const isMobile = useIsMobile();
+interface MovieCardProps {
+  movie: Movie;
+}
+
+export const MovieCard = ({ movie }: MovieCardProps) => {
   const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
+  const liked = isLiked(movie.id);
+  const inWatchlist = isInWatchlist(movie.id);
 
-  const handleLikeClick = async (e: React.MouseEvent) => {
+  const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleLike(movie.id, movie.title, movie.poster);
+    await toggleLike(movie.id, movie.title, movie.poster_path);
   };
 
-  const handleWatchlistClick = async (e: React.MouseEvent) => {
+  const handleWatchlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleWatchlist(movie.id, movie.title, movie.poster);
+    await toggleWatchlist(movie.id, movie.title, movie.poster_path);
   };
 
-  const handleImageError = () => {
-    setImageError(true);
-  };
+  // Enhanced mobile image handling - use backdrop as fallback
+  const imageUrl = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    : null;
 
-  // Responsive sizing that works with CSS Grid - No fixed width needed
-  const getCardClasses = () => {
-    return "w-full aspect-[2/3]"; // Use CSS Grid sizing with proper aspect ratio
-  };
+  const backdropUrl = movie.backdrop_path
+    ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
+    : null;
 
-  const getImageClasses = () => {
-    return "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105";
-  };
+  const displayImage = imageUrl || backdropUrl;
 
   return (
-    <Link to={`/movie/${movie.id}`} className="block w-full">
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer ${getCardClasses()}`}>
-        <div className="w-full h-full relative">
-          {/* Movie Poster - Ensure full visibility */}
-          {!imageError ? (
-            <img 
-              src={movie.poster} 
-              alt={movie.title}
-              className={getImageClasses()}
-              loading="lazy"
-              onError={handleImageError}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-cinema-charcoal to-cinema-black flex items-center justify-center border border-border">
-              <div className="text-center p-3">
-                <div className="text-3xl mb-2">🎬</div>
-                <p className="text-xs text-foreground font-medium line-clamp-3 leading-tight px-1 text-shadow-sm">{movie.title}</p>
-                <p className="text-xs text-muted-foreground mt-2 text-shadow-sm">{movie.year}</p>
+    <Link to={`/movie/${movie.id}`} className="block">
+      <Card className="group overflow-hidden enhanced-card mobile-card-hover mobile-touch-feedback">
+        <div className="relative aspect-[2/3] overflow-hidden mobile-image-container">
+          {/* Enhanced mobile-optimized image container */}
+          <div className="relative w-full h-full bg-gradient-to-br from-muted/50 to-muted">
+            {displayImage && !imageError ? (
+              <>
+                {imageLoading && (
+                  <div className="absolute inset-0 mobile-skeleton flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  </div>
+                )}
+                <img
+                  src={displayImage}
+                  alt={movie.title}
+                  className={`mobile-image transition-all duration-500 ${
+                    imageLoading ? 'opacity-0' : 'opacity-100'
+                  } ${!movie.poster_path ? 'object-center' : ''}`}
+                  onLoad={() => setImageLoading(false)}
+                  onError={() => {
+                    setImageError(true);
+                    setImageLoading(false);
+                  }}
+                  loading="lazy"
+                  style={{
+                    filter: !movie.poster_path ? 'brightness(0.9) contrast(1.1)' : 'none',
+                    objectPosition: !movie.poster_path ? 'center 30%' : 'center'
+                  }}
+                />
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 flex flex-col items-center justify-center p-4 text-center">
+                <div className="w-12 h-12 mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Play className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm leading-tight text-foreground mb-1 high-contrast-text">
+                  {movie.title}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Enhanced mobile overlay with better visibility */}
+          <div className="absolute inset-0 mobile-gradient-overlay opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+              <div className="backdrop-text space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <span className="text-white text-xs font-medium">
+                      {movie.vote_average.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleLike}
+                      className="h-7 w-7 p-0 hover:bg-white/20 mobile-touch-feedback"
+                    >
+                      <Heart
+                        className={`w-4 h-4 transition-colors ${
+                          liked ? "fill-red-500 text-red-500" : "text-white"
+                        }`}
+                      />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleWatchlist}
+                      className="h-7 w-7 p-0 hover:bg-white/20 mobile-touch-feedback"
+                    >
+                      <Plus
+                        className={`w-4 h-4 transition-colors ${
+                          inWatchlist ? "text-green-500" : "text-white"
+                        }`}
+                      />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    className="flex-1 h-7 text-xs bg-primary/90 hover:bg-primary mobile-touch-feedback"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Play className="w-3 h-3 mr-1" />
+                    Watch
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-white/20 mobile-touch-feedback"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Info className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
             </div>
-          )}
-          
-          {/* Lighter overlay for better image visibility */}
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
-          </div>
-          
-          {/* Subtle Hover Enhancement - Very light */}
-          <div className={`absolute inset-0 transition-opacity duration-300 ${
-            isMobile ? 'opacity-0 group-active:opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
-          </div>
-          
-          {/* Rating Badge */}
-          <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-            <Star className="h-3 w-3 text-cinema-gold fill-current" />
-            <span className="text-foreground font-semibold text-xs">{movie.rating}</span>
           </div>
 
-          {/* Action Buttons */}
-          <div className={`absolute top-2 right-2 transition-opacity duration-300 space-y-2 ${
-            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <Button 
-              size="sm" 
+          {/* Enhanced rating badge for mobile */}
+          <div className="absolute top-2 right-2">
+            <Badge 
               variant="secondary" 
-              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
-                isMobile ? 'active:scale-95' : ''
-              } ${
-                isLiked(movie.id) ? 'bg-cinema-red border-cinema-red text-white' : 'bg-cinema-charcoal/80'
-              }`}
-              onClick={handleLikeClick}
+              className="text-xs bg-black/80 text-white border-white/20 backdrop-blur-sm font-semibold"
             >
-              <Heart className={`h-4 w-4 ${isLiked(movie.id) ? 'fill-current' : ''}`} />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="secondary" 
-              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
-                isMobile ? 'active:scale-95' : ''
-              } ${
-                isInWatchlist(movie.id) ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : 'bg-cinema-charcoal/80'
-              }`}
-              onClick={handleWatchlistClick}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Movie Info Overlay - Better text visibility */}
-          <div className={`absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-cinema-black/90 via-cinema-black/60 to-transparent transition-opacity duration-300 ${
-            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm text-shadow-md">
-              {movie.title}
-            </h3>
-            <div className="flex items-center justify-between text-muted-foreground text-xs">
-              <span className="text-shadow-sm">{movie.year}</span>
-              <span className="truncate ml-2 text-shadow-sm">Movie</span>
-            </div>
+              ★ {movie.vote_average.toFixed(1)}
+            </Badge>
           </div>
         </div>
+
+        <CardContent className="p-3">
+          <h3 className="mobile-title font-semibold leading-tight mb-1 text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+            {movie.title}
+          </h3>
+          <p className="mobile-subtitle text-muted-foreground">
+            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+          </p>
+        </CardContent>
       </Card>
     </Link>
   );
