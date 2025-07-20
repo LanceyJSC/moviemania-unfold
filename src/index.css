@@ -1,147 +1,205 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile-First iOS Design System for CINESCOPE
-All colors MUST be HSL for proper theming.
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Mobile-First iOS Dark Cinematic Theme */
+    /* Cinematic Dark Theme */
     --background: 0 0% 0%;
     --foreground: 0 0% 95%;
 
-    /* iOS-style elevated surfaces */
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 90%;
 
-    --popover: 0 0% 12%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 95%;
 
-    /* Hollywood Red Primary - slightly adjusted for mobile readability */
-    --primary: 350 85% 50%;
+    /* Hollywood Red Primary */
+    --primary: 350 85% 44%;
     --primary-foreground: 0 0% 98%;
 
-    /* iOS-style secondary surfaces */
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 90%;
+    /* Dark Secondary */
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 85%;
 
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 90%;
+    /* Gold Accent */
+    --accent: 51 100% 50%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 350 85% 50%;
+    --border: 0 0% 15%;
+    --input: 0 0% 10%;
+    --ring: 350 85% 44%;
 
-    /* Mobile-optimized radius */
-    --radius: 12px;
-
-    /* iOS-style cinematic colors */
+    /* Cinematic Design Tokens */
     --cinema-black: 0 0% 0%;
-    --cinema-charcoal: 0 0% 8%;
-    --cinema-red: 350 85% 50%;
-    --cinema-gold: 43 74% 66%;
+    --cinema-charcoal: 0 0% 5%;
+    --cinema-red: 350 85% 44%;
+    --cinema-gold: 51 100% 50%;
+    --cinema-silver: 0 0% 66%;
+    --cinema-green: 120 60% 50%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)));
+    --gradient-card: linear-gradient(180deg, hsl(var(--cinema-charcoal)), hsl(var(--cinema-black)));
+    
+    /* Shadows */
+    --shadow-cinematic: 0 25px 50px -12px hsl(var(--cinema-black) / 0.8);
+    --shadow-card: 0 10px 30px -10px hsl(var(--cinema-black) / 0.6);
+    --shadow-glow: 0 0 30px hsl(var(--cinema-red) / 0.3);
 
-    /* Mobile-specific gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(350 75% 45%));
-    --gradient-dark: linear-gradient(180deg, hsl(var(--background)), hsl(0 0% 5%));
-    --gradient-overlay: linear-gradient(180deg, transparent, hsl(var(--background)));
+    --radius: 0.75rem;
 
-    /* iOS-style shadows */
-    --shadow-sm: 0 2px 8px hsl(var(--cinema-black) / 0.3);
-    --shadow-md: 0 4px 16px hsl(var(--cinema-black) / 0.4);
-    --shadow-lg: 0 8px 32px hsl(var(--cinema-black) / 0.5);
-
-    /* Mobile touch targets */
-    --touch-target: 44px;
-    --touch-padding: 12px;
-
-    /* Chart colors */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
   * {
     @apply border-border;
   }
-  
-  html {
-    scroll-behavior: smooth;
-    /* iOS viewport units */
-    height: 100vh;
-    height: -webkit-fill-available;
-  }
-  
+
   body {
     @apply bg-background text-foreground;
-    /* Mobile-optimized typography */
-    font-size: 16px; /* Prevents zoom on iOS */
-    line-height: 1.5;
-    /* iOS safe areas */
-    padding-bottom: env(safe-area-inset-bottom);
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    /* Touch optimization */
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-
-  /* Custom font for cinematic feel - mobile optimized */
-  .font-cinematic {
-    font-family: 'Bebas Neue', 'Arial Black', sans-serif;
-    letter-spacing: 0.05em;
-    /* Better mobile rendering */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* Cinema theme colors - mobile optimized */
-  .bg-cinema-black { background-color: hsl(var(--cinema-black)); }
-  .bg-cinema-charcoal { background-color: hsl(var(--cinema-charcoal)); }
-  .text-cinema-red { color: hsl(var(--cinema-red)); }
-  .text-cinema-gold { color: hsl(var(--cinema-gold)); }
-  .border-cinema-red { border-color: hsl(var(--cinema-red)); }
-
-  /* iOS-style touch targets */
-  .touch-target {
-    min-height: var(--touch-target);
-    min-width: var(--touch-target);
-    padding: var(--touch-padding);
-  }
-
-  /* iOS-style focus states */
-  .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
-  }
-
-  /* Mobile-optimized scrollbar */
-  ::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary));
-    border-radius: 2px;
-  }
-
-  /* iOS momentum scrolling */
-  .smooth-scroll {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
 }
+
+@layer utilities {
+  /* Mobile Safe Area Utilities */
+  .pb-safe {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+  
+  .pt-safe {
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+  }
+  
+  /* Scrollbar Hide Utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Mobile Optimized Touch Targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Line clamp utilities for text truncation */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  }
+
+  /* Standard Movie/TV Poster Grid Layout */
+  .poster-grid {
+    @apply grid gap-5 p-5;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .poster-grid-sm {
+    @apply grid gap-4 p-4;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .poster-grid-lg {
+    @apply grid gap-6 p-6;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  /* Responsive poster grid that maintains consistent spacing */
+  .poster-grid-responsive {
+    @apply grid p-4 gap-4;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 640px) {
+    .poster-grid-responsive {
+      @apply p-5 gap-5;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .poster-grid-responsive {
+      @apply p-6 gap-6;
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .poster-grid-responsive {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .poster-grid-responsive {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }

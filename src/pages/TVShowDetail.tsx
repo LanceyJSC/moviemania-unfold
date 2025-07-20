@@ -136,11 +136,8 @@ const TVShowDetail = () => {
       {/* Hero Section with Poster Overlay */}
       <div className="relative overflow-hidden h-[50vh]">
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: `url(${backdropUrl})`,
-            backgroundColor: 'hsl(var(--background))'
-          }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${backdropUrl})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />

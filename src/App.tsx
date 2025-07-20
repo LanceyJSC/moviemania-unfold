@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TrailerProvider } from "@/contexts/TrailerContext";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import Movies from "./pages/Movies";
@@ -36,40 +35,34 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <ErrorBoundary>
-            <AuthProvider>
-              <ErrorBoundary>
-                <TrailerProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/search" element={<Search />} />
-                      <Route path="/movies" element={<Movies />} />
-                      <Route path="/tv-shows" element={<TVShows />} />
-                      <Route path="/movie/:id" element={<MovieDetail />} />
-                      <Route path="/tv/:id" element={<TVShowDetail />} />
-                      <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
-                      <Route path="/actor/:id" element={<ActorDetail />} />
-                      <Route path="/category/:category" element={<CategoryPage />} />
-                      <Route path="/watchlist" element={<Watchlist />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/auth" element={<Auth />} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </BrowserRouter>
-                </TrailerProvider>
-              </ErrorBoundary>
-            </AuthProvider>
-          </ErrorBoundary>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <TrailerProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/movies" element={<Movies />} />
+              <Route path="/tv-shows" element={<TVShows />} />
+              <Route path="/movie/:id" element={<MovieDetail />} />
+              <Route path="/tv/:id" element={<TVShowDetail />} />
+              <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
+              <Route path="/actor/:id" element={<ActorDetail />} />
+              <Route path="/category/:category" element={<CategoryPage />} />
+              <Route path="/watchlist" element={<Watchlist />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/auth" element={<Auth />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          </TrailerProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 

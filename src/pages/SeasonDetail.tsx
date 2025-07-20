@@ -133,11 +133,8 @@ const SeasonDetail = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden h-[40vh]">
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: `url(${getSeasonBackdrop()})`,
-            backgroundColor: 'hsl(var(--background))'
-          }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${getSeasonBackdrop()})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />

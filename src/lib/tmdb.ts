@@ -112,8 +112,6 @@ class TMDBService {
   private async fetchFromTMDB<T>(endpoint: string, bustCache: boolean = false): Promise<T> {
     const url = `${TMDB_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_API_KEY}`;
     
-    console.log(`TMDB API call: ${endpoint}${bustCache ? ' (fresh)' : ''}`);
-    
     const fetchOptions: RequestInit = {
       headers: {
         'Cache-Control': bustCache ? 'no-cache' : 'max-age=3600' // 1 hour max cache
@@ -122,27 +120,13 @@ class TMDBService {
     
     try {
       const response = await fetch(url, fetchOptions);
-      
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`TMDB API error ${response.status}:`, errorText);
-        throw new Error(`TMDB API error: ${response.status} - ${errorText}`);
+        throw new Error(`TMDB API error: ${response.status}`);
       }
-      
-      const data = await response.json();
-      console.log(`TMDB API success: ${endpoint} - ${data.results?.length || 'N/A'} results`);
-      return data;
+      return await response.json();
     } catch (error) {
       console.error('TMDB fetch error:', error);
-      
-      // More specific error handling
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        throw new Error('Network error: Unable to connect to movie database');
-      } else if (error instanceof Error) {
-        throw error;
-      } else {
-        throw new Error('Unknown error occurred while fetching movie data');
-      }
+      throw error;
     }
   }
 

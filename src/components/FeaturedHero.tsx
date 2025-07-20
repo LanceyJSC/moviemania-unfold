@@ -99,11 +99,8 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Background Image */}
       {backdropUrl && (
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-transform duration-300 group-hover:scale-105"
-          style={{ 
-            backgroundImage: `url(${backdropUrl})`,
-            backgroundColor: 'hsl(var(--background))'
-          }}
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
+          style={{ backgroundImage: `url(${backdropUrl})` }}
         />
       )}
       
