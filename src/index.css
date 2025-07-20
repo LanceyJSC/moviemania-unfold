@@ -1,3 +1,4 @@
+
 /* Mobile-First iOS Design System for CINESCOPE
 All colors MUST be HSL for proper theming.
 */
@@ -222,6 +223,7 @@ All colors MUST be HSL for proper theming.
   /* TMDB Backdrop aspect ratio */
   .backdrop-16-9 {
     aspect-ratio: 16/9;
+    width: 100%;
   }
 
   /* iOS Scroll Behaviors */
@@ -273,24 +275,42 @@ All colors MUST be HSL for proper theming.
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    position: relative;
   }
 
   .ios-content-area {
     flex: 1;
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
     overflow-x: hidden;
+    position: relative;
   }
 
-  /* Text visibility improvements */
+  /* Enhanced text visibility improvements */
   .text-shadow-sm {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6);
   }
 
   .text-shadow-md {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 3px rgba(0, 0, 0, 0.7);
   }
 
   .text-shadow-lg {
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Backdrop text enhancement */
+  .backdrop-text {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  /* Enhanced contrast utilities */
+  .high-contrast-text {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.8);
+    font-weight: 500;
   }
 }
