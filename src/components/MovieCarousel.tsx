@@ -63,7 +63,7 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       // Updated scroll amounts based on uniform poster sizes + consistent spacing (12px)
-      const scrollAmount = cardSize === 'small' ? 140 : cardSize === 'medium' ? 156 : 172; // poster width + gap
+      const scrollAmount = cardSize === 'small' ? 124 : cardSize === 'medium' ? 132 : 140; // poster width + gap
       const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       
       scrollRef.current.scrollTo({
@@ -86,10 +86,10 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
 
   const getSkeletonClasses = () => {
     switch (cardSize) {
-      case "small": return "w-32 h-48";
-      case "medium": return "w-36 h-54";
-      case "large": return "w-40 h-60";
-      default: return "w-36 h-54";
+      case "small": return "w-28 h-42";
+      case "medium": return "w-30 h-45";
+      case "large": return "w-32 h-48";
+      default: return "w-30 h-45";
     }
   };
 

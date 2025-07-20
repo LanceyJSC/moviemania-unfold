@@ -120,7 +120,7 @@ export const LatestTrailers = () => {
         {loading ? (
           <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex-shrink-0 w-36 h-54 bg-muted animate-pulse rounded-lg" />
+              <div key={i} className="flex-shrink-0 w-30 h-45 bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
         ) : (
@@ -128,7 +128,7 @@ export const LatestTrailers = () => {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 w-36 h-54 rounded-lg"
+                className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 w-30 h-45 rounded-lg"
                 onClick={() => handlePlayTrailer(item)}
               >
                 <div className="w-full h-full relative">

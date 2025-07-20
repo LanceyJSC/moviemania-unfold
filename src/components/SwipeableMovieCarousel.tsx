@@ -119,10 +119,10 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
 
   const getSkeletonClasses = () => {
     switch (cardSize) {
-      case "small": return "w-32 h-48";
-      case "medium": return "w-36 h-54"; 
-      case "large": return "w-40 h-60";
-      default: return "w-36 h-54";
+      case "small": return "w-28 h-42";
+      case "medium": return "w-30 h-45"; 
+      case "large": return "w-32 h-48";
+      default: return "w-30 h-45";
     }
   };
 

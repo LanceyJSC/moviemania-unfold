@@ -110,7 +110,7 @@ export const FreshPicks = () => {
           </div>
             <div className="flex space-x-3 overflow-hidden">
              {Array.from({ length: 6 }).map((_, index) => (
-               <div key={index} className="flex-shrink-0 w-36 h-54 bg-muted animate-pulse rounded-lg"></div>
+               <div key={index} className="flex-shrink-0 w-30 h-45 bg-muted animate-pulse rounded-lg"></div>
              ))}
           </div>
         </div>

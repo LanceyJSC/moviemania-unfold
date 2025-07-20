@@ -41,17 +41,17 @@ export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
     setImageError(true);
   };
 
-  // Uniform sizing system - matching MovieCard exactly with 2:3 aspect ratio
+  // iPhone-optimized sizing system - matching MovieCard exactly
   const getCardClasses = () => {
     switch (size) {
       case "small":
-        return "w-32 h-48"; // 128px × 192px - for dense grids and mobile carousels
+        return "w-28 h-42"; // 112px × 168px - for very dense grids
       case "medium":
-        return "w-36 h-54"; // 144px × 216px - for main carousels and lists
+        return "w-30 h-45"; // 120px × 180px - for main carousels (fits 3 across on iPhone)
       case "large":
-        return "w-40 h-60"; // 160px × 240px - for featured content
+        return "w-32 h-48"; // 128px × 192px - for featured content
       default:
-        return "w-36 h-54";
+        return "w-30 h-45";
     }
   };
 
