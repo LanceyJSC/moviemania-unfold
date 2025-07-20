@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Film, TrendingUp, Star, Calendar } from "lucide-react";
+import { Film, TrendingUp, Star, Calendar, AlertCircle } from "lucide-react";
 import { tmdbService } from "@/lib/tmdb";
 
 export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
@@ -10,13 +10,27 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
     topRatedCount: 0,
     upcomingCount: 0
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadStats = async (fresh: boolean = false) => {
+    console.log('Loading movie stats, fresh:', fresh);
+    setError(null);
+    
     try {
       const [trending, topRated, upcoming] = await Promise.all([
-        tmdbService.getTrendingMovies('week', fresh),
-        tmdbService.getTopRatedMovies(1, fresh),
-        tmdbService.getUpcomingMovies(1, fresh)
+        tmdbService.getTrendingMovies('week', fresh).catch(err => {
+          console.warn('Failed to load trending movies:', err);
+          return { results: [], total_results: 0 };
+        }),
+        tmdbService.getTopRatedMovies(1, fresh).catch(err => {
+          console.warn('Failed to load top rated movies:', err);
+          return { results: [], total_results: 0 };
+        }),
+        tmdbService.getUpcomingMovies(1, fresh).catch(err => {
+          console.warn('Failed to load upcoming movies:', err);
+          return { results: [], total_results: 0 };
+        })
       ]);
       
       setStats({
@@ -25,8 +39,11 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
         topRatedCount: topRated.results.length,
         upcomingCount: upcoming.results.length
       });
+      
+      console.log('Movie stats loaded successfully');
     } catch (error) {
       console.error('Failed to load stats:', error);
+      setError('Unable to load movie statistics');
       // Fallback to reasonable estimates
       setStats({
         totalMovies: 500000,
@@ -34,6 +51,8 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
         topRatedCount: 20,
         upcomingCount: 20
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,6 +63,7 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
   // Periodic refresh every hour to stay updated with TMDB
   useEffect(() => {
     const refreshInterval = setInterval(() => {
+      console.log('Auto-refreshing movie stats...');
       loadStats(true);
     }, 3600000); // 1 hour in milliseconds
 
@@ -56,6 +76,15 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
     { icon: Star, label: "Top Rated", value: stats.topRatedCount },
     { icon: Calendar, label: "Coming Soon", value: stats.upcomingCount }
   ];
+
+  if (error && !isLoading) {
+    return (
+      <div className="bg-background rounded-2xl p-8 mb-12 text-center">
+        <AlertCircle className="h-8 w-8 text-cinema-red mx-auto mb-4" />
+        <p className="text-muted-foreground">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background rounded-2xl p-8 mb-12">
@@ -74,10 +103,14 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
           return (
             <div key={index} className="text-center">
               <div className="bg-cinema-red/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Icon className="h-8 w-8 text-cinema-red" />
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cinema-red"></div>
+                ) : (
+                  <Icon className="h-8 w-8 text-cinema-red" />
+                )}
               </div>
               <div className="text-2xl font-bold text-foreground mb-2">
-                {item.value}
+                {isLoading ? '-' : item.value}
               </div>
               <div className="text-sm text-muted-foreground">
                 {item.label}

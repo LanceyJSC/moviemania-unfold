@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Play, Info, RefreshCw } from "lucide-react";
+import { Play, Info, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TrailerModal } from "@/components/TrailerModal";
 import { tmdbService, Movie } from "@/lib/tmdb";
@@ -13,35 +13,62 @@ export const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [trailerKeys, setTrailerKeys] = useState<(string | null)[]>([]);
-  const { isTrailerOpen, setIsTrailerOpen } = useTrailerContext();
+  const [isPaused, setIsPaused] = useState(false);
+  
   const isMobile = useIsMobile();
   const rotationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
+
+  // Safe context usage with fallback
+  let isTrailerOpen = false;
+  let setIsTrailerOpen = () => {};
+  
+  try {
+    const trailerContext = useTrailerContext();
+    isTrailerOpen = trailerContext.isTrailerOpen;
+    setIsTrailerOpen = trailerContext.setIsTrailerOpen;
+  } catch (contextError) {
+    console.warn('TrailerContext not available:', contextError);
+  }
 
   const loadHeroMovies = async (fresh: boolean = false) => {
+    console.log('Loading hero movies, fresh:', fresh);
+    
     if (fresh) {
       setIsRefreshing(true);
     } else {
       setIsLoading(true);
     }
     
+    setError(null);
+    
     try {
       const trending = await tmdbService.getTrendingMovies('week', fresh);
+      console.log('Trending movies loaded:', trending.results?.length || 0);
+      
       if (trending.results && trending.results.length > 0) {
         // Get the first 5 movies with backdrop images
         const moviesWithBackdrops = trending.results
           .filter(movie => movie.backdrop_path)
           .slice(0, 5);
+        console.log('Movies with backdrops:', moviesWithBackdrops.length);
         
         // Get full movie details including videos for each movie
-        const movieDetailsPromises = moviesWithBackdrops.map(movie => 
-          tmdbService.getMovieDetails(movie.id, fresh)
-        );
-        const movieDetails = await Promise.all(movieDetailsPromises);
+        const movieDetailsPromises = moviesWithBackdrops.map(async (movie) => {
+          try {
+            return await tmdbService.getMovieDetails(movie.id, fresh);
+          } catch (detailError) {
+            console.error('Failed to load movie details for:', movie.id, detailError);
+            return movie; // Return basic movie data if details fail
+          }
+        });
         
-        setHeroMovies(movieDetails);
+        const movieDetails = await Promise.all(movieDetailsPromises);
+        console.log('Movie details loaded:', movieDetails.length);
+        
+        setHeroMovies(movieDetails.filter(Boolean)); // Filter out any null results
         
         // Extract trailer keys for all movies
         const trailerKeysArray = movieDetails.map(movie => {
@@ -56,9 +83,12 @@ export const HeroSection = () => {
         if (fresh) {
           setCurrentIndex(0);
         }
+      } else {
+        throw new Error('No trending movies found');
       }
     } catch (error) {
       console.error("Failed to load hero movies:", error);
+      setError(error instanceof Error ? error.message : 'Failed to load movies');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -72,7 +102,7 @@ export const HeroSection = () => {
     }
     
     rotationIntervalRef.current = setInterval(() => {
-      if (!isPaused) {
+      if (!isPaused && heroMovies.length > 1) {
         setCurrentIndex(prevIndex => 
           prevIndex >= heroMovies.length - 1 ? 0 : prevIndex + 1
         );
@@ -90,43 +120,55 @@ export const HeroSection = () => {
 
   useEffect(() => {
     loadHeroMovies();
-  }, []);
-
-  // Start rotation when we have movies
-  useEffect(() => {
-    if (heroMovies.length > 1) {
-      startRotation();
-    }
     
-    return () => stopRotation();
-  }, [heroMovies.length, isPaused]);
-
-  // Periodic refresh every hour with more aggressive cache busting
-  useEffect(() => {
-    refreshIntervalRef.current = setInterval(() => {
-      console.log('Auto-refreshing hero movies...');
-      loadHeroMovies(true);
-    }, 3600000); // 1 hour in milliseconds
-
     return () => {
+      stopRotation();
       if (refreshIntervalRef.current) {
         clearInterval(refreshIntervalRef.current);
       }
     };
   }, []);
 
+  // Start rotation when we have movies
+  useEffect(() => {
+    if (heroMovies.length > 1 && !error) {
+      startRotation();
+    }
+    
+    return () => stopRotation();
+  }, [heroMovies.length, isPaused, error]);
+
+  // Periodic refresh every hour with more aggressive cache busting
+  useEffect(() => {
+    if (!error) {
+      refreshIntervalRef.current = setInterval(() => {
+        console.log('Auto-refreshing hero movies...');
+        loadHeroMovies(true);
+      }, 3600000); // 1 hour in milliseconds
+    }
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [error]);
+
   // Manual refresh function
   const handleManualRefresh = () => {
     console.log('Manual refresh triggered');
+    setError(null);
     loadHeroMovies(true);
   };
 
   // Navigation functions
   const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-    // Restart rotation after manual navigation
-    if (heroMovies.length > 1) {
-      startRotation();
+    if (index >= 0 && index < heroMovies.length) {
+      setCurrentIndex(index);
+      // Restart rotation after manual navigation
+      if (heroMovies.length > 1) {
+        startRotation();
+      }
     }
   };
 
@@ -142,14 +184,48 @@ export const HeroSection = () => {
 
   const handleWatchNow = () => {
     const currentTrailerKey = trailerKeys[currentIndex];
-    if (currentTrailerKey) {
+    if (currentTrailerKey && setIsTrailerOpen) {
       setIsTrailerOpen(true);
     }
   };
 
   const handleCloseTrailer = () => {
-    setIsTrailerOpen(false);
+    if (setIsTrailerOpen) {
+      setIsTrailerOpen(false);
+    }
   };
+
+  // Error state
+  if (error && !isRefreshing) {
+    return (
+      <div 
+        className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black"
+        style={{ 
+          height: '50vh',
+          minHeight: '400px',
+          maxHeight: '600px'
+        }}
+      >
+        <div className="relative z-10 flex flex-col justify-center items-center h-full px-6 text-center">
+          <AlertCircle className="h-12 w-12 text-cinema-red mb-4" />
+          <h2 className="font-cinematic text-xl text-foreground mb-2">
+            Unable to Load Featured Content
+          </h2>
+          <p className="text-muted-foreground mb-4 max-w-md">
+            We're having trouble connecting to our movie database. Please try refreshing.
+          </p>
+          <Button
+            onClick={handleManualRefresh}
+            className="bg-cinema-red hover:bg-cinema-red/90"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Always show the hero section, even when loading
   const heroMovie = heroMovies[currentIndex];
@@ -172,7 +248,7 @@ export const HeroSection = () => {
         <div 
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
           style={{ 
-            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'var(--gradient-dark)'
+            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))'
           }}
         >
           {/* Mobile-optimized overlays */}
