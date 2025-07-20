@@ -106,7 +106,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
       </div>
 
       {/* Movies Grid */}
-      <div className="poster-grid-standard">
+      <div className="poster-grid-responsive">
         {isLoading && movies.length === 0 ? (
           // Loading skeleton
           Array.from({ length: 15 }).map((_, index) => (

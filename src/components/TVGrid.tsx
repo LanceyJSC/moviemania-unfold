@@ -106,7 +106,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
       </div>
 
       {/* TV Shows Grid */}
-      <div className="poster-grid-standard">
+      <div className="poster-grid-responsive">
         {isLoading && tvShows.length === 0 ? (
           // Loading skeleton
           Array.from({ length: 15 }).map((_, index) => (

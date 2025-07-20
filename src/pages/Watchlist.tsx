@@ -135,13 +135,13 @@ const Watchlist = () => {
               </Link>
             </div>
           ) : isLoading ? (
-             <div className="poster-grid-standard">
+             <div className="poster-grid-responsive">
               {Array.from({ length: 6 }).map((_, index) => (
                 <div key={index} className="w-48 h-72 bg-muted animate-pulse rounded-lg"></div>
               ))}
             </div>
           ) : activeTabData && activeTabData.data.length > 0 ? (
-            <div className="poster-grid-standard">
+            <div className="poster-grid-responsive">
               {activeTabData.data.map((movie) => (
                 <div key={movie.id} className="relative group">
                   <MovieCard movie={movie} size="medium" />
