@@ -162,18 +162,20 @@ const ActorDetail = () => {
             FILMOGRAPHY ({allContent.length} {allContent.length === 1 ? 'TITLE' : 'TITLES'})
           </h2>
           <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
-            {allContent.map((item) => (
-              <MovieCard 
-                key={`${item.id}-${item.media_type}`}
-                movie={{
-                  id: item.id,
-                  title: item.title,
-                  poster: tmdbService.getPosterUrl(item.poster_path),
-                  year: item.release_date ? new Date(item.release_date).getFullYear().toString() : 'TBA',
-                  rating: item.vote_average.toFixed(1),
-                  genre: item.character
-                }}
-              />
+            {allContent.map((item, index) => (
+              <div key={`${item.id}-${item.media_type}`} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                <MovieCard 
+                  movie={{
+                    id: item.id,
+                    title: item.title,
+                    poster: tmdbService.getPosterUrl(item.poster_path),
+                    year: item.release_date ? new Date(item.release_date).getFullYear().toString() : 'TBA',
+                    rating: item.vote_average.toFixed(1),
+                    genre: item.character
+                  }}
+                  variant="grid"
+                />
+              </div>
             ))}
           </div>
         </div>
