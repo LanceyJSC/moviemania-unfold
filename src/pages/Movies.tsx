@@ -12,11 +12,11 @@ const Movies = () => {
   const [activeFilter, setActiveFilter] = useState("all");
 
   const filterButtons = [
-    { id: "all", label: "All Movies", icon: Film },
+    { id: "all", label: "All", icon: Film },
     { id: "popular", label: "Popular", icon: TrendingUp },
-    { id: "now_playing", label: "Now Playing", icon: Play },
-    { id: "upcoming", label: "Upcoming", icon: Calendar },
-    { id: "top_rated", label: "Top Rated", icon: Star },
+    { id: "now_playing", label: "Playing", icon: Play },
+    { id: "upcoming", label: "Soon", icon: Calendar },
+    { id: "top_rated", label: "Top", icon: Star },
   ];
 
   const getFilterTitle = (filterId: string) => {
@@ -46,10 +46,9 @@ const Movies = () => {
         {/* Content */}
         <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
 
-          {/* Mobile-First Filter Buttons */}
+          {/* Mobile-First Filter Buttons - Single Line */}
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4 px-4 md:px-6">
-            {/* Mobile Grid Layout - 2 columns, 3 rows */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
+            <div className="flex justify-between space-x-1 sm:space-x-2">
               {filterButtons.map((filter) => {
                 const Icon = filter.icon;
                 return (
@@ -57,15 +56,15 @@ const Movies = () => {
                      key={filter.id}
                      variant={activeFilter === filter.id ? "default" : "outline"}
                      size="sm"
-                     className={`h-14 text-sm font-medium transition-all duration-200 active:scale-95 rounded-2xl touch-target focus-ring ${
+                     className={`flex-1 h-12 sm:h-14 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl sm:rounded-2xl touch-target focus-ring ${
                        activeFilter === filter.id 
                          ? "bg-cinema-red text-white shadow-md" 
                          : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
                      }`}
                      onClick={() => setActiveFilter(filter.id)}
                    >
-                    <div className="flex flex-col items-center space-y-1">
-                      <Icon className="h-4 w-4" />
+                    <div className="flex flex-col items-center space-y-0.5 sm:space-y-1">
+                      <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span className="text-xs leading-tight">{filter.label}</span>
                     </div>
                   </Button>

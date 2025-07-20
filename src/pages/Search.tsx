@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search as SearchIcon, Filter, X, TrendingUp, Film, Tv, ArrowRight, Shuffle, Star, Clock, PlayCircle } from "lucide-react";
@@ -437,14 +438,14 @@ const Search = () => {
             </Button>
           </div>
 
-          {/* Mobile-First Control Tabs */}
+          {/* Mobile-First Control Tabs - Single Line */}
           {(searchTerm || isSurpriseMode) && (
-            <div className="grid grid-cols-3 gap-2 bg-muted/30 rounded-2xl p-1">
+            <div className="flex justify-between space-x-1 bg-muted/30 rounded-2xl p-1">
               <Button
                 variant={activeTab === 'all' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveTab('all')}
-                className="rounded-xl h-10 text-sm font-medium"
+                className="flex-1 rounded-xl h-10 text-sm font-medium"
               >
                 All
               </Button>
@@ -452,7 +453,7 @@ const Search = () => {
                 variant={activeTab === 'movies' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveTab('movies')}
-                className="rounded-xl h-10 text-sm font-medium"
+                className="flex-1 rounded-xl h-10 text-sm font-medium"
               >
                 <Film className="h-4 w-4 mr-1" />
                 Movies
@@ -461,7 +462,7 @@ const Search = () => {
                 variant={activeTab === 'tv' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveTab('tv')}
-                className="rounded-xl h-10 text-sm font-medium"
+                className="flex-1 rounded-xl h-10 text-sm font-medium"
               >
                 <Tv className="h-4 w-4 mr-1" />
                 TV
@@ -469,48 +470,46 @@ const Search = () => {
             </div>
           )}
 
-          {/* Mobile-First Sort and Action Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            {/* Sort Controls - Mobile Grid */}
+          {/* Mobile-First Sort and Action Controls - Single Line */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Sort Controls - Single Line */}
             {(searchTerm || genreParam || isSurpriseMode) && (
-              <div className="flex-1 min-w-0">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-muted/20 rounded-xl p-1">
-                  <Button
-                    variant={sortBy === 'popularity' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSortBy('popularity')}
-                    className="rounded-lg h-9 text-xs font-medium"
-                  >
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    Popular
-                  </Button>
-                  <Button
-                    variant={sortBy === 'rating' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSortBy('rating')}
-                    className="rounded-lg h-9 text-xs font-medium"
-                  >
-                    <Star className="h-3 w-3 mr-1" />
-                    Rating
-                  </Button>
-                  <Button
-                    variant={sortBy === 'release_date' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSortBy('release_date')}
-                    className="rounded-lg h-9 text-xs font-medium"
-                  >
-                    <Clock className="h-3 w-3 mr-1" />
-                    Recent
-                  </Button>
-                  <Button
-                    variant={sortBy === 'title' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSortBy('title')}
-                    className="rounded-lg h-9 text-xs font-medium"
-                  >
-                    A-Z
-                  </Button>
-                </div>
+              <div className="flex justify-between space-x-1 flex-1 bg-muted/20 rounded-xl p-1">
+                <Button
+                  variant={sortBy === 'popularity' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSortBy('popularity')}
+                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                >
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Pop
+                </Button>
+                <Button
+                  variant={sortBy === 'rating' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSortBy('rating')}
+                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                >
+                  <Star className="h-3 w-3 mr-1" />
+                  Rate
+                </Button>
+                <Button
+                  variant={sortBy === 'release_date' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSortBy('release_date')}
+                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  New
+                </Button>
+                <Button
+                  variant={sortBy === 'title' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSortBy('title')}
+                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                >
+                  A-Z
+                </Button>
               </div>
             )}
 

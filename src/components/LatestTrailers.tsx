@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 
 const TRAILER_CATEGORIES = [
   { id: 'popular', label: 'Popular' },
-  { id: 'streaming', label: 'Streaming' },
-  { id: 'on_tv', label: 'On TV' },
-  { id: 'for_rent', label: 'For Rent' },
-  { id: 'in_theaters', label: 'In Theaters' }
+  { id: 'streaming', label: 'Stream' },
+  { id: 'on_tv', label: 'TV' },
+  { id: 'for_rent', label: 'Rent' },
+  { id: 'in_theaters', label: 'Theater' }
 ] as const;
 
 type TrailerCategory = typeof TRAILER_CATEGORIES[number]['id'];
@@ -97,9 +97,9 @@ export const LatestTrailers = () => {
           <div className="w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
 
-        {/* Mobile-First Category Tabs - Responsive Grid */}
+        {/* Mobile-First Category Tabs - Single Line */}
         <div className="mb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 max-w-2xl mx-auto">
+          <div className="flex justify-between space-x-1 sm:space-x-2 max-w-2xl mx-auto">
             {TRAILER_CATEGORIES.map((category) => (
               <Button
                 key={category.id}
@@ -107,7 +107,7 @@ export const LatestTrailers = () => {
                 size="sm"
                 onClick={() => setActiveCategory(category.id)}
                 className={cn(
-                  "h-12 text-xs font-medium transition-all duration-200 active:scale-95",
+                  "flex-1 h-10 sm:h-12 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95",
                   "touch-target focus-ring rounded-xl",
                   activeCategory === category.id
                     ? "bg-primary text-primary-foreground shadow-md"
