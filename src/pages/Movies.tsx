@@ -41,35 +41,36 @@ const Movies = () => {
       
       {/* Content container */}
       <div className="relative">
-        {/* Filter Buttons */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 pt-8">
-        <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
-          {filterButtons.map((filter) => {
-            const Icon = filter.icon;
-            return (
-              <Button
-                key={filter.id}
-                variant={activeFilter === filter.id ? "default" : "outline"}
-                size="sm"
-                className={`flex-shrink-0 ${
-                  activeFilter === filter.id 
-                    ? "bg-cinema-red text-white" 
-                    : "bg-transparent border-border text-foreground"
-                }`}
-                onClick={() => setActiveFilter(filter.id)}
-              >
-                <Icon className="h-4 w-4 mr-2" />
-                {filter.label}
-              </Button>
-            );
-          })}
-        </div>
-        </div>
 
         {/* Content */}
         <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
           {/* Featured Hero Section */}
           <FeaturedHero type="movie" />
+
+          {/* Filter Buttons */}
+          <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg px-4 py-4">
+            <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
+              {filterButtons.map((filter) => {
+                const Icon = filter.icon;
+                return (
+                  <Button
+                    key={filter.id}
+                    variant={activeFilter === filter.id ? "default" : "outline"}
+                    size="sm"
+                    className={`flex-shrink-0 ${
+                      activeFilter === filter.id 
+                        ? "bg-cinema-red text-white" 
+                        : "bg-transparent border-border text-foreground"
+                    }`}
+                    onClick={() => setActiveFilter(filter.id)}
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    {filter.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Movies Grid */}
           <MovieGrid 
