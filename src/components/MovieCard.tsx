@@ -40,17 +40,17 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     setImageError(true);
   };
 
-  // Consistent sizing based on size prop - Fixed dimensions for grid consistency
+  // iPhone-optimized sizing - optimized for 414px-428px screen width
   const getCardClasses = () => {
     switch (size) {
       case "small":
-        return "w-[150px] h-[225px]"; // Fixed 2:3 aspect ratio
+        return "w-[120px] h-[180px] iphone-65:w-[130px] iphone-65:h-[195px] sm:w-[150px] sm:h-[225px]"; // iPhone optimized 2:3 aspect ratio
       case "medium":
-        return "w-[180px] h-[270px]"; // Fixed 2:3 aspect ratio
+        return "w-[140px] h-[210px] iphone-65:w-[150px] iphone-65:h-[225px] sm:w-[180px] sm:h-[270px]"; // iPhone optimized 2:3 aspect ratio
       case "large":
-        return "w-[200px] h-[300px]"; // Fixed 2:3 aspect ratio
+        return "w-[160px] h-[240px] iphone-65:w-[170px] iphone-65:h-[255px] sm:w-[200px] sm:h-[300px]"; // iPhone optimized 2:3 aspect ratio
       default:
-        return "w-[180px] h-[270px]";
+        return "w-[140px] h-[210px] iphone-65:w-[150px] iphone-65:h-[225px] sm:w-[180px] sm:h-[270px]";
     }
   };
 

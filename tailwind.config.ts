@@ -12,10 +12,23 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: '1rem',
 			screens: {
-				'2xl': '1400px'
+				'sm': '414px',    // iPhone 6.5" minimum
+				'md': '428px',    // iPhone 6.7" 
+				'lg': '768px',    // iPad
+				'xl': '1024px',   // Desktop
+				'2xl': '1400px'   // Large desktop
 			}
+		},
+		screens: {
+			'iphone-65': '414px',    // iPhone 6.5"
+			'iphone-67': '428px',    // iPhone 6.7"
+			'sm': '640px',
+			'md': '768px',
+			'lg': '1024px',
+			'xl': '1280px',
+			'2xl': '1536px'
 		},
 		extend: {
 			colors: {

@@ -237,9 +237,9 @@ export const HeroSection = () => {
       <div 
         className="relative text-foreground overflow-hidden"
         style={{ 
-          height: '50vh',
-          minHeight: '400px',
-          maxHeight: '600px'
+          height: 'clamp(350px, 45vh, 500px)', // iPhone-optimized height
+          minHeight: '350px', // Smaller for iPhone screens
+          maxHeight: '500px'  // More compact for mobile
         }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}

@@ -1,6 +1,8 @@
 import * as React from "react"
 
-const MOBILE_BREAKPOINT = 768
+// iPhone 6.5" and 6.7" screen width range: 414px-428px
+const MOBILE_BREAKPOINT = 640  // Anything below 640px is considered mobile (iPhone/small devices)
+const IPHONE_MAX_WIDTH = 428   // iPhone 6.7" max width
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
@@ -16,4 +18,21 @@ export function useIsMobile() {
   }, [])
 
   return !!isMobile
+}
+
+// iPhone-specific hook for 6.5" and 6.7" detection
+export function useIsIPhone() {
+  const [isIPhone, setIsIPhone] = React.useState<boolean | undefined>(undefined)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${IPHONE_MAX_WIDTH}px)`)
+    const onChange = () => {
+      setIsIPhone(window.innerWidth <= IPHONE_MAX_WIDTH)
+    }
+    mql.addEventListener("change", onChange)
+    setIsIPhone(window.innerWidth <= IPHONE_MAX_WIDTH)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return !!isIPhone
 }

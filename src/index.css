@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile-First iOS Design System for CINESCOPE
-All colors MUST be HSL for proper theming.
-*/
+  /* iPhone 6.5" & 6.7" Optimized Design System for CINESCOPE
+    Specifically designed for 414px-428px width screens
+    All colors MUST be HSL for proper theming.
+  */
 
 @layer base {
   :root {
-    /* Mobile-First iOS Dark Cinematic Theme */
+    /* iPhone-First iOS Dark Cinematic Theme */
     --background: 0 0% 0%;
     --foreground: 0 0% 95%;
 
@@ -19,7 +20,7 @@ All colors MUST be HSL for proper theming.
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 95%;
 
-    /* Hollywood Red Primary - slightly adjusted for mobile readability */
+    /* Hollywood Red Primary - iPhone screen optimized */
     --primary: 350 85% 50%;
     --primary-foreground: 0 0% 98%;
 
@@ -40,7 +41,7 @@ All colors MUST be HSL for proper theming.
     --input: 0 0% 15%;
     --ring: 350 85% 50%;
 
-    /* Mobile-optimized radius */
+    /* iPhone-optimized radius */
     --radius: 12px;
 
     /* iOS-style cinematic colors */
@@ -49,19 +50,25 @@ All colors MUST be HSL for proper theming.
     --cinema-red: 350 85% 50%;
     --cinema-gold: 43 74% 66%;
 
-    /* Mobile-specific gradients */
+    /* iPhone-specific gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(350 75% 45%));
     --gradient-dark: linear-gradient(180deg, hsl(var(--background)), hsl(0 0% 5%));
     --gradient-overlay: linear-gradient(180deg, transparent, hsl(var(--background)));
 
-    /* iOS-style shadows */
+    /* iOS-style shadows optimized for iPhone */
     --shadow-sm: 0 2px 8px hsl(var(--cinema-black) / 0.3);
     --shadow-md: 0 4px 16px hsl(var(--cinema-black) / 0.4);
     --shadow-lg: 0 8px 32px hsl(var(--cinema-black) / 0.5);
+    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.3);
 
-    /* Mobile touch targets */
+    /* iPhone touch targets - Apple Human Interface Guidelines */
     --touch-target: 44px;
     --touch-padding: 12px;
+    
+    /* iPhone 6.5"/6.7" specific spacing */
+    --safe-area-top: env(safe-area-inset-top);
+    --safe-area-bottom: env(safe-area-inset-bottom);
+    --iphone-container-padding: 16px;
 
     /* Chart colors */
     --chart-1: 12 76% 61%;
