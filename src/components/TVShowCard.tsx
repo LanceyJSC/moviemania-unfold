@@ -53,7 +53,7 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
 
   return (
     <Link to={`/tv/${tvShow.id}`}>
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
+      <Card className={`group relative overflow-hidden bg-card border-border transition-all duration-300 cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* TV Show Poster */}
           {!imageError ? (
