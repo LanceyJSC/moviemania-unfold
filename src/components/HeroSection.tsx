@@ -246,9 +246,10 @@ export const HeroSection = () => {
       >
         {/* Hero Background - Mobile optimized with smooth transitions */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+          className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{ 
-            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))'
+            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))',
+            backgroundColor: 'hsl(var(--background))'
           }}
         >
           {/* Mobile-optimized overlays */}
