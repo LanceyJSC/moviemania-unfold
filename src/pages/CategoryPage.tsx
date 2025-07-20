@@ -127,7 +127,7 @@ const CategoryPage = () => {
       <MobileHeader title={getCategoryTitle(category || '')} />
       
       <div className="container mx-auto px-4 py-6">
-        <div className="poster-grid-responsive mb-8">
+        <div className="poster-grid-standard mb-8">
           {movies.map((movie, index) => (
             <MovieCard 
               key={`${movie.id}-${index}`}

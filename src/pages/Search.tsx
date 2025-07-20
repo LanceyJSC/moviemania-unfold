@@ -275,6 +275,10 @@ const Search = () => {
   const handleSurpriseMe = async () => {
     console.log("Surprise Me clicked!");
     setIsSearching(true);
+    
+    // Clear previous surprise state first
+    setOriginalSurpriseResults([]);
+    setSearchResults([]);
     setIsSurpriseMode(true);
     
     // Clear search term immediately to prevent useEffect interference
@@ -399,7 +403,7 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 max-h-screen overflow-y-auto">{/* Fixed scrolling */}
+    <div className="min-h-screen bg-background pb-20 max-h-screen overflow-y-auto safe-top safe-bottom">{/* Mobile-optimized with safe areas */}
       <MobileHeader title="Search" />
       {/* Header and Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
@@ -626,7 +630,7 @@ const Search = () => {
                   Trending TV Shows
                 </h2>
               </div>
-               <div className="poster-grid-responsive">
+               <div className="poster-grid-standard">
                 {trendingTVShows.map((tvShow) => (
                   <TVShowCard 
                     key={tvShow.id} 
@@ -675,7 +679,7 @@ const Search = () => {
             
             {/* Results Grid - Movies Page Style */}
             <div className="container mx-auto px-4 md:px-6 py-8">
-               <div className="poster-grid-responsive">
+               <div className="poster-grid-standard">
                 {searchResults.map((item) => renderMediaCard(item))}
               </div>
             </div>

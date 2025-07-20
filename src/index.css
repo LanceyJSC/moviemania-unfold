@@ -154,52 +154,86 @@ All colors MUST be HSL.
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Mobile-First Design System for 6:9 iPhone Screens */
+  
+  /* Standardized Poster Grid - 4 across with consistent 2:3 ratio */
+  .poster-grid-standard {
+    @apply grid gap-3 p-4;
+    grid-template-columns: repeat(4, 1fr); /* Always 4 posters across */
   }
 
-  /* Standard Movie/TV Poster Grid Layout */
-  .poster-grid {
-    @apply grid gap-5 p-5;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-
-  .poster-grid-sm {
-    @apply grid gap-4 p-4;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-
-  .poster-grid-lg {
-    @apply grid gap-6 p-6;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
-
-  /* Responsive poster grid that maintains consistent spacing */
-  .poster-grid-responsive {
-    @apply grid p-4 gap-4;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 640px) {
-    .poster-grid-responsive {
-      @apply p-5 gap-5;
-      grid-template-columns: repeat(3, 1fr);
+  /* Ensure consistent spacing on all screen sizes */
+  @media (max-width: 360px) {
+    .poster-grid-standard {
+      @apply gap-2 p-3; /* Slightly tighter on very small screens */
     }
   }
 
   @media (min-width: 768px) {
-    .poster-grid-responsive {
-      @apply p-6 gap-6;
-      grid-template-columns: repeat(4, 1fr);
+    .poster-grid-standard {
+      @apply gap-4 p-5; /* More generous spacing on larger screens */
     }
   }
 
-  @media (min-width: 1024px) {
-    .poster-grid-responsive {
-      grid-template-columns: repeat(5, 1fr);
-    }
+  /* Standard poster card dimensions - 2:3 aspect ratio */
+  .poster-card {
+    @apply w-full rounded-lg overflow-hidden;
+    aspect-ratio: 2/3; /* Enforces poster ratio */
   }
 
-  @media (min-width: 1280px) {
-    .poster-grid-responsive {
-      grid-template-columns: repeat(6, 1fr);
+  .poster-card img {
+    @apply w-full h-full object-cover;
+  }
+
+  /* Mobile-first typography */
+  .mobile-title {
+    @apply text-xl font-cinematic tracking-wide;
+  }
+
+  .mobile-subtitle {
+    @apply text-lg font-semibold;
+  }
+
+  .mobile-body {
+    @apply text-sm leading-relaxed;
+  }
+
+  .mobile-caption {
+    @apply text-xs text-muted-foreground;
+  }
+
+  /* Mobile-optimized spacing */
+  .mobile-section {
+    @apply py-6 px-4;
+  }
+
+  .mobile-card-spacing {
+    @apply p-4 space-y-4;
+  }
+
+  /* Safe areas for notched devices */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Mobile-optimized hero sections */
+  .mobile-hero {
+    @apply relative h-[60vh] overflow-hidden;
+  }
+
+  /* Responsive text sizing for mobile */
+  @media (max-width: 414px) {
+    .mobile-title {
+      @apply text-lg;
+    }
+    
+    .mobile-subtitle {
+      @apply text-base;
     }
   }
+}

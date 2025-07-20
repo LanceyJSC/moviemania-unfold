@@ -80,10 +80,9 @@ export const HeroSection = () => {
       <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground">
         {/* Hero Background with lighter overlay */}
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-            backgroundColor: '#1a1a1a'
+            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent" />
