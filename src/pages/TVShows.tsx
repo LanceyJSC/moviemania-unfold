@@ -47,7 +47,7 @@ const TVShows = () => {
           <FeaturedHero type="tv" />
 
           {/* Filter Buttons */}
-          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border border-border rounded-lg px-4 py-4">
+          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm rounded-lg px-4 py-4">
             <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
               {filterButtons.map((filter) => {
                 const Icon = filter.icon;
