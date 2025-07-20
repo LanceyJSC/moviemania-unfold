@@ -112,8 +112,19 @@ class TMDBService {
   private async fetchFromTMDB<T>(endpoint: string, bustCache: boolean = false, retries: number = 3): Promise<T> {
     // Add timestamp to force fresh data and prevent any caching
     const timestamp = Date.now();
-    const separator = endpoint.includes('?') ? '&' : '?';
-    const url = `${TMDB_BASE_URL}${endpoint}${separator}api_key=${TMDB_API_KEY}&_t=${timestamp}&_bust=${Math.random()}`;
+    
+    // Properly construct the URL with API key and cache busting parameters
+    let url: string;
+    if (endpoint.includes('?')) {
+      url = `${TMDB_BASE_URL}${endpoint}&api_key=${TMDB_API_KEY}`;
+    } else {
+      url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}`;
+    }
+    
+    // Add cache busting parameters if requested
+    if (bustCache) {
+      url += `&_t=${timestamp}&_bust=${Math.random()}`;
+    }
     
     console.log(`TMDB API call: ${endpoint}${bustCache ? ' (FORCE FRESH)' : ''} - Attempt ${4 - retries}`);
     
