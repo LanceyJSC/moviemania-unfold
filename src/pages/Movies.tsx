@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { MovieGrid } from "@/components/MovieGrid";
-import { Navigation } from "@/components/Navigation";
+import { IOSTabBar } from "@/components/IOSTabBar";
 import { MovieStats } from "@/components/MovieStats";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,7 @@ const Movies = () => {
         </div>
 
         {/* Content */}
-        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
+        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12" style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
           {/* Featured Hero Section */}
           <FeaturedHero type="movie" />
 
@@ -82,8 +82,8 @@ const Movies = () => {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
       </div>
 
-      {/* Mobile Navigation */}
-      <Navigation />
+      {/* iOS Tab Bar */}
+      <IOSTabBar />
     </div>
   );
 };
