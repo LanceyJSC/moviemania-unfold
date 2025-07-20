@@ -260,9 +260,9 @@ export const HeroSection = () => {
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none" />
         </div>
 
-        {/* iOS-style safe area top spacing with refresh button */}
+        {/* iOS-style safe area top spacing */}
         <div 
-          className="absolute top-0 left-0 right-0 z-20 px-6 flex justify-between items-start"
+          className="absolute top-0 left-0 right-0 z-20 px-6"
           style={{ 
             paddingTop: 'max(env(safe-area-inset-top), 16px)',
             marginTop: '8px'
@@ -276,17 +276,6 @@ export const HeroSection = () => {
               Discover Movies Like Never Before
             </p>
           </div>
-          
-          {/* Manual refresh button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleManualRefresh}
-            disabled={isRefreshing}
-            className="h-8 w-8 p-0 bg-background/20 backdrop-blur-sm hover:bg-background/40 text-foreground"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
         </div>
 
         {/* Navigation arrows for desktop */}
