@@ -235,18 +235,13 @@ export const HeroSection = () => {
   return (
     <>
       <div 
-        className="relative text-foreground overflow-hidden"
-        style={{ 
-          height: 'clamp(350px, 45vh, 500px)', // iPhone-optimized height
-          minHeight: '350px', // Smaller for iPhone screens
-          maxHeight: '500px'  // More compact for mobile
-        }}
+        className="relative w-full aspect-video text-foreground overflow-hidden rounded-2xl"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Hero Background - iPhone optimized with smooth transitions and rounded corners */}
+        {/* Hero Background - TMDB 16:9 aspect ratio */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out rounded-2xl overflow-hidden"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out overflow-hidden"
           style={{ 
             backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))',
             backgroundColor: 'hsl(var(--background))'
