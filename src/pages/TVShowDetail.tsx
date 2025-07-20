@@ -134,10 +134,7 @@ const TVShowDetail = () => {
   ).slice(0, 6);
 
   return (
-    <div 
-      className="min-h-screen bg-background"
-      style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
-    >
+    <div className="ios-app-container">
       <MobileHeader title={tvShow.name} />
 
       {/* Hero Section - TMDB Backdrop 16:9 */}
@@ -207,7 +204,7 @@ const TVShowDetail = () => {
       </div>
 
       {/* Content */}
-      <div className="px-4 py-6 space-y-6">
+      <div className="ios-content-area px-4 py-6 space-y-6">
         {/* Action Buttons */}
         <div className="flex gap-3">
           {trailerKey ? (

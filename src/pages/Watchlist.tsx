@@ -89,10 +89,7 @@ const Watchlist = () => {
   }
 
   return (
-    <div 
-      className="min-h-screen bg-background"
-      style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
-    >
+    <div className="ios-app-container">
       <MobileHeader title="My Watchlist" />
       
       {/* Tab Selector */}
@@ -134,7 +131,7 @@ const Watchlist = () => {
       </div>
 
       {/* Content */}
-      <div className="px-4 py-6 space-y-6">
+      <div className="ios-content-area px-4 py-6 space-y-6">
         {isLoading ? (
           <div className="mobile-grid">
             {Array.from({ length: 8 }).map((_, i) => (

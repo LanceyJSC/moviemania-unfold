@@ -9,17 +9,12 @@ import { LatestTrailers } from "@/components/LatestTrailers";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="ios-app-container">
       {/* Hero Section - Full width, proper aspect ratio */}
       <HeroSection />
 
-      {/* Content Sections - Consistent mobile spacing with safe area */}
-      <div 
-        className="space-y-8"
-        style={{ 
-          paddingBottom: 'calc(100px + env(safe-area-inset-bottom))'
-        }}
-      >
+      {/* Content Sections - iOS Compatible Layout */}
+      <div className="ios-content-area space-y-8">
         {/* Quick Stats - Consistent padding */}
         <div className="px-4 pt-6">
           <MovieStats />

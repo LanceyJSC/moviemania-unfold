@@ -72,6 +72,8 @@ All colors MUST be HSL for proper theming.
     height: -webkit-fill-available;
     /* iOS momentum scrolling */
     -webkit-overflow-scrolling: touch;
+    /* Prevent zoom on iOS when focusing inputs */
+    -webkit-text-size-adjust: 100%;
   }
   
   body {
@@ -79,8 +81,9 @@ All colors MUST be HSL for proper theming.
     /* Mobile-optimized typography */
     font-size: 16px; /* Prevents zoom on iOS */
     line-height: 1.5;
-    /* iOS safe areas */
-    padding-bottom: env(safe-area-inset-bottom);
+    /* iOS safe areas - CRITICAL for proper spacing */
+    padding: 0;
+    margin: 0;
     min-height: 100vh;
     min-height: -webkit-fill-available;
     /* Touch optimization */
@@ -89,6 +92,8 @@ All colors MUST be HSL for proper theming.
     touch-action: manipulation;
     /* iOS momentum scrolling */
     -webkit-overflow-scrolling: touch;
+    /* Prevent body scroll when modals are open */
+    overflow-x: hidden;
   }
 
   /* Custom font for cinematic feel - mobile optimized */
@@ -245,19 +250,47 @@ All colors MUST be HSL for proper theming.
     display: none;
   }
 
-  /* iOS safe area helpers */
+  /* iOS safe area helpers - CRITICAL for layout */
   .safe-area-top {
-    padding-top: env(safe-area-inset-top);
+    padding-top: max(env(safe-area-inset-top), 0px);
   }
 
   .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
   }
 
   .safe-area-full {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-top: max(env(safe-area-inset-top), 0px);
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    padding-left: max(env(safe-area-inset-left), 0px);
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
+
+  /* iOS App Layout - CRITICAL container classes */
+  .ios-app-container {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .ios-content-area {
+    flex: 1;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+
+  /* Text visibility improvements */
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
   }
 }

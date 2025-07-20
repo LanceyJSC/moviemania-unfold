@@ -36,13 +36,11 @@ const Movies = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="ios-app-container">
       <MobileHeader title="Movies" />
       
-      {/* Hero-style gradient background */}
-      <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
-        {/* Filter Buttons */}
-        <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4">
+      {/* Filter Buttons */}
+      <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4">
         <div className="flex overflow-x-auto space-x-3 ios-horizontal-scroll">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
@@ -64,10 +62,11 @@ const Movies = () => {
             );
           })}
         </div>
-        </div>
+      </div>
 
-        {/* Content */}
-        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12" style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
+      {/* Content */}
+      <div className="ios-content-area bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
+        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12">
           {/* Featured Hero Section */}
           <FeaturedHero type="movie" />
 

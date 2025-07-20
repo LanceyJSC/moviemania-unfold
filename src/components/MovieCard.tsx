@@ -40,30 +40,25 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     setImageError(true);
   };
 
-  // Consistent sizing based on size prop - Fixed dimensions for grid consistency
+  // Responsive sizing that works with CSS Grid - No fixed width needed
   const getCardClasses = () => {
-    switch (size) {
-      case "small":
-        return "w-[150px] h-[225px]"; // Fixed 2:3 aspect ratio
-      case "medium":
-        return "w-[180px] h-[270px]"; // Fixed 2:3 aspect ratio
-      case "large":
-        return "w-[200px] h-[300px]"; // Fixed 2:3 aspect ratio
-      default:
-        return "w-[180px] h-[270px]";
-    }
+    return "w-full aspect-[2/3]"; // Use CSS Grid sizing with proper aspect ratio
+  };
+
+  const getImageClasses = () => {
+    return "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105";
   };
 
   return (
-    <Link to={`/movie/${movie.id}`}>
-      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
+    <Link to={`/movie/${movie.id}`} className="block w-full">
+      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer ${getCardClasses()}`}>
         <div className="w-full h-full relative">
-          {/* Movie Poster */}
+          {/* Movie Poster - Ensure full visibility */}
           {!imageError ? (
             <img 
               src={movie.poster} 
               alt={movie.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              className={getImageClasses()}
               loading="lazy"
               onError={handleImageError}
             />
@@ -71,16 +66,15 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
             <div className="w-full h-full bg-gradient-to-br from-cinema-charcoal to-cinema-black flex items-center justify-center border border-border">
               <div className="text-center p-3">
                 <div className="text-3xl mb-2">🎬</div>
-                <p className="text-xs text-foreground font-medium line-clamp-3 leading-tight px-1">{movie.title}</p>
-                <p className="text-xs text-muted-foreground mt-2">{movie.year}</p>
+                <p className="text-xs text-foreground font-medium line-clamp-3 leading-tight px-1 text-shadow-sm">{movie.title}</p>
+                <p className="text-xs text-muted-foreground mt-2 text-shadow-sm">{movie.year}</p>
               </div>
             </div>
           )}
           
-          {/* Base Gradient Overlay - Very light for consistent brightness */}
+          {/* Lighter overlay for better image visibility */}
           <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
           </div>
           
           {/* Subtle Hover Enhancement - Very light */}
@@ -127,16 +121,16 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
             </Button>
           </div>
 
-          {/* Movie Info Overlay */}
-          <div className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
+          {/* Movie Info Overlay - Better text visibility */}
+          <div className={`absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-cinema-black/90 via-cinema-black/60 to-transparent transition-opacity duration-300 ${
             isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}>
-            <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
+            <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm text-shadow-md">
               {movie.title}
             </h3>
             <div className="flex items-center justify-between text-muted-foreground text-xs">
-              <span>{movie.year}</span>
-              <span className="truncate ml-2">Movie</span>
+              <span className="text-shadow-sm">{movie.year}</span>
+              <span className="truncate ml-2 text-shadow-sm">Movie</span>
             </div>
           </div>
         </div>
