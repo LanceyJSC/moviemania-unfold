@@ -6,8 +6,13 @@ import { IOSTabBar } from "@/components/IOSTabBar";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
+import { ContinueWatching } from "@/components/enhanced/ContinueWatching";
+import { Recommendations } from "@/components/enhanced/Recommendations";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user } = useAuth();
+
   return (
     <div className="ios-app-container">
       {/* Hero Section - Full width, proper aspect ratio */}
@@ -25,8 +30,10 @@ const Index = () => {
 
         {/* Dynamic Content Sections - Consistent spacing */}
         <div className="px-4 space-y-8">
+          {user && <ContinueWatching />}
           <NewThisMonth />
           <FreshPicks />
+          {user && <Recommendations />}
           <LatestTrailers />
         </div>
       </div>
