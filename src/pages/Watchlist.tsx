@@ -89,7 +89,12 @@ const Watchlist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div 
+      className="min-h-screen bg-background"
+      style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
+    >
+      <MobileHeader title="My Watchlist" />
+      
       {/* Tab Selector */}
       <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4">
         <div className="flex bg-muted/50 rounded-2xl p-1">

@@ -149,7 +149,10 @@ const MovieDetail = () => {
   ).slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div 
+      className="min-h-screen bg-background"
+      style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}
+    >
       <MobileHeader title={title} />
 
       {/* Hero Section - TMDB Backdrop 16:9 */}

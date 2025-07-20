@@ -100,16 +100,16 @@ export const HeroSection = () => {
             marginTop: '8px'
           }}
         >
-          <h1 className="font-cinematic text-2xl sm:text-3xl tracking-wide text-foreground">
+          <h1 className="font-cinematic text-2xl sm:text-3xl tracking-wide text-foreground drop-shadow-lg">
             CINE<span className="text-cinema-red">SCOPE</span>
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-foreground/90 text-sm mt-1 drop-shadow-sm">
             Discover Movies Like Never Before
           </p>
         </div>
 
         {/* Hero Content - Mobile-first layout */}
-        <div className="relative z-10 flex flex-col justify-end h-full px-6 pb-8">
+        <div className="relative z-10 flex flex-col justify-end h-full px-6 pb-8 pt-24">
           {isLoading ? (
             <div className="animate-pulse space-y-3">
               <div className="h-8 bg-muted/60 rounded-lg w-3/4"></div>
