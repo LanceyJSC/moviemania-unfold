@@ -50,7 +50,7 @@ export const Recommendations = () => {
         // Remove duplicates and already liked movies
         const uniqueResults = results.filter((movie, index, self) => 
           index === self.findIndex(m => m.id === movie.id) &&
-          !userState.likedMovies.some(liked => liked.movie_id === movie.id)
+          !userState.likedMovies.some(likedId => likedId === movie.id)
         );
         
         setRecommendations(uniqueResults.slice(0, 12));
@@ -178,13 +178,11 @@ export const Recommendations = () => {
                 <TVShowCard
                   key={item.id}
                   tvShow={item as any}
-                  priority={false}
                 />
               ) : (
                 <MovieCard
                   key={item.id}
                   movie={item as any}
-                  priority={false}
                 />
               );
             })}
