@@ -244,17 +244,20 @@ export const HeroSection = () => {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Hero Background - Mobile optimized with smooth transitions */}
+        {/* Hero Background - iPhone optimized with smooth transitions and rounded corners */}
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out rounded-2xl overflow-hidden"
           style={{ 
             backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))',
             backgroundColor: 'hsl(var(--background))'
           }}
         >
-          {/* Mobile-optimized overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/20" />
+          {/* Base overlays for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/20 to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/10" />
+          
+          {/* Bottom gradient blend - Creates smooth transition to page background */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none" />
         </div>
 
         {/* iOS-style safe area top spacing with refresh button */}

@@ -95,11 +95,11 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   return (
-    <div className="relative h-96 rounded-xl overflow-hidden mb-8 group">
+    <div className="relative h-96 rounded-2xl overflow-hidden mb-8 group">
       {/* Background Image */}
       {backdropUrl && (
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-transform duration-300 group-hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
           style={{ 
             backgroundImage: `url(${backdropUrl})`,
             backgroundColor: 'hsl(var(--background))'
@@ -107,8 +107,12 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
         />
       )}
       
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+      {/* Gradient Overlays */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+      
+      {/* Bottom gradient blend - Creates smooth transition to page background */}
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
       {/* Stats Cards - Moved to top-right to avoid overlap */}
       <div className="absolute top-6 right-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">

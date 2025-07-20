@@ -143,20 +143,21 @@ const MovieDetail = () => {
       <MobileHeader title={title} />
       
       {/* Hero Section with Poster Overlay */}
-      <div className="relative overflow-hidden h-[50vh]">
+      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ 
             backgroundImage: `url(${backdropUrl})`,
             backgroundColor: 'hsl(var(--background))'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
+          {/* Base overlays for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/50 via-transparent to-transparent" />
         </div>
 
         {/* Bottom Gradient Blend - Creates smooth transition to page background */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
         {/* Poster positioned on top and to the left */}
         <div className="absolute bottom-6 left-4 z-30">
