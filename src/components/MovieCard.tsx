@@ -40,17 +40,17 @@ export const MovieCard = ({ movie, size = "medium" }: MovieCardProps) => {
     setImageError(true);
   };
 
-  // iPhone-optimized sizing - optimized for 414px-428px screen width
+  // Uniform sizing system - optimized for iPhone viewing with 2:3 aspect ratio
   const getCardClasses = () => {
     switch (size) {
       case "small":
-        return "w-[120px] h-[180px] iphone-65:w-[130px] iphone-65:h-[195px] sm:w-[150px] sm:h-[225px]"; // iPhone optimized 2:3 aspect ratio
+        return "w-32 h-48"; // 128px × 192px - for dense grids and mobile carousels
       case "medium":
-        return "w-[140px] h-[210px] iphone-65:w-[150px] iphone-65:h-[225px] sm:w-[180px] sm:h-[270px]"; // iPhone optimized 2:3 aspect ratio
+        return "w-36 h-54"; // 144px × 216px - for main carousels and lists
       case "large":
-        return "w-[160px] h-[240px] iphone-65:w-[170px] iphone-65:h-[255px] sm:w-[200px] sm:h-[300px]"; // iPhone optimized 2:3 aspect ratio
+        return "w-40 h-60"; // 160px × 240px - for featured content
       default:
-        return "w-[140px] h-[210px] iphone-65:w-[150px] iphone-65:h-[225px] sm:w-[180px] sm:h-[270px]";
+        return "w-36 h-54";
     }
   };
 

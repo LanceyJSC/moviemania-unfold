@@ -1,3 +1,4 @@
+
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "./MovieCard";
@@ -61,7 +62,8 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = cardSize === 'small' ? 176 : cardSize === 'medium' ? 208 : 240; // Based on card widths + gap
+      // Updated scroll amounts based on uniform poster sizes + consistent spacing (12px)
+      const scrollAmount = cardSize === 'small' ? 140 : cardSize === 'medium' ? 156 : 172; // poster width + gap
       const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       
       scrollRef.current.scrollTo({
@@ -82,21 +84,12 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
     }
   };
 
-  const getSkeletonWidth = () => {
+  const getSkeletonClasses = () => {
     switch (cardSize) {
-      case "small": return "w-40";
-      case "medium": return "w-48";
-      case "large": return "w-56";
-      default: return "w-48";
-    }
-  };
-
-  const getSkeletonHeight = () => {
-    switch (cardSize) {
-      case "small": return "h-60";
-      case "medium": return "h-72";
-      case "large": return "h-84";
-      default: return "h-72";
+      case "small": return "w-32 h-48";
+      case "medium": return "w-36 h-54";
+      case "large": return "w-40 h-60";
+      default: return "w-36 h-54";
     }
   };
 
@@ -129,16 +122,16 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
         </div>
       </div>
 
-      {/* Movie Cards Container */}
+      {/* Movie Cards Container with consistent spacing */}
       <div 
         ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
+        className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {isLoading ? (
-          // Loading skeleton with consistent sizing
+          // Loading skeleton with uniform sizing
           Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className={`flex-shrink-0 ${getSkeletonWidth()} ${getSkeletonHeight()} bg-muted animate-pulse rounded-lg`}></div>
+            <div key={index} className={`flex-shrink-0 ${getSkeletonClasses()} bg-muted animate-pulse rounded-lg`}></div>
           ))
         ) : (
           movies.map((movie) => (

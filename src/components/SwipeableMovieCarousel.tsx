@@ -1,3 +1,4 @@
+
 import { Loader2, ArrowRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "./MovieCard";
@@ -116,6 +117,15 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
     setIsDragging(false);
   };
 
+  const getSkeletonClasses = () => {
+    switch (cardSize) {
+      case "small": return "w-32 h-48";
+      case "medium": return "w-36 h-54"; 
+      case "large": return "w-40 h-60";
+      default: return "w-36 h-54";
+    }
+  };
+
   return (
     <div className="relative group">
       {/* Section Header */}
@@ -148,10 +158,10 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
         </div>
       </div>
 
-      {/* Movie Cards Container */}
+      {/* Movie Cards Container with consistent spacing */}
       <div 
         ref={scrollRef}
-        className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
+        className={`flex space-x-3 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -162,12 +172,10 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
         onTouchEnd={handleEnd}
       >
         {isLoading ? (
-          // Loading skeleton
+          // Loading skeleton with uniform sizing
           Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="flex-shrink-0">
-              <div className={`bg-muted animate-pulse rounded-lg ${
-                isMobile ? 'w-36 h-[216px]' : 'w-44 h-[264px]'
-              }`}></div>
+              <div className={`${getSkeletonClasses()} bg-muted animate-pulse rounded-lg`}></div>
             </div>
           ))
         ) : (
@@ -175,7 +183,7 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
             <div key={movie.id} className="flex-shrink-0">
               <MovieCard 
                 movie={tmdbService.formatMovieForCard(movie)} 
-                size={isMobile ? "small" : cardSize} 
+                size={cardSize} 
               />
             </div>
           ))

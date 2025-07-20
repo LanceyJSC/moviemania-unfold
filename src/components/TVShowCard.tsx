@@ -41,17 +41,17 @@ export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
     setImageError(true);
   };
 
-  // Consistent sizing based on size prop - Fixed dimensions matching MovieCard
+  // Uniform sizing system - matching MovieCard exactly with 2:3 aspect ratio
   const getCardClasses = () => {
     switch (size) {
       case "small":
-        return "w-[150px] h-[225px]"; // Fixed 2:3 aspect ratio - matches MovieCard
+        return "w-32 h-48"; // 128px × 192px - for dense grids and mobile carousels
       case "medium":
-        return "w-[180px] h-[270px]"; // Fixed 2:3 aspect ratio - matches MovieCard
+        return "w-36 h-54"; // 144px × 216px - for main carousels and lists
       case "large":
-        return "w-[200px] h-[300px]"; // Fixed 2:3 aspect ratio - matches MovieCard
+        return "w-40 h-60"; // 160px × 240px - for featured content
       default:
-        return "w-[180px] h-[270px]";
+        return "w-36 h-54";
     }
   };
 
