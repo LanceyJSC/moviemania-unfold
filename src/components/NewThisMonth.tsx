@@ -1,20 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, TrendingUp } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 type MediaItem = Movie | TVShow;
 
 export const NewThisMonth = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const isMobile = useIsMobile();
 
   const loadNewContent = async (fresh: boolean = false) => {
     try {
@@ -89,39 +83,6 @@ export const NewThisMonth = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
-  // Touch/Mouse event handlers for swipe functionality
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleEnd = () => {
-    setIsDragging(false);
-  };
 
   if (isLoading) {
     return (
@@ -161,14 +122,7 @@ export const NewThisMonth = () => {
         </div>
       
       {content.length > 0 ? (
-        <div 
-          ref={scrollRef}
-          className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4"
-          style={{ 
-            scrollbarWidth: 'none', 
-            msOverflowStyle: 'none'
-          }}
-        >
+        <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
           {content.map((item) => {
             const isMovie = 'title' in item;
             return (
