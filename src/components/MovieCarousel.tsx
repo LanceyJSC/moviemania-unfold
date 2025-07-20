@@ -8,10 +8,9 @@ import { tmdbService, Movie } from "@/lib/tmdb";
 interface MovieCarouselProps {
   title: string;
   category: "trending" | "popular" | "top_rated" | "upcoming";
-  cardSize?: "small" | "medium" | "large";
 }
 
-export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCarouselProps) => {
+export const MovieCarousel = ({ title, category }: MovieCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -62,8 +61,8 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      // Updated scroll amounts based on uniform poster sizes + consistent spacing (12px)
-      const scrollAmount = cardSize === 'small' ? 124 : cardSize === 'medium' ? 132 : 140; // poster width + gap
+      // Fixed scroll amount for standard poster size (w-32 = 8rem = 128px + 12px gap)
+      const scrollAmount = 140;
       const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       
       scrollRef.current.scrollTo({
@@ -81,15 +80,6 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
           );
         }
       }, 300);
-    }
-  };
-
-  const getSkeletonClasses = () => {
-    switch (cardSize) {
-      case "small": return "w-28 h-42";
-      case "medium": return "w-30 h-45";
-      case "large": return "w-32 h-48";
-      default: return "w-30 h-45";
     }
   };
 
@@ -129,16 +119,15 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {isLoading ? (
-          // Loading skeleton with uniform sizing
+          // Loading skeleton with standard sizing
           Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className={`flex-shrink-0 ${getSkeletonClasses()} bg-muted animate-pulse rounded-lg`}></div>
+            <div key={index} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg"></div>
           ))
         ) : (
           movies.map((movie) => (
             <MovieCard 
               key={movie.id} 
               movie={tmdbService.formatMovieForCard(movie)} 
-              size={cardSize} 
             />
           ))
         )}

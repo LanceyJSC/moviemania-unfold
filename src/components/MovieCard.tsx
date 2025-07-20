@@ -16,11 +16,10 @@ interface MovieCardProps {
     rating: string;
     genre?: string;
   };
-  size?: "small" | "medium" | "large";
   variant?: "grid" | "carousel";
 }
 
-export const MovieCard = ({ movie, size = "medium", variant = "carousel" }: MovieCardProps) => {
+export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
   const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
@@ -47,17 +46,8 @@ export const MovieCard = ({ movie, size = "medium", variant = "carousel" }: Movi
       return "w-full aspect-[2/3]"; // Responsive width for grid
     }
     
-    // Fixed widths for carousel
-    switch (size) {
-      case "small":
-        return "w-28 h-42";
-      case "medium":
-        return "w-30 h-45";
-      case "large":
-        return "w-32 h-48";
-      default:
-        return "w-30 h-45";
-    }
+    // Fixed standard size for carousel
+    return "w-32 h-48";
   };
 
   return (

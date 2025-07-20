@@ -132,7 +132,6 @@ const CategoryPage = () => {
             <MovieCard 
               key={`${movie.id}-${index}`}
               movie={tmdbService.formatMovieForCard(movie)} 
-              size="small" 
             />
           ))}
         </div>

@@ -110,7 +110,7 @@ export const FreshPicks = () => {
           </div>
             <div className="flex space-x-3 overflow-hidden">
              {Array.from({ length: 6 }).map((_, index) => (
-               <div key={index} className="flex-shrink-0 w-30 h-45 bg-muted animate-pulse rounded-lg"></div>
+               <div key={index} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg"></div>
              ))}
           </div>
         </div>
@@ -155,12 +155,10 @@ export const FreshPicks = () => {
                    {isMovie ? (
                      <MovieCard 
                        movie={tmdbService.formatMovieForCard(item as Movie)} 
-                       size="medium" 
                      />
                    ) : (
                      <TVShowCard 
                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
-                       size="medium" 
                      />
                    )}
                  </div>
