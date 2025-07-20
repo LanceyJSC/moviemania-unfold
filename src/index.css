@@ -152,11 +152,11 @@
     scroll-behavior: smooth;
   }
 
-  /* iPhone-optimized poster grid - 4 across for iPhone */
+  /* iPhone-optimized poster grid - 3 across for iPhone */
   .poster-grid-responsive {
     display: grid;
     gap: 12px;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   /* iPad and larger screens - more columns */

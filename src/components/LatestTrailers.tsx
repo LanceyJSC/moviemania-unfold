@@ -81,7 +81,7 @@ export const LatestTrailers = () => {
 
   return (
     <div className="mb-12 pt-4">
-      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
+      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Film className="h-8 w-8 text-primary" />
@@ -118,17 +118,17 @@ export const LatestTrailers = () => {
 
         {/* Trailers Grid */}
         {loading ? (
-          <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
+          <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex-shrink-0 w-44 h-[264px] bg-muted animate-pulse rounded-lg" />
+              <div key={i} className="flex-shrink-0 w-36 h-54 bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
         ) : (
-          <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
+          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 w-44 h-[264px] rounded-lg"
+                className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 w-36 h-54 rounded-lg"
                 onClick={() => handlePlayTrailer(item)}
               >
                 <div className="w-full h-full relative">
