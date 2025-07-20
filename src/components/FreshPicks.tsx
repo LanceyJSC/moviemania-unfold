@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sparkles, Clock } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
@@ -6,16 +7,21 @@ import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 
 type MediaItem = Movie | TVShow;
 
+// High priority refresh - every 20 minutes for trending content
+const FRESH_PICKS_REFRESH_INTERVAL = 20 * 60 * 1000;
+
 export const FreshPicks = () => {
   const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const loadFreshPicks = async (fresh: boolean = false) => {
+  const loadFreshPicks = async (forceFresh: boolean = true) => {
     try {
-      // Get trending movies and TV shows for this week
+      console.log('Loading Fresh Picks with FORCE FRESH data');
+      // Always force fresh data for Fresh Picks - this is the most critical content
       const [trendingMovies, trendingTV] = await Promise.all([
-        tmdbService.getTrendingMovies('week', fresh),
-        tmdbService.getTrendingTVShows('week', fresh)
+        tmdbService.getTrendingMovies('week', forceFresh),
+        tmdbService.getTrendingTVShows('week', forceFresh)
       ]);
       
       // Combine and shuffle movies and TV shows
@@ -27,15 +33,18 @@ export const FreshPicks = () => {
       // Shuffle the combined array
       const shuffled = allContent.sort(() => Math.random() - 0.5);
       setContent(shuffled.slice(0, 8));
+      setLastUpdated(new Date());
+      console.log('Fresh Picks loaded successfully with latest TMDB data');
     } catch (error) {
       console.error('Failed to load fresh picks:', error);
       try {
         // Fallback to popular movies only
-        const fallbackResponse = await tmdbService.getPopularMovies(1, fresh);
+        const fallbackResponse = await tmdbService.getPopularMovies(1, forceFresh);
         const moviesWithPosters = fallbackResponse.results
           .filter(movie => movie.poster_path)
           .slice(0, 8);
         setContent(moviesWithPosters);
+        setLastUpdated(new Date());
       } catch (fallbackError) {
         console.error('Fallback also failed:', fallbackError);
       }
@@ -45,18 +54,32 @@ export const FreshPicks = () => {
   };
 
   useEffect(() => {
-    loadFreshPicks();
+    loadFreshPicks(true);
   }, []);
 
-  // Periodic refresh every hour to stay updated with TMDB
+  // High priority refresh every 20 minutes for Fresh Picks
   useEffect(() => {
+    console.log('Setting up Fresh Picks auto-refresh every 20 minutes');
     const refreshInterval = setInterval(() => {
+      console.log('Auto-refreshing Fresh Picks - Priority content update');
       loadFreshPicks(true);
-    }, 3600000); // 1 hour in milliseconds
+    }, FRESH_PICKS_REFRESH_INTERVAL);
 
     return () => clearInterval(refreshInterval);
   }, []);
 
+  // Refresh when app regains focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('App regained focus - Refreshing Fresh Picks');
+        loadFreshPicks(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   if (isLoading) {
     return (
@@ -89,9 +112,14 @@ export const FreshPicks = () => {
             </h2>
             <Clock className="h-8 w-8 text-cinema-red" />
           </div>
-          <p className="text-muted-foreground mb-4">
-            Trending movies & TV shows this week - Updated hourly
+          <p className="text-muted-foreground mb-2">
+            Trending movies & TV shows this week - Live updates every 20 minutes
           </p>
+          {lastUpdated && (
+            <p className="text-xs text-muted-foreground mb-4">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
           <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
         </div>
         
@@ -116,7 +144,7 @@ export const FreshPicks = () => {
            </div>
         ) : (
           <div className="text-center text-muted-foreground">
-            No fresh picks available this week
+            Loading fresh picks from TMDB...
           </div>
         )}
       </div>

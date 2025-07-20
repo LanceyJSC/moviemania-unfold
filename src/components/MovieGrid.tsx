@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { tmdbService } from "@/lib/tmdb";
 import { Movie } from "@/lib/tmdb";
@@ -9,47 +10,72 @@ interface MovieGridProps {
   category: "all" | "popular" | "now_playing" | "upcoming" | "top_rated";
 }
 
+// Content priority refresh intervals
+const REFRESH_INTERVALS = {
+  HIGH_PRIORITY: 20 * 60 * 1000,    // 20 minutes for trending/popular/now_playing
+  MEDIUM_PRIORITY: 45 * 60 * 1000,  // 45 minutes for upcoming
+  LOW_PRIORITY: 60 * 60 * 1000      // 60 minutes for top_rated
+};
+
+const getRefreshInterval = (category: string) => {
+  switch (category) {
+    case "popular":
+    case "now_playing":
+      return REFRESH_INTERVALS.HIGH_PRIORITY;
+    case "upcoming":
+      return REFRESH_INTERVALS.MEDIUM_PRIORITY;
+    case "top_rated":
+    case "all":
+    default:
+      return REFRESH_INTERVALS.LOW_PRIORITY;
+  }
+};
+
 export const MovieGrid = ({ title, category }: MovieGridProps) => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const isMobile = useIsMobile();
 
-  const loadMovies = async (pageNum: number = 1, fresh: boolean = false) => {
+  const loadMovies = async (pageNum: number = 1, forceFresh: boolean = true) => {
     try {
       if (pageNum === 1) {
         setIsLoading(true);
+        console.log(`Loading fresh ${category} movies - Page ${pageNum}`);
       }
 
       let response;
       switch (category) {
         case "all":
-          response = await tmdbService.getPopularMovies(pageNum, fresh);
+          response = await tmdbService.getPopularMovies(pageNum, forceFresh);
           break;
         case "popular":
-          response = await tmdbService.getPopularMovies(pageNum, fresh);
+          response = await tmdbService.getPopularMovies(pageNum, forceFresh);
           break;
         case "now_playing":
-          response = await tmdbService.getNowPlayingMovies(pageNum, fresh);
+          response = await tmdbService.getNowPlayingMovies(pageNum, forceFresh);
           break;
         case "upcoming":
-          response = await tmdbService.getUpcomingMovies(pageNum, fresh);
+          response = await tmdbService.getUpcomingMovies(pageNum, forceFresh);
           break;
         case "top_rated":
-          response = await tmdbService.getTopRatedMovies(pageNum, fresh);
+          response = await tmdbService.getTopRatedMovies(pageNum, forceFresh);
           break;
         default:
-          response = await tmdbService.getPopularMovies(pageNum, fresh);
+          response = await tmdbService.getPopularMovies(pageNum, forceFresh);
       }
 
       if (pageNum === 1) {
         setMovies(response.results);
+        setLastUpdated(new Date());
       } else {
         setMovies(prev => [...prev, ...response.results]);
       }
       
       setHasMore(pageNum < response.total_pages);
+      console.log(`${category} movies loaded successfully - ${response.results.length} items`);
     } catch (error) {
       console.error(`Failed to load ${category} movies:`, error);
     } finally {
@@ -61,23 +87,41 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     if (!isLoading && hasMore) {
       const nextPage = page + 1;
       setPage(nextPage);
-      loadMovies(nextPage);
+      loadMovies(nextPage, true);
     }
   };
 
   useEffect(() => {
     setPage(1);
-    loadMovies(1);
+    loadMovies(1, true);
   }, [category]);
 
-  // Periodic refresh every hour to stay updated with TMDB
+  // Enhanced refresh strategy with different intervals based on content priority
   useEffect(() => {
-    const refreshInterval = setInterval(() => {
+    const refreshInterval = getRefreshInterval(category);
+    console.log(`Setting up refresh for ${category} every ${refreshInterval / 60000} minutes`);
+    
+    const interval = setInterval(() => {
+      console.log(`Auto-refreshing ${category} movies - Priority refresh`);
       setPage(1);
       loadMovies(1, true);
-    }, 3600000); // 1 hour in milliseconds
+    }, refreshInterval);
 
-    return () => clearInterval(refreshInterval);
+    return () => clearInterval(interval);
+  }, [category]);
+
+  // Refresh when app regains focus (visibility change)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log(`App regained focus - Refreshing ${category} movies`);
+        setPage(1);
+        loadMovies(1, true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [category]);
 
   useEffect(() => {
@@ -98,11 +142,18 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     <div className="space-y-6">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <h2 className={`font-cinematic text-foreground tracking-wide ${
-          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
-        }`}>
-          {title}
-        </h2>
+        <div>
+          <h2 className={`font-cinematic text-foreground tracking-wide ${
+            isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
+          }`}>
+            {title}
+          </h2>
+          {lastUpdated && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Updated {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Movies Grid - Optimized for iPhone 3-across */}

@@ -17,19 +17,24 @@ const TRAILER_CATEGORIES = [
 type TrailerCategory = typeof TRAILER_CATEGORIES[number]['id'];
 type MediaItem = Movie | TVShow;
 
+// High priority refresh - every 20 minutes for trailer content
+const TRAILERS_REFRESH_INTERVAL = 20 * 60 * 1000;
+
 export const LatestTrailers = () => {
   const [activeCategory, setActiveCategory] = useState<TrailerCategory>('popular');
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const { setTrailerKey, setMovieTitle, setIsTrailerOpen } = useTrailerContext();
 
-  const fetchTrailers = async (fresh: boolean = false) => {
+  const fetchTrailers = async (forceFresh: boolean = true) => {
     try {
       setLoading(true);
-      console.log(`Fetching trailers for category: ${activeCategory}`);
-      const response = await tmdbService.getLatestTrailers(activeCategory, fresh);
-      console.log(`Received ${response.results.length} items for ${activeCategory}:`, response.results.slice(0, 3));
+      console.log(`Fetching FRESH trailers for category: ${activeCategory} - Force fresh: ${forceFresh}`);
+      const response = await tmdbService.getLatestTrailers(activeCategory, forceFresh);
+      console.log(`Received ${response.results.length} fresh items for ${activeCategory}`);
       setItems(response.results);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching trailers:', error);
     } finally {
@@ -38,24 +43,39 @@ export const LatestTrailers = () => {
   };
 
   useEffect(() => {
-    fetchTrailers();
+    fetchTrailers(true);
   }, [activeCategory]);
 
-  // Periodic refresh every hour to stay updated with TMDB
+  // High priority refresh every 20 minutes for Latest Trailers
   useEffect(() => {
+    console.log(`Setting up trailers auto-refresh for ${activeCategory} every 20 minutes`);
     const refreshInterval = setInterval(() => {
+      console.log(`Auto-refreshing trailers for ${activeCategory} - Priority content update`);
       fetchTrailers(true);
-    }, 3600000); // 1 hour in milliseconds
+    }, TRAILERS_REFRESH_INTERVAL);
 
     return () => clearInterval(refreshInterval);
+  }, [activeCategory]);
+
+  // Refresh when app regains focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log(`App regained focus - Refreshing trailers for ${activeCategory}`);
+        fetchTrailers(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [activeCategory]);
 
   const handlePlayTrailer = async (item: MediaItem) => {
     try {
       const isMovie = 'title' in item;
       const details = isMovie 
-        ? await tmdbService.getMovieDetails(item.id)
-        : await tmdbService.getTVShowDetails(item.id);
+        ? await tmdbService.getMovieDetails(item.id, true)
+        : await tmdbService.getTVShowDetails(item.id, true);
       
       const trailer = details.videos?.results?.find(
         video => video.type === 'Trailer' && video.site === 'YouTube'
@@ -91,9 +111,14 @@ export const LatestTrailers = () => {
             </h2>
             <Video className="h-8 w-8 text-primary" />
           </div>
-          <p className="text-muted-foreground mb-4">
-            Watch the newest trailers across all categories - Updated hourly
+          <p className="text-muted-foreground mb-2">
+            Watch the newest trailers across all categories - Live updates every 20 minutes
           </p>
+          {lastUpdated && (
+            <p className="text-xs text-muted-foreground mb-4">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
           <div className="w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
 

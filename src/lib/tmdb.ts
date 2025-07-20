@@ -109,40 +109,55 @@ export interface TMDBResponse<T> {
 }
 
 class TMDBService {
-  private async fetchFromTMDB<T>(endpoint: string, bustCache: boolean = false): Promise<T> {
-    const url = `${TMDB_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_API_KEY}`;
+  private async fetchFromTMDB<T>(endpoint: string, bustCache: boolean = false, retries: number = 3): Promise<T> {
+    // Add timestamp to force fresh data and prevent any caching
+    const timestamp = Date.now();
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const url = `${TMDB_BASE_URL}${endpoint}${separator}api_key=${TMDB_API_KEY}&_t=${timestamp}&_bust=${Math.random()}`;
     
-    console.log(`TMDB API call: ${endpoint}${bustCache ? ' (fresh)' : ''}`);
+    console.log(`TMDB API call: ${endpoint}${bustCache ? ' (FORCE FRESH)' : ''} - Attempt ${4 - retries}`);
     
     const fetchOptions: RequestInit = {
       headers: {
-        'Cache-Control': bustCache ? 'no-cache' : 'max-age=3600' // 1 hour max cache
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     };
     
-    try {
-      const response = await fetch(url, fetchOptions);
-      
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`TMDB API error ${response.status}:`, errorText);
-        throw new Error(`TMDB API error: ${response.status} - ${errorText}`);
+    let lastError: Error;
+    
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const response = await fetch(url, fetchOptions);
+        
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          console.error(`TMDB API error ${response.status}:`, errorText);
+          throw new Error(`TMDB API error: ${response.status} - ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log(`TMDB API SUCCESS: ${endpoint} - ${data.results?.length || 'N/A'} results - Fresh data loaded`);
+        return data;
+      } catch (error) {
+        console.error(`TMDB fetch error (attempt ${attempt + 1}/${retries}):`, error);
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        
+        // Exponential backoff: wait 1s, 2s, 4s between retries
+        if (attempt < retries - 1) {
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
-      
-      const data = await response.json();
-      console.log(`TMDB API success: ${endpoint} - ${data.results?.length || 'N/A'} results`);
-      return data;
-    } catch (error) {
-      console.error('TMDB fetch error:', error);
-      
-      // More specific error handling
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        throw new Error('Network error: Unable to connect to movie database');
-      } else if (error instanceof Error) {
-        throw error;
-      } else {
-        throw new Error('Unknown error occurred while fetching movie data');
-      }
+    }
+    
+    // More specific error handling after all retries failed
+    if (lastError instanceof TypeError && lastError.message.includes('Failed to fetch')) {
+      throw new Error('Network error: Unable to connect to movie database. Please check your connection.');
+    } else {
+      throw lastError;
     }
   }
 
@@ -291,8 +306,8 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Get latest trailers by category - using trending and mixed content to match TMDB
-  async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = false): Promise<TMDBResponse<Movie | TVShow>> {
+  // Enhanced Latest Trailers with stronger cache busting
+  async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = true): Promise<TMDBResponse<Movie | TVShow>> {
     let movieEndpoint = '';
     let tvEndpoint = '';
     
@@ -319,10 +334,10 @@ class TMDBService {
         break;
     }
     
-    // Fetch both movies and TV shows and mix them like TMDB does
+    // Always fetch fresh data for trailers - they change frequently
     const [movieResponse, tvResponse] = await Promise.all([
-      this.fetchFromTMDB<TMDBResponse<Movie>>(movieEndpoint, fresh),
-      this.fetchFromTMDB<TMDBResponse<TVShow>>(tvEndpoint, fresh)
+      this.fetchFromTMDB<TMDBResponse<Movie>>(movieEndpoint, true),
+      this.fetchFromTMDB<TMDBResponse<TVShow>>(tvEndpoint, true)
     ]);
     
     // Mix movies and TV shows alternating like TMDB
@@ -333,7 +348,6 @@ class TMDBService {
     
     for (let i = 0; i < maxItems; i++) {
       if (i % 3 === 0 && tvIndex < tvResponse.results.length) {
-        // Every 3rd item is a TV show
         mixedResults.push(tvResponse.results[tvIndex]);
         tvIndex++;
       } else if (movieIndex < movieResponse.results.length) {
