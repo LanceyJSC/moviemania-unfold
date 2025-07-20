@@ -145,7 +145,6 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
             <div key={movie.id} className="flex-shrink-0 w-40 sm:w-48 md:w-52">
               <MovieCard 
                 movie={tmdbService.formatMovieForCard(movie)} 
-                size={cardSize} 
               />
             </div>
           ))

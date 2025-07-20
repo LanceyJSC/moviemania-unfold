@@ -183,12 +183,10 @@ export const NewThisMonth = () => {
                 {isMovie ? (
                   <MovieCard 
                     movie={tmdbService.formatMovieForCard(item as Movie)} 
-                    size="medium" 
                   />
                 ) : (
                   <TVShowCard 
                     tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
-                    size="medium" 
                   />
                 )}
               </div>

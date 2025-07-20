@@ -81,7 +81,6 @@ const Search = () => {
         year: movie.release_date ? new Date(movie.release_date).getFullYear().toString() : "",
         rating: movie.vote_average ? movie.vote_average.toFixed(1) : "0"
       }}
-      size="small"
     />
   );
 
@@ -95,7 +94,6 @@ const Search = () => {
         year: show.first_air_date ? new Date(show.first_air_date).getFullYear().toString() : "",
         rating: show.vote_average ? show.vote_average.toFixed(1) : "0"
       }}
-      size="small"
     />
   );
 

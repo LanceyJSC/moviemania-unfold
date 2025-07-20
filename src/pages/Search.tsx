@@ -392,9 +392,9 @@ const Search = () => {
 
   const renderMediaCard = (item: any) => {
     if (item.media_type === 'tv' || item.name) {
-      return <TVShowCard key={item.id} tvShow={tmdbService.formatTVShowForCard(item)} size="small" />;
+      return <TVShowCard key={item.id} tvShow={tmdbService.formatTVShowForCard(item)} />;
     } else {
-      return <MovieCard key={item.id} movie={tmdbService.formatMovieForCard(item)} size="small" />;
+      return <MovieCard key={item.id} movie={tmdbService.formatMovieForCard(item)} />;
     }
   };
 
@@ -610,7 +610,6 @@ const Search = () => {
                   <MovieCard 
                     key={movie.id} 
                     movie={tmdbService.formatMovieForCard(movie)} 
-                    size="small" 
                   />
                 ))}
               </div>
@@ -631,7 +630,6 @@ const Search = () => {
                   <TVShowCard 
                     key={tvShow.id} 
                     tvShow={tmdbService.formatTVShowForCard(tvShow)} 
-                    size="small" 
                   />
                 ))}
               </div>

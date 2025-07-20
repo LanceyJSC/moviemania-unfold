@@ -119,7 +119,6 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
             <div key={`${movie.id}-${index}`} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard 
                 movie={tmdbService.formatMovieForCard(movie)} 
-                size={isMobile ? "small" : "medium"} 
               />
             </div>
           ))

@@ -119,7 +119,6 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
             <div key={tvShow.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
               <TVShowCard 
                 tvShow={tmdbService.formatTVShowForCard(tvShow)} 
-                size={isMobile ? "small" : "medium"} 
               />
             </div>
           ))

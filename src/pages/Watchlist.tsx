@@ -163,7 +163,6 @@ const Watchlist = () => {
                 <div key={movie.id} className="relative group">
                   <MovieCard
                     movie={movie}
-                    size="small"
                   />
                   
                   {/* iOS-style remove button */}

@@ -152,7 +152,6 @@ export const SwipeableTVCarousel = ({ title, category, cardSize = "medium" }: Sw
             <div key={tvShow.id} className="flex-shrink-0">
               <TVShowCard 
                 tvShow={tmdbService.formatTVShowForCard(tvShow)} 
-                size={isMobile ? "small" : cardSize} 
               />
             </div>
           ))

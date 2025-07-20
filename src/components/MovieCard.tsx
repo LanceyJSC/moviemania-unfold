@@ -6,15 +6,22 @@ import { Heart, Star, Play, Info, Plus } from "lucide-react";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { Link } from "react-router-dom";
 
+// Support both TMDB format and legacy format for backward compatibility
 interface Movie {
   id: number;
   title: string;
-  poster_path: string | null;
+  // TMDB format
+  poster_path?: string | null;
   backdrop_path?: string | null;
-  release_date: string;
-  vote_average: number;
+  release_date?: string;
+  vote_average?: number;
   genre_ids?: number[];
   overview?: string;
+  // Legacy format
+  poster?: string;
+  year?: string;
+  rating?: string;
+  genre?: string;
 }
 
 interface MovieCardProps {
@@ -31,18 +38,23 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleLike(movie.id, movie.title, movie.poster_path);
+    const posterForDb = movie.poster_path || movie.poster;
+    await toggleLike(movie.id, movie.title, posterForDb);
   };
 
   const handleWatchlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleWatchlist(movie.id, movie.title, movie.poster_path);
+    const posterForDb = movie.poster_path || movie.poster;
+    await toggleWatchlist(movie.id, movie.title, posterForDb);
   };
 
-  // Enhanced mobile image handling - use backdrop as fallback
-  const imageUrl = movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+  // Enhanced mobile image handling - support both formats
+  const posterPath = movie.poster_path || movie.poster;
+  const imageUrl = posterPath?.startsWith('http') 
+    ? posterPath 
+    : posterPath 
+    ? `https://image.tmdb.org/t/p/w500${posterPath}`
     : null;
 
   const backdropUrl = movie.backdrop_path
@@ -50,6 +62,14 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
     : null;
 
   const displayImage = imageUrl || backdropUrl;
+
+  // Get rating from either format
+  const rating = movie.vote_average || parseFloat(movie.rating || '0');
+  
+  // Get year from either format
+  const year = movie.release_date 
+    ? new Date(movie.release_date).getFullYear()
+    : movie.year || 'TBA';
 
   return (
     <Link to={`/movie/${movie.id}`} className="block">
@@ -91,7 +111,7 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
                   {movie.title}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+                  {year}
                 </p>
               </div>
             )}
@@ -105,7 +125,7 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
                   <div className="flex items-center gap-1">
                     <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     <span className="text-white text-xs font-medium">
-                      {movie.vote_average.toFixed(1)}
+                      {rating.toFixed(1)}
                     </span>
                   </div>
                   <div className="flex gap-1">
@@ -163,7 +183,7 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
               variant="secondary" 
               className="text-xs bg-black/80 text-white border-white/20 backdrop-blur-sm font-semibold"
             >
-              ★ {movie.vote_average.toFixed(1)}
+              ★ {rating.toFixed(1)}
             </Badge>
           </div>
         </div>
@@ -173,7 +193,7 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
             {movie.title}
           </h3>
           <p className="mobile-subtitle text-muted-foreground">
-            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+            {year}
           </p>
         </CardContent>
       </Card>

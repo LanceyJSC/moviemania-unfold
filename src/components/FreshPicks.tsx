@@ -153,15 +153,13 @@ export const FreshPicks = () => {
                return (
                  <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0 w-44">
                    {isMovie ? (
-                     <MovieCard 
-                       movie={tmdbService.formatMovieForCard(item as Movie)} 
-                       size="medium" 
-                     />
+                      <MovieCard 
+                        movie={tmdbService.formatMovieForCard(item as Movie)} 
+                      />
                    ) : (
-                     <TVShowCard 
-                       tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
-                       size="medium" 
-                     />
+                      <TVShowCard 
+                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
+                      />
                    )}
                  </div>
                );
