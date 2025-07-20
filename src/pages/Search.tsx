@@ -8,7 +8,7 @@ import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
 import { PhotoSearch } from "@/components/PhotoSearch";
 import { QuickGenres } from "@/components/QuickGenres";
-import { Navigation } from "@/components/Navigation";
+import { IOSTabBar } from "@/components/IOSTabBar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -683,8 +683,8 @@ const Search = () => {
         )}
       </div>
       
-      {/* Mobile Navigation */}
-      <Navigation />
+      {/* iOS Tab Bar */}
+      <IOSTabBar />
     </div>
   );
 };

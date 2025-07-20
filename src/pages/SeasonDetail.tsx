@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Calendar, Clock, Star, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
-import { Navigation } from "@/components/Navigation";
+import { IOSTabBar } from "@/components/IOSTabBar";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 
 interface Episode {
@@ -254,8 +254,8 @@ const SeasonDetail = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      <Navigation />
+      {/* iOS Tab Bar */}
+      <IOSTabBar />
     </div>
   );
 };

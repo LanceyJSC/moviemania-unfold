@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { MobileHeader } from "@/components/MobileHeader";
-import { Navigation } from "@/components/Navigation";
+import { IOSTabBar } from "@/components/IOSTabBar";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { Button } from "@/components/ui/button";
 
@@ -157,7 +157,7 @@ const CategoryPage = () => {
         )}
       </div>
       
-      <Navigation />
+      <IOSTabBar />
     </div>
   );
 };
