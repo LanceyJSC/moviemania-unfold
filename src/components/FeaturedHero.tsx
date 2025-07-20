@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Info, Star, Calendar, TrendingUp, Users } from "lucide-react";
+import { Play, Info, Star, Calendar } from "lucide-react";
 import { tmdbService } from "@/lib/tmdb";
 
 interface FeaturedHeroProps {
@@ -12,11 +12,6 @@ interface FeaturedHeroProps {
 
 export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const [featuredContent, setFeaturedContent] = useState<any>(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    trending: 0,
-    topRated: 0
-  });
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -29,31 +24,11 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
     
     try {
       if (type === 'movie') {
-        const [trending, topRated, popular] = await Promise.all([
-          tmdbService.getTrendingMovies(),
-          tmdbService.getTopRatedMovies(),
-          tmdbService.getPopularMovies()
-        ]);
-        
+        const trending = await tmdbService.getTrendingMovies();
         setFeaturedContent(trending.results[0]);
-        setStats({
-          total: popular.total_results || 0,
-          trending: trending.total_results || 0,
-          topRated: topRated.total_results || 0
-        });
       } else {
-        const [trending, topRated, popular] = await Promise.all([
-          tmdbService.getTrendingTVShows(),
-          tmdbService.getTopRatedTVShows(),
-          tmdbService.getPopularTVShows()
-        ]);
-        
+        const trending = await tmdbService.getTrendingTVShows();
         setFeaturedContent(trending.results[0]);
-        setStats({
-          total: popular.total_results || 0,
-          trending: trending.total_results || 0,
-          topRated: topRated.total_results || 0
-        });
       }
     } catch (error) {
       console.error(`Failed to load featured ${type} content:`, error);
@@ -114,38 +89,6 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend - Creates smooth transition to page background */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
-      {/* Stats Cards - Repositioned horizontally at top for iPhone screens */}
-      <div className="absolute top-4 left-4 right-4 z-40 flex justify-center space-x-2 sm:top-6 sm:right-6 sm:left-auto sm:justify-end sm:flex-col sm:space-x-0 sm:space-y-2 md:flex-row md:space-y-0 md:space-x-3">
-        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 flex-1 sm:flex-none sm:min-w-[90px]">
-          <div className="flex items-center justify-center space-x-1 text-white">
-            <TrendingUp className="h-3 w-3 text-cinema-red flex-shrink-0" />
-            <div className="text-xs text-center">
-              <div className="font-semibold leading-none">{stats.trending.toLocaleString()}</div>
-              <div className="text-white/70 text-[10px] leading-none mt-0.5">Trending</div>
-            </div>
-          </div>
-        </Card>
-        
-        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 flex-1 sm:flex-none sm:min-w-[90px]">
-          <div className="flex items-center justify-center space-x-1 text-white">
-            <Star className="h-3 w-3 text-cinema-gold flex-shrink-0" />
-            <div className="text-xs text-center">
-              <div className="font-semibold leading-none">{stats.topRated.toLocaleString()}</div>
-              <div className="text-white/70 text-[10px] leading-none mt-0.5">Top Rated</div>
-            </div>
-          </div>
-        </Card>
-        
-        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 flex-1 sm:flex-none sm:min-w-[90px]">
-          <div className="flex items-center justify-center space-x-1 text-white">
-            <Users className="h-3 w-3 text-cinema-gold flex-shrink-0" />
-            <div className="text-xs text-center">
-              <div className="font-semibold leading-none">{stats.total.toLocaleString()}</div>
-              <div className="text-white/70 text-[10px] leading-none mt-0.5">Total</div>
-            </div>
-          </div>
-        </Card>
-      </div>
       
       {/* Content */}
       <div className="relative h-full flex items-center">
