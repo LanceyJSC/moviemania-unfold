@@ -332,7 +332,6 @@ const MovieDetail = () => {
         <MovieCarousel 
           title="YOU MIGHT ALSO LIKE" 
           category="popular"
-          cardSize="medium"
         />
       </div>
 

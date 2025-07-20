@@ -183,7 +183,6 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
             <div key={movie.id} className="flex-shrink-0">
               <MovieCard 
                 movie={tmdbService.formatMovieForCard(movie)} 
-                size={cardSize} 
               />
             </div>
           ))

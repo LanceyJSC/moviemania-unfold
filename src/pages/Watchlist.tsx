@@ -144,7 +144,7 @@ const Watchlist = () => {
             <div className="poster-grid-responsive">
               {activeTabData.data.map((movie) => (
                 <div key={movie.id} className="relative group">
-                  <MovieCard movie={movie} size="medium" />
+                  <MovieCard movie={movie} />
                   
                   {/* Action Overlay */}
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
