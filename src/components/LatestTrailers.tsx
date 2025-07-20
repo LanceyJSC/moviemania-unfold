@@ -107,7 +107,7 @@ export const LatestTrailers = () => {
                 size="sm"
                 onClick={() => setActiveCategory(category.id)}
                 className={cn(
-                  "flex-1 h-10 sm:h-12 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95",
+                  "flex-1 h-9 sm:h-10 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95",
                   "touch-target focus-ring rounded-xl",
                   activeCategory === category.id
                     ? "bg-primary text-primary-foreground shadow-md"

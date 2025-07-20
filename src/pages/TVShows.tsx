@@ -58,16 +58,16 @@ const TVShows = () => {
                      key={filter.id}
                      variant={activeFilter === filter.id ? "default" : "outline"}
                      size="sm"
-                     className={`flex-1 h-12 sm:h-14 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl sm:rounded-2xl touch-target focus-ring ${
+                     className={`flex-1 h-9 sm:h-10 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl sm:rounded-2xl touch-target focus-ring ${
                        activeFilter === filter.id 
                          ? "bg-cinema-red text-white shadow-md" 
                          : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
                      }`}
                      onClick={() => setActiveFilter(filter.id)}
                    >
-                    <div className="flex flex-col items-center space-y-0.5 sm:space-y-1">
-                      <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span className="text-xs leading-tight">{filter.label}</span>
+                    <div className="flex flex-col items-center">
+                      <Icon className="h-3 w-3 sm:h-4 sm:w-4 mb-0.5" />
+                      <span className="text-xs leading-none">{filter.label}</span>
                     </div>
                   </Button>
                 );

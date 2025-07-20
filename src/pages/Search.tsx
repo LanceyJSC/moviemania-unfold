@@ -445,7 +445,7 @@ const Search = () => {
                 variant={activeTab === 'all' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveTab('all')}
-                className="flex-1 rounded-xl h-10 text-sm font-medium"
+                className="flex-1 rounded-xl h-9 text-sm font-medium"
               >
                 All
               </Button>
@@ -453,7 +453,7 @@ const Search = () => {
                 variant={activeTab === 'movies' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveTab('movies')}
-                className="flex-1 rounded-xl h-10 text-sm font-medium"
+                className="flex-1 rounded-xl h-9 text-sm font-medium"
               >
                 <Film className="h-4 w-4 mr-1" />
                 Movies
@@ -462,7 +462,7 @@ const Search = () => {
                 variant={activeTab === 'tv' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveTab('tv')}
-                className="flex-1 rounded-xl h-10 text-sm font-medium"
+                className="flex-1 rounded-xl h-9 text-sm font-medium"
               >
                 <Tv className="h-4 w-4 mr-1" />
                 TV
@@ -479,7 +479,7 @@ const Search = () => {
                   variant={sortBy === 'popularity' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setSortBy('popularity')}
-                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                  className="flex-1 rounded-lg h-8 text-xs font-medium"
                 >
                   <TrendingUp className="h-3 w-3 mr-1" />
                   Pop
@@ -488,7 +488,7 @@ const Search = () => {
                   variant={sortBy === 'rating' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setSortBy('rating')}
-                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                  className="flex-1 rounded-lg h-8 text-xs font-medium"
                 >
                   <Star className="h-3 w-3 mr-1" />
                   Rate
@@ -497,7 +497,7 @@ const Search = () => {
                   variant={sortBy === 'release_date' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setSortBy('release_date')}
-                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                  className="flex-1 rounded-lg h-8 text-xs font-medium"
                 >
                   <Clock className="h-3 w-3 mr-1" />
                   New
@@ -506,7 +506,7 @@ const Search = () => {
                   variant={sortBy === 'title' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setSortBy('title')}
-                  className="flex-1 rounded-lg h-9 text-xs font-medium"
+                  className="flex-1 rounded-lg h-8 text-xs font-medium"
                 >
                   A-Z
                 </Button>
@@ -518,7 +518,7 @@ const Search = () => {
               variant="outline"
               size="sm"
               onClick={handleSurpriseMe}
-              className="rounded-full h-10 px-4 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary touch-target"
+              className="rounded-full h-9 px-4 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary touch-target"
             >
               <Shuffle className="h-4 w-4 mr-1" />
               Surprise!
