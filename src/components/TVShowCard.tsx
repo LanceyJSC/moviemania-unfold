@@ -94,48 +94,6 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
             <span className="text-foreground font-semibold text-xs">{tvShow.rating}</span>
           </div>
 
-          {/* Action Buttons */}
-          <div className={`absolute top-2 right-2 transition-opacity duration-300 space-y-2 ${
-            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <Button 
-              size="sm" 
-              variant="secondary" 
-              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
-                isMobile ? 'active:scale-95' : ''
-              } ${
-                isLiked(tvShow.id) ? 'bg-cinema-red border-cinema-red text-white' : 'bg-cinema-charcoal/80'
-              }`}
-              onClick={handleLikeClick}
-            >
-              <Heart className={`h-4 w-4 ${isLiked(tvShow.id) ? 'fill-current' : ''}`} />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="secondary" 
-              className={`p-0 backdrop-blur-sm border-border hover:border-cinema-red h-8 w-8 ${
-                isMobile ? 'active:scale-95' : ''
-              } ${
-                isInWatchlist(tvShow.id) ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : 'bg-cinema-charcoal/80'
-              }`}
-              onClick={handleWatchlistClick}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* TV Show Info Overlay */}
-          <div className={`absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 ${
-            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
-              {tvShow.title}
-            </h3>
-            <div className="flex items-center justify-between text-muted-foreground text-xs">
-              <span>{tvShow.year}</span>
-              <span className="truncate ml-2">TV Show</span>
-            </div>
-          </div>
         </div>
       </Card>
     </Link>
