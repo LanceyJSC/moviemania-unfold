@@ -1,7 +1,8 @@
+
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.0d45f270b6d947cb8b142e046a055325',
+  appId: 'com.lancey.moviemania',
   appName: 'moviemania-unfold',
   webDir: 'dist',
   server: {
