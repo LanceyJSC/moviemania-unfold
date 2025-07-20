@@ -37,7 +37,7 @@ const Movies = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader title="Movies" />
+      
       
       {/* Content container */}
       <div className="relative">

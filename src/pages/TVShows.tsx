@@ -36,7 +36,7 @@ const TVShows = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <MobileHeader title="TV Shows" />
+      
       
       {/* Content container */}
       <div className="relative">
