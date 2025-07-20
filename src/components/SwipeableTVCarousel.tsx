@@ -10,10 +10,9 @@ import { useNavigate } from "react-router-dom";
 interface SwipeableTVCarouselProps {
   title: string;
   category: "trending" | "popular" | "top_rated" | "airing_today" | "on_the_air";
-  cardSize?: "small" | "medium" | "large";
 }
 
-export const SwipeableTVCarousel = ({ title, category, cardSize = "medium" }: SwipeableTVCarouselProps) => {
+export const SwipeableTVCarousel = ({ title, category }: SwipeableTVCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [tvShows, setTVShows] = useState<TVShow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,12 +105,7 @@ export const SwipeableTVCarousel = ({ title, category, cardSize = "medium" }: Sw
   };
 
   const getSkeletonClasses = () => {
-    switch (cardSize) {
-      case "small": return "w-28 h-42";
-      case "medium": return "w-30 h-45"; 
-      case "large": return "w-32 h-48";
-      default: return "w-30 h-45";
-    }
+    return "w-32 h-48";
   };
 
   return (

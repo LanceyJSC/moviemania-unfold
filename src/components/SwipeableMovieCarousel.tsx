@@ -10,10 +10,9 @@ import { useNavigate } from "react-router-dom";
 interface SwipeableMovieCarouselProps {
   title: string;
   category: "trending" | "popular" | "top_rated" | "upcoming" | "now_playing";
-  cardSize?: "small" | "medium" | "large";
 }
 
-export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }: SwipeableMovieCarouselProps) => {
+export const SwipeableMovieCarousel = ({ title, category }: SwipeableMovieCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,12 +117,7 @@ export const SwipeableMovieCarousel = ({ title, category, cardSize = "medium" }:
   };
 
   const getSkeletonClasses = () => {
-    switch (cardSize) {
-      case "small": return "w-28 h-42";
-      case "medium": return "w-30 h-45"; 
-      case "large": return "w-32 h-48";
-      default: return "w-30 h-45";
-    }
+    return "w-32 h-48";
   };
 
   return (
