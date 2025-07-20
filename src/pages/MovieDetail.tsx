@@ -376,7 +376,7 @@ const MovieDetail = () => {
               <div className="flex space-x-3 pb-2">
                 {keyCrewMembers.map((member, index) => (
                   <div key={`${member.id}-${index}`} className="flex-shrink-0 w-20">
-                    <CrewCard crewMember={member} />
+                    <CrewCard person={member} />
                   </div>
                 ))}
               </div>
@@ -388,7 +388,7 @@ const MovieDetail = () => {
         {/* Similar Movies */}
         <div className="space-y-4">
           <h3 className="font-semibold text-foreground text-lg">More Like This</h3>
-          <MovieCarousel title="Similar Movies" category="similar" />
+          <MovieCarousel title="Popular Movies" category="popular" />
         </div>
       </div>
 
