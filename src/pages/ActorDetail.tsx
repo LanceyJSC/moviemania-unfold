@@ -161,7 +161,7 @@ const ActorDetail = () => {
           <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
             FILMOGRAPHY ({allContent.length} {allContent.length === 1 ? 'TITLE' : 'TITLES'})
           </h2>
-          <div className="poster-grid-responsive">
+          <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
             {allContent.map((item) => (
               <MovieCard 
                 key={`${item.id}-${item.media_type}`}
