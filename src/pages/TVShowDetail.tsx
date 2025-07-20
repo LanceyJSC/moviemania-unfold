@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, ArrowLeft, Clock, Calendar, Tv } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, Clock, Calendar, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ActorCard } from "@/components/ActorCard";
 import { CrewCard } from "@/components/CrewCard";
 import { IOSTabBar } from "@/components/IOSTabBar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { TrailerModal } from "@/components/TrailerModal";
 import { SynopsisModal } from "@/components/SynopsisModal";
 import { tmdbService, TVShow } from "@/lib/tmdb";
@@ -92,23 +93,7 @@ const TVShowDetail = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div 
-          className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50"
-          style={{ paddingTop: 'env(safe-area-inset-top)' }}
-        >
-          <div className="flex items-center justify-between px-4 py-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="rounded-full h-10 w-10 p-0"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <span className="font-medium text-foreground">Loading...</span>
-            <div className="w-10" />
-          </div>
-        </div>
+        <MobileHeader title="Loading..." />
         
         <div className="flex items-center justify-center h-screen">
           <div className="text-center space-y-4">
@@ -123,23 +108,7 @@ const TVShowDetail = () => {
   if (!tvShow) {
     return (
       <div className="min-h-screen bg-background">
-        <div 
-          className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50"
-          style={{ paddingTop: 'env(safe-area-inset-top)' }}
-        >
-          <div className="flex items-center justify-between px-4 py-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="rounded-full h-10 w-10 p-0"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <span className="font-medium text-foreground">Not Found</span>
-            <div className="w-10" />
-          </div>
-        </div>
+        <MobileHeader title="Not Found" />
         
         <div className="flex items-center justify-center h-screen">
           <div className="text-center space-y-4">
@@ -166,53 +135,12 @@ const TVShowDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32">
-      {/* iOS-style Header with Dynamic Blur */}
-      <div 
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          scrollY > 200 
-            ? "bg-background/95 backdrop-blur-xl border-b border-border/50" 
-            : "bg-transparent"
-        )}
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
-      >
-        <div className="flex items-center justify-between px-4 py-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className={cn(
-              "rounded-full h-10 w-10 p-0 transition-colors",
-              scrollY > 200 ? "text-foreground" : "text-white bg-black/30 backdrop-blur-sm"
-            )}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          
-          {scrollY > 200 && (
-            <div className="text-center">
-              <span className="font-medium text-foreground text-sm">{tvShow.name}</span>
-            </div>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleShare}
-            className={cn(
-              "rounded-full h-10 w-10 p-0 transition-colors",
-              scrollY > 200 ? "text-foreground" : "text-white bg-black/30 backdrop-blur-sm"
-            )}
-          >
-            <Share className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <MobileHeader title={tvShow.name} />
 
-      {/* Hero Section - Mobile Optimized */}
+      {/* Hero Section - TMDB Backdrop 16:9 */}
       <div className="relative overflow-hidden">
         <div 
-          className="h-[60vh] bg-cover bg-center"
+          className="backdrop-16-9 bg-cover bg-center"
           style={{ backgroundImage: `url(${backdropUrl})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/80" />

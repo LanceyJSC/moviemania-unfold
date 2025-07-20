@@ -42,8 +42,8 @@ const Movies = () => {
       {/* Hero-style gradient background */}
       <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
         {/* Filter Buttons */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 pt-8">
-        <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
+        <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4">
+        <div className="flex overflow-x-auto space-x-3 ios-horizontal-scroll">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
             return (

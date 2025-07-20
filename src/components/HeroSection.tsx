@@ -77,15 +77,8 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div 
-        className="relative text-foreground overflow-hidden"
-        style={{ 
-          height: '60vh',
-          minHeight: '500px',
-          maxHeight: '70vh'
-        }}
-      >
-        {/* Hero Background - Correct aspect ratio */}
+      <div className="relative text-foreground overflow-hidden backdrop-16-9">
+        {/* Hero Background - TMDB Backdrop 16:9 */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ 

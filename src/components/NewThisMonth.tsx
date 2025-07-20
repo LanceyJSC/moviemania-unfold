@@ -164,7 +164,7 @@ export const NewThisMonth = () => {
       {content.length > 0 ? (
         <div 
           ref={scrollRef}
-          className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 ${
+          className={`flex space-x-4 overflow-x-auto ios-horizontal-scroll pb-4 ${
             isMobile ? 'cursor-grab active:cursor-grabbing' : ''
           } ${isDragging ? 'select-none' : ''}`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}

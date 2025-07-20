@@ -132,7 +132,7 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
       {/* Movie Cards Container */}
       <div 
         ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
+        className="flex space-x-4 overflow-x-auto ios-horizontal-scroll pb-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {isLoading ? (

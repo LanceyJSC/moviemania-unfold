@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Heart, Clock, Eye, Trash2, ArrowLeft, Filter, Grid3X3 } from "lucide-react";
+import { Heart, Clock, Eye, Trash2, Filter, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { IOSTabBar } from "@/components/IOSTabBar";
+import { MobileHeader } from "@/components/MobileHeader";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useAuth } from "@/hooks/useAuth";
 import { tmdbService, Movie } from "@/lib/tmdb";
@@ -89,88 +90,48 @@ const Watchlist = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32">
-      {/* iOS-style Header with Dynamic Blur */}
-      <div 
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          scrollY > 50 
-            ? "bg-background/95 backdrop-blur-xl border-b border-border/50" 
-            : "bg-background/80 backdrop-blur-sm"
-        )}
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
-      >
-        <div className="px-4 py-4 space-y-4">
-          {/* Header */}
-          <div className="flex items-center justify-between">
+      {/* Tab Selector */}
+      <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4">
+        <div className="flex bg-muted/50 rounded-2xl p-1">
+          {[
+            { key: 'watchlist' as const, label: 'Watchlist', count: stats.watchlist },
+            { key: 'liked' as const, label: 'Liked', count: stats.liked },
+            { key: 'watching' as const, label: 'Watching', count: stats.watching }
+          ].map((tab) => (
             <Button
-              variant="ghost"
+              key={tab.key}
+              variant={activeTab === tab.key ? "default" : "ghost"}
               size="sm"
-              onClick={() => navigate(-1)}
-              className="rounded-full h-10 w-10 p-0"
+              className={cn(
+                "flex-1 rounded-xl h-10 text-sm font-medium transition-all duration-200",
+                activeTab === tab.key 
+                  ? "bg-background text-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              onClick={() => setActiveTab(tab.key)}
             >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            
-            <div className="text-center">
-              <h1 className="font-cinematic text-xl tracking-wide text-foreground">
-                My Lists
-              </h1>
-            </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full h-10 w-10 p-0"
-            >
-              <Filter className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Tab Selector */}
-          <div className="flex bg-muted/50 rounded-2xl p-1">
-            {[
-              { key: 'watchlist' as const, label: 'Watchlist', count: stats.watchlist },
-              { key: 'liked' as const, label: 'Liked', count: stats.liked },
-              { key: 'watching' as const, label: 'Watching', count: stats.watching }
-            ].map((tab) => (
-              <Button
-                key={tab.key}
-                variant={activeTab === tab.key ? "default" : "ghost"}
-                size="sm"
-                className={cn(
-                  "flex-1 rounded-xl h-10 text-sm font-medium transition-all duration-200",
-                  activeTab === tab.key 
-                    ? "bg-background text-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
+              <div className="flex items-center gap-2">
+                <span>{tab.label}</span>
+                {tab.count > 0 && (
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-xs",
+                    activeTab === tab.key 
+                      ? "bg-primary/20 text-primary" 
+                      : "bg-muted text-muted-foreground"
+                  )}>
+                    {tab.count}
+                  </span>
                 )}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <div className="flex items-center gap-2">
-                  <span>{tab.label}</span>
-                  {tab.count > 0 && (
-                    <span className={cn(
-                      "px-2 py-0.5 rounded-full text-xs",
-                      activeTab === tab.key 
-                        ? "bg-primary/20 text-primary" 
-                        : "bg-muted text-muted-foreground"
-                    )}>
-                      {tab.count}
-                    </span>
-                  )}
-                </div>
-              </Button>
-            ))}
-          </div>
+              </div>
+            </Button>
+          ))}
         </div>
       </div>
 
       {/* Content */}
-      <div 
-        className="px-4 py-6 space-y-6"
-        style={{ paddingTop: `calc(120px + env(safe-area-inset-top))` }}
-      >
+      <div className="px-4 py-6 space-y-6">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="mobile-grid">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-[2/3] bg-muted rounded-2xl" />
@@ -195,14 +156,13 @@ const Watchlist = () => {
             </div>
 
             {/* Movies Grid - Consistent with other pages */}
-            <div className="px-4">
-              <div className="mobile-grid">
-                {currentMovies.map((movie) => (
-                  <div key={movie.id} className="relative group">
-                    <MovieCard
-                      movie={movie}
-                      size="small"
-                    />
+            <div className="mobile-grid">
+              {currentMovies.map((movie) => (
+                <div key={movie.id} className="relative group">
+                  <MovieCard
+                    movie={movie}
+                    size="small"
+                  />
                   
                   {/* iOS-style remove button */}
                   {activeTab === 'watchlist' && (
@@ -219,13 +179,12 @@ const Watchlist = () => {
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   )}
-                  </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </>
         ) : (
-          /* Empty State */
+          // Empty State
           <div className="text-center py-16 space-y-4">
             <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
               {activeTab === 'watchlist' && <Clock className="h-8 w-8 text-muted-foreground" />}
