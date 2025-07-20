@@ -23,7 +23,7 @@ export const HeroSection = () => {
 
   // Safe context usage with fallback
   let isTrailerOpen = false;
-  let setIsTrailerOpen = () => {};
+  let setIsTrailerOpen = (_open: boolean) => {};
   
   try {
     const trailerContext = useTrailerContext();
