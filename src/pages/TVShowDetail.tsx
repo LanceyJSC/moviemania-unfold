@@ -134,7 +134,7 @@ const TVShowDetail = () => {
       <MobileHeader title={tvShow.name} />
       
       {/* Hero Section with Poster Overlay */}
-      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
+      <div className="relative overflow-hidden h-80 iphone-65:h-96 md:h-[50vh] rounded-b-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
@@ -213,52 +213,71 @@ const TVShowDetail = () => {
 
       {/* Action Section */}
       <div className="container mx-auto px-4 py-6">
-        {/* Action Buttons */}
-        <div className="flex gap-3 mb-6">
+        {/* Action Buttons - Layout like home page */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
           {trailerKey ? (
             <Button 
-              className="flex-1 bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]"
+              size="lg"
+              className="bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold w-full sm:w-auto"
               onClick={handleWatchTrailer}
             >
-              <Play className="mr-2 h-4 w-4" />
+              <Play className="mr-2 h-5 w-5" />
               Watch Trailer
             </Button>
           ) : (
-            <Button className="flex-1 bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]" disabled>
-              <Play className="mr-2 h-4 w-4" />
+            <Button 
+              size="lg" 
+              className="bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold w-full sm:w-auto" 
+              disabled
+            >
+              <Play className="mr-2 h-5 w-5" />
               No Trailer
             </Button>
           )}
           
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
-                isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
-              }`}
-              onClick={() => toggleLike(tvShowId, tvShow.name, posterUrl)}
-            >
-              <Heart className={`h-4 w-4 ${isTVShowLiked ? 'fill-current' : ''}`} />
-            </Button>
+          <Button 
+            variant="outline" 
+            size="lg"
+            className="border-white/30 text-foreground hover:bg-card w-full sm:w-auto"
+            onClick={() => setShowSynopsis(true)}
+          >
+            <MoreHorizontal className="mr-2 h-5 w-5" />
+            More Info
+          </Button>
+        </div>
 
-            <Button 
-              variant="outline" 
-              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
-                isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
-              }`}
-              onClick={() => toggleWatchlist(tvShowId, tvShow.name, posterUrl)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+        {/* Secondary Action Buttons */}
+        <div className="flex gap-3 mb-6">
+          <Button 
+            variant="outline" 
+            className={`flex-1 border-border hover:bg-card px-4 py-3 min-h-[44px] ${
+              isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
+            }`}
+            onClick={() => toggleLike(tvShowId, tvShow.name, posterUrl)}
+          >
+            <Heart className={`mr-2 h-4 w-4 ${isTVShowLiked ? 'fill-current' : ''}`} />
+            {isTVShowLiked ? 'Liked' : 'Like'}
+          </Button>
 
-            <Button 
-              variant="outline" 
-              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
-              onClick={handleShare}
-            >
-              <Share className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            className={`flex-1 border-border hover:bg-card px-4 py-3 min-h-[44px] ${
+              isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
+            }`}
+            onClick={() => toggleWatchlist(tvShowId, tvShow.name, posterUrl)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {isTVShowInWatchlist ? 'In Watchlist' : 'Watchlist'}
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className="flex-1 border-border hover:bg-card px-4 py-3 min-h-[44px]" 
+            onClick={handleShare}
+          >
+            <Share className="mr-2 h-4 w-4" />
+            Share
+          </Button>
         </div>
 
         {/* Rating */}
