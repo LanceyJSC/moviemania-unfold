@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Calendar, TrendingUp } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
@@ -164,8 +163,13 @@ export const NewThisMonth = () => {
       {content.length > 0 ? (
         <div 
           ref={scrollRef}
-          className={`flex space-x-3 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className={`flex space-x-3 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing transition-all duration-200 ease-out ${isDragging ? 'select-none' : ''}`}
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            scrollBehavior: 'smooth',
+            WebkitOverflowScrolling: 'touch'
+          }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleEnd}
