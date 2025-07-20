@@ -184,7 +184,7 @@ const Watchlist = () => {
         ) : currentMovies.length > 0 ? (
           <>
             {/* Stats */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between px-4">
               <p className="text-sm text-muted-foreground">
                 {currentMovies.length} {currentMovies.length === 1 ? 'movie' : 'movies'}
               </p>
@@ -194,14 +194,15 @@ const Watchlist = () => {
               </Button>
             </div>
 
-            {/* Movies Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {currentMovies.map((movie) => (
-                <div key={movie.id} className="relative group">
-                  <MovieCard
-                    movie={movie}
-                    size="small"
-                  />
+            {/* Movies Grid - Consistent with other pages */}
+            <div className="px-4">
+              <div className="mobile-grid">
+                {currentMovies.map((movie) => (
+                  <div key={movie.id} className="relative group">
+                    <MovieCard
+                      movie={movie}
+                      size="small"
+                    />
                   
                   {/* iOS-style remove button */}
                   {activeTab === 'watchlist' && (
@@ -218,8 +219,9 @@ const Watchlist = () => {
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   )}
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         ) : (

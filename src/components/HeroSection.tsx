@@ -80,21 +80,23 @@ export const HeroSection = () => {
       <div 
         className="relative text-foreground overflow-hidden"
         style={{ 
-          height: '50vh',
-          minHeight: '400px',
-          maxHeight: '600px'
+          height: '60vh',
+          minHeight: '500px',
+          maxHeight: '70vh'
         }}
       >
-        {/* Hero Background - Mobile optimized */}
+        {/* Hero Background - Correct aspect ratio */}
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ 
-            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'var(--gradient-dark)'
+            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'var(--gradient-dark)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center'
           }}
         >
-          {/* Mobile-optimized overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/20" />
+          {/* iOS-style gradients for readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/30" />
         </div>
 
         {/* iOS-style safe area top spacing */}

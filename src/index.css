@@ -1,10 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Mobile-First iOS Design System for CINESCOPE
 All colors MUST be HSL for proper theming.
 */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
@@ -19,7 +19,7 @@ All colors MUST be HSL for proper theming.
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 95%;
 
-    /* Hollywood Red Primary - slightly adjusted for mobile readability */
+    /* Hollywood Red Primary - mobile optimized */
     --primary: 350 85% 50%;
     --primary-foreground: 0 0% 98%;
 
@@ -49,16 +49,6 @@ All colors MUST be HSL for proper theming.
     --cinema-red: 350 85% 50%;
     --cinema-gold: 43 74% 66%;
 
-    /* Mobile-specific gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(350 75% 45%));
-    --gradient-dark: linear-gradient(180deg, hsl(var(--background)), hsl(0 0% 5%));
-    --gradient-overlay: linear-gradient(180deg, transparent, hsl(var(--background)));
-
-    /* iOS-style shadows */
-    --shadow-sm: 0 2px 8px hsl(var(--cinema-black) / 0.3);
-    --shadow-md: 0 4px 16px hsl(var(--cinema-black) / 0.4);
-    --shadow-lg: 0 8px 32px hsl(var(--cinema-black) / 0.5);
-
     /* Mobile touch targets */
     --touch-target: 44px;
     --touch-padding: 12px;
@@ -80,6 +70,8 @@ All colors MUST be HSL for proper theming.
     /* iOS viewport units */
     height: 100vh;
     height: -webkit-fill-available;
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
   }
   
   body {
@@ -95,6 +87,8 @@ All colors MUST be HSL for proper theming.
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Custom font for cinematic feel - mobile optimized */
@@ -128,6 +122,7 @@ All colors MUST be HSL for proper theming.
   /* Mobile-optimized scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
+    height: 4px;
   }
   
   ::-webkit-scrollbar-track {
@@ -139,9 +134,58 @@ All colors MUST be HSL for proper theming.
     border-radius: 2px;
   }
 
-  /* iOS momentum scrolling */
-  .smooth-scroll {
+  /* iOS momentum scrolling for all scrollable elements */
+  .ios-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    overscroll-behavior: contain;
+  }
+
+  /* Consistent grid system for all pages */
+  .mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .mobile-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-grid {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .mobile-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  /* iOS safe area helpers */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-full {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
