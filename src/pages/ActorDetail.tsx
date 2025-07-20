@@ -68,7 +68,30 @@ const ActorDetail = () => {
 
   const profileUrl = getProfileImageUrl();
   const birthYear = actor.birthday ? new Date(actor.birthday).getFullYear() : null;
+  
+  // Combine movies and TV shows into one filmography list
   const movies = actor.movie_credits?.cast || [];
+  const tvShows = actor.tv_credits?.cast || [];
+  
+  // Convert TV shows to movie-like format for consistent display
+  const formattedTVShows = tvShows.map(show => ({
+    id: show.id,
+    title: show.name,
+    character: show.character,
+    poster_path: show.poster_path,
+    release_date: show.first_air_date,
+    vote_average: show.vote_average,
+    media_type: 'tv' as const
+  }));
+  
+  const formattedMovies = movies.map(movie => ({
+    ...movie,
+    media_type: 'movie' as const
+  }));
+  
+  // Combine and sort all content by release date
+  const allContent = [...formattedMovies, ...formattedTVShows]
+    .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime());
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -133,28 +156,25 @@ const ActorDetail = () => {
       </div>
 
       {/* Filmography */}
-      {movies.length > 0 && (
+      {allContent.length > 0 && (
         <div className="container mx-auto px-4 py-6">
           <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
-            FILMOGRAPHY
+            FILMOGRAPHY ({allContent.length} {allContent.length === 1 ? 'TITLE' : 'TITLES'})
           </h2>
           <div className="poster-grid-responsive">
-            {movies
-              .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime())
-              .slice(0, 18)
-              .map((movie) => (
-                <MovieCard 
-                  key={movie.id}
-                  movie={{
-                    id: movie.id,
-                    title: movie.title,
-                    poster: tmdbService.getPosterUrl(movie.poster_path),
-                    year: movie.release_date ? new Date(movie.release_date).getFullYear().toString() : 'TBA',
-                    rating: movie.vote_average.toFixed(1),
-                    genre: movie.character
-                  }}
-                />
-              ))}
+            {allContent.map((item) => (
+              <MovieCard 
+                key={`${item.id}-${item.media_type}`}
+                movie={{
+                  id: item.id,
+                  title: item.title,
+                  poster: tmdbService.getPosterUrl(item.poster_path),
+                  year: item.release_date ? new Date(item.release_date).getFullYear().toString() : 'TBA',
+                  rating: item.vote_average.toFixed(1),
+                  genre: item.character
+                }}
+              />
+            ))}
           </div>
         </div>
       )}

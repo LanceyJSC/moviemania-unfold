@@ -84,6 +84,16 @@ export interface Person {
       vote_average: number;
     }>;
   };
+  tv_credits?: {
+    cast: Array<{
+      id: number;
+      name: string;
+      character: string;
+      poster_path: string | null;
+      first_air_date: string;
+      vote_average: number;
+    }>;
+  };
 }
 
 export interface Review {
@@ -296,7 +306,7 @@ class TMDBService {
   }
 
   async getPersonDetails(personId: number, fresh: boolean = false): Promise<Person> {
-    return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits`, fresh);
+    return this.fetchFromTMDB(`/person/${personId}?append_to_response=movie_credits,tv_credits`, fresh);
   }
 
   // Get movie reviews
