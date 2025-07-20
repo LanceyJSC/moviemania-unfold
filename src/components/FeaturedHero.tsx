@@ -116,56 +116,56 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       
       
       {/* Content */}
-      <div className="relative h-full flex items-center">
-        <div className="container mx-auto px-6">
+      <div className="relative h-full flex items-end pb-6 sm:items-center sm:pb-0">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-2xl">
             {/* Badge */}
-            <Badge className="mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red">
+            <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
               Featured {type === 'movie' ? 'Movie' : 'TV Show'}
               {isRefreshing && <span className="ml-2 text-xs">Updating...</span>}
             </Badge>
             
             {/* Title */}
-            <h1 className="font-cinematic text-3xl md:text-4xl lg:text-5xl text-white mb-4 tracking-wide">
+            <h1 className="font-cinematic text-xl sm:text-3xl md:text-4xl lg:text-5xl text-white mb-2 sm:mb-4 tracking-wide leading-tight">
               {title}
             </h1>
             
             {/* Meta Info */}
-            <div className="flex items-center space-x-4 mb-4">
+            <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
               {releaseDate && (
                 <div className="flex items-center space-x-1 text-white/80">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(releaseDate).getFullYear()}</span>
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm">{new Date(releaseDate).getFullYear()}</span>
                 </div>
               )}
               <div className="flex items-center space-x-1 text-white/80">
-                <Star className="h-4 w-4 fill-cinema-gold text-cinema-gold" />
-                <span>{rating?.toFixed(1)}/10</span>
+                <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-cinema-gold text-cinema-gold" />
+                <span className="text-xs sm:text-sm">{rating?.toFixed(1)}/10</span>
               </div>
             </div>
             
             {/* Overview */}
-            <p className="text-white/90 text-base md:text-lg mb-6 line-clamp-3">
+            <p className="text-white/90 text-sm sm:text-base md:text-lg mb-4 sm:mb-6 line-clamp-2 sm:line-clamp-3 leading-relaxed">
               {overview}
             </p>
             
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <Button 
-                size="lg" 
-                className="bg-cinema-red text-white hover:bg-cinema-red/90 w-full sm:w-auto"
+                size="sm"
+                className="bg-cinema-red text-white hover:bg-cinema-red/90 w-full sm:w-auto h-10 sm:h-12 text-sm sm:text-base"
                 disabled={isRefreshing}
               >
-                <Play className="h-5 w-5 mr-2" />
+                <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Watch Trailer
               </Button>
               <Button 
                 variant="outline" 
-                size="lg" 
-                className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto"
+                size="sm"
+                className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto h-10 sm:h-12 text-sm sm:text-base"
                 disabled={isRefreshing}
               >
-                <Info className="h-5 w-5 mr-2" />
+                <Info className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 More Info
               </Button>
             </div>
