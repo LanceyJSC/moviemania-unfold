@@ -151,4 +151,34 @@
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
+
+  /* iPhone-optimized poster grid - 4 across for iPhone */
+  .poster-grid-responsive {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* iPad and larger screens - more columns */
+  @media (min-width: 768px) {
+    .poster-grid-responsive {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .poster-grid-responsive {
+      grid-template-columns: repeat(8, 1fr);
+    }
+  }
+
+  /* Hide scrollbars on carousels */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

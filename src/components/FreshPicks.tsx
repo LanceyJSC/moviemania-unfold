@@ -101,16 +101,16 @@ export const FreshPicks = () => {
   if (isLoading) {
     return (
       <div className="mb-12">
-        <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
+        <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
           <div className="text-center mb-8">
             <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
               FRESH PICKS
             </h2>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
-           <div className="flex space-x-4 overflow-hidden">
+            <div className="flex space-x-3 overflow-hidden">
              {Array.from({ length: 6 }).map((_, index) => (
-               <div key={index} className="flex-shrink-0 w-44 aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+               <div key={index} className="flex-shrink-0 w-36 h-54 bg-muted animate-pulse rounded-lg"></div>
              ))}
           </div>
         </div>
@@ -120,7 +120,7 @@ export const FreshPicks = () => {
 
   return (
     <div className="mb-12 pt-4">
-      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-1 md:-mx-4 px-1 md:px-4 py-8">
+      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Sparkles className="h-8 w-8 text-cinema-red" />
@@ -136,9 +136,9 @@ export const FreshPicks = () => {
         </div>
         
         {content.length > 0 ? (
-          <div 
+           <div 
             ref={scrollRef}
-            className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
+            className={`flex space-x-3 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -151,7 +151,7 @@ export const FreshPicks = () => {
              {content.map((item) => {
                const isMovie = 'title' in item;
                return (
-                 <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0 w-44">
+                 <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0">
                    {isMovie ? (
                      <MovieCard 
                        movie={tmdbService.formatMovieForCard(item as Movie)} 
