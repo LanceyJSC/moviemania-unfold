@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Info, Star, Calendar } from "lucide-react";
+import { Play, Info, Star, Calendar, TrendingUp, Users } from "lucide-react";
 import { tmdbService } from "@/lib/tmdb";
 
 interface FeaturedHeroProps {
@@ -12,6 +12,11 @@ interface FeaturedHeroProps {
 
 export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const [featuredContent, setFeaturedContent] = useState<any>(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    trending: 0,
+    topRated: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -24,11 +29,31 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
     
     try {
       if (type === 'movie') {
-        const trending = await tmdbService.getTrendingMovies();
+        const [trending, topRated, popular] = await Promise.all([
+          tmdbService.getTrendingMovies(),
+          tmdbService.getTopRatedMovies(),
+          tmdbService.getPopularMovies()
+        ]);
+        
         setFeaturedContent(trending.results[0]);
+        setStats({
+          total: popular.total_results || 0,
+          trending: trending.total_results || 0,
+          topRated: topRated.total_results || 0
+        });
       } else {
-        const trending = await tmdbService.getTrendingTVShows();
+        const [trending, topRated, popular] = await Promise.all([
+          tmdbService.getTrendingTVShows(),
+          tmdbService.getTopRatedTVShows(),
+          tmdbService.getPopularTVShows()
+        ]);
+        
         setFeaturedContent(trending.results[0]);
+        setStats({
+          total: popular.total_results || 0,
+          trending: trending.total_results || 0,
+          topRated: topRated.total_results || 0
+        });
       }
     } catch (error) {
       console.error(`Failed to load featured ${type} content:`, error);
@@ -52,7 +77,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   if (isLoading || !featuredContent) {
     return (
-      <div className="relative bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-xl overflow-hidden mb-8" style={{ aspectRatio: '16/9' }}>
+      <div className="relative h-96 bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-xl overflow-hidden mb-8">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-muted-foreground">Loading featured {type}...</div>
         </div>
@@ -70,7 +95,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   return (
-    <div className="relative rounded-2xl overflow-hidden mb-8 group" style={{ aspectRatio: '16/9' }}>
+    <div className="relative h-96 rounded-2xl overflow-hidden mb-8 group">
       {/* Background Image */}
       {backdropUrl && (
         <div 
@@ -89,6 +114,38 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend - Creates smooth transition to page background */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
+      {/* Stats Cards - Moved to top-right to avoid overlap */}
+      <div className="absolute top-6 right-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
+          <div className="flex items-center space-x-2 text-white">
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-red" />
+            <div className="text-xs sm:text-sm">
+              <div className="font-semibold">{stats.trending.toLocaleString()}</div>
+              <div className="text-white/70 text-xs">Trending</div>
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
+          <div className="flex items-center space-x-2 text-white">
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
+            <div className="text-xs sm:text-sm">
+              <div className="font-semibold">{stats.topRated.toLocaleString()}</div>
+              <div className="text-white/70 text-xs">Top Rated</div>
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
+          <div className="flex items-center space-x-2 text-white">
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
+            <div className="text-xs sm:text-sm">
+              <div className="font-semibold">{stats.total.toLocaleString()}</div>
+              <div className="text-white/70 text-xs">Total</div>
+            </div>
+          </div>
+        </Card>
+      </div>
       
       {/* Content */}
       <div className="relative h-full flex items-center">

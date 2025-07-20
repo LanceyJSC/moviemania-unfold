@@ -237,7 +237,9 @@ export const HeroSection = () => {
       <div 
         className="relative text-foreground overflow-hidden"
         style={{ 
-          aspectRatio: '16/9' // TMDB backdrop aspect ratio
+          height: 'clamp(350px, 45vh, 500px)', // iPhone-optimized height
+          minHeight: '350px', // Smaller for iPhone screens
+          maxHeight: '500px'  // More compact for mobile
         }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
