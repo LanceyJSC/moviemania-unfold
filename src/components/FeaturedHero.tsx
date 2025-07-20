@@ -114,38 +114,6 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend - Creates smooth transition to page background */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
-      {/* Stats Cards - Moved to top-right to avoid overlap */}
-      <div className="absolute top-6 right-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
-          <div className="flex items-center space-x-2 text-white">
-            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-red" />
-            <div className="text-xs sm:text-sm">
-              <div className="font-semibold">{stats.trending.toLocaleString()}</div>
-              <div className="text-white/70 text-xs">Trending</div>
-            </div>
-          </div>
-        </Card>
-        
-        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
-          <div className="flex items-center space-x-2 text-white">
-            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
-            <div className="text-xs sm:text-sm">
-              <div className="font-semibold">{stats.topRated.toLocaleString()}</div>
-              <div className="text-white/70 text-xs">Top Rated</div>
-            </div>
-          </div>
-        </Card>
-        
-        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
-          <div className="flex items-center space-x-2 text-white">
-            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
-            <div className="text-xs sm:text-sm">
-              <div className="font-semibold">{stats.total.toLocaleString()}</div>
-              <div className="text-white/70 text-xs">Total</div>
-            </div>
-          </div>
-        </Card>
-      </div>
       
       {/* Content */}
       <div className="relative h-full flex items-center">
