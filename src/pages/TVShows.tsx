@@ -38,13 +38,14 @@ const TVShows = () => {
     <div className="min-h-screen bg-background">
       
       
+      {/* Featured Hero Section - Full width */}
+      <FeaturedHero type="tv" />
+
       {/* Content container */}
       <div className="relative">
 
         {/* Content */}
         <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
-          {/* Featured Hero Section */}
-          <FeaturedHero type="tv" />
 
           {/* Filter Buttons */}
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4 px-4 md:px-6">

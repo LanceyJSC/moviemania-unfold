@@ -95,7 +95,11 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   return (
-    <div className="relative w-full aspect-video overflow-hidden mb-8 group">
+    <div className="relative w-full overflow-hidden mb-8 group" style={{ 
+      height: 'clamp(350px, 45vh, 500px)',
+      minHeight: '350px',
+      maxHeight: '500px'  
+    }}>
       {/* Background Image */}
       {backdropUrl && (
         <div 
