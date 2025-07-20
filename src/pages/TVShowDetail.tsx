@@ -151,43 +151,43 @@ const TVShowDetail = () => {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
         {/* Poster positioned on top and to the left */}
-        <div className="absolute bottom-6 left-4 z-30">
+        <div className="absolute bottom-6 left-4 z-30 iphone-65:left-3">
           <img 
             src={posterUrl} 
             alt={tvShow.name}
-            className="w-32 h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
+            className="w-24 h-36 iphone-65:w-28 iphone-65:h-42 iphone-67:w-32 iphone-67:h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
           />
         </div>
 
-        {/* TV Show Info positioned to the right of poster */}
-        <div className="absolute bottom-6 left-40 right-4 z-30">
+        {/* TV Show Info positioned to the right of poster - Responsive spacing */}
+        <div className="absolute bottom-6 left-32 right-4 z-30 iphone-65:left-36 iphone-67:left-40">
           {/* TV Show Logo */}
           {logoUrl && (
             <div className="mb-3">
               <img 
                 src={logoUrl} 
                 alt={`${tvShow.name} logo`}
-                className="h-12 max-w-48 object-contain"
+                className="h-8 iphone-65:h-10 iphone-67:h-12 max-w-36 iphone-65:max-w-44 iphone-67:max-w-48 object-contain"
               />
             </div>
           )}
           
-          <div className="flex items-center space-x-3 mb-2">
-            <span className="text-cinema-gold font-semibold text-sm">★ {tvShow.vote_average.toFixed(1)}</span>
-            <span className="text-white/80 text-sm">{releaseYear}</span>
-            <span className="text-white/80 text-sm">TV Series</span>
+          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2 flex-wrap">
+            <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">★ {tvShow.vote_average.toFixed(1)}</span>
+            <span className="text-white/80 text-xs iphone-65:text-sm">{releaseYear}</span>
+            <span className="text-white/80 text-xs iphone-65:text-sm">TV Series</span>
             {tvShow.number_of_seasons && (
-              <span className="text-white/80 text-sm">{tvShow.number_of_seasons} Season{tvShow.number_of_seasons > 1 ? 's' : ''}</span>
+              <span className="text-white/80 text-xs iphone-65:text-sm">{tvShow.number_of_seasons} Season{tvShow.number_of_seasons > 1 ? 's' : ''}</span>
             )}
           </div>
 
           {!logoUrl && (
-            <h1 className="font-cinematic text-white mb-2 tracking-wide text-xl leading-tight">
+            <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg iphone-65:text-xl leading-tight">
               {tvShow.name}
             </h1>
           )}
 
-          <p className="text-white/70 mb-3 text-sm">
+          <p className="text-white/70 mb-3 text-xs iphone-65:text-sm">
             {genres}
           </p>
         </div>

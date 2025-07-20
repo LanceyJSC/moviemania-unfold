@@ -160,27 +160,27 @@ const MovieDetail = () => {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
         {/* Poster positioned on top and to the left */}
-        <div className="absolute bottom-6 left-4 z-30">
+        <div className="absolute bottom-6 left-4 z-30 iphone-65:left-3">
           <img 
             src={posterUrl} 
             alt={title}
-            className="w-32 h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
+            className="w-24 h-36 iphone-65:w-28 iphone-65:h-42 iphone-67:w-32 iphone-67:h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
           />
         </div>
 
-        {/* Movie Info positioned to the right of poster - Now z-30 to be above gradient */}
-        <div className="absolute bottom-6 left-40 right-4 z-30">
-          <div className="flex items-center space-x-3 mb-2">
-            <span className="text-cinema-gold font-semibold text-sm">★ {movie.vote_average.toFixed(1)}</span>
-            <span className="text-white/80 text-sm">{releaseYear}</span>
-            <span className="text-white/80 text-sm">{runtime}</span>
+        {/* Movie Info positioned to the right of poster - Responsive spacing */}
+        <div className="absolute bottom-6 left-32 right-4 z-30 iphone-65:left-36 iphone-67:left-40">
+          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2">
+            <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">★ {movie.vote_average.toFixed(1)}</span>
+            <span className="text-white/80 text-xs iphone-65:text-sm">{releaseYear}</span>
+            <span className="text-white/80 text-xs iphone-65:text-sm">{runtime}</span>
           </div>
 
-          <h1 className="font-cinematic text-white mb-2 tracking-wide text-xl leading-tight">
+          <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg iphone-65:text-xl leading-tight">
             {title}
           </h1>
 
-          <p className="text-white/70 mb-3 text-sm">
+          <p className="text-white/70 mb-3 text-xs iphone-65:text-sm">
             {genres}
           </p>
         </div>
