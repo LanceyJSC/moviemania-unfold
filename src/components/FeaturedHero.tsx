@@ -70,7 +70,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   return (
-    <div className="relative h-96 rounded-2xl overflow-hidden mb-8 group">
+    <div className="relative h-80 iphone-65:h-96 md:h-[24rem] lg:h-96 rounded-2xl overflow-hidden mb-8 group">
       {/* Background Image */}
       {backdropUrl && (
         <div 
