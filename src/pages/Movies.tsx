@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { MovieGrid } from "@/components/MovieGrid";
@@ -37,20 +38,18 @@ const Movies = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      
-      
       {/* Featured Hero Section - Full width */}
       <FeaturedHero type="movie" />
 
       {/* Content container */}
       <div className="relative">
-
         {/* Content */}
         <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
 
-          {/* Filter Buttons */}
+          {/* Mobile-First Filter Buttons */}
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4 px-4 md:px-6">
-            <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
+            {/* Mobile Grid Layout - 2 columns, 3 rows */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
               {filterButtons.map((filter) => {
                 const Icon = filter.icon;
                 return (
@@ -58,15 +57,17 @@ const Movies = () => {
                      key={filter.id}
                      variant={activeFilter === filter.id ? "default" : "outline"}
                      size="sm"
-                     className={`flex-shrink-0 touch-target focus-ring ${
+                     className={`h-14 text-sm font-medium transition-all duration-200 active:scale-95 rounded-2xl touch-target focus-ring ${
                        activeFilter === filter.id 
-                         ? "bg-cinema-red text-white" 
-                         : "bg-transparent border-border text-foreground"
+                         ? "bg-cinema-red text-white shadow-md" 
+                         : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
                      }`}
                      onClick={() => setActiveFilter(filter.id)}
                    >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {filter.label}
+                    <div className="flex flex-col items-center space-y-1">
+                      <Icon className="h-4 w-4" />
+                      <span className="text-xs leading-tight">{filter.label}</span>
+                    </div>
                   </Button>
                 );
               })}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Play, Star, Film, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -96,24 +97,27 @@ export const LatestTrailers = () => {
           <div className="w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex justify-center space-x-2 mb-6 overflow-x-auto scrollbar-hide">
-          {TRAILER_CATEGORIES.map((category) => (
-            <Button
-              key={category.id}
-              variant={activeCategory === category.id ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setActiveCategory(category.id)}
-              className={cn(
-                "whitespace-nowrap transition-colors",
-                activeCategory === category.id
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {category.label}
-            </Button>
-          ))}
+        {/* Mobile-First Category Tabs - Responsive Grid */}
+        <div className="mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 max-w-2xl mx-auto">
+            {TRAILER_CATEGORIES.map((category) => (
+              <Button
+                key={category.id}
+                variant={activeCategory === category.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveCategory(category.id)}
+                className={cn(
+                  "h-12 text-xs font-medium transition-all duration-200 active:scale-95",
+                  "touch-target focus-ring rounded-xl",
+                  activeCategory === category.id
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-card/60 border-border/50 text-muted-foreground hover:text-foreground hover:bg-card/80"
+                )}
+              >
+                {category.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Trailers Grid */}

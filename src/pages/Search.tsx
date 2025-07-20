@@ -399,131 +399,131 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 max-h-screen overflow-y-auto">{/* Fixed scrolling */}
+    <div className="min-h-screen bg-background pb-32 max-h-screen overflow-y-auto">
       <MobileHeader title="Search" />
-      {/* Header and Search Input */}
+      
+      {/* Mobile-Optimized Header and Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
-        <div className="container mx-auto flex items-center">
-          <div className="relative flex-grow">
-            <Input
-              type="search"
-              placeholder={genreParam ? `Search in ${getGenreName(genreParam)} movies...` : "Search for movies and TV shows..."}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded-full pl-10 pr-16 min-h-[44px]"
-            />
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            {searchTerm && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearSearch}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-full min-h-[44px] min-w-[44px]"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="ml-2 rounded-full min-h-[44px] min-w-[44px]"
-          >
-            <Filter className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* Interactive Tools */}
-        <div className="container mx-auto mt-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Search Type Tabs */}
-            {(searchTerm || isSurpriseMode) && (
-              <div className="flex space-x-2">
+        <div className="container mx-auto space-y-4">
+          {/* Search Input Row */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-grow">
+              <Input
+                type="search"
+                placeholder={genreParam ? `Search in ${getGenreName(genreParam)} movies...` : "Search for movies and TV shows..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="rounded-full pl-10 pr-16 h-12 text-base bg-card/60 border-border/50"
+              />
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              {searchTerm && (
                 <Button
-                  variant={activeTab === 'all' ? 'default' : 'outline'}
+                  variant="ghost"
                   size="sm"
-                  onClick={() => setActiveTab('all')}
-                  className="rounded-full"
+                  onClick={clearSearch}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 rounded-full touch-target"
                 >
-                  All
+                  <X className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant={activeTab === 'movies' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setActiveTab('movies')}
-                  className="rounded-full"
-                >
-                  <Film className="h-4 w-4 mr-1" />
-                  Movies
-                </Button>
-                <Button
-                  variant={activeTab === 'tv' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setActiveTab('tv')}
-                  className="rounded-full"
-                >
-                  <Tv className="h-4 w-4 mr-1" />
-                  TV Shows
-                </Button>
-              </div>
-            )}
-
-            {/* Sort Controls - Enhanced with more options */}
-            {(searchTerm || genreParam || isSurpriseMode) && (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">Sort by:</span>
-                <Button
-                  variant={sortBy === 'popularity' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSortBy('popularity')}
-                  className="rounded-full text-xs"
-                >
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  Popular
-                </Button>
-                <Button
-                  variant={sortBy === 'rating' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSortBy('rating')}
-                  className="rounded-full text-xs"
-                >
-                  <Star className="h-3 w-3 mr-1" />
-                  Rating
-                </Button>
-                <Button
-                  variant={sortBy === 'release_date' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSortBy('release_date')}
-                  className="rounded-full text-xs"
-                >
-                  <Clock className="h-3 w-3 mr-1" />
-                  Recent
-                </Button>
-                <Button
-                  variant={sortBy === 'title' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSortBy('title')}
-                  className="rounded-full text-xs"
-                >
-                  A-Z
-                </Button>
-              </div>
-            )}
-
-            {/* Interactive Tools */}
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSurpriseMe}
-                className="rounded-full hover:bg-cinema-red/10 hover:border-cinema-red hover:text-cinema-red"
-              >
-                <Shuffle className="h-4 w-4 mr-1" />
-                Surprise Me!
-              </Button>
-              
+              )}
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="rounded-full h-12 w-12 touch-target focus-ring"
+            >
+              <Filter className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Mobile-First Control Tabs */}
+          {(searchTerm || isSurpriseMode) && (
+            <div className="grid grid-cols-3 gap-2 bg-muted/30 rounded-2xl p-1">
+              <Button
+                variant={activeTab === 'all' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('all')}
+                className="rounded-xl h-10 text-sm font-medium"
+              >
+                All
+              </Button>
+              <Button
+                variant={activeTab === 'movies' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('movies')}
+                className="rounded-xl h-10 text-sm font-medium"
+              >
+                <Film className="h-4 w-4 mr-1" />
+                Movies
+              </Button>
+              <Button
+                variant={activeTab === 'tv' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('tv')}
+                className="rounded-xl h-10 text-sm font-medium"
+              >
+                <Tv className="h-4 w-4 mr-1" />
+                TV
+              </Button>
+            </div>
+          )}
+
+          {/* Mobile-First Sort and Action Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Sort Controls - Mobile Grid */}
+            {(searchTerm || genreParam || isSurpriseMode) && (
+              <div className="flex-1 min-w-0">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-muted/20 rounded-xl p-1">
+                  <Button
+                    variant={sortBy === 'popularity' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSortBy('popularity')}
+                    className="rounded-lg h-9 text-xs font-medium"
+                  >
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    Popular
+                  </Button>
+                  <Button
+                    variant={sortBy === 'rating' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSortBy('rating')}
+                    className="rounded-lg h-9 text-xs font-medium"
+                  >
+                    <Star className="h-3 w-3 mr-1" />
+                    Rating
+                  </Button>
+                  <Button
+                    variant={sortBy === 'release_date' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSortBy('release_date')}
+                    className="rounded-lg h-9 text-xs font-medium"
+                  >
+                    <Clock className="h-3 w-3 mr-1" />
+                    Recent
+                  </Button>
+                  <Button
+                    variant={sortBy === 'title' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSortBy('title')}
+                    className="rounded-lg h-9 text-xs font-medium"
+                  >
+                    A-Z
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Action Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSurpriseMe}
+              className="rounded-full h-10 px-4 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary touch-target"
+            >
+              <Shuffle className="h-4 w-4 mr-1" />
+              Surprise!
+            </Button>
           </div>
         </div>
       </div>
@@ -539,15 +539,11 @@ const Search = () => {
       )}
 
       {/* Advanced Filters */}
-      {showFilters && (
-        <div className="container mx-auto px-4 mt-4">
-          <AdvancedFilters 
-            onFiltersChange={handleFilterChange}
-            isOpen={showFilters}
-            onToggle={() => setShowFilters(!showFilters)}
-          />
-        </div>
-      )}
+      <AdvancedFilters 
+        onFiltersChange={handleFilterChange}
+        isOpen={showFilters}
+        onToggle={() => setShowFilters(!showFilters)}
+      />
 
       {/* Default Content - Discovery Hub */}
       {showDefaultContent && (
@@ -572,14 +568,14 @@ const Search = () => {
               <TrendingUp className="h-5 w-5 mr-2 text-cinema-gold" />
               Popular Searches
             </h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
               {popularSearches.map((term) => (
                 <Button
                   key={term}
                   variant="outline"
                   size="sm"
                   onClick={() => handlePopularSearch(term)}
-                  className="rounded-full border-border hover:border-cinema-red hover:text-cinema-red"
+                  className="rounded-xl h-12 border-border hover:border-cinema-red hover:text-cinema-red touch-target"
                 >
                   {term}
                 </Button>
