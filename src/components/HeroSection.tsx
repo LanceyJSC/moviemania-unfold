@@ -77,56 +77,72 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground">
-        {/* Hero Background with lighter overlay */}
+      <div 
+        className="relative text-foreground overflow-hidden"
+        style={{ 
+          height: '50vh',
+          minHeight: '400px',
+          maxHeight: '600px'
+        }}
+      >
+        {/* Hero Background - Mobile optimized */}
         <div 
-          className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-            backgroundColor: '#1a1a1a'
+            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'var(--gradient-dark)'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
+          {/* Mobile-optimized overlays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/20" />
         </div>
 
-        {/* Bottom Gradient Blend - Creates smooth transition to page background */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
-
-        {/* CINESCOPE Branding - Always visible */}
-        <div className="absolute top-8 left-8 z-20">
-          <h1 className="font-cinematic text-3xl md:text-4xl lg:text-5xl tracking-wide text-foreground">
+        {/* iOS-style safe area top spacing */}
+        <div 
+          className="absolute top-0 left-0 right-0 z-20 px-6"
+          style={{ 
+            paddingTop: 'max(env(safe-area-inset-top), 16px)',
+            marginTop: '8px'
+          }}
+        >
+          <h1 className="font-cinematic text-2xl sm:text-3xl tracking-wide text-foreground">
             CINE<span className="text-cinema-red">SCOPE</span>
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base mt-2">
+          <p className="text-muted-foreground text-sm mt-1">
             Discover Movies Like Never Before
           </p>
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 flex flex-col justify-center items-start h-full p-8 md:p-12 lg:p-20">
+        {/* Hero Content - Mobile-first layout */}
+        <div className="relative z-10 flex flex-col justify-end h-full px-6 pb-8">
           {isLoading ? (
-            <div className="animate-pulse">
-              <div className="h-12 bg-muted rounded w-64 mb-4"></div>
-              <div className="h-4 bg-muted rounded w-96 mb-2"></div>
-              <div className="h-4 bg-muted rounded w-80 mb-6"></div>
-              <div className="flex gap-4">
-                <div className="h-10 bg-muted rounded w-32"></div>
-                <div className="h-10 bg-muted rounded w-32"></div>
+            <div className="animate-pulse space-y-3">
+              <div className="h-8 bg-muted/60 rounded-lg w-3/4"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-muted/40 rounded w-full"></div>
+                <div className="h-4 bg-muted/40 rounded w-5/6"></div>
+                <div className="h-4 bg-muted/40 rounded w-4/6"></div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <div className="h-12 bg-muted/60 rounded-xl w-32"></div>
+                <div className="h-12 bg-muted/40 rounded-xl w-24"></div>
               </div>
             </div>
           ) : heroMovie ? (
-            <>
-              <h2 className="font-cinematic text-2xl md:text-3xl lg:text-4xl tracking-wide mb-4">
-                {heroMovie.title}
-              </h2>
-              <p className="text-lg md:text-xl mb-6 line-clamp-3 md:line-clamp-4 max-w-2xl">
-                {heroMovie.overview}
-              </p>
-              <div className="flex gap-4">
+            <div className="space-y-4">
+              <div>
+                <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
+                  {heroMovie.title}
+                </h2>
+                <p className="text-sm sm:text-base text-foreground/90 line-clamp-3 leading-relaxed">
+                  {heroMovie.overview}
+                </p>
+              </div>
+              
+              <div className="flex gap-3 pt-2">
                 {trailerKey ? (
                   <Button 
-                    className="bg-cinema-red hover:bg-cinema-red/90"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium touch-target"
                     onClick={handleWatchNow}
                   >
                     <Play className="mr-2 h-4 w-4" />
@@ -134,30 +150,36 @@ export const HeroSection = () => {
                   </Button>
                 ) : (
                   <Link to={`/movie/${heroMovie.id}`}>
-                    <Button className="bg-cinema-red hover:bg-cinema-red/90">
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium touch-target">
                       <Play className="mr-2 h-4 w-4" />
                       Watch Now
                     </Button>
                   </Link>
                 )}
                 <Link to={`/movie/${heroMovie.id}`}>
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 touch-target"
+                  >
                     <Info className="mr-2 h-4 w-4" />
-                    More Info
+                    <span className="hidden sm:inline">More Info</span>
+                    <span className="sm:hidden">Info</span>
                   </Button>
                 </Link>
               </div>
-            </>
+            </div>
           ) : (
-            <div className="text-center">
-              <h2 className="font-cinematic text-2xl md:text-3xl lg:text-4xl tracking-wide mb-4">
-                Welcome to Your Movie Universe
-              </h2>
-              <p className="text-lg md:text-xl mb-6 max-w-2xl">
-                Discover, save, and explore thousands of movies with personalized recommendations.
-              </p>
+            <div className="text-center space-y-4">
+              <div>
+                <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
+                  Welcome to Your Movie Universe
+                </h2>
+                <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
+                  Discover, save, and explore thousands of movies with personalized recommendations.
+                </p>
+              </div>
               <Link to="/search">
-                <Button className="bg-cinema-red hover:bg-cinema-red/90">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium touch-target">
                   Start Exploring
                 </Button>
               </Link>
