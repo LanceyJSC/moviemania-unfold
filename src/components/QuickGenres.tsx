@@ -1,7 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
 import { Zap, Heart, Sword, Laugh, Ghost, Rocket } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -45,9 +44,9 @@ export const QuickGenres = () => {
         </Button>
       </div>
       
-      {/* Mobile-first horizontal scroll */}
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex space-x-3 px-4 pb-2">
+      {/* Mobile-first responsive grid - 3 columns on mobile, 6 on larger screens */}
+      <div className="px-4">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {genres.map((genre) => {
             const Icon = genre.icon;
             return (
@@ -56,24 +55,24 @@ export const QuickGenres = () => {
                 variant="outline"
                 onClick={() => handleGenreClick(genre.id)}
                 className={cn(
-                  "flex-shrink-0 h-auto py-4 px-4 rounded-2xl",
+                  "h-auto py-3 px-2 rounded-2xl",
                   "bg-card/60 backdrop-blur-sm border-border/50",
                   "hover:bg-card/80 hover:border-primary/50",
                   "transition-all duration-200 active:scale-95",
-                  "touch-target focus-ring min-w-[80px]"
+                  "touch-target focus-ring min-h-[80px] min-w-[80px]"
                 )}
               >
                 <div className="flex flex-col items-center space-y-2">
                   <div className={cn(
-                    "rounded-full w-12 h-12 flex items-center justify-center",
+                    "rounded-full w-10 h-10 flex items-center justify-center",
                     genre.color,
                     "transition-transform duration-200 group-hover:scale-110"
                   )}>
-                    <span className="text-xl" role="img" aria-label={genre.name}>
+                    <span className="text-lg" role="img" aria-label={genre.name}>
                       {genre.emoji}
                     </span>
                   </div>
-                  <span className="text-xs font-medium text-foreground text-center whitespace-nowrap">
+                  <span className="text-xs font-medium text-foreground text-center leading-tight">
                     {genre.name}
                   </span>
                 </div>
@@ -81,8 +80,7 @@ export const QuickGenres = () => {
             );
           })}
         </div>
-        <ScrollBar orientation="horizontal" className="h-2" />
-      </ScrollArea>
+      </div>
     </div>
   );
 };
