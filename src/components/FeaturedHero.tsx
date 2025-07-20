@@ -114,32 +114,32 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend - Creates smooth transition to page background */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
-      {/* Stats Cards - Repositioned for iPhone screens */}
-      <div className="absolute top-4 right-4 z-40 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:top-6 sm:right-6">
-        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 min-w-[80px] sm:p-3">
-          <div className="flex items-center space-x-1 text-white">
+      {/* Stats Cards - Repositioned horizontally at top for iPhone screens */}
+      <div className="absolute top-4 left-4 right-4 z-40 flex justify-center space-x-2 sm:top-6 sm:right-6 sm:left-auto sm:justify-end sm:flex-col sm:space-x-0 sm:space-y-2 md:flex-row md:space-y-0 md:space-x-3">
+        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 flex-1 sm:flex-none sm:min-w-[90px]">
+          <div className="flex items-center justify-center space-x-1 text-white">
             <TrendingUp className="h-3 w-3 text-cinema-red flex-shrink-0" />
-            <div className="text-xs">
+            <div className="text-xs text-center">
               <div className="font-semibold leading-none">{stats.trending.toLocaleString()}</div>
               <div className="text-white/70 text-[10px] leading-none mt-0.5">Trending</div>
             </div>
           </div>
         </Card>
         
-        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 min-w-[80px] sm:p-3">
-          <div className="flex items-center space-x-1 text-white">
+        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 flex-1 sm:flex-none sm:min-w-[90px]">
+          <div className="flex items-center justify-center space-x-1 text-white">
             <Star className="h-3 w-3 text-cinema-gold flex-shrink-0" />
-            <div className="text-xs">
+            <div className="text-xs text-center">
               <div className="font-semibold leading-none">{stats.topRated.toLocaleString()}</div>
               <div className="text-white/70 text-[10px] leading-none mt-0.5">Top Rated</div>
             </div>
           </div>
         </Card>
         
-        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 min-w-[80px] sm:p-3">
-          <div className="flex items-center space-x-1 text-white">
+        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 flex-1 sm:flex-none sm:min-w-[90px]">
+          <div className="flex items-center justify-center space-x-1 text-white">
             <Users className="h-3 w-3 text-cinema-gold flex-shrink-0" />
-            <div className="text-xs">
+            <div className="text-xs text-center">
               <div className="font-semibold leading-none">{stats.total.toLocaleString()}</div>
               <div className="text-white/70 text-[10px] leading-none mt-0.5">Total</div>
             </div>
