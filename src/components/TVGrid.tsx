@@ -105,8 +105,8 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
         </h2>
       </div>
 
-      {/* TV Shows Grid */}
-      <div className="poster-grid-responsive">
+      {/* TV Shows Grid - Optimized for iPhone 3-across */}
+      <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
         {isLoading && tvShows.length === 0 ? (
           // Loading skeleton
           Array.from({ length: 15 }).map((_, index) => (
@@ -119,7 +119,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
             <div key={tvShow.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
               <TVShowCard 
                 tvShow={tmdbService.formatTVShowForCard(tvShow)} 
-                size={isMobile ? "small" : "medium"} 
+                variant="grid"
               />
             </div>
           ))

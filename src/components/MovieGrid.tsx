@@ -105,8 +105,8 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
         </h2>
       </div>
 
-      {/* Movies Grid */}
-      <div className="poster-grid-responsive">
+      {/* Movies Grid - Optimized for iPhone 3-across */}
+      <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
         {isLoading && movies.length === 0 ? (
           // Loading skeleton
           Array.from({ length: 15 }).map((_, index) => (
@@ -119,7 +119,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
             <div key={movie.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard 
                 movie={tmdbService.formatMovieForCard(movie)} 
-                size={isMobile ? "small" : "medium"} 
+                variant="grid"
               />
             </div>
           ))

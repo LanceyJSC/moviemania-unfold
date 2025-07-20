@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -150,26 +151,6 @@
   .smooth-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-  }
-
-  /* iPhone-optimized poster grid - 3 across for iPhone */
-  .poster-grid-responsive {
-    display: grid;
-    gap: 12px;
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  /* iPad and larger screens - more columns */
-  @media (min-width: 768px) {
-    .poster-grid-responsive {
-      grid-template-columns: repeat(6, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .poster-grid-responsive {
-      grid-template-columns: repeat(8, 1fr);
-    }
   }
 
   /* Hide scrollbars on carousels */
