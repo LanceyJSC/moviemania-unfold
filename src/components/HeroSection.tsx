@@ -77,16 +77,23 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="relative h-[60vh] md:h-[75vh] lg:h-[90vh] text-foreground">
-        {/* Hero Background with lighter overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ 
-            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/50 via-cinema-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/60 via-transparent to-transparent" />
+      <div className="relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] xl:h-[85vh] text-foreground overflow-hidden">
+        {/* Hero Background with proper aspect ratio */}
+        <div className="absolute inset-0">
+          {heroBackdrop ? (
+            <img 
+              src={heroBackdrop}
+              alt={heroMovie?.title || "Hero backdrop"}
+              className="w-full h-full object-cover object-center"
+              style={{ aspectRatio: '16/9' }}
+            />
+          ) : (
+            <div 
+              className="w-full h-full bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/70 via-cinema-black/40 to-cinema-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/80 via-transparent to-transparent" />
         </div>
 
         {/* Bottom Gradient Blend - Creates smooth transition to page background */}
