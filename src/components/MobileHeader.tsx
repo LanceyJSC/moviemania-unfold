@@ -20,7 +20,7 @@ export const MobileHeader = ({ title, showBack = true }: MobileHeaderProps) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-cinema-black/95 backdrop-blur-sm border-b border-border">
+    <header className="sticky top-0 z-50 bg-cinema-black/95 backdrop-blur-sm border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="flex items-center h-14 px-4">
         {showBack && (
           <Button

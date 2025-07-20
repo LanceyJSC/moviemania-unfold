@@ -114,34 +114,34 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend - Creates smooth transition to page background */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
-      {/* Stats Cards - Moved to top-right to avoid overlap */}
-      <div className="absolute top-6 right-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
-          <div className="flex items-center space-x-2 text-white">
-            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-red" />
-            <div className="text-xs sm:text-sm">
-              <div className="font-semibold">{stats.trending.toLocaleString()}</div>
-              <div className="text-white/70 text-xs">Trending</div>
+      {/* Stats Cards - Repositioned for iPhone screens */}
+      <div className="absolute top-4 right-4 z-40 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:top-6 sm:right-6">
+        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 min-w-[80px] sm:p-3">
+          <div className="flex items-center space-x-1 text-white">
+            <TrendingUp className="h-3 w-3 text-cinema-red flex-shrink-0" />
+            <div className="text-xs">
+              <div className="font-semibold leading-none">{stats.trending.toLocaleString()}</div>
+              <div className="text-white/70 text-[10px] leading-none mt-0.5">Trending</div>
             </div>
           </div>
         </Card>
         
-        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
-          <div className="flex items-center space-x-2 text-white">
-            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
-            <div className="text-xs sm:text-sm">
-              <div className="font-semibold">{stats.topRated.toLocaleString()}</div>
-              <div className="text-white/70 text-xs">Top Rated</div>
+        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 min-w-[80px] sm:p-3">
+          <div className="flex items-center space-x-1 text-white">
+            <Star className="h-3 w-3 text-cinema-gold flex-shrink-0" />
+            <div className="text-xs">
+              <div className="font-semibold leading-none">{stats.topRated.toLocaleString()}</div>
+              <div className="text-white/70 text-[10px] leading-none mt-0.5">Top Rated</div>
             </div>
           </div>
         </Card>
         
-        <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-2 sm:p-3">
-          <div className="flex items-center space-x-2 text-white">
-            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
-            <div className="text-xs sm:text-sm">
-              <div className="font-semibold">{stats.total.toLocaleString()}</div>
-              <div className="text-white/70 text-xs">Total</div>
+        <Card className="bg-black/60 backdrop-blur-sm border-white/20 p-2 min-w-[80px] sm:p-3">
+          <div className="flex items-center space-x-1 text-white">
+            <Users className="h-3 w-3 text-cinema-gold flex-shrink-0" />
+            <div className="text-xs">
+              <div className="font-semibold leading-none">{stats.total.toLocaleString()}</div>
+              <div className="text-white/70 text-[10px] leading-none mt-0.5">Total</div>
             </div>
           </div>
         </Card>

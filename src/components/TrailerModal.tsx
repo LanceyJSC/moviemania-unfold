@@ -41,7 +41,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   const youtubeEmbedUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] bg-cinema-black/95 backdrop-blur-sm" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="relative h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
