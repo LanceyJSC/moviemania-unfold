@@ -1,7 +1,7 @@
 
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Navigation } from "@/components/Navigation";
 
 const NotFound = () => {
   const location = useLocation();
@@ -23,8 +23,8 @@ const NotFound = () => {
         </a>
       </div>
       
-      {/* iOS Tab Bar */}
-      <IOSTabBar />
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

@@ -138,7 +138,7 @@ export const FreshPicks = () => {
         {content.length > 0 ? (
           <div 
             ref={scrollRef}
-            className={`flex space-x-4 overflow-x-auto ios-horizontal-scroll pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
+            className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -153,13 +153,15 @@ export const FreshPicks = () => {
                return (
                  <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0 w-44">
                    {isMovie ? (
-                      <MovieCard 
-                        movie={tmdbService.formatMovieForCard(item as Movie)} 
-                      />
+                     <MovieCard 
+                       movie={tmdbService.formatMovieForCard(item as Movie)} 
+                       size="medium" 
+                     />
                    ) : (
-                      <TVShowCard 
-                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
-                      />
+                     <TVShowCard 
+                       tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                       size="medium" 
+                     />
                    )}
                  </div>
                );

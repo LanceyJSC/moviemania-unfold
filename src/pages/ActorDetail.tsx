@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Loader2, Calendar, MapPin } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { MobileHeader } from "@/components/MobileHeader";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Navigation } from "@/components/Navigation";
 import { tmdbService, Person } from "@/lib/tmdb";
 
 const ActorDetail = () => {
@@ -153,13 +153,14 @@ const ActorDetail = () => {
                     rating: movie.vote_average.toFixed(1),
                     genre: movie.character
                   }}
+                  size="small"
                 />
               ))}
           </div>
         </div>
       )}
 
-      <IOSTabBar />
+      <Navigation />
     </div>
   );
 };

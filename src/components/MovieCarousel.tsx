@@ -132,21 +132,21 @@ export const MovieCarousel = ({ title, category, cardSize = "medium" }: MovieCar
       {/* Movie Cards Container */}
       <div 
         ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto ios-horizontal-scroll pb-4"
+        className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {isLoading ? (
-          // Loading skeleton with responsive sizing
+          // Loading skeleton with consistent sizing
           Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="flex-shrink-0 w-40 sm:w-48 md:w-52 aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+            <div key={index} className={`flex-shrink-0 ${getSkeletonWidth()} ${getSkeletonHeight()} bg-muted animate-pulse rounded-lg`}></div>
           ))
         ) : (
           movies.map((movie) => (
-            <div key={movie.id} className="flex-shrink-0 w-40 sm:w-48 md:w-52">
-              <MovieCard 
-                movie={tmdbService.formatMovieForCard(movie)} 
-              />
-            </div>
+            <MovieCard 
+              key={movie.id} 
+              movie={tmdbService.formatMovieForCard(movie)} 
+              size={cardSize} 
+            />
           ))
         )}
       </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { MovieGrid } from "@/components/MovieGrid";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Navigation } from "@/components/Navigation";
 import { MovieStats } from "@/components/MovieStats";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
@@ -36,12 +36,14 @@ const Movies = () => {
   };
 
   return (
-    <div className="ios-app-container">
+    <div className="min-h-screen bg-background">
       <MobileHeader title="Movies" />
       
-      {/* Filter Buttons */}
-      <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4">
-        <div className="flex overflow-x-auto space-x-3 ios-horizontal-scroll">
+      {/* Hero-style gradient background */}
+      <div className="relative bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
+        {/* Filter Buttons */}
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-4 pt-8">
+        <div className="flex overflow-x-auto space-x-3 scrollbar-hide">
           {filterButtons.map((filter) => {
             const Icon = filter.icon;
             return (
@@ -62,11 +64,10 @@ const Movies = () => {
             );
           })}
         </div>
-      </div>
+        </div>
 
-      {/* Content */}
-      <div className="ios-content-area bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
-        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12">
+        {/* Content */}
+        <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
           {/* Featured Hero Section */}
           <FeaturedHero type="movie" />
 
@@ -81,8 +82,8 @@ const Movies = () => {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
       </div>
 
-      {/* iOS Tab Bar */}
-      <IOSTabBar />
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

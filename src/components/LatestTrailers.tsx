@@ -97,7 +97,7 @@ export const LatestTrailers = () => {
         </div>
 
         {/* Category Tabs */}
-        <div className="flex justify-center space-x-2 mb-6 overflow-x-auto ios-horizontal-scroll">
+        <div className="flex justify-center space-x-2 mb-6 overflow-x-auto scrollbar-hide">
           {TRAILER_CATEGORIES.map((category) => (
             <Button
               key={category.id}
@@ -118,13 +118,13 @@ export const LatestTrailers = () => {
 
         {/* Trailers Grid */}
         {loading ? (
-          <div className="flex space-x-4 overflow-x-auto ios-horizontal-scroll">
+          <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex-shrink-0 w-44 h-[264px] bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
         ) : (
-          <div className="flex space-x-4 overflow-x-auto ios-horizontal-scroll pb-4">
+          <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
             {items.map((item) => (
               <div
                 key={item.id}

@@ -23,13 +23,13 @@ export const IOSTabBar = () => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 shadow-lg"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border/50"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom)',
         height: `calc(80px + env(safe-area-inset-bottom))`
       }}
     >
-      <div className="flex items-center justify-around px-2 pt-2 pb-1 h-20">
+      <div className="flex items-center justify-around px-2 pt-2 pb-1">
         {tabItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;

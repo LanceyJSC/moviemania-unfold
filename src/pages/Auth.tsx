@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { IOSTabBar } from '@/components/IOSTabBar';
+import { Navigation } from '@/components/Navigation';
 import { toast } from 'sonner';
 import { Film } from 'lucide-react';
 
@@ -156,8 +156,8 @@ const Auth = () => {
         </CardContent>
       </Card>
       
-      {/* iOS Tab Bar */}
-      <IOSTabBar />
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

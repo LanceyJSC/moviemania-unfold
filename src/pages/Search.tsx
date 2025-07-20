@@ -8,7 +8,7 @@ import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
 import { PhotoSearch } from "@/components/PhotoSearch";
 import { QuickGenres } from "@/components/QuickGenres";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -392,9 +392,9 @@ const Search = () => {
 
   const renderMediaCard = (item: any) => {
     if (item.media_type === 'tv' || item.name) {
-      return <TVShowCard key={item.id} tvShow={tmdbService.formatTVShowForCard(item)} />;
+      return <TVShowCard key={item.id} tvShow={tmdbService.formatTVShowForCard(item)} size="small" />;
     } else {
-      return <MovieCard key={item.id} movie={tmdbService.formatMovieForCard(item)} />;
+      return <MovieCard key={item.id} movie={tmdbService.formatMovieForCard(item)} size="small" />;
     }
   };
 
@@ -610,6 +610,7 @@ const Search = () => {
                   <MovieCard 
                     key={movie.id} 
                     movie={tmdbService.formatMovieForCard(movie)} 
+                    size="small" 
                   />
                 ))}
               </div>
@@ -630,6 +631,7 @@ const Search = () => {
                   <TVShowCard 
                     key={tvShow.id} 
                     tvShow={tmdbService.formatTVShowForCard(tvShow)} 
+                    size="small" 
                   />
                 ))}
               </div>
@@ -681,8 +683,8 @@ const Search = () => {
         )}
       </div>
       
-      {/* iOS Tab Bar */}
-      <IOSTabBar />
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

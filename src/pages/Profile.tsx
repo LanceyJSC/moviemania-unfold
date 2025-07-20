@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { User, Settings, Calendar, Star, Trophy, Film, LogOut, ArrowLeft, Edit3, ChevronRight } from "lucide-react";
+import { User, Settings, Calendar, Star, Trophy, Film, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Navigation } from "@/components/Navigation";
+import { MobileHeader } from "@/components/MobileHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 
 // Mock user data - will be replaced with real user data later
 const mockUserData = {
@@ -28,32 +26,10 @@ const mockUserData = {
   ]
 };
 
-export const cleanupAuthState = () => {
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
-
 const Profile = () => {
-  const [scrollY, setScrollY] = useState(0);
+  const [activeSection, setActiveSection] = useState<'timeline' | 'settings'>('timeline');
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-
-  // Handle scroll for header blur effect
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -61,256 +37,192 @@ const Profile = () => {
     }
   }, [user, navigate]);
 
-  const handleSignOut = async () => {
-    try {
-      // Clean up auth state
-      cleanupAuthState();
-      // Attempt global sign out (fallback if it fails)
-      try {
-        await signOut();
-      } catch (err) {
-        // Ignore errors
-      }
-      // Force page reload for a clean state
-      window.location.href = '/auth';
-    } catch (error) {
-      console.error('Sign out error:', error);
-      // Force navigation even if signOut fails
-      window.location.href = '/auth';
-    }
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'watched': return <Film className="h-4 w-4" />;
-      case 'liked': return <Star className="h-4 w-4" />;
-      case 'watchlist': return <Trophy className="h-4 w-4" />;
-      default: return <Film className="h-4 w-4" />;
-    }
-  };
-
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'watched': return 'bg-primary/20 text-primary';
-      case 'liked': return 'bg-yellow-500/20 text-yellow-600';
-      case 'watchlist': return 'bg-green-500/20 text-green-600';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background pb-32">
-      {/* iOS-style Header with Dynamic Blur */}
-      <div 
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          scrollY > 100 
-            ? "bg-background/95 backdrop-blur-xl border-b border-border/50" 
-            : "bg-transparent"
-        )}
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
-      >
-        <div className="flex items-center justify-between px-4 py-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className={cn(
-              "rounded-full h-10 w-10 p-0 transition-colors",
-              scrollY > 100 ? "text-foreground" : "text-white bg-black/30 backdrop-blur-sm"
-            )}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          
-          {scrollY > 100 && (
-            <div className="text-center">
-              <span className="font-medium text-foreground text-sm">Profile</span>
+      <MobileHeader title="Profile" />
+      {/* Header */}
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center space-x-6">
+            <div className="h-20 w-20 bg-cinema-red rounded-full flex items-center justify-center">
+              <User className="h-10 w-10 text-white" />
             </div>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {}}
-            className={cn(
-              "rounded-full h-10 w-10 p-0 transition-colors",
-              scrollY > 100 ? "text-foreground" : "text-white bg-black/30 backdrop-blur-sm"
-            )}
-          >
-            <Edit3 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Hero Profile Section */}
-      <div className="relative overflow-hidden">
-        <div className="h-[40vh] bg-gradient-to-br from-primary/20 via-primary/10 to-background">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/80" />
-        </div>
-
-        {/* Profile Info Overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-6 space-y-4">
-          <div className="flex items-end gap-4">
-            {/* Avatar */}
-            <Avatar className="w-20 h-20 border-4 border-white/20 shadow-lg">
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-semibold">
-                {mockUserData.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-
-            {/* Info */}
-            <div className="flex-1 text-white pb-2">
-              <h1 className="font-cinematic text-2xl tracking-wide">
-                {mockUserData.name}
-              </h1>
-              <p className="text-white/80 text-sm">
-                {user?.email || mockUserData.email}
-              </p>
-              <p className="text-white/60 text-xs mt-1">
-                Member since {mockUserData.joinDate}
-              </p>
+            <div>
+              <h1 className="text-3xl font-cinematic text-foreground tracking-wide">
+                 {user?.user_metadata?.full_name || user?.email || 'Movie Enthusiast'}
+               </h1>
+               <p className="text-muted-foreground">{user?.email}</p>
+              <p className="text-sm text-muted-foreground">Member since {mockUserData.joinDate}</p>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Content */}
-      <div className="px-4 py-6 space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="p-4 bg-card/60 backdrop-blur-sm border-border/50 text-center">
-            <div className="text-2xl font-bold text-primary mb-1">
-              {mockUserData.stats.moviesWatched}
-            </div>
-            <div className="text-xs text-muted-foreground">Movies Watched</div>
-          </Card>
-          
-          <Card className="p-4 bg-card/60 backdrop-blur-sm border-border/50 text-center">
-            <div className="text-2xl font-bold text-primary mb-1">
-              {mockUserData.stats.totalHours}h
-            </div>
-            <div className="text-xs text-muted-foreground">Total Hours</div>
-          </Card>
-          
-          <Card className="p-4 bg-card/60 backdrop-blur-sm border-border/50 text-center">
-            <div className="text-2xl font-bold text-primary mb-1">
-              {mockUserData.stats.avgRating}/5
-            </div>
-            <div className="text-xs text-muted-foreground">Avg Rating</div>
-          </Card>
-          
-          <Card className="p-4 bg-card/60 backdrop-blur-sm border-border/50 text-center">
-            <div className="text-sm font-semibold text-primary mb-1">
-              {mockUserData.stats.favoriteGenre}
-            </div>
-            <div className="text-xs text-muted-foreground">Favorite Genre</div>
-          </Card>
-        </div>
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 mb-6">
+              <Card className="bg-card border-border">
+                <CardContent className="p-4 text-center">
+                  <Film className="h-8 w-8 text-cinema-red mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-foreground">{mockUserData.stats.moviesWatched}</div>
+                  <div className="text-sm text-muted-foreground">Movies Watched</div>
+                </CardContent>
+              </Card>
 
-        {/* Quick Actions */}
-        <Card className="bg-card/60 backdrop-blur-sm border-border/50">
-          <div className="p-4 space-y-1">
-            <h3 className="font-semibold text-foreground mb-3">Quick Actions</h3>
-            
-            <Button
-              variant="ghost"
-              className="w-full justify-between h-12 px-4 rounded-xl"
-              onClick={() => navigate('/watchlist')}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Trophy className="h-4 w-4 text-primary" />
-                </div>
-                <span className="font-medium">My Watchlist</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Button>
+              <Card className="bg-card border-border">
+                <CardContent className="p-4 text-center">
+                  <Calendar className="h-8 w-8 text-cinema-gold mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-foreground">{mockUserData.stats.totalHours}h</div>
+                  <div className="text-sm text-muted-foreground">Total Hours</div>
+                </CardContent>
+              </Card>
 
-            <Button
-              variant="ghost"
-              className="w-full justify-between h-12 px-4 rounded-xl"
-              onClick={() => {}}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                  <Star className="h-4 w-4 text-yellow-600" />
-                </div>
-                <span className="font-medium">My Ratings</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Button>
+              <Card className="bg-card border-border">
+                <CardContent className="p-4 text-center">
+                  <Star className="h-8 w-8 text-cinema-gold mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-foreground">{mockUserData.stats.avgRating}</div>
+                  <div className="text-sm text-muted-foreground">Avg Rating</div>
+                </CardContent>
+              </Card>
 
-            <Button
-              variant="ghost"
-              className="w-full justify-between h-12 px-4 rounded-xl"
-              onClick={() => {}}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
-                  <Settings className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <span className="font-medium">Settings</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Button>
+              <Card className="bg-card border-border">
+                <CardContent className="p-4 text-center">
+                  <Trophy className="h-8 w-8 text-cinema-silver mx-auto mb-2" />
+                  <div className="text-lg font-bold text-foreground">{mockUserData.stats.favoriteGenre}</div>
+                  <div className="text-sm text-muted-foreground">Favorite Genre</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Navigation */}
+            <div className="space-y-2">
+              <Button
+                variant={activeSection === 'timeline' ? 'default' : 'ghost'}
+                className="w-full justify-start"
+                onClick={() => setActiveSection('timeline')}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Movie Timeline
+              </Button>
+               <Button
+                 variant={activeSection === 'settings' ? 'default' : 'ghost'}
+                 className="w-full justify-start"
+                 onClick={() => setActiveSection('settings')}
+               >
+                 <Settings className="h-4 w-4 mr-2" />
+                 Settings
+               </Button>
+               <Button
+                 variant="ghost"
+                 className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                 onClick={signOut}
+               >
+                 <LogOut className="h-4 w-4 mr-2" />
+                 Sign Out
+               </Button>
+            </div>
           </div>
-        </Card>
 
-        {/* Recent Activity */}
-        <Card className="bg-card/60 backdrop-blur-sm border-border/50">
-          <div className="p-4">
-            <h3 className="font-semibold text-foreground mb-4">Recent Activity</h3>
-            
-            <div className="space-y-3">
-              {mockUserData.recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
-                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", getActivityColor(activity.type))}>
-                    {getActivityIcon(activity.type)}
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            {activeSection === 'timeline' && (
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockUserData.recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg">
+                        <div className="flex-shrink-0">
+                          {activity.type === 'watched' && <Film className="h-6 w-6 text-cinema-red" />}
+                          {activity.type === 'liked' && <Star className="h-6 w-6 text-cinema-gold" />}
+                          {activity.type === 'watchlist' && <Calendar className="h-6 w-6 text-cinema-silver" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-foreground font-medium">{activity.title}</p>
+                          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                            <span className="capitalize">{activity.type}</span>
+                            {activity.rating && (
+                              <>
+                                <span>•</span>
+                                <div className="flex items-center">
+                                  {Array.from({ length: activity.rating }).map((_, i) => (
+                                    <Star key={i} className="h-3 w-3 text-cinema-gold fill-current" />
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                            <span>•</span>
+                            <span>{activity.date}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-foreground text-sm truncate">
-                        {activity.title}
-                      </span>
-                      {activity.rating && (
-                        <Badge variant="secondary" className="text-xs">
-                          ⭐ {activity.rating}
-                        </Badge>
-                      )}
+                </CardContent>
+              </Card>
+            )}
+
+            {activeSection === 'settings' && (
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Account Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Authentication</h3>
+                    <div className="space-y-3">
+                      <Button className="w-full bg-cinema-red hover:bg-cinema-red/90">
+                        Sign in with Google
+                      </Button>
+                      <Button variant="outline" className="w-full border-border hover:bg-card">
+                        Sign in with Apple
+                      </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {activity.type} • {activity.date}
-                    </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
 
-        {/* Sign Out */}
-        <Card className="bg-card/60 backdrop-blur-sm border-border/50">
-          <div className="p-4">
-            <Button
-              variant="ghost"
-              className="w-full justify-start h-12 px-4 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={handleSignOut}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-destructive/20 flex items-center justify-center">
-                  <LogOut className="h-4 w-4" />
-                </div>
-                <span className="font-medium">Sign Out</span>
-              </div>
-            </Button>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Preferences</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Email Notifications</span>
+                        <Button variant="outline" size="sm">Toggle</Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Dark Theme</span>
+                        <Button variant="outline" size="sm">Enabled</Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground">Auto-play Trailers</span>
+                        <Button variant="outline" size="sm">Toggle</Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Data</h3>
+                    <div className="space-y-3">
+                      <Button variant="outline" className="w-full border-border hover:bg-card">
+                        Export My Data
+                      </Button>
+                      <Button variant="destructive" className="w-full">
+                        Delete Account
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
-        </Card>
+        </div>
       </div>
 
-      {/* iOS Tab Bar */}
-      <IOSTabBar />
+      {/* Mobile Navigation */}
+      <Navigation />
     </div>
   );
 };

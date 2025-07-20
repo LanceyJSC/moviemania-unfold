@@ -17,9 +17,10 @@ interface TVShowCardProps {
     rating: string;
     genre?: string;
   };
+  size?: "small" | "medium" | "large";
 }
 
-export const TVShowCard = ({ tvShow }: TVShowCardProps) => {
+export const TVShowCard = ({ tvShow, size = "medium" }: TVShowCardProps) => {
   const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
@@ -40,9 +41,23 @@ export const TVShowCard = ({ tvShow }: TVShowCardProps) => {
     setImageError(true);
   };
 
+  // Consistent sizing based on size prop - Fixed dimensions matching MovieCard
+  const getCardClasses = () => {
+    switch (size) {
+      case "small":
+        return "w-[150px] h-[225px]"; // Fixed 2:3 aspect ratio - matches MovieCard
+      case "medium":
+        return "w-[180px] h-[270px]"; // Fixed 2:3 aspect ratio - matches MovieCard
+      case "large":
+        return "w-[200px] h-[300px]"; // Fixed 2:3 aspect ratio - matches MovieCard
+      default:
+        return "w-[180px] h-[270px]";
+    }
+  };
+
   return (
     <Link to={`/tv/${tvShow.id}`}>
-      <Card className="group relative overflow-hidden enhanced-card mobile-card-hover mobile-touch-feedback aspect-[2/3]">
+      <Card className={`group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 hover:shadow-glow cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* TV Show Poster */}
           {!imageError ? (

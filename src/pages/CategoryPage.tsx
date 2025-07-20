@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { MobileHeader } from "@/components/MobileHeader";
-import { IOSTabBar } from "@/components/IOSTabBar";
+import { Navigation } from "@/components/Navigation";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { Button } from "@/components/ui/button";
 
@@ -132,6 +132,7 @@ const CategoryPage = () => {
             <MovieCard 
               key={`${movie.id}-${index}`}
               movie={tmdbService.formatMovieForCard(movie)} 
+              size="small" 
             />
           ))}
         </div>
@@ -156,7 +157,7 @@ const CategoryPage = () => {
         )}
       </div>
       
-      <IOSTabBar />
+      <Navigation />
     </div>
   );
 };

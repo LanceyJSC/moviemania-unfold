@@ -128,7 +128,7 @@ export const SwipeableTVCarousel = ({ title, category, cardSize = "medium" }: Sw
       {/* TV Show Cards Container */}
       <div 
         ref={scrollRef}
-        className={`flex space-x-4 overflow-x-auto ios-horizontal-scroll pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
+        className={`flex space-x-4 overflow-x-auto scrollbar-hide pb-4 cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -152,6 +152,7 @@ export const SwipeableTVCarousel = ({ title, category, cardSize = "medium" }: Sw
             <div key={tvShow.id} className="flex-shrink-0">
               <TVShowCard 
                 tvShow={tmdbService.formatTVShowForCard(tvShow)} 
+                size={isMobile ? "small" : cardSize} 
               />
             </div>
           ))
