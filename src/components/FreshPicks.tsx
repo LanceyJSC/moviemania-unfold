@@ -1,20 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, Clock } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 type MediaItem = Movie | TVShow;
 
 export const FreshPicks = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const isMobile = useIsMobile();
 
   const loadFreshPicks = async (fresh: boolean = false) => {
     try {
@@ -63,39 +57,6 @@ export const FreshPicks = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
-  // Touch/Mouse event handlers for swipe functionality
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleEnd = () => {
-    setIsDragging(false);
-  };
 
   if (isLoading) {
     return (
@@ -135,21 +96,7 @@ export const FreshPicks = () => {
         </div>
         
         {content.length > 0 ? (
-           <div 
-            ref={scrollRef}
-            className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4"
-            style={{ 
-              scrollbarWidth: 'none', 
-              msOverflowStyle: 'none'
-            }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleEnd}
-            onMouseLeave={handleEnd}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleEnd}
-          >
+           <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
              {content.map((item) => {
                const isMovie = 'title' in item;
                return (
