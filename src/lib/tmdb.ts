@@ -110,30 +110,22 @@ export interface TMDBResponse<T> {
 
 class TMDBService {
   private async fetchFromTMDB<T>(endpoint: string, bustCache: boolean = false, retries: number = 3): Promise<T> {
-    // Add timestamp to force fresh data and prevent any caching
     const timestamp = Date.now();
     
-    // Properly construct the URL with API key and cache busting parameters
-    let url: string;
-    if (endpoint.includes('?')) {
-      url = `${TMDB_BASE_URL}${endpoint}&api_key=${TMDB_API_KEY}`;
-    } else {
-      url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}`;
-    }
+    // Build URL with API key
+    const separator = endpoint.includes('?') ? '&' : '?';
+    let url = `${TMDB_BASE_URL}${endpoint}${separator}api_key=${TMDB_API_KEY}`;
     
-    // Add cache busting parameters if requested
+    // Add simple cache busting for fresh requests
     if (bustCache) {
-      url += `&_t=${timestamp}&_bust=${Math.random()}`;
+      url += `&t=${timestamp}`;
     }
     
-    console.log(`TMDB API call: ${endpoint}${bustCache ? ' (FORCE FRESH)' : ''} - Attempt ${4 - retries}`);
+    console.log(`🎬 TMDB API: ${endpoint} ${bustCache ? '(FRESH)' : '(CACHED)'}`);
     
+    // Simple fetch without aggressive headers
     const fetchOptions: RequestInit = {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+      method: 'GET'
     };
     
     let lastError: Error;
