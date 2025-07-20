@@ -157,33 +157,50 @@ All colors MUST be HSL.
 
   /* Mobile-First Design System for 6:9 iPhone Screens */
   
-  /* Standardized Poster Grid - 4 across with consistent 2:3 ratio */
+  /* Mobile-optimized poster grid */
   .poster-grid-standard {
     @apply grid gap-3 p-4;
-    grid-template-columns: repeat(4, 1fr); /* Always 4 posters across */
+    grid-template-columns: repeat(3, 1fr); /* Mobile: 3 across for 6:9 screens */
   }
 
-  /* Ensure consistent spacing on all screen sizes */
+  /* Small screens (very narrow phones) */
   @media (max-width: 360px) {
     .poster-grid-standard {
-      @apply gap-2 p-3; /* Slightly tighter on very small screens */
+      @apply gap-2 p-3;
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
+  /* Large mobile phones */
+  @media (min-width: 414px) {
+    .poster-grid-standard {
+      @apply gap-3 p-4;
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Tablet portrait */
   @media (min-width: 768px) {
     .poster-grid-standard {
-      @apply gap-4 p-5; /* More generous spacing on larger screens */
+      @apply gap-4 p-5;
+      grid-template-columns: repeat(5, 1fr);
     }
   }
 
-  /* Standard poster card dimensions - 2:3 aspect ratio */
-  .poster-card {
-    @apply w-full rounded-lg overflow-hidden;
-    aspect-ratio: 2/3; /* Enforces poster ratio */
+  /* Tablet landscape and small desktop */
+  @media (min-width: 1024px) {
+    .poster-grid-standard {
+      @apply gap-4 p-6;
+      grid-template-columns: repeat(6, 1fr);
+    }
   }
 
-  .poster-card img {
-    @apply w-full h-full object-cover;
+  /* Large desktop */
+  @media (min-width: 1280px) {
+    .poster-grid-standard {
+      @apply gap-5 p-6;
+      grid-template-columns: repeat(7, 1fr);
+    }
   }
 
   /* Mobile-first typography */
