@@ -136,15 +136,12 @@ export const HeroSection = () => {
       <TrailerModal 
         isOpen={isTrailerOpen} 
         onClose={() => setIsTrailerOpen(false)} 
-        trailerKey=""
-        movieTitle={featuredMovie?.title || ""}
+        movie={featuredMovie}
       />
       <SynopsisModal
         isOpen={isSynopsisOpen}
         onClose={() => setIsSynopsisOpen(false)}
-        title={featuredMovie?.title || ""}
-        synopsis={featuredMovie?.overview || ""}
-        posterUrl={featuredMovie?.poster_path ? `https://image.tmdb.org/t/p/w300${featuredMovie.poster_path}` : undefined}
+        movie={featuredMovie}
       />
     </>
   );

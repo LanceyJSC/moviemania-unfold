@@ -7,11 +7,11 @@ import { tmdbService } from "@/lib/tmdb";
 
 interface MovieGridProps {
   title: string;
-  category: "all" | "popular" | "now_playing" | "upcoming" | "top_rated";
+  fetchFunction: () => Promise<any>;
   refreshInterval?: number;
 }
 
-export const MovieGrid = ({ title, category, refreshInterval = 30 * 60 * 1000 }: MovieGridProps) => {
+export const MovieGrid = ({ title, fetchFunction, refreshInterval = 30 * 60 * 1000 }: MovieGridProps) => {
   const [movies, setMovies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -22,25 +22,7 @@ export const MovieGrid = ({ title, category, refreshInterval = 30 * 60 * 1000 }:
     }
     
     try {
-      let response;
-      switch (category) {
-        case "popular":
-          response = await tmdbService.getPopularMovies();
-          break;
-        case "now_playing":
-          response = await tmdbService.getNowPlayingMovies();
-          break;
-        case "upcoming":
-          response = await tmdbService.getUpcomingMovies();
-          break;
-        case "top_rated":
-          response = await tmdbService.getTopRatedMovies();
-          break;
-        case "all":
-        default:
-          response = await tmdbService.getPopularMovies();
-          break;
-      }
+      const response = await fetchFunction();
       const formattedMovies = response.results.map((movie: any) => 
         tmdbService.formatMovieForCard(movie)
       );

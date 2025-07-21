@@ -44,7 +44,7 @@ export const FreshPicks = () => {
         </div>
       </div>
       
-      <MovieCarousel title="Fresh Picks" category="trending" />
+      <MovieCarousel movies={movies} isLoading={isLoading} />
     </section>
   );
 };

@@ -93,8 +93,7 @@ export const LatestTrailers = () => {
       <TrailerModal 
         isOpen={isTrailerOpen} 
         onClose={() => setIsTrailerOpen(false)} 
-        trailerKey=""
-        movieTitle={selectedMovie?.title || ""}
+        movie={selectedMovie}
       />
     </>
   );
