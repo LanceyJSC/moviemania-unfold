@@ -16,6 +16,7 @@ export const HeroSection = () => {
   const [error, setError] = useState<string | null>(null);
   const [trailerKeys, setTrailerKeys] = useState<(string | null)[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   const isMobile = useIsMobile();
   const rotationIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -83,6 +84,10 @@ export const HeroSection = () => {
         if (fresh) {
           setCurrentIndex(0);
         }
+        
+        // Update last refreshed timestamp
+        setLastUpdated(new Date());
+        console.log('🎬 Hero Section: Content refreshed at', new Date().toLocaleTimeString());
       } else {
         throw new Error('No trending movies found');
       }
@@ -138,13 +143,13 @@ export const HeroSection = () => {
     return () => stopRotation();
   }, [heroMovies.length, isPaused, error]);
 
-  // Periodic refresh every hour with more aggressive cache busting
+  // Periodic refresh every 20 minutes to match other components
   useEffect(() => {
     if (!error) {
       refreshIntervalRef.current = setInterval(() => {
-        console.log('Auto-refreshing hero movies...');
+        console.log('🎬 Hero Section: Auto-refreshing trending movies...');
         loadHeroMovies(true);
-      }, 3600000); // 1 hour in milliseconds
+      }, 1200000); // 20 minutes (same as FreshPicks and LatestTrailers)
     }
 
     return () => {
@@ -154,9 +159,26 @@ export const HeroSection = () => {
     };
   }, [error]);
 
+  // Add visibility change listener to refresh when user returns
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && lastUpdated) {
+        const timeSinceUpdate = Date.now() - lastUpdated.getTime();
+        // Refresh if it's been more than 15 minutes since last update
+        if (timeSinceUpdate > 900000) {
+          console.log('🎬 Hero Section: Refreshing on visibility change');
+          loadHeroMovies(true);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [lastUpdated]);
+
   // Manual refresh function
   const handleManualRefresh = () => {
-    console.log('Manual refresh triggered');
+    console.log('🎬 Hero Section: Manual refresh triggered');
     setError(null);
     loadHeroMovies(true);
   };
@@ -395,12 +417,21 @@ export const HeroSection = () => {
           )}
         </div>
 
-        {/* Loading indicator for refresh */}
+        {/* Loading indicator for refresh with last updated info */}
         {isRefreshing && (
           <div className="absolute top-16 right-6 z-30">
             <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-foreground flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin" />
               Refreshing...
+            </div>
+          </div>
+        )}
+
+        {/* Last updated indicator (only show when not loading/refreshing) */}
+        {lastUpdated && !isLoading && !isRefreshing && !isMobile && (
+          <div className="absolute top-16 right-6 z-30">
+            <div className="bg-background/60 backdrop-blur-sm rounded-lg px-3 py-1 text-xs text-muted-foreground">
+              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
         )}
