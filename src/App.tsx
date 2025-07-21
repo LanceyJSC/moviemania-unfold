@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TrailerProvider } from "@/contexts/TrailerContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import Movies from "./pages/Movies";
@@ -47,6 +48,7 @@ const App = () => {
                   <Toaster />
                   <Sonner />
                   <BrowserRouter>
+                    <ScrollToTop />
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/search" element={<Search />} />

@@ -1,5 +1,5 @@
 
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 
@@ -18,9 +18,9 @@ const NotFound = () => {
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4 text-foreground">404</h1>
         <p className="text-xl text-muted-foreground mb-4">Oops! Page not found</p>
-        <a href="/" className="text-cinema-red hover:text-cinema-red/90 underline">
+        <Link to="/" className="text-cinema-red hover:text-cinema-red/90 underline">
           Return to Home
-        </a>
+        </Link>
       </div>
       
       {/* Mobile Navigation */}
