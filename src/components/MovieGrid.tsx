@@ -1,188 +1,93 @@
 
 import { useState, useEffect } from "react";
+import { Grid, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MovieCard } from "./MovieCard";
 import { tmdbService } from "@/lib/tmdb";
-import { Movie } from "@/lib/tmdb";
-import { MovieCard } from "@/components/MovieCard";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MovieGridProps {
   title: string;
-  category: "all" | "popular" | "now_playing" | "upcoming" | "top_rated";
+  fetchFunction: () => Promise<any>;
+  refreshInterval?: number;
 }
 
-// Content priority refresh intervals
-const REFRESH_INTERVALS = {
-  HIGH_PRIORITY: 20 * 60 * 1000,    // 20 minutes for trending/popular/now_playing
-  MEDIUM_PRIORITY: 45 * 60 * 1000,  // 45 minutes for upcoming
-  LOW_PRIORITY: 60 * 60 * 1000      // 60 minutes for top_rated
-};
-
-const getRefreshInterval = (category: string) => {
-  switch (category) {
-    case "popular":
-    case "now_playing":
-      return REFRESH_INTERVALS.HIGH_PRIORITY;
-    case "upcoming":
-      return REFRESH_INTERVALS.MEDIUM_PRIORITY;
-    case "top_rated":
-    case "all":
-    default:
-      return REFRESH_INTERVALS.LOW_PRIORITY;
-  }
-};
-
-export const MovieGrid = ({ title, category }: MovieGridProps) => {
-  const [movies, setMovies] = useState<Movie[]>([]);
+export const MovieGrid = ({ title, fetchFunction, refreshInterval = 30 * 60 * 1000 }: MovieGridProps) => {
+  const [movies, setMovies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const isMobile = useIsMobile();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadMovies = async (pageNum: number = 1, forceFresh: boolean = true) => {
+  const fetchMovies = async (isManualRefresh = false) => {
+    if (isManualRefresh) {
+      setIsRefreshing(true);
+    }
+    
     try {
-      if (pageNum === 1) {
-        setIsLoading(true);
-        console.log(`Loading fresh ${category} movies - Page ${pageNum}`);
-      }
-
-      let response;
-      switch (category) {
-        case "all":
-          response = await tmdbService.getPopularMovies(pageNum, forceFresh);
-          break;
-        case "popular":
-          response = await tmdbService.getPopularMovies(pageNum, forceFresh);
-          break;
-        case "now_playing":
-          response = await tmdbService.getNowPlayingMovies(pageNum, forceFresh);
-          break;
-        case "upcoming":
-          response = await tmdbService.getUpcomingMovies(pageNum, forceFresh);
-          break;
-        case "top_rated":
-          response = await tmdbService.getTopRatedMovies(pageNum, forceFresh);
-          break;
-        default:
-          response = await tmdbService.getPopularMovies(pageNum, forceFresh);
-      }
-
-      if (pageNum === 1) {
-        setMovies(response.results);
-        setLastUpdated(new Date());
-      } else {
-        setMovies(prev => [...prev, ...response.results]);
-      }
-      
-      setHasMore(pageNum < response.total_pages);
-      console.log(`${category} movies loaded successfully - ${response.results.length} items`);
+      const response = await fetchFunction();
+      const formattedMovies = response.results.map((movie: any) => 
+        tmdbService.formatMovieForCard(movie)
+      );
+      setMovies(formattedMovies);
     } catch (error) {
-      console.error(`Failed to load ${category} movies:`, error);
+      console.error(`Error fetching ${title}:`, error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadMore = () => {
-    if (!isLoading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      loadMovies(nextPage, true);
+      setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    setPage(1);
-    loadMovies(1, true);
-  }, [category]);
-
-  // Enhanced refresh strategy with different intervals based on content priority
-  useEffect(() => {
-    const refreshInterval = getRefreshInterval(category);
-    console.log(`Setting up refresh for ${category} every ${refreshInterval / 60000} minutes`);
+    fetchMovies();
     
-    const interval = setInterval(() => {
-      console.log(`Auto-refreshing ${category} movies - Priority refresh`);
-      setPage(1);
-      loadMovies(1, true);
-    }, refreshInterval);
-
+    const interval = setInterval(() => fetchMovies(), refreshInterval);
     return () => clearInterval(interval);
-  }, [category]);
+  }, []);
 
-  // Refresh when app regains focus (visibility change)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log(`App regained focus - Refreshing ${category} movies`);
-        setPage(1);
-        loadMovies(1, true);
-      }
-    };
+  const handleManualRefresh = () => {
+    fetchMovies(true);
+  };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [category]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop
-        >= document.documentElement.offsetHeight - 1000
-      ) {
-        loadMore();
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [page, hasMore, isLoading]);
+  if (isLoading) {
+    return (
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Grid className="h-6 w-6 text-cinema-gold" />
+            <h2 className="text-2xl font-cinematic text-foreground">{title}</h2>
+          </div>
+        </div>
+        <div className="poster-grid-responsive">
+          {Array.from({ length: 20 }).map((_, index) => (
+            <div key={index} className="w-48 h-72 bg-muted animate-pulse rounded-lg"></div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Section Header */}
+    <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className={`font-cinematic text-foreground tracking-wide ${
-            isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
-          }`}>
-            {title}
-          </h2>
-          {lastUpdated && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Updated {lastUpdated.toLocaleTimeString()}
-            </p>
-          )}
+        <div className="flex items-center space-x-2">
+          <Grid className="h-6 w-6 text-cinema-gold" />
+          <h2 className="text-2xl font-cinematic text-foreground">{title}</h2>
         </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleManualRefresh}
+          disabled={isRefreshing}
+          className="flex items-center space-x-2"
+        >
+          <RotateCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </Button>
       </div>
-
-      {/* Movies Grid - Optimized for iPhone 3-across */}
-      <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
-        {isLoading && movies.length === 0 ? (
-          // Loading skeleton
-          Array.from({ length: 15 }).map((_, index) => (
-            <div key={index} className="animate-fade-in">
-              <div className="bg-muted animate-pulse rounded-lg aspect-[2/3] w-full"></div>
-            </div>
-          ))
-        ) : (
-          movies.map((movie, index) => (
-            <div key={movie.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-              <MovieCard 
-                movie={tmdbService.formatMovieForCard(movie)} 
-                variant="grid"
-              />
-            </div>
-          ))
-        )}
+      
+      <div className="poster-grid-responsive">
+        {movies.map((movie) => (
+          <MovieCard key={movie.id} movie={movie} />
+        ))}
       </div>
-
-      {/* Loading more indicator */}
-      {isLoading && movies.length > 0 && (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cinema-red"></div>
-        </div>
-      )}
-    </div>
+    </section>
   );
 };
