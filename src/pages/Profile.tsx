@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { User, Settings, Calendar, Star, Trophy, Film, LogOut } from "lucide-react";
+import { User, Settings, Calendar, Star, Trophy, Film, LogOut, MapPin, Bell, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
 
 // Mock user data - will be replaced with real user data later
@@ -27,8 +29,9 @@ const mockUserData = {
 };
 
 const Profile = () => {
-  const [activeSection, setActiveSection] = useState<'timeline' | 'settings'>('timeline');
+  const [activeSection, setActiveSection] = useState<'timeline' | 'features' | 'settings'>('timeline');
   const { user, signOut } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -107,22 +110,33 @@ const Profile = () => {
                 <Calendar className="h-4 w-4 mr-2" />
                 Movie Timeline
               </Button>
-               <Button
-                 variant={activeSection === 'settings' ? 'default' : 'ghost'}
-                 className="w-full justify-start"
-                 onClick={() => setActiveSection('settings')}
-               >
-                 <Settings className="h-4 w-4 mr-2" />
-                 Settings
-               </Button>
-               <Button
-                 variant="ghost"
-                 className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-                 onClick={signOut}
-               >
-                 <LogOut className="h-4 w-4 mr-2" />
-                 Sign Out
-               </Button>
+              
+              <Button
+                variant={activeSection === 'features' ? 'default' : 'ghost'}
+                className="w-full justify-start"
+                onClick={() => setActiveSection('features')}
+              >
+                <Star className="h-4 w-4 mr-2" />
+                Features & Social
+              </Button>
+              
+              <Button
+                variant={activeSection === 'settings' ? 'default' : 'ghost'}
+                className="w-full justify-start"
+                onClick={() => setActiveSection('settings')}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={signOut}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
             </div>
           </div>
 
@@ -165,6 +179,137 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {activeSection === 'features' && (
+              <div className="space-y-6">
+                {/* Quick Access Features */}
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <CardTitle className="text-foreground">Quick Access</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Button
+                        variant="outline"
+                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
+                        onClick={() => navigate('/notifications')}
+                      >
+                        <div className="relative">
+                          <Bell className="h-6 w-6" />
+                          {unreadCount > 0 && (
+                            <Badge 
+                              variant="destructive" 
+                              className="absolute -top-2 -right-2 h-4 w-4 p-0 text-[8px] flex items-center justify-center rounded-full"
+                            >
+                              {unreadCount > 9 ? '9+' : unreadCount}
+                            </Badge>
+                          )}
+                        </div>
+                        <span className="text-sm">Notifications</span>
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
+                        onClick={() => navigate('/cinemas')}
+                      >
+                        <MapPin className="h-6 w-6" />
+                        <span className="text-sm">Find Cinemas</span>
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
+                        onClick={() => navigate('/watchlist')}
+                      >
+                        <Film className="h-6 w-6" />
+                        <span className="text-sm">My Watchlist</span>
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
+                        onClick={() => {
+                          // TODO: Navigate to social features when implemented
+                          console.log('Social features coming soon!');
+                        }}
+                      >
+                        <Users className="h-6 w-6" />
+                        <span className="text-sm">Social (Soon)</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Social Features Preview */}
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Social Features
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Connect with other movie enthusiasts and share your passion for cinema.
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
+                        <Users className="h-5 w-5" />
+                        <div>
+                          <div className="font-medium">Friends & Following</div>
+                          <div className="text-sm text-muted-foreground">Connect with friends and see what they're watching</div>
+                        </div>
+                        <Badge variant="outline">Coming Soon</Badge>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
+                        <Film className="h-5 w-5" />
+                        <div>
+                          <div className="font-medium">Community Lists</div>
+                          <div className="text-sm text-muted-foreground">Create and share movie collections</div>
+                        </div>
+                        <Badge variant="outline">Coming Soon</Badge>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
+                        <Award className="h-5 w-5" />
+                        <div>
+                          <div className="font-medium">Achievements</div>
+                          <div className="text-sm text-muted-foreground">Unlock badges for your movie journey</div>
+                        </div>
+                        <Badge variant="outline">Coming Soon</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recommendations Engine Preview */}
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center gap-2">
+                      <Star className="h-5 w-5" />
+                      Personalized Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Get AI-powered movie recommendations based on your viewing history and preferences.
+                    </div>
+                    
+                    <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
+                      <Star className="h-5 w-5" />
+                      <div>
+                        <div className="font-medium">Smart Recommendations</div>
+                        <div className="text-sm text-muted-foreground">Because you liked X, you might like Y</div>
+                      </div>
+                      <Badge variant="outline">Coming Soon</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             )}
 
             {activeSection === 'settings' && (
