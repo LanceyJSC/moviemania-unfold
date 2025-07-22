@@ -8,6 +8,7 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 // Mock user data - will be replaced with real user data later
 const mockUserData = {
@@ -39,6 +40,27 @@ const Profile = () => {
       navigate('/auth');
     }
   }, [user, navigate]);
+
+  const handleFeatureNavigation = (feature: string) => {
+    switch (feature) {
+      case 'notifications':
+        navigate('/notifications');
+        break;
+      case 'cinemas':
+        navigate('/cinemas');
+        break;
+      case 'watchlist':
+        navigate('/watchlist');
+        break;
+      case 'social':
+        toast.info('Social features are coming soon! Stay tuned for updates.', {
+          description: 'Connect with friends, share reviews, and discover movies together.'
+        });
+        break;
+      default:
+        toast.error('Feature not found');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -193,7 +215,7 @@ const Profile = () => {
                       <Button
                         variant="outline"
                         className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => navigate('/notifications')}
+                        onClick={() => handleFeatureNavigation('notifications')}
                       >
                         <div className="relative">
                           <Bell className="h-6 w-6" />
@@ -212,7 +234,7 @@ const Profile = () => {
                       <Button
                         variant="outline"
                         className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => navigate('/cinemas')}
+                        onClick={() => handleFeatureNavigation('cinemas')}
                       >
                         <MapPin className="h-6 w-6" />
                         <span className="text-sm">Find Cinemas</span>
@@ -221,7 +243,7 @@ const Profile = () => {
                       <Button
                         variant="outline"
                         className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => navigate('/watchlist')}
+                        onClick={() => handleFeatureNavigation('watchlist')}
                       >
                         <Film className="h-6 w-6" />
                         <span className="text-sm">My Watchlist</span>
@@ -230,13 +252,10 @@ const Profile = () => {
                       <Button
                         variant="outline"
                         className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => {
-                          // TODO: Navigate to social features when implemented
-                          console.log('Social features coming soon!');
-                        }}
+                        onClick={() => handleFeatureNavigation('social')}
                       >
                         <Users className="h-6 w-6" />
-                        <span className="text-sm">Social (Soon)</span>
+                        <span className="text-sm">Social Features</span>
                       </Button>
                     </div>
                   </CardContent>

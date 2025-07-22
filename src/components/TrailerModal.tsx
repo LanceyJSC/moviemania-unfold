@@ -1,5 +1,5 @@
 
-import { X } from "lucide-react";
+import { X, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -13,11 +13,54 @@ interface TrailerModalProps {
 
 export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: TrailerModalProps) => {
   const [videoError, setVideoError] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { setIsTrailerOpen } = useTrailerContext();
 
   const handleClose = () => {
+    if (isFullscreen) {
+      exitFullscreen();
+    }
     setIsTrailerOpen(false);
     onClose();
+  };
+
+  const enterFullscreen = async () => {
+    const element = document.documentElement;
+    try {
+      if (element.requestFullscreen) {
+        await element.requestFullscreen();
+      } else if ((element as any).webkitRequestFullscreen) {
+        await (element as any).webkitRequestFullscreen();
+      } else if ((element as any).msRequestFullscreen) {
+        await (element as any).msRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } catch (error) {
+      console.error('Failed to enter fullscreen:', error);
+    }
+  };
+
+  const exitFullscreen = async () => {
+    try {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        await (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        await (document as any).msExitFullscreen();
+      }
+      setIsFullscreen(false);
+    } catch (error) {
+      console.error('Failed to exit fullscreen:', error);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (isFullscreen) {
+      exitFullscreen();
+    } else {
+      enterFullscreen();
+    }
   };
 
   useEffect(() => {
@@ -31,6 +74,48 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
+
+  // Handle orientation change for mobile devices
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      if (window.innerHeight < window.innerWidth && isOpen && !isFullscreen) {
+        // Landscape mode detected, auto-enter fullscreen on mobile
+        if (window.innerWidth <= 768) {
+          setTimeout(() => enterFullscreen(), 100);
+        }
+      }
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange);
+
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleOrientationChange);
+    };
+  }, [isOpen, isFullscreen]);
+
+  // Handle fullscreen state changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).msFullscreenElement
+      );
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -48,14 +133,24 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           <h2 className="text-lg font-semibold text-foreground truncate pr-4">
             {movieTitle} - Trailer
           </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClose}
-            className="text-muted-foreground hover:text-foreground p-2"
-          >
-            <X className="h-6 w-6" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleFullscreen}
+              className="text-muted-foreground hover:text-foreground p-2 md:flex hidden"
+            >
+              {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="text-muted-foreground hover:text-foreground p-2"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
         </div>
 
         {/* Video Container */}
@@ -87,10 +182,17 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           </div>
         </div>
 
-        {/* Close hint */}
-        <div className="p-4 text-center">
+        {/* Mobile hint */}
+        <div className="p-4 text-center md:hidden">
           <p className="text-sm text-muted-foreground">
-            Tap the X button to close
+            Rotate your device for fullscreen experience
+          </p>
+        </div>
+
+        {/* Desktop close hint */}
+        <div className="p-4 text-center hidden md:block">
+          <p className="text-sm text-muted-foreground">
+            Press ESC or click X to close
           </p>
         </div>
       </div>

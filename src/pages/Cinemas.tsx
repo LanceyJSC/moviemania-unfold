@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { useCinemas } from '@/hooks/useCinemas';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
@@ -12,16 +14,20 @@ import {
   Globe, 
   Navigation as NavigationIcon,
   Clock,
-  ExternalLink
+  ExternalLink,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Cinemas = () => {
   const navigate = useNavigate();
   const { cinemas, isLoading, fetchNearbyCinemas, fetchCinemas } = useCinemas();
-  const { coordinates, error, loading, getCurrentLocation } = useGeolocation();
+  const { coordinates, error, loading, getCurrentLocation, clearError } = useGeolocation();
   const { preferences, updateLocation } = useUserPreferences();
-  const [selectedCinema, setSelectedCinema] = useState<string | null>(null);
+  const [manualLocation, setManualLocation] = useState('');
+  const [showManualInput, setShowManualInput] = useState(false);
 
   useEffect(() => {
     if (preferences?.location_latitude && preferences?.location_longitude) {
@@ -37,12 +43,57 @@ const Cinemas = () => {
   }, [coordinates]);
 
   const handleGetLocation = () => {
+    clearError();
     getCurrentLocation();
+  };
+
+  const handleManualLocationSubmit = async () => {
+    if (!manualLocation.trim()) {
+      toast.error('Please enter a location');
+      return;
+    }
+
+    try {
+      // Use geocoding to convert address to coordinates
+      const response = await fetch(
+        `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(manualLocation)}&key=YOUR_API_KEY`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.results && data.results.length > 0) {
+          const { lat, lng } = data.results[0].geometry;
+          updateLocation(lat, lng);
+          fetchNearbyCinemas(lat, lng);
+          setShowManualInput(false);
+          toast.success('Location updated successfully');
+        } else {
+          toast.error('Location not found. Please try a different search.');
+        }
+      } else {
+        toast.error('Unable to search for location. Please try again.');
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      toast.error('Failed to search for location. Please enable GPS instead.');
+    }
   };
 
   const formatDistance = (distance?: number) => {
     if (!distance) return '';
     return `${distance} km away`;
+  };
+
+  const handleRetry = () => {
+    if (coordinates || (preferences?.location_latitude && preferences?.location_longitude)) {
+      // Retry fetching cinemas with existing coordinates
+      const lat = coordinates?.latitude || preferences?.location_latitude!;
+      const lng = coordinates?.longitude || preferences?.location_longitude!;
+      fetchNearbyCinemas(lat, lng);
+    } else {
+      // Try to get location again
+      handleGetLocation();
+    }
   };
 
   return (
@@ -51,16 +102,18 @@ const Cinemas = () => {
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">
           <h1 className="text-2xl font-bold text-foreground">Find Cinemas</h1>
-          <Button
-            onClick={handleGetLocation}
-            disabled={loading}
-            size="sm"
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <NavigationIcon className="h-4 w-4" />
-            {loading ? 'Finding...' : 'Near Me'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleGetLocation}
+              disabled={loading}
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <NavigationIcon className="h-4 w-4" />
+              {loading ? 'Finding...' : 'Near Me'}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -69,15 +122,55 @@ const Cinemas = () => {
         {error && (
           <Card className="border-destructive/20">
             <CardContent className="p-4">
-              <p className="text-sm text-destructive">{error}</p>
-              <Button 
-                onClick={handleGetLocation} 
-                size="sm" 
-                variant="outline" 
-                className="mt-2"
-              >
-                Try Again
-              </Button>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-destructive mb-3">{error}</p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button onClick={handleGetLocation} size="sm" variant="outline">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Try Again
+                    </Button>
+                    <Button 
+                      onClick={() => setShowManualInput(true)} 
+                      size="sm" 
+                      variant="outline"
+                    >
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Enter Location Manually
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Manual Location Input */}
+        {showManualInput && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <h3 className="font-medium">Enter your location</h3>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="City, address, or postal code"
+                    value={manualLocation}
+                    onChange={(e) => setManualLocation(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleManualLocationSubmit()}
+                  />
+                  <Button onClick={handleManualLocationSubmit} size="sm">
+                    Search
+                  </Button>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowManualInput(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -114,16 +207,31 @@ const Cinemas = () => {
               <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-2">No Cinemas Found</h3>
               <p className="text-muted-foreground mb-4">
-                {coordinates 
-                  ? "No cinemas found in your area. Try expanding your search radius."
+                {coordinates || (preferences?.location_latitude && preferences?.location_longitude)
+                  ? "No cinemas found in your area. This might be because cinema data is not yet available for your location."
                   : "Allow location access to find cinemas near you."
                 }
               </p>
-              {!coordinates && (
-                <Button onClick={handleGetLocation} disabled={loading}>
-                  Enable Location
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                {!coordinates && !(preferences?.location_latitude && preferences?.location_longitude) && (
+                  <Button onClick={handleGetLocation} disabled={loading}>
+                    Enable Location
+                  </Button>
+                )}
+                <Button onClick={handleRetry} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry Search
                 </Button>
-              )}
+                <Button 
+                  onClick={() => setShowManualInput(true)} 
+                  variant="outline"
+                >
+                  Enter Location Manually
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                Cinema data is continuously being updated. Please check back later.
+              </p>
             </CardContent>
           </Card>
         ) : (

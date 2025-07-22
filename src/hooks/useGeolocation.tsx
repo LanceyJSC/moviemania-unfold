@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 
 interface GeolocationState {
@@ -43,13 +44,13 @@ export const useGeolocation = () => {
         let errorMessage = 'An unknown error occurred.';
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'User denied the request for Geolocation.';
+            errorMessage = 'Location access denied. Please enable location services and try again.';
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information is unavailable.';
+            errorMessage = 'Location information is unavailable. Please check your GPS settings.';
             break;
           case error.TIMEOUT:
-            errorMessage = 'The request to get user location timed out.';
+            errorMessage = 'Location request timed out. Please try again or check your connection.';
             break;
         }
         setState({
@@ -60,14 +61,19 @@ export const useGeolocation = () => {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 600000, // 10 minutes
+        timeout: 30000, // Increased to 30 seconds
+        maximumAge: 300000, // 5 minutes cache
       }
     );
+  };
+
+  const clearError = () => {
+    setState(prev => ({ ...prev, error: null }));
   };
 
   return {
     ...state,
     getCurrentLocation,
+    clearError,
   };
 };
