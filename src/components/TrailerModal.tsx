@@ -20,6 +20,11 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
     if (isFullscreen) {
       exitFullscreen();
     }
+    // Restore navigation bar when closing
+    const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
+    if (navigation) {
+      navigation.style.display = 'block';
+    }
     setIsTrailerOpen(false);
     onClose();
   };
@@ -78,13 +83,34 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   // Handle orientation change for mobile devices
   useEffect(() => {
     const handleOrientationChange = () => {
-      if (window.innerHeight < window.innerWidth && isOpen && !isFullscreen) {
-        // Landscape mode detected, auto-enter fullscreen on mobile
-        if (window.innerWidth <= 768) {
+      const isLandscape = window.innerHeight < window.innerWidth;
+      const isMobile = window.innerWidth <= 768;
+      
+      if (isLandscape && isOpen && isMobile) {
+        // Auto-enter fullscreen in landscape on mobile
+        if (!isFullscreen) {
           setTimeout(() => enterFullscreen(), 100);
+        }
+        // Hide navigation bar in landscape
+        const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
+        if (navigation) {
+          navigation.style.display = 'none';
+        }
+      } else if (!isLandscape && isOpen && isMobile) {
+        // Show navigation bar in portrait
+        const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
+        if (navigation) {
+          navigation.style.display = 'block';
+        }
+        // Exit fullscreen in portrait if currently fullscreen
+        if (isFullscreen) {
+          setTimeout(() => exitFullscreen(), 100);
         }
       }
     };
+
+    // Initial check
+    handleOrientationChange();
 
     window.addEventListener('orientationchange', handleOrientationChange);
     window.addEventListener('resize', handleOrientationChange);
@@ -92,6 +118,11 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
     return () => {
       window.removeEventListener('orientationchange', handleOrientationChange);
       window.removeEventListener('resize', handleOrientationChange);
+      // Restore navigation bar when component unmounts
+      const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
+      if (navigation) {
+        navigation.style.display = 'block';
+      }
     };
   }, [isOpen, isFullscreen]);
 

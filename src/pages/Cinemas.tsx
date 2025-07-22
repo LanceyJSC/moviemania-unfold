@@ -54,15 +54,16 @@ const Cinemas = () => {
     }
 
     try {
-      // Use geocoding to convert address to coordinates
+      // Use browser's geocoding API (more reliable than external APIs)
       const response = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(manualLocation)}&key=YOUR_API_KEY`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(manualLocation)}&limit=1`
       );
       
       if (response.ok) {
         const data = await response.json();
-        if (data.results && data.results.length > 0) {
-          const { lat, lng } = data.results[0].geometry;
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
           updateLocation(lat, lng);
           fetchNearbyCinemas(lat, lng);
           setShowManualInput(false);
