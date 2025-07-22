@@ -30,18 +30,41 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   };
 
   const enterFullscreen = async () => {
-    const element = document.documentElement;
     try {
+      const element = document.documentElement;
+      
+      // Try different fullscreen methods for better browser compatibility
       if (element.requestFullscreen) {
         await element.requestFullscreen();
       } else if ((element as any).webkitRequestFullscreen) {
+        // For Safari
         await (element as any).webkitRequestFullscreen();
+      } else if ((element as any).webkitEnterFullscreen) {
+        // For iOS Safari video elements
+        await (element as any).webkitEnterFullscreen();
+      } else if ((element as any).mozRequestFullScreen) {
+        // For Firefox
+        await (element as any).mozRequestFullScreen();
       } else if ((element as any).msRequestFullscreen) {
+        // For IE/Edge
         await (element as any).msRequestFullscreen();
       }
+      
+      // Force hide browser UI on mobile
+      if (window.innerWidth <= 768) {
+        // Hide address bar and tabs on mobile browsers
+        window.scrollTo(0, 1);
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+      }
+      
       setIsFullscreen(true);
     } catch (error) {
       console.error('Failed to enter fullscreen:', error);
+      // Fallback: at least hide scrollbars and try to maximize viewport
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      window.scrollTo(0, 1);
     }
   };
 
