@@ -230,7 +230,8 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
               <iframe
                 src={youtubeEmbedUrl}
                 title={`${movieTitle} Trailer`}
-                className="w-full h-full"
+                className={`w-full h-full ${isFullscreen ? 'object-cover' : ''}`}
+                style={isFullscreen ? { minHeight: '100vh', minWidth: '100vw' } : {}}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
