@@ -31,40 +31,44 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
 
   const enterFullscreen = async () => {
     try {
-      const element = document.documentElement;
+      // Try to request fullscreen on the iframe element first for better mobile support
+      const iframe = document.querySelector('iframe[title*="Trailer"]') as HTMLIFrameElement;
       
-      // Try different fullscreen methods for better browser compatibility
-      if (element.requestFullscreen) {
-        await element.requestFullscreen();
-      } else if ((element as any).webkitRequestFullscreen) {
-        // For Safari
-        await (element as any).webkitRequestFullscreen();
-      } else if ((element as any).webkitEnterFullscreen) {
-        // For iOS Safari video elements
-        await (element as any).webkitEnterFullscreen();
-      } else if ((element as any).mozRequestFullScreen) {
-        // For Firefox
-        await (element as any).mozRequestFullScreen();
-      } else if ((element as any).msRequestFullscreen) {
-        // For IE/Edge
-        await (element as any).msRequestFullscreen();
+      if (iframe && (iframe as any).webkitEnterFullscreen) {
+        // iOS Safari video fullscreen
+        await (iframe as any).webkitEnterFullscreen();
+      } else {
+        // Fallback to document fullscreen
+        const element = document.documentElement;
+        
+        if (element.requestFullscreen) {
+          await element.requestFullscreen();
+        } else if ((element as any).webkitRequestFullscreen) {
+          await (element as any).webkitRequestFullscreen();
+        } else if ((element as any).mozRequestFullScreen) {
+          await (element as any).mozRequestFullScreen();
+        } else if ((element as any).msRequestFullscreen) {
+          await (element as any).msRequestFullscreen();
+        }
       }
       
-      // Force hide browser UI on mobile
+      // Mobile-specific viewport adjustments
       if (window.innerWidth <= 768) {
-        // Hide address bar and tabs on mobile browsers
-        window.scrollTo(0, 1);
         document.body.style.overflow = 'hidden';
         document.documentElement.style.overflow = 'hidden';
+        // Hide mobile browser UI
+        window.scrollTo(0, 1);
+        setTimeout(() => window.scrollTo(0, 1), 100);
       }
       
       setIsFullscreen(true);
     } catch (error) {
       console.error('Failed to enter fullscreen:', error);
-      // Fallback: at least hide scrollbars and try to maximize viewport
+      // Fallback for mobile
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
       window.scrollTo(0, 1);
+      setIsFullscreen(true);
     }
   };
 
@@ -208,8 +212,8 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
         </div>
 
         {/* Video Container */}
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl aspect-video bg-cinema-charcoal rounded-lg overflow-hidden">
+        <div className={`flex-1 flex items-center justify-center ${isFullscreen ? 'p-0' : 'p-4'}`}>
+          <div className={`${isFullscreen ? 'w-full h-full' : 'w-full max-w-4xl aspect-video'} bg-cinema-charcoal ${isFullscreen ? '' : 'rounded-lg'} overflow-hidden`}>
             {videoError ? (
               <div className="w-full h-full flex items-center justify-center text-center">
                 <div>
