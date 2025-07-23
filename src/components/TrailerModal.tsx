@@ -186,34 +186,36 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
       <div className="relative h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
-          <h2 className="text-lg font-semibold text-foreground truncate pr-4">
-            {movieTitle} - Trailer
-          </h2>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleFullscreen}
-              className="text-muted-foreground hover:text-foreground p-2 md:flex hidden"
-            >
-              {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="text-muted-foreground hover:text-foreground p-2"
-            >
-              <X className="h-6 w-6" />
-            </Button>
+        {/* Header - Hidden in fullscreen */}
+        {!isFullscreen && (
+          <div className="flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
+            <h2 className="text-lg font-semibold text-foreground truncate pr-4">
+              {movieTitle} - Trailer
+            </h2>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleFullscreen}
+                className="text-muted-foreground hover:text-foreground p-2 md:flex hidden"
+              >
+                {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClose}
+                className="text-muted-foreground hover:text-foreground p-2"
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Video Container */}
-        <div className={`flex-1 flex items-center justify-center ${isFullscreen ? 'p-0' : 'p-4'}`}>
-          <div className={`${isFullscreen ? 'w-full h-full' : 'w-full max-w-4xl aspect-video'} bg-cinema-charcoal ${isFullscreen ? '' : 'rounded-lg'} overflow-hidden`}>
+        <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'flex-1 flex items-center justify-center p-4'}`}>
+          <div className={`${isFullscreen ? 'w-screen h-screen' : 'w-full max-w-4xl aspect-video'} bg-cinema-charcoal ${isFullscreen ? '' : 'rounded-lg'} overflow-hidden`}>
             {videoError ? (
               <div className="w-full h-full flex items-center justify-center text-center">
                 <div>
@@ -230,8 +232,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
               <iframe
                 src={youtubeEmbedUrl}
                 title={`${movieTitle} Trailer`}
-                className={`w-full h-full ${isFullscreen ? 'object-cover' : ''}`}
-                style={isFullscreen ? { minHeight: '100vh', minWidth: '100vw' } : {}}
+                className="w-full h-full"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
@@ -241,19 +242,24 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           </div>
         </div>
 
-        {/* Mobile hint */}
-        <div className="p-4 text-center md:hidden">
-          <p className="text-sm text-muted-foreground">
-            Rotate your device for fullscreen experience
-          </p>
-        </div>
+        {/* Mobile and Desktop hints - Hidden in fullscreen */}
+        {!isFullscreen && (
+          <>
+            {/* Mobile hint */}
+            <div className="p-4 text-center md:hidden">
+              <p className="text-sm text-muted-foreground">
+                Rotate your device for fullscreen experience
+              </p>
+            </div>
 
-        {/* Desktop close hint */}
-        <div className="p-4 text-center hidden md:block">
-          <p className="text-sm text-muted-foreground">
-            Press ESC or click X to close
-          </p>
-        </div>
+            {/* Desktop close hint */}
+            <div className="p-4 text-center hidden md:block">
+              <p className="text-sm text-muted-foreground">
+                Press ESC or click X to close
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
