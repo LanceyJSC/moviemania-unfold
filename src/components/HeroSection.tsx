@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Play, Info, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { TrailerModal } from "@/components/TrailerModal";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -23,7 +23,16 @@ export const HeroSection = () => {
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Safe context usage with fallback
-  const { isTrailerOpen, setIsTrailerOpen, setTrailerKey, setMovieTitle } = useTrailerContext();
+  let isTrailerOpen = false;
+  let setIsTrailerOpen = (_open: boolean) => {};
+  
+  try {
+    const trailerContext = useTrailerContext();
+    isTrailerOpen = trailerContext.isTrailerOpen;
+    setIsTrailerOpen = trailerContext.setIsTrailerOpen;
+  } catch (contextError) {
+    console.warn('TrailerContext not available:', contextError);
+  }
 
   const loadHeroMovies = async (fresh: boolean = false) => {
     console.log('Loading hero movies, fresh:', fresh);
@@ -197,10 +206,14 @@ export const HeroSection = () => {
 
   const handleWatchNow = () => {
     const currentTrailerKey = trailerKeys[currentIndex];
-    if (currentTrailerKey) {
-      setTrailerKey(currentTrailerKey);
-      setMovieTitle(heroMovie.title);
+    if (currentTrailerKey && setIsTrailerOpen) {
       setIsTrailerOpen(true);
+    }
+  };
+
+  const handleCloseTrailer = () => {
+    if (setIsTrailerOpen) {
+      setIsTrailerOpen(false);
     }
   };
 
@@ -424,6 +437,15 @@ export const HeroSection = () => {
         )}
       </div>
 
+      {/* Trailer Modal */}
+      {isTrailerOpen && currentTrailerKey && heroMovie && (
+        <TrailerModal
+          isOpen={isTrailerOpen}
+          onClose={handleCloseTrailer}
+          trailerKey={currentTrailerKey}
+          movieTitle={heroMovie.title}
+        />
+      )}
     </>
   );
 };
