@@ -31,43 +31,53 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
 
   const enterFullscreen = async () => {
     try {
-      // Try to request fullscreen on the iframe element first for better mobile support
-      const iframe = document.querySelector('iframe[title*="Trailer"]') as HTMLIFrameElement;
+      const element = document.documentElement;
       
-      if (iframe && (iframe as any).webkitEnterFullscreen) {
-        // iOS Safari video fullscreen
-        await (iframe as any).webkitEnterFullscreen();
-      } else {
-        // Fallback to document fullscreen
-        const element = document.documentElement;
-        
-        if (element.requestFullscreen) {
-          await element.requestFullscreen();
-        } else if ((element as any).webkitRequestFullscreen) {
-          await (element as any).webkitRequestFullscreen();
-        } else if ((element as any).mozRequestFullScreen) {
-          await (element as any).mozRequestFullScreen();
-        } else if ((element as any).msRequestFullscreen) {
-          await (element as any).msRequestFullscreen();
-        }
+      // Request fullscreen on the document element
+      if (element.requestFullscreen) {
+        await element.requestFullscreen();
+      } else if ((element as any).webkitRequestFullscreen) {
+        await (element as any).webkitRequestFullscreen();
+      } else if ((element as any).mozRequestFullScreen) {
+        await (element as any).mozRequestFullScreen();
+      } else if ((element as any).msRequestFullscreen) {
+        await (element as any).msRequestFullscreen();
       }
       
-      // Mobile-specific viewport adjustments
-      if (window.innerWidth <= 768) {
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
-        // Hide mobile browser UI
+      // Force mobile viewport adjustments
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      document.documentElement.style.height = '100vh';
+      
+      // Add viewport meta tag for mobile fullscreen
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover');
+      }
+      
+      // Hide mobile browser UI with multiple attempts
+      const hideUI = () => {
         window.scrollTo(0, 1);
+        setTimeout(() => window.scrollTo(0, 1), 50);
         setTimeout(() => window.scrollTo(0, 1), 100);
-      }
+        setTimeout(() => window.scrollTo(0, 1), 200);
+      };
+      
+      hideUI();
+      setTimeout(hideUI, 100);
       
       setIsFullscreen(true);
     } catch (error) {
       console.error('Failed to enter fullscreen:', error);
-      // Fallback for mobile
+      // Fallback: simulate fullscreen with CSS
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
+      
+      // Try to hide browser UI on mobile
       window.scrollTo(0, 1);
+      setTimeout(() => window.scrollTo(0, 1), 100);
+      
       setIsFullscreen(true);
     }
   };
@@ -81,9 +91,28 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
       } else if ((document as any).msExitFullscreen) {
         await (document as any).msExitFullscreen();
       }
+      
+      // Restore viewport and body styles
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.height = '';
+      document.documentElement.style.height = '';
+      
+      // Restore viewport meta tag
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+      }
+      
       setIsFullscreen(false);
     } catch (error) {
       console.error('Failed to exit fullscreen:', error);
+      // Still restore styles even if fullscreen API failed
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.height = '';
+      document.documentElement.style.height = '';
+      setIsFullscreen(false);
     }
   };
 
