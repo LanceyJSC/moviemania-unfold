@@ -9,10 +9,11 @@ import { UserReviews } from "@/components/UserReviews";
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
-import { TrailerModal } from "@/components/TrailerModal";
+
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTrailerContext } from "@/contexts/TrailerContext";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
 
@@ -21,9 +22,9 @@ const MovieDetail = () => {
   const [movie, setMovie] = useState<Movie | TVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
-  const [showTrailer, setShowTrailer] = useState(false);
   const [showSynopsis, setShowSynopsis] = useState(false);
   const isMobile = useIsMobile();
+  const { setTrailerKey: setGlobalTrailerKey, setMovieTitle, setIsTrailerOpen } = useTrailerContext();
   const {
     toggleLike,
     toggleWatchlist,
@@ -89,7 +90,9 @@ const MovieDetail = () => {
 
   const handleWatchTrailer = () => {
     if (trailerKey) {
-      setShowTrailer(true);
+      setGlobalTrailerKey(trailerKey);
+      setMovieTitle(title);
+      setIsTrailerOpen(true);
     }
   };
 
@@ -335,15 +338,6 @@ const MovieDetail = () => {
         />
       </div>
 
-      {/* Trailer Modal */}
-      {showTrailer && (
-        <TrailerModal 
-          isOpen={showTrailer} 
-          onClose={() => setShowTrailer(false)} 
-          trailerKey={trailerKey || ''} 
-          movieTitle={title} 
-        />
-      )}
 
       {/* Synopsis Modal */}
       {showSynopsis && (
