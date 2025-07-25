@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TrailerProvider } from "@/contexts/TrailerContext";
+import { GlobalTrailerModal } from "@/components/GlobalTrailerModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
@@ -50,6 +51,7 @@ const App = () => {
                 <TrailerProvider>
                   <Toaster />
                   <Sonner />
+                  <GlobalTrailerModal />
                   <BrowserRouter>
                     <ScrollToTop />
                     <Routes>

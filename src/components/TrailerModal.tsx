@@ -33,7 +33,34 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
     try {
       const element = document.documentElement;
       
-      // Request fullscreen on the document element
+      // Aggressively hide browser UI before requesting fullscreen
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover');
+      }
+      
+      // Set CSS properties for immediate effect
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      document.documentElement.style.height = '100vh';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
+      // Hide address bar on mobile with aggressive scrolling
+      const hideAddressBar = () => {
+        window.scrollTo(0, 1);
+        setTimeout(() => window.scrollTo(0, 1), 10);
+        setTimeout(() => window.scrollTo(0, 1), 20);
+        setTimeout(() => window.scrollTo(0, 1), 50);
+        setTimeout(() => window.scrollTo(0, 1), 100);
+        setTimeout(() => window.scrollTo(0, 1), 200);
+        setTimeout(() => window.scrollTo(0, 1), 500);
+      };
+      
+      hideAddressBar();
+      
+      // Request fullscreen API
       if (element.requestFullscreen) {
         await element.requestFullscreen();
       } else if ((element as any).webkitRequestFullscreen) {
@@ -44,39 +71,33 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
         await (element as any).msRequestFullscreen();
       }
       
-      // Force mobile viewport adjustments
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.height = '100vh';
-      document.documentElement.style.height = '100vh';
-      
-      // Add viewport meta tag for mobile fullscreen
-      const viewport = document.querySelector('meta[name="viewport"]');
-      if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover');
-      }
-      
-      // Hide mobile browser UI with multiple attempts
-      const hideUI = () => {
-        window.scrollTo(0, 1);
-        setTimeout(() => window.scrollTo(0, 1), 50);
-        setTimeout(() => window.scrollTo(0, 1), 100);
-        setTimeout(() => window.scrollTo(0, 1), 200);
-      };
-      
-      hideUI();
-      setTimeout(hideUI, 100);
+      // Continue hiding after fullscreen request
+      setTimeout(hideAddressBar, 100);
+      setTimeout(hideAddressBar, 300);
+      setTimeout(hideAddressBar, 500);
       
       setIsFullscreen(true);
     } catch (error) {
       console.error('Failed to enter fullscreen:', error);
-      // Fallback: simulate fullscreen with CSS
+      // Fallback: aggressive CSS fullscreen simulation
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      document.documentElement.style.height = '100vh';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
       
-      // Try to hide browser UI on mobile
-      window.scrollTo(0, 1);
-      setTimeout(() => window.scrollTo(0, 1), 100);
+      // Aggressive address bar hiding for fallback
+      const fallbackHide = () => {
+        window.scrollTo(0, 1);
+        setTimeout(() => window.scrollTo(0, 1), 10);
+        setTimeout(() => window.scrollTo(0, 1), 50);
+        setTimeout(() => window.scrollTo(0, 1), 100);
+      };
+      
+      fallbackHide();
+      setTimeout(fallbackHide, 200);
+      setTimeout(fallbackHide, 500);
       
       setIsFullscreen(true);
     }
@@ -92,11 +113,13 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
         await (document as any).msExitFullscreen();
       }
       
-      // Restore viewport and body styles
+      // Restore all modified styles
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
       document.body.style.height = '';
       document.documentElement.style.height = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
       
       // Restore viewport meta tag
       const viewport = document.querySelector('meta[name="viewport"]');
@@ -112,6 +135,8 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
       document.documentElement.style.overflow = '';
       document.body.style.height = '';
       document.documentElement.style.height = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
       setIsFullscreen(false);
     }
   };

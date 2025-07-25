@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Info, Star, Calendar, TrendingUp, Users } from "lucide-react";
 import { tmdbService } from "@/lib/tmdb";
+import { useTrailerContext } from "@/contexts/TrailerContext";
 
 interface FeaturedHeroProps {
   type: 'movie' | 'tv';
@@ -12,6 +13,7 @@ interface FeaturedHeroProps {
 
 export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const [featuredContent, setFeaturedContent] = useState<any>(null);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [stats, setStats] = useState({
     total: 0,
     trending: 0,
@@ -19,6 +21,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
 
   const loadFeaturedContent = async (isRefresh = false) => {
     if (isRefresh) {
@@ -35,7 +38,18 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
           tmdbService.getPopularMovies()
         ]);
         
-        setFeaturedContent(trending.results[0]);
+        const featuredItem = trending.results[0];
+        setFeaturedContent(featuredItem);
+        
+        // Get movie details with trailer
+        if (featuredItem) {
+          const details = await tmdbService.getMovieDetails(featuredItem.id);
+          const trailer = details.videos?.results.find(
+            video => video.type === 'Trailer' && video.site === 'YouTube'
+          );
+          setTrailerKey(trailer ? trailer.key : null);
+        }
+        
         setStats({
           total: popular.total_results || 0,
           trending: trending.total_results || 0,
@@ -48,7 +62,18 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
           tmdbService.getPopularTVShows()
         ]);
         
-        setFeaturedContent(trending.results[0]);
+        const featuredItem = trending.results[0];
+        setFeaturedContent(featuredItem);
+        
+        // Get TV show details with trailer
+        if (featuredItem) {
+          const details = await tmdbService.getTVShowDetails(featuredItem.id);
+          const trailer = details.videos?.results.find(
+            video => video.type === 'Trailer' && video.site === 'YouTube'
+          );
+          setTrailerKey(trailer ? trailer.key : null);
+        }
+        
         setStats({
           total: popular.total_results || 0,
           trending: trending.total_results || 0,
@@ -93,6 +118,14 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const releaseDate = type === 'movie' ? featuredContent.release_date : featuredContent.first_air_date;
   const rating = featuredContent.vote_average;
   const overview = featuredContent.overview;
+
+  const handleWatchTrailer = () => {
+    if (trailerKey) {
+      setGlobalTrailerKey(trailerKey);
+      setMovieTitle(title);
+      setIsTrailerOpen(true);
+    }
+  };
 
   return (
     <div className="relative w-full overflow-hidden mb-8 group" style={{ 
@@ -153,13 +186,24 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
           
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium"
-              disabled={isRefreshing}
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Watch Trailer
-            </Button>
+            {trailerKey ? (
+              <Button 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium"
+                disabled={isRefreshing}
+                onClick={handleWatchTrailer}
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Watch Trailer
+              </Button>
+            ) : (
+              <Button 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium"
+                disabled={true}
+              >
+                <Play className="mr-2 h-4 w-4" />
+                No Trailer
+              </Button>
+            )}
             <Button 
               variant="outline" 
               className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4"
