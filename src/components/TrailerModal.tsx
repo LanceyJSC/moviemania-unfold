@@ -14,6 +14,7 @@ interface TrailerModalProps {
 export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: TrailerModalProps) => {
   const [videoError, setVideoError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLandscapeMobile, setIsLandscapeMobile] = useState(false);
   const { setIsTrailerOpen } = useTrailerContext();
 
   const handleClose = () => {
@@ -144,8 +145,11 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   const handleOrientationChange = () => {
     const isLandscape = window.innerHeight < window.innerWidth;
     const isMobile = window.innerWidth <= 768;
+    const landscapeMobile = isLandscape && isMobile;
     
-    if (isLandscape && isOpen && isMobile) {
+    setIsLandscapeMobile(landscapeMobile);
+    
+    if (landscapeMobile && isOpen) {
       // Immediately set fullscreen state for UI hiding
       setIsFullscreen(true);
       // Auto-enter fullscreen in landscape on mobile
@@ -155,7 +159,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
       if (navigation) {
         navigation.style.display = 'none';
       }
-    } else if (!isLandscape && isOpen && isMobile) {
+    } else if (!landscapeMobile && isOpen) {
       // Show navigation bar in portrait
       const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
       if (navigation) {
@@ -263,7 +267,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
         </div>
 
         {/* Close button - Only show in portrait */}
-        {!(window.innerHeight < window.innerWidth && window.innerWidth <= 768) && (
+        {!isLandscapeMobile && (
           <>
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
@@ -307,7 +311,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
         )}
 
         {/* Landscape close button - floating close button for landscape */}
-        {(window.innerHeight < window.innerWidth && window.innerWidth <= 768) && (
+        {isLandscapeMobile && (
           <Button
             variant="ghost"
             size="sm"
