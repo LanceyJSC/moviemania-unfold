@@ -233,34 +233,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
       <div className="relative h-full flex flex-col">
-        {/* Header - Hidden in fullscreen or landscape mobile */}
-        {!isFullscreen && !(window.innerHeight < window.innerWidth && window.innerWidth <= 768) && (
-          <div className="flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
-            <h2 className="text-lg font-semibold text-foreground truncate pr-4">
-              {movieTitle} - Trailer
-            </h2>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleFullscreen}
-                className="text-muted-foreground hover:text-foreground p-2 md:flex hidden"
-              >
-                {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClose}
-                className="text-muted-foreground hover:text-foreground p-2"
-              >
-                <X className="h-6 w-6" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Video Container */}
+        {/* Video Container - Full screen in landscape mobile */}
         <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'flex-1 flex items-center justify-center p-4'}`}>
           <div className={`${isFullscreen ? 'w-screen h-screen' : 'w-full max-w-4xl aspect-video'} bg-cinema-charcoal ${isFullscreen ? '' : 'rounded-lg'} overflow-hidden`}>
             {videoError ? (
@@ -289,23 +262,60 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           </div>
         </div>
 
-        {/* Mobile and Desktop hints - Hidden in fullscreen */}
-        {!isFullscreen && (
+        {/* Close button - Only show in portrait */}
+        {!(window.innerHeight < window.innerWidth && window.innerWidth <= 768) && (
           <>
+            {/* Header */}
+            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
+              <h2 className="text-lg font-semibold text-foreground truncate pr-4">
+                {movieTitle} - Trailer
+              </h2>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleFullscreen}
+                  className="text-muted-foreground hover:text-foreground p-2 md:flex hidden"
+                >
+                  {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClose}
+                  className="text-muted-foreground hover:text-foreground p-2"
+                >
+                  <X className="h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+
             {/* Mobile hint */}
-            <div className="p-4 text-center md:hidden">
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-center md:hidden">
               <p className="text-sm text-muted-foreground">
                 Rotate your device for fullscreen experience
               </p>
             </div>
 
             {/* Desktop close hint */}
-            <div className="p-4 text-center hidden md:block">
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-center hidden md:block">
               <p className="text-sm text-muted-foreground">
                 Press ESC or click X to close
               </p>
             </div>
           </>
+        )}
+
+        {/* Landscape close button - floating close button for landscape */}
+        {(window.innerHeight < window.innerWidth && window.innerWidth <= 768) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClose}
+            className="absolute top-4 right-4 z-20 text-white/80 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-2"
+          >
+            <X className="h-6 w-6" />
+          </Button>
         )}
       </div>
     </div>
