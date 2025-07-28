@@ -141,32 +141,32 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
 
   // Handle orientation change for mobile devices
   useEffect(() => {
-    const handleOrientationChange = () => {
-      const isLandscape = window.innerHeight < window.innerWidth;
-      const isMobile = window.innerWidth <= 768;
-      
-      if (isLandscape && isOpen && isMobile) {
-        // Auto-enter fullscreen in landscape on mobile
-        if (!isFullscreen) {
-          setTimeout(() => enterFullscreen(), 100);
-        }
-        // Hide navigation bar in landscape
-        const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
-        if (navigation) {
-          navigation.style.display = 'none';
-        }
-      } else if (!isLandscape && isOpen && isMobile) {
-        // Show navigation bar in portrait
-        const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
-        if (navigation) {
-          navigation.style.display = 'block';
-        }
-        // Exit fullscreen in portrait if currently fullscreen
-        if (isFullscreen) {
-          setTimeout(() => exitFullscreen(), 100);
-        }
+  const handleOrientationChange = () => {
+    const isLandscape = window.innerHeight < window.innerWidth;
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isLandscape && isOpen && isMobile) {
+      // Immediately set fullscreen state for UI hiding
+      setIsFullscreen(true);
+      // Auto-enter fullscreen in landscape on mobile
+      setTimeout(() => enterFullscreen(), 100);
+      // Hide navigation bar in landscape
+      const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
+      if (navigation) {
+        navigation.style.display = 'none';
       }
-    };
+    } else if (!isLandscape && isOpen && isMobile) {
+      // Show navigation bar in portrait
+      const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
+      if (navigation) {
+        navigation.style.display = 'block';
+      }
+      // Exit fullscreen in portrait if currently fullscreen
+      if (isFullscreen) {
+        setTimeout(() => exitFullscreen(), 100);
+      }
+    }
+  };
 
     // Initial check
     handleOrientationChange();
