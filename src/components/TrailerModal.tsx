@@ -233,8 +233,8 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
       <div className="relative h-full flex flex-col">
-        {/* Header - Hidden in fullscreen */}
-        {!isFullscreen && (
+        {/* Header - Hidden in fullscreen or landscape mobile */}
+        {!isFullscreen && !(window.innerHeight < window.innerWidth && window.innerWidth <= 768) && (
           <div className="flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
             <h2 className="text-lg font-semibold text-foreground truncate pr-4">
               {movieTitle} - Trailer
