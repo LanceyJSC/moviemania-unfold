@@ -31,115 +31,31 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
 
   const enterFullscreen = async () => {
     try {
-      // Set aggressive CSS first for immediate effect
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.height = '100vh';
-      document.documentElement.style.height = '100vh';
-      document.body.style.position = 'fixed';
-      document.body.style.top = '0';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.bottom = '0';
-      document.body.style.width = '100vw';
-      document.documentElement.style.width = '100vw';
+      console.log('Entering fullscreen...');
       
-      // Force viewport for mobile
-      const viewport = document.querySelector('meta[name="viewport"]');
-      if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover, minimal-ui');
-      }
+      // Force immediate fullscreen state
+      setIsFullscreen(true);
       
-      // Aggressive browser UI hiding function
-      const aggressiveHide = () => {
-        // Multiple scroll attempts with different timings
-        window.scrollTo(0, 1);
-        setTimeout(() => window.scrollTo(0, 1), 1);
-        setTimeout(() => window.scrollTo(0, 1), 10);
-        setTimeout(() => window.scrollTo(0, 1), 50);
-        setTimeout(() => window.scrollTo(0, 1), 100);
-        setTimeout(() => window.scrollTo(0, 1), 200);
-        setTimeout(() => window.scrollTo(0, 1), 500);
-        setTimeout(() => window.scrollTo(0, 1), 1000);
-        
-        // Try to resize window to hide UI
-        if ((window as any).orientation !== undefined) {
-          // Mobile device - trigger orientation-based hiding
-          setTimeout(() => {
-            window.dispatchEvent(new Event('resize'));
-          }, 100);
-        }
-      };
-      
-      // Start aggressive hiding immediately
-      aggressiveHide();
-      
-      // Try fullscreen API
+      // Direct fullscreen API call on the document element
       const element = document.documentElement;
-      let fullscreenPromise = null;
       
       if (element.requestFullscreen) {
-        fullscreenPromise = element.requestFullscreen();
+        await element.requestFullscreen({ navigationUI: "hide" });
       } else if ((element as any).webkitRequestFullscreen) {
-        fullscreenPromise = (element as any).webkitRequestFullscreen();
+        await (element as any).webkitRequestFullscreen();
       } else if ((element as any).webkitRequestFullScreen) {
-        fullscreenPromise = (element as any).webkitRequestFullScreen();
+        await (element as any).webkitRequestFullScreen();
       } else if ((element as any).mozRequestFullScreen) {
-        fullscreenPromise = (element as any).mozRequestFullScreen();
+        await (element as any).mozRequestFullScreen();
       } else if ((element as any).msRequestFullscreen) {
-        fullscreenPromise = (element as any).msRequestFullscreen();
+        await (element as any).msRequestFullscreen();
       }
       
-      if (fullscreenPromise) {
-        await fullscreenPromise;
-      }
+      console.log('Fullscreen API called');
       
-      // Continue aggressive hiding after fullscreen attempt
-      setTimeout(aggressiveHide, 100);
-      setTimeout(aggressiveHide, 300);
-      setTimeout(aggressiveHide, 500);
-      setTimeout(aggressiveHide, 1000);
-      
-      setIsFullscreen(true);
     } catch (error) {
-      console.error('Failed to enter fullscreen:', error);
-      
-      // Fallback: super aggressive CSS-only fullscreen
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.height = '100vh';
-      document.documentElement.style.height = '100vh';
-      document.body.style.position = 'fixed';
-      document.body.style.top = '0';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.bottom = '0';
-      document.body.style.width = '100vw';
-      document.documentElement.style.width = '100vw';
-      document.body.style.margin = '0';
-      document.body.style.padding = '0';
-      document.documentElement.style.margin = '0';
-      document.documentElement.style.padding = '0';
-      
-      // Extreme fallback hiding
-      const extremeHide = () => {
-        window.scrollTo(0, 1);
-        setTimeout(() => window.scrollTo(0, 1), 1);
-        setTimeout(() => window.scrollTo(0, 1), 10);
-        setTimeout(() => window.scrollTo(0, 1), 50);
-        setTimeout(() => window.scrollTo(0, 1), 100);
-        setTimeout(() => window.scrollTo(0, 1), 250);
-        setTimeout(() => window.scrollTo(0, 1), 500);
-        setTimeout(() => window.scrollTo(0, 1), 1000);
-        setTimeout(() => window.scrollTo(0, 1), 2000);
-      };
-      
-      extremeHide();
-      setTimeout(extremeHide, 200);
-      setTimeout(extremeHide, 500);
-      setTimeout(extremeHide, 1000);
-      
-      setIsFullscreen(true);
+      console.error('Fullscreen failed:', error);
+      setIsFullscreen(true); // Still set state for styling
     }
   };
 
