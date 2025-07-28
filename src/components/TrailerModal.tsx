@@ -175,6 +175,11 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
     // Initial check
     handleOrientationChange();
 
+    // Also check immediately when modal opens
+    if (isOpen) {
+      handleOrientationChange();
+    }
+
     window.addEventListener('orientationchange', handleOrientationChange);
     window.addEventListener('resize', handleOrientationChange);
 
@@ -236,7 +241,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
 
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
-      <div className="relative h-full flex flex-col">
+      <div className={`relative h-full flex flex-col ${isLandscapeMobile ? 'landscape-mobile' : ''}`}>
         {/* Video Container - Full screen in landscape mobile */}
         <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'flex-1 flex items-center justify-center p-4'}`}>
           <div className={`${isFullscreen ? 'w-screen h-screen' : 'w-full max-w-4xl aspect-video'} bg-cinema-charcoal ${isFullscreen ? '' : 'rounded-lg'} overflow-hidden`}>
@@ -266,11 +271,9 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           </div>
         </div>
 
-        {/* Close button - Only show in portrait */}
+        {/* Header - Completely hidden in landscape mobile */}
         {!isLandscapeMobile && (
-          <>
-            {/* Header */}
-            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
+          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
               <h2 className="text-lg font-semibold text-foreground truncate pr-4">
                 {movieTitle} - Trailer
               </h2>
@@ -291,9 +294,13 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
                 >
                   <X className="h-6 w-6" />
                 </Button>
-              </div>
             </div>
+          </div>
+        )}
 
+        {/* Hints - Only show in portrait */}
+        {!isLandscapeMobile && (
+          <>
             {/* Mobile hint */}
             <div className="absolute bottom-0 left-0 right-0 p-4 text-center md:hidden">
               <p className="text-sm text-muted-foreground">
