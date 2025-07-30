@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Heart, User, LogIn } from "lucide-react";
+import { Home, Search, Heart, User, LogIn, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -10,6 +10,8 @@ export const DesktopNavigation = () => {
   
   const navItems = user ? [
     { path: "/", icon: Home, label: "Home" },
+    { path: "/discover", icon: Zap, label: "Discover" },
+    { path: "/social", icon: Users, label: "Social" },
     { path: "/search", icon: Search, label: "Search" },
     { path: "/watchlist", icon: Heart, label: "Watchlist" },
     { path: "/profile", icon: User, label: "Profile" }
