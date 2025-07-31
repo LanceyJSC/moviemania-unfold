@@ -252,36 +252,6 @@ export type Database = {
         }
         Relationships: []
       }
-      movie_preferences: {
-        Row: {
-          created_at: string
-          id: string
-          movie_id: number
-          movie_poster: string | null
-          movie_title: string
-          preference: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          movie_id: number
-          movie_poster?: string | null
-          movie_title: string
-          preference: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          movie_id?: number
-          movie_poster?: string | null
-          movie_title?: string
-          preference?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       movie_streaming_availability: {
         Row: {
           available_from: string | null
@@ -720,37 +690,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_friend_rating_comparison: {
-        Args: { p_user_id: string; p_friend_id: string }
-        Returns: {
-          movie_id: number
-          movie_title: string
-          user_rating: number
-          friend_rating: number
-          rating_difference: number
-        }[]
-      }
-      get_friend_watchlist_comparison: {
-        Args: { p_user_id: string; p_friend_id: string }
-        Returns: {
-          movie_id: number
-          movie_title: string
-          movie_poster: string
-          in_user_watchlist: boolean
-          in_friend_watchlist: boolean
-          user_list_type: string
-          friend_list_type: string
-        }[]
-      }
-      get_mutual_friends: {
-        Args: { p_user_id: string }
-        Returns: {
-          friend_id: string
-          friend_username: string
-          friend_avatar_url: string
-          connection_date: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
