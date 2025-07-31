@@ -1,14 +1,16 @@
 
 import { useState } from "react";
-import { Tv, Star, Calendar, TrendingUp, Play } from "lucide-react";
+import { Tv, Star, Calendar, TrendingUp, Play, Heart } from "lucide-react";
 import { TVGrid } from "@/components/TVGrid";
 import { Navigation } from "@/components/Navigation";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DiscoveryModal } from "@/components/DiscoveryModal";
 
 const TVShows = () => {
   const [activeFilter, setActiveFilter] = useState("all");
+  const [showDiscovery, setShowDiscovery] = useState(false);
 
   const filterButtons = [
     { id: "all", label: "All", icon: Tv },
@@ -72,6 +74,17 @@ const TVShows = () => {
                   </Button>
                 );
               })}
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-9 sm:h-10 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl sm:rounded-2xl touch-target focus-ring bg-card/60 border-border/50 text-foreground hover:bg-card/80"
+                onClick={() => setShowDiscovery(true)}
+              >
+                <div className="flex flex-col items-center">
+                  <Heart className="h-3 w-3 sm:h-4 sm:w-4 mb-0.5" />
+                  <span className="text-xs leading-none">Discover</span>
+                </div>
+              </Button>
             </div>
           </div>
 
@@ -88,6 +101,13 @@ const TVShows = () => {
 
       {/* Mobile Navigation */}
       <Navigation />
+      
+      {/* Discovery Modal */}
+      <DiscoveryModal
+        isOpen={showDiscovery}
+        onClose={() => setShowDiscovery(false)}
+        type="tv"
+      />
     </div>
   );
 };
