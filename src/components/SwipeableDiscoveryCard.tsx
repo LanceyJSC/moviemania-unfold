@@ -34,16 +34,19 @@ export const SwipeableDiscoveryCard = ({
     
     const deltaX = clientX - startPos.x;
     const deltaY = clientY - startPos.y;
-    setDragOffset({ x: deltaX, y: deltaY * 0.3 });
+    
+    // More responsive movement with less Y constraint
+    setDragOffset({ x: deltaX, y: deltaY * 0.1 });
   };
 
   const handleEnd = () => {
     if (!isDragging || !isActive) return;
     
-    const threshold = 120;
+    const threshold = 80; // Lower threshold for more responsive feel
+    const velocity = Math.abs(dragOffset.x) / 10; // Velocity consideration
     const { x } = dragOffset;
     
-    if (Math.abs(x) > threshold) {
+    if (Math.abs(x) > threshold || velocity > 5) {
       if (x > 0) {
         onLike();
       } else {
@@ -100,14 +103,14 @@ export const SwipeableDiscoveryCard = ({
     };
   }, [isDragging, dragOffset]);
 
-  const rotation = dragOffset.x * 0.1;
-  const opacity = Math.max(0.3, 1 - Math.abs(dragOffset.x) / 300);
-  const scale = isActive ? 1 : 0.95;
+  const rotation = dragOffset.x * 0.08; // Slightly less rotation for more refined feel
+  const opacity = Math.max(0.5, 1 - Math.abs(dragOffset.x) / 400);
+  const scale = isActive ? 1 : 0.96;
 
   const cardStyle = {
     transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${rotation}deg) scale(${scale})`,
-    opacity: isActive ? opacity : 0.8,
-    transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    opacity: isActive ? opacity : 0.9,
+    transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Apple-like spring animation
     zIndex: isActive ? 10 : 1,
   };
 
@@ -153,24 +156,24 @@ export const SwipeableDiscoveryCard = ({
         </div>
       )}
 
-      {/* Backdrop Image */}
-      <div className="relative h-2/3 overflow-hidden">
+      {/* Poster Image */}
+      <div className="relative h-4/5 overflow-hidden rounded-t-2xl">
         <img
-          src={tmdbService.getBackdropUrl(item.backdrop_path || item.poster_path)}
+          src={tmdbService.getPosterUrl(item.poster_path)}
           alt={title}
           className="w-full h-full object-cover"
           draggable={false}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="p-6 h-1/3 flex flex-col justify-between">
+      <div className="absolute bottom-0 left-0 right-0 p-6 h-1/5 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
         <div>
-          <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-1">{title}</h3>
-          <div className="flex items-center gap-4 text-muted-foreground text-sm mb-3">
+          <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">{title}</h3>
+          <div className="flex items-center gap-4 text-white/80 text-sm">
             <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span>{item.vote_average.toFixed(1)}</span>
             </div>
             <div className="flex items-center gap-1">
@@ -178,7 +181,6 @@ export const SwipeableDiscoveryCard = ({
               <span>{year}</span>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-2">{item.overview}</p>
         </div>
       </div>
     </div>
