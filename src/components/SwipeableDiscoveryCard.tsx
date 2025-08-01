@@ -36,17 +36,17 @@ export const SwipeableDiscoveryCard = ({
     const deltaY = clientY - startPos.y;
     
     // Ultra responsive movement for premium feel
-    setDragOffset({ x: deltaX, y: deltaY * 0.05 });
+    setDragOffset({ x: deltaX, y: deltaY * 0.02 });
   };
 
   const handleEnd = () => {
     if (!isDragging || !isActive) return;
     
-    const threshold = 60; // Very responsive threshold
-    const velocity = Math.abs(dragOffset.x) / 8; // More sensitive velocity
+    const threshold = 50; // Ultra responsive threshold
+    const velocity = Math.abs(dragOffset.x) / 6; // Very sensitive velocity
     const { x } = dragOffset;
     
-    if (Math.abs(x) > threshold || velocity > 5) {
+    if (Math.abs(x) > threshold || velocity > 3) {
       if (x > 0) {
         onLike();
       } else {
@@ -103,14 +103,16 @@ export const SwipeableDiscoveryCard = ({
     };
   }, [isDragging, dragOffset]);
 
-  const rotation = dragOffset.x * 0.05; // Subtle rotation for premium feel
-  const opacity = Math.max(0.7, 1 - Math.abs(dragOffset.x) / 500);
-  const scale = isActive ? 1 : 0.98;
+  const rotation = dragOffset.x * 0.03; // Ultra subtle rotation
+  const opacity = Math.max(0.8, 1 - Math.abs(dragOffset.x) / 600);
+  const scale = isActive ? 1 : 0.99;
 
   const cardStyle = {
     transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${rotation}deg) scale(${scale})`,
-    opacity: isActive ? opacity : 0.95,
-    transition: isDragging ? 'none' : 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)', // More fluid spring
+    opacity: isActive ? opacity : 0.96,
+    transition: isDragging 
+      ? 'none' 
+      : 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Ultra smooth iOS spring
     zIndex: isActive ? 10 : 1,
   };
 
