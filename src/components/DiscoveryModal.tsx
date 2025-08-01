@@ -43,14 +43,6 @@ export const DiscoveryModal = ({ isOpen, onClose, type }: DiscoveryModalProps) =
       </div>
       
       <div className="flex flex-col h-screen pt-14 overflow-hidden">
-        {/* Progress indicator */}
-        <div className="px-4 py-3 bg-muted/50 flex-shrink-0">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Swipe right to like, left to pass</span>
-            <span>{remainingCount} remaining</span>
-          </div>
-        </div>
-
         {/* Cards Container */}
         <div className="flex-1 relative overflow-hidden">
           {currentItem && hasMore ? (

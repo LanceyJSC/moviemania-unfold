@@ -35,15 +35,15 @@ export const SwipeableDiscoveryCard = ({
     const deltaX = clientX - startPos.x;
     const deltaY = clientY - startPos.y;
     
-    // More responsive movement with less Y constraint
-    setDragOffset({ x: deltaX, y: deltaY * 0.1 });
+    // Ultra responsive movement for premium feel
+    setDragOffset({ x: deltaX, y: deltaY * 0.05 });
   };
 
   const handleEnd = () => {
     if (!isDragging || !isActive) return;
     
-    const threshold = 80; // Lower threshold for more responsive feel
-    const velocity = Math.abs(dragOffset.x) / 10; // Velocity consideration
+    const threshold = 60; // Very responsive threshold
+    const velocity = Math.abs(dragOffset.x) / 8; // More sensitive velocity
     const { x } = dragOffset;
     
     if (Math.abs(x) > threshold || velocity > 5) {
@@ -103,14 +103,14 @@ export const SwipeableDiscoveryCard = ({
     };
   }, [isDragging, dragOffset]);
 
-  const rotation = dragOffset.x * 0.08; // Slightly less rotation for more refined feel
-  const opacity = Math.max(0.5, 1 - Math.abs(dragOffset.x) / 400);
-  const scale = isActive ? 1 : 0.96;
+  const rotation = dragOffset.x * 0.05; // Subtle rotation for premium feel
+  const opacity = Math.max(0.7, 1 - Math.abs(dragOffset.x) / 500);
+  const scale = isActive ? 1 : 0.98;
 
   const cardStyle = {
     transform: `translateX(${dragOffset.x}px) translateY(${dragOffset.y}px) rotate(${rotation}deg) scale(${scale})`,
-    opacity: isActive ? opacity : 0.9,
-    transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Apple-like spring animation
+    opacity: isActive ? opacity : 0.95,
+    transition: isDragging ? 'none' : 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)', // More fluid spring
     zIndex: isActive ? 10 : 1,
   };
 
@@ -124,7 +124,7 @@ export const SwipeableDiscoveryCard = ({
   return (
     <div
       ref={cardRef}
-      className="absolute inset-6 bg-card rounded-2xl shadow-2xl overflow-hidden select-none cursor-grab active:cursor-grabbing max-h-[calc(100vh-200px)]"
+      className="absolute inset-4 top-2 bottom-20 bg-card rounded-3xl shadow-2xl overflow-hidden select-none cursor-grab active:cursor-grabbing"
       style={cardStyle}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -157,7 +157,7 @@ export const SwipeableDiscoveryCard = ({
       )}
 
       {/* Poster Image */}
-      <div className="relative h-full overflow-hidden rounded-2xl">
+      <div className="relative h-full overflow-hidden rounded-3xl">
         <img
           src={tmdbService.getPosterUrl(item.poster_path)}
           alt={title}
@@ -167,11 +167,11 @@ export const SwipeableDiscoveryCard = ({
             e.currentTarget.src = tmdbService.getBackdropUrl(item.backdrop_path);
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent rounded-b-2xl">
+      <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end rounded-b-3xl">
         <div>
           <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">{title}</h3>
           <div className="flex items-center gap-4 text-white/80 text-sm">
