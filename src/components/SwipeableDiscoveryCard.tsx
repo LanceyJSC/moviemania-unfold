@@ -124,7 +124,7 @@ export const SwipeableDiscoveryCard = ({
   return (
     <div
       ref={cardRef}
-      className="absolute inset-4 bg-card rounded-2xl shadow-2xl overflow-hidden select-none cursor-grab active:cursor-grabbing"
+      className="absolute inset-6 bg-card rounded-2xl shadow-2xl overflow-hidden select-none cursor-grab active:cursor-grabbing max-h-[calc(100vh-200px)]"
       style={cardStyle}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -157,18 +157,21 @@ export const SwipeableDiscoveryCard = ({
       )}
 
       {/* Poster Image */}
-      <div className="relative h-4/5 overflow-hidden rounded-t-2xl">
+      <div className="relative h-full overflow-hidden rounded-2xl">
         <img
           src={tmdbService.getPosterUrl(item.poster_path)}
           alt={title}
           className="w-full h-full object-cover"
           draggable={false}
+          onError={(e) => {
+            e.currentTarget.src = tmdbService.getBackdropUrl(item.backdrop_path);
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 h-1/5 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
+      <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent rounded-b-2xl">
         <div>
           <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">{title}</h3>
           <div className="flex items-center gap-4 text-white/80 text-sm">

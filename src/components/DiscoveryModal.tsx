@@ -42,9 +42,9 @@ export const DiscoveryModal = ({ isOpen, onClose, type }: DiscoveryModalProps) =
         </Button>
       </div>
       
-      <div className="flex flex-col h-full pt-14">
+      <div className="flex flex-col h-screen pt-14 overflow-hidden">
         {/* Progress indicator */}
-        <div className="px-4 py-2 bg-muted/50">
+        <div className="px-4 py-3 bg-muted/50 flex-shrink-0">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>Swipe right to like, left to pass</span>
             <span>{remainingCount} remaining</span>
@@ -52,7 +52,7 @@ export const DiscoveryModal = ({ isOpen, onClose, type }: DiscoveryModalProps) =
         </div>
 
         {/* Cards Container */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative overflow-hidden">
           {currentItem && hasMore ? (
             <SwipeableDiscoveryCard
               key={currentItem.id}
@@ -88,32 +88,32 @@ export const DiscoveryModal = ({ isOpen, onClose, type }: DiscoveryModalProps) =
 
         {/* Action Buttons */}
         {currentItem && hasMore && (
-          <div className="flex justify-center gap-6 p-6 bg-background/95 backdrop-blur-sm border-t">
+          <div className="flex justify-center gap-4 p-4 bg-background/95 backdrop-blur-sm border-t flex-shrink-0">
             <Button
               variant="outline"
               size="lg"
               onClick={() => handleDislike(currentItem)}
-              className="rounded-full w-16 h-16 p-0 border-2 hover:bg-red-50 hover:border-red-300"
+              className="rounded-full w-14 h-14 p-0 border-2 hover:bg-red-50 hover:border-red-300"
             >
-              <X className="w-6 h-6 text-red-500" />
+              <X className="w-5 h-5 text-red-500" />
             </Button>
             
             <Button
               variant="outline"
               size="lg"
               onClick={() => handleSkip(currentItem)}
-              className="rounded-full w-14 h-14 p-0 border-2"
+              className="rounded-full w-12 h-12 p-0 border-2"
             >
-              <SkipForward className="w-5 h-5 text-muted-foreground" />
+              <SkipForward className="w-4 h-4 text-muted-foreground" />
             </Button>
             
             <Button
               variant="outline"
               size="lg"
               onClick={() => handleLike(currentItem)}
-              className="rounded-full w-16 h-16 p-0 border-2 hover:bg-green-50 hover:border-green-300"
+              className="rounded-full w-14 h-14 p-0 border-2 hover:bg-green-50 hover:border-green-300"
             >
-              <Heart className="w-6 h-6 text-green-500" />
+              <Heart className="w-5 h-5 text-green-500" />
             </Button>
           </div>
         )}
