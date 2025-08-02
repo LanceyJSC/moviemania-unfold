@@ -27,6 +27,9 @@ import CinemaDetail from "./pages/CinemaDetail";
 import Notifications from "./pages/Notifications";
 import { DiscoverMovies } from "./pages/DiscoverMovies";
 import { DiscoverTVShows } from "./pages/DiscoverTVShows";
+import { SocialFriends } from "./pages/SocialFriends";
+import { SocialLists } from "./pages/SocialLists";
+import { SocialAchievements } from "./pages/SocialAchievements";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -73,6 +76,9 @@ const App = () => {
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/discover/movies" element={<DiscoverMovies />} />
                       <Route path="/discover/tv-shows" element={<DiscoverTVShows />} />
+                      <Route path="/social/friends" element={<SocialFriends />} />
+                      <Route path="/social/lists" element={<SocialLists />} />
+                      <Route path="/social/achievements" element={<SocialAchievements />} />
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/auth" element={<Auth />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

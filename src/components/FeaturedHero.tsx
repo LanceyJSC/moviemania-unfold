@@ -216,8 +216,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
                   disabled={isRefreshing}
                 >
                   <Info className="mr-2 h-4 w-4" />
-                  <span className="hidden xs:inline">More Info</span>
-                  <span className="xs:hidden">Info</span>
+                  More Info
                 </Button>
               </Link>
             </div>

@@ -275,32 +275,41 @@ const Profile = () => {
                     </div>
                     
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
-                        <Users className="h-5 w-5" />
-                        <div>
+                      <button 
+                        onClick={() => navigate('/social/friends')}
+                        className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
+                      >
+                        <Users className="h-5 w-5 group-hover:text-primary transition-colors" />
+                        <div className="flex-1">
                           <div className="font-medium">Friends & Following</div>
                           <div className="text-sm text-muted-foreground">Connect with friends and see what they're watching</div>
                         </div>
-                        <Badge variant="outline">Coming Soon</Badge>
-                      </div>
+                        <div className="text-xs text-muted-foreground">Active</div>
+                      </button>
                       
-                      <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
-                        <Film className="h-5 w-5" />
-                        <div>
+                      <button 
+                        onClick={() => navigate('/social/lists')}
+                        className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
+                      >
+                        <Film className="h-5 w-5 group-hover:text-primary transition-colors" />
+                        <div className="flex-1">
                           <div className="font-medium">Community Lists</div>
                           <div className="text-sm text-muted-foreground">Create and share movie collections</div>
                         </div>
-                        <Badge variant="outline">Coming Soon</Badge>
-                      </div>
+                        <div className="text-xs text-muted-foreground">Active</div>
+                      </button>
                       
-                      <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
-                        <Award className="h-5 w-5" />
-                        <div>
+                      <button 
+                        onClick={() => navigate('/social/achievements')}
+                        className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
+                      >
+                        <Award className="h-5 w-5 group-hover:text-primary transition-colors" />
+                        <div className="flex-1">
                           <div className="font-medium">Achievements</div>
                           <div className="text-sm text-muted-foreground">Unlock badges for your movie journey</div>
                         </div>
-                        <Badge variant="outline">Coming Soon</Badge>
-                      </div>
+                        <div className="text-xs text-muted-foreground">Active</div>
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
@@ -318,14 +327,17 @@ const Profile = () => {
                       Get AI-powered movie recommendations based on your viewing history and preferences.
                     </div>
                     
-                    <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg opacity-60">
-                      <Star className="h-5 w-5" />
-                      <div>
+                    <button 
+                      onClick={() => navigate('/recommendations')}
+                      className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
+                    >
+                      <Star className="h-5 w-5 group-hover:text-primary transition-colors" />
+                      <div className="flex-1">
                         <div className="font-medium">Smart Recommendations</div>
                         <div className="text-sm text-muted-foreground">Because you liked X, you might like Y</div>
                       </div>
-                      <Badge variant="outline">Coming Soon</Badge>
-                    </div>
+                      <div className="text-xs text-muted-foreground">Active</div>
+                    </button>
                   </CardContent>
                 </Card>
               </div>
