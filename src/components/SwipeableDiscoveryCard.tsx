@@ -126,7 +126,7 @@ export const SwipeableDiscoveryCard = ({
   return (
     <div
       ref={cardRef}
-      className="absolute inset-4 top-2 bottom-20 bg-card rounded-3xl shadow-2xl overflow-hidden select-none cursor-grab active:cursor-grabbing"
+      className="absolute inset-4 top-2 bottom-20 bg-card rounded-3xl shadow-2xl overflow-hidden select-none cursor-grab active:cursor-grabbing md:inset-8 md:top-4 md:bottom-24 lg:inset-16 lg:top-8 lg:bottom-32"
       style={cardStyle}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -173,10 +173,10 @@ export const SwipeableDiscoveryCard = ({
       </div>
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end rounded-b-3xl">
+      <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end rounded-b-3xl md:p-6 lg:p-8">
         <div>
-          <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">{title}</h3>
-          <div className="flex items-center gap-4 text-white/80 text-sm">
+          <h3 className="text-xl font-bold text-white mb-1 line-clamp-1 md:text-2xl lg:text-3xl md:mb-2">{title}</h3>
+          <div className="flex items-center gap-4 text-white/80 text-sm md:text-base lg:text-lg md:gap-6">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span>{item.vote_average.toFixed(1)}</span>
