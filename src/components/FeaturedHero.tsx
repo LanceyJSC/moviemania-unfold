@@ -186,47 +186,52 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
           </p>
           
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3">
+            {/* Primary Action Buttons */}
             <div className="flex gap-3">
               {trailerKey ? (
                 <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium flex-1 sm:flex-none"
                   disabled={isRefreshing}
                   onClick={handleWatchTrailer}
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  Watch Trailer
+                  <span className="hidden xs:inline">Watch Trailer</span>
+                  <span className="xs:hidden">Trailer</span>
                 </Button>
               ) : (
                 <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium flex-1 sm:flex-none"
                   disabled={true}
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  No Trailer
+                  <span className="hidden xs:inline">No Trailer</span>
+                  <span className="xs:hidden">No Trailer</span>
                 </Button>
               )}
-              <Link to={`/${type === 'movie' ? 'movies' : 'tv-shows'}/${featuredContent.id}`}>
+              <Link to={`/${type}/${featuredContent.id}`}>
                 <Button 
                   variant="outline" 
-                  className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-6"
+                  className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 sm:px-6"
                   disabled={isRefreshing}
                 >
                   <Info className="mr-2 h-4 w-4" />
-                  More Info
+                  <span className="hidden xs:inline">More Info</span>
+                  <span className="xs:hidden">Info</span>
                 </Button>
               </Link>
             </div>
             
-            {/* Discover Button - Better placement */}
-            <Link to={`/discover/${type === 'movie' ? 'movies' : 'tv-shows'}`} className="sm:min-w-fit">
+            {/* Discover Button */}
+            <Link to={`/discover/${type === 'movie' ? 'movies' : 'tv-shows'}`}>
               <Button 
                 variant="outline" 
-                className="border-primary/30 text-primary bg-primary/10 backdrop-blur-sm hover:bg-primary/20 rounded-xl h-12 px-6 font-medium w-full sm:w-auto"
+                className="border-primary/30 text-primary bg-primary/10 backdrop-blur-sm hover:bg-primary/20 rounded-xl h-12 px-6 font-medium w-full"
                 disabled={isRefreshing}
               >
                 <Sparkles className="mr-2 h-4 w-4" />
-                Discover More {type === 'movie' ? 'Movies' : 'TV Shows'}
+                <span className="hidden xs:inline">Discover More {type === 'movie' ? 'Movies' : 'TV Shows'}</span>
+                <span className="xs:hidden">Discover</span>
               </Button>
             </Link>
           </div>
