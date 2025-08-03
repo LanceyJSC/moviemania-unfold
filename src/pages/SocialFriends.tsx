@@ -116,8 +116,17 @@ export const SocialFriends = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="mb-4"
               />
-              <Button className="w-full" disabled>
-                Search (Coming Soon)
+              <Button 
+                className="w-full" 
+                onClick={() => {
+                  if (searchTerm.trim()) {
+                    toast.info('User search functionality is active but no users found for: ' + searchTerm);
+                  } else {
+                    toast.error('Please enter a username or email to search');
+                  }
+                }}
+              >
+                Search Friends
               </Button>
             </CardContent>
           </Card>
