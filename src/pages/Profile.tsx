@@ -53,9 +53,7 @@ const Profile = () => {
         navigate('/watchlist');
         break;
       case 'social':
-        toast.info('Social features are coming soon! Stay tuned for updates.', {
-          description: 'Connect with friends, share reviews, and discover movies together.'
-        });
+        navigate('/social/friends');
         break;
       default:
         toast.error('Feature not found');
