@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Heart, User, LogIn, Film, Tv } from "lucide-react";
+import { Home, Search, Heart, User, LogIn, Film, Tv, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -13,6 +13,7 @@ export const Navigation = () => {
     { path: "/movies", icon: Film, label: "Movies" },
     { path: "/tv-shows", icon: Tv, label: "TV Shows" },
     { path: "/search", icon: Search, label: "Search" },
+    { path: "/social/friends", icon: Users, label: "Friends" },
     { path: "/watchlist", icon: Heart, label: "Watchlist" },
     { path: "/profile", icon: User, label: "Profile" }
   ] : [
