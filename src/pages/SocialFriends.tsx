@@ -16,11 +16,21 @@ interface Connection {
   status: string;
 }
 
+interface UserProfile {
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url?: string;
+  created_at: string;
+}
+
 export const SocialFriends = () => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
+  const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -95,6 +105,58 @@ export const SocialFriends = () => {
     }
   };
 
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      toast.error('Please enter a username or email to search');
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or(`username.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%`)
+        .neq('id', user?.id)
+        .limit(10);
+
+      if (error) throw error;
+
+      setSearchResults(data || []);
+      if (data && data.length === 0) {
+        toast.info('No users found matching your search');
+      }
+    } catch (error) {
+      console.error('Error searching users:', error);
+      toast.error('Failed to search users');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const sendFriendRequest = async (targetUserId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('social_connections')
+        .insert({
+          follower_id: user.id,
+          following_id: targetUserId,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      toast.success('Friend request sent!');
+      // Remove from search results
+      setSearchResults(prev => prev.filter(u => u.id !== targetUserId));
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      toast.error('Failed to send friend request');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-32">
       <MobileHeader title="Friends & Following" />
@@ -118,18 +180,50 @@ export const SocialFriends = () => {
               />
               <Button 
                 className="w-full" 
-                onClick={() => {
-                  if (searchTerm.trim()) {
-                    toast.info('User search functionality is active but no users found for: ' + searchTerm);
-                  } else {
-                    toast.error('Please enter a username or email to search');
-                  }
-                }}
+                onClick={handleSearch}
+                disabled={!searchTerm.trim() || isSearching}
               >
-                Search Friends
+                {isSearching ? 'Searching...' : 'Search Friends'}
               </Button>
             </CardContent>
           </Card>
+
+          {/* Search Results */}
+          {searchResults.length > 0 && (
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground">Search Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {searchResults.map((profile) => (
+                    <div key={profile.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                          {profile.avatar_url ? (
+                            <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
+                          ) : (
+                            <Users className="h-5 w-5 text-primary-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-foreground">{profile.full_name || profile.username}</div>
+                          <div className="text-sm text-muted-foreground">@{profile.username}</div>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => sendFriendRequest(profile.id)}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Add Friend
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Pending Requests */}
           {pendingRequests.length > 0 && (

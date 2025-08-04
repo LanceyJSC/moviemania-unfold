@@ -47,19 +47,43 @@ export const useUserPreferences = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // First try to get existing preferences
+      const { data: existing } = await supabase
         .from('user_preferences')
-        .upsert({
-          user_id: user.id,
-          ...updates,
-        })
-        .select()
-        .single();
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      let result;
+      
+      if (existing) {
+        // Update existing record
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .update(updates)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = data;
+      } else {
+        // Insert new record
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .insert({
+            user_id: user.id,
+            ...updates,
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        result = data;
+      }
 
-      setPreferences(data);
-      return data;
+      setPreferences(result);
+      return result;
     } catch (error) {
       console.error('Error updating user preferences:', error);
       throw error;
