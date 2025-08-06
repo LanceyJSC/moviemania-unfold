@@ -620,7 +620,7 @@ const Search = () => {
                   Trending TV Shows
                 </h2>
               </div>
-               <div className="poster-grid-responsive">
+               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
                 {trendingTVShows.map((tvShow) => (
                   <TVShowCard 
                     key={tvShow.id} 
@@ -668,7 +668,7 @@ const Search = () => {
             
             {/* Results Grid - Movies Page Style */}
             <div className="container mx-auto px-4 md:px-6 py-8">
-               <div className="poster-grid-responsive">
+               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
                 {searchResults.map((item) => renderMediaCard(item))}
               </div>
             </div>

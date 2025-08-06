@@ -421,7 +421,7 @@ class TMDBService {
       title: tvShow.name,
       poster: this.getPosterUrl(tvShow.poster_path),
       year: tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear().toString() : 'TBA',
-      rating: tvShow.vote_average.toFixed(1),
+      rating: tvShow.vote_average ? tvShow.vote_average.toFixed(1) : '0.0',
       genre: tvShow.genres?.[0]?.name || undefined
     };
   }
