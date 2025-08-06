@@ -1,20 +1,37 @@
-import { useState, useEffect } from "react";
-import { User, Settings, Calendar, Star, Trophy, Film, LogOut, MapPin, Bell, Users, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Navigation } from "@/components/Navigation";
-import { MobileHeader } from "@/components/MobileHeader";
-import { useAuth } from "@/hooks/useAuth";
-import { useNotifications } from "@/hooks/useNotifications";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AvatarUpload } from '@/components/AvatarUpload';
+import { 
+  Calendar, 
+  Clock, 
+  Star, 
+  Trophy, 
+  Users, 
+  Bell, 
+  MapPin, 
+  List,
+  Sparkles,
+  Heart,
+  LogOut,
+  User,
+  Settings,
+  UserPlus,
+  Grid3X3,
+  Film
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Navigation } from '@/components/Navigation';
+import { MobileHeader } from '@/components/MobileHeader';
 
 // Mock user data - will be replaced with real user data later
 const mockUserData = {
-  name: "Movie Enthusiast",
-  email: "user@example.com",
-  joinDate: "January 2024",
+  level: 5,
+  points: 1247,
   stats: {
     moviesWatched: 127,
     totalHours: 254,
@@ -30,9 +47,9 @@ const mockUserData = {
 };
 
 const Profile = () => {
-  const [activeSection, setActiveSection] = useState<'timeline' | 'features' | 'settings'>('timeline');
+  const [activeSection, setActiveSection] = useState('timeline');
   const { user, signOut } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { profile, loading, updateProfile } = useProfile();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,346 +73,398 @@ const Profile = () => {
         navigate('/social/friends');
         break;
       default:
-        toast.error('Feature not found');
+        break;
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center">
+        <p className="text-muted-foreground">Profile not found</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background pb-32">
-      <MobileHeader title="Profile" />
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center space-x-6">
-            <div className="h-20 w-20 bg-cinema-red rounded-full flex items-center justify-center">
-              <User className="h-10 w-10 text-white" />
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
+      {/* Mobile Header */}
+      <div className="block lg:hidden">
+        <MobileHeader title={profile.username} showBack={false} />
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 pt-4 md:pt-8 pb-24">
+        {/* Navigation Buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Button
+            variant={activeSection === 'timeline' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveSection('timeline')}
+            className="flex items-center gap-2"
+          >
+            <Clock className="h-4 w-4" />
+            Timeline
+          </Button>
+          <Button
+            variant={activeSection === 'features' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveSection('features')}
+            className="flex items-center gap-2"
+          >
+            <Grid3X3 className="h-4 w-4" />
+            Features
+          </Button>
+          <Button
+            variant={activeSection === 'friends' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveSection('friends')}
+            className="flex items-center gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Friends
+          </Button>
+          <Button
+            variant={activeSection === 'settings' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveSection('settings')}
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Button>
+        </div>
+
+        {/* Profile Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center gap-6 mb-8">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20 md:h-24 md:w-24">
+              <AvatarImage src={profile.avatar_url} alt={profile.username} />
+              <AvatarFallback className="text-xl font-semibold bg-primary text-primary-foreground">
+                {profile.username.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            
             <div>
-              <h1 className="text-3xl font-cinematic text-foreground tracking-wide">
-                 {user?.user_metadata?.full_name || user?.email || 'Movie Enthusiast'}
-               </h1>
-               <p className="text-muted-foreground">{user?.email}</p>
-              <p className="text-sm text-muted-foreground">Member since {mockUserData.joinDate}</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                {profile.full_name || profile.username}
+              </h1>
+              <p className="text-muted-foreground">@{profile.username}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="secondary" className="text-xs">
+                  <Trophy className="w-3 h-3 mr-1" />
+                  Level {mockUserData.level}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  <Star className="w-3 h-3 mr-1" />
+                  {mockUserData.points} points
+                </Badge>
+              </div>
             </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="p-4 text-center">
+              <div className="text-2xl font-bold text-foreground">{mockUserData.stats.moviesWatched}</div>
+              <div className="text-xs text-muted-foreground">Movies</div>
+            </Card>
+            <Card className="p-4 text-center">
+              <div className="text-2xl font-bold text-foreground">{mockUserData.stats.totalHours}h</div>
+              <div className="text-xs text-muted-foreground">Hours</div>
+            </Card>
+            <Card className="p-4 text-center">
+              <div className="text-2xl font-bold text-foreground">{mockUserData.stats.avgRating}</div>
+              <div className="text-xs text-muted-foreground">Avg Rating</div>
+            </Card>
+            <Card className="p-4 text-center">
+              <div className="text-lg font-bold text-foreground">{mockUserData.stats.favoriteGenre}</div>
+              <div className="text-xs text-muted-foreground">Top Genre</div>
+            </Card>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 mb-6">
-              <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Film className="h-8 w-8 text-cinema-red mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">{mockUserData.stats.moviesWatched}</div>
-                  <div className="text-sm text-muted-foreground">Movies Watched</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Calendar className="h-8 w-8 text-cinema-gold mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">{mockUserData.stats.totalHours}h</div>
-                  <div className="text-sm text-muted-foreground">Total Hours</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Star className="h-8 w-8 text-cinema-gold mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">{mockUserData.stats.avgRating}</div>
-                  <div className="text-sm text-muted-foreground">Avg Rating</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Trophy className="h-8 w-8 text-cinema-silver mx-auto mb-2" />
-                  <div className="text-lg font-bold text-foreground">{mockUserData.stats.favoriteGenre}</div>
-                  <div className="text-sm text-muted-foreground">Favorite Genre</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Navigation */}
-            <div className="space-y-2">
-              <Button
-                variant={activeSection === 'timeline' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveSection('timeline')}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Movie Timeline
-              </Button>
-              
-              <Button
-                variant={activeSection === 'features' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveSection('features')}
-              >
-                <Star className="h-4 w-4 mr-2" />
-                Features & Social
-              </Button>
-              
-              <Button
-                variant={activeSection === 'settings' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveSection('settings')}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-              
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={signOut}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {activeSection === 'timeline' && (
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mockUserData.recentActivity.map((activity) => (
-                      <div key={activity.id} className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg">
-                        <div className="flex-shrink-0">
-                          {activity.type === 'watched' && <Film className="h-6 w-6 text-cinema-red" />}
-                          {activity.type === 'liked' && <Star className="h-6 w-6 text-cinema-gold" />}
-                          {activity.type === 'watchlist' && <Calendar className="h-6 w-6 text-cinema-silver" />}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-foreground font-medium">{activity.title}</p>
-                          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <span className="capitalize">{activity.type}</span>
-                            {activity.rating && (
-                              <>
-                                <span>•</span>
-                                <div className="flex items-center">
-                                  {Array.from({ length: activity.rating }).map((_, i) => (
-                                    <Star key={i} className="h-3 w-3 text-cinema-gold fill-current" />
-                                  ))}
-                                </div>
-                              </>
-                            )}
-                            <span>•</span>
-                            <span>{activity.date}</span>
-                          </div>
-                        </div>
+        {/* Main Content */}
+        <div className="space-y-6">
+          {activeSection === 'timeline' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockUserData.recentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg">
+                      <div className="flex-shrink-0">
+                        {activity.type === 'watched' && <Film className="h-6 w-6 text-primary" />}
+                        {activity.type === 'liked' && <Heart className="h-6 w-6 text-red-500" />}
+                        {activity.type === 'watchlist' && <List className="h-6 w-6 text-blue-500" />}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {activeSection === 'features' && (
-              <div className="space-y-6">
-                {/* Quick Access Features */}
-                <Card className="bg-card border-border">
-                  <CardHeader>
-                    <CardTitle className="text-foreground">Quick Access</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button
-                        variant="outline"
-                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => handleFeatureNavigation('notifications')}
-                      >
-                        <div className="relative">
-                          <Bell className="h-6 w-6" />
-                          {unreadCount > 0 && (
-                            <Badge 
-                              variant="destructive" 
-                              className="absolute -top-2 -right-2 h-4 w-4 p-0 text-[8px] flex items-center justify-center rounded-full"
-                            >
-                              {unreadCount > 9 ? '9+' : unreadCount}
-                            </Badge>
-                          )}
-                        </div>
-                        <span className="text-sm">Notifications</span>
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => handleFeatureNavigation('cinemas')}
-                      >
-                        <MapPin className="h-6 w-6" />
-                        <span className="text-sm">Find Cinemas</span>
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => handleFeatureNavigation('watchlist')}
-                      >
-                        <Film className="h-6 w-6" />
-                        <span className="text-sm">My Watchlist</span>
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        className="h-20 flex flex-col items-center gap-2 hover:bg-muted/50"
-                        onClick={() => handleFeatureNavigation('social')}
-                      >
-                        <Users className="h-6 w-6" />
-                        <span className="text-sm">Social Features</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Social Features Preview */}
-                <Card className="bg-card border-border">
-                  <CardHeader>
-                    <CardTitle className="text-foreground flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      Social Features
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="text-sm text-muted-foreground mb-4">
-                      Connect with other movie enthusiasts and share your passion for cinema.
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <button 
-                        onClick={() => navigate('/social/friends')}
-                        className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
-                      >
-                        <Users className="h-5 w-5 group-hover:text-primary transition-colors" />
-                        <div className="flex-1">
-                          <div className="font-medium">Friends & Following</div>
-                          <div className="text-sm text-muted-foreground">Connect with friends and see what they're watching</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground">Active</div>
-                      </button>
-                      
-                      <button 
-                        onClick={() => navigate('/social/lists')}
-                        className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
-                      >
-                        <Film className="h-5 w-5 group-hover:text-primary transition-colors" />
-                        <div className="flex-1">
-                          <div className="font-medium">Community Lists</div>
-                          <div className="text-sm text-muted-foreground">Create and share movie collections</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground">Active</div>
-                      </button>
-                      
-                      <button 
-                        onClick={() => navigate('/social/achievements')}
-                        className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
-                      >
-                        <Award className="h-5 w-5 group-hover:text-primary transition-colors" />
-                        <div className="flex-1">
-                          <div className="font-medium">Achievements</div>
-                          <div className="text-sm text-muted-foreground">Unlock badges for your movie journey</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground">Active</div>
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Recommendations Engine Preview */}
-                <Card className="bg-card border-border">
-                  <CardHeader>
-                    <CardTitle className="text-foreground flex items-center gap-2">
-                      <Star className="h-5 w-5" />
-                      Personalized Recommendations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm text-muted-foreground mb-4">
-                      Get AI-powered movie recommendations based on your viewing history and preferences.
-                    </div>
-                    
-                    <button 
-                      onClick={() => navigate('/recommendations')}
-                      className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors w-full text-left group"
-                    >
-                      <Star className="h-5 w-5 group-hover:text-primary transition-colors" />
                       <div className="flex-1">
-                        <div className="font-medium">Smart Recommendations</div>
-                        <div className="text-sm text-muted-foreground">Because you liked X, you might like Y</div>
+                        <p className="text-foreground font-medium">{activity.title}</p>
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <span className="capitalize">{activity.type}</span>
+                          {activity.rating && (
+                            <>
+                              <span>•</span>
+                              <div className="flex items-center">
+                                {Array.from({ length: activity.rating }).map((_, i) => (
+                                  <Star key={i} className="h-3 w-3 text-yellow-500 fill-current" />
+                                ))}
+                              </div>
+                            </>
+                          )}
+                          <span>•</span>
+                          <span>{activity.date}</span>
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">Active</div>
-                    </button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeSection === 'friends' && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                Friends & Social
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => navigate('/social/friends')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <Users className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Find Friends</CardTitle>
+                        <CardDescription>Discover and connect with friends</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => navigate('/social/lists')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <List className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Social Lists</CardTitle>
+                        <CardDescription>Create and share movie lists</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => navigate('/social/achievements')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <Trophy className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Achievements</CardTitle>
+                        <CardDescription>Your movie watching achievements</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => navigate('/recommendations')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <Sparkles className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Recommendations</CardTitle>
+                        <CardDescription>Personalized movie suggestions</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'features' && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                App Features
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => handleFeatureNavigation('notifications')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <Bell className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Notifications</CardTitle>
+                        <CardDescription>Stay updated with the latest</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => handleFeatureNavigation('cinemas')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Cinemas</CardTitle>
+                        <CardDescription>Find nearby theaters</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => handleFeatureNavigation('watchlist')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <List className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Watchlist</CardTitle>
+                        <CardDescription>Your saved movies & shows</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => navigate('/discover/movies')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <Star className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Discover</CardTitle>
+                        <CardDescription>Find new movies to watch</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'settings' && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Settings className="h-5 w-5 text-primary" />
+                Account Settings
+              </h2>
+              
+              <div className="grid gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Profile</CardTitle>
+                    <CardDescription>Manage your profile information</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <AvatarUpload
+                      currentAvatarUrl={profile.avatar_url}
+                      username={profile.username}
+                      onAvatarUpdate={(url) => updateProfile({ avatar_url: url })}
+                    />
+                    <div className="space-y-4">
+                      <div>
+                        <p className="font-medium">Username</p>
+                        <p className="text-sm text-muted-foreground">@{profile.username}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Full Name</p>
+                        <p className="text-sm text-muted-foreground">{profile.full_name || 'Not set'}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Authentication</CardTitle>
+                    <CardDescription>Manage your account security</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Email</p>
+                        <p className="text-sm text-muted-foreground">{user?.email}</p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="destructive" 
+                      onClick={signOut}
+                      className="w-full sm:w-auto"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Preferences</CardTitle>
+                    <CardDescription>Customize your app experience</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <p className="font-medium">Notification Settings</p>
+                      <p className="text-sm text-muted-foreground">
+                        Manage how you receive updates about new releases, friend activity, and more.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-medium">Movie Preferences</p>
+                      <p className="text-sm text-muted-foreground">
+                        Set your favorite genres, actors, and viewing preferences for better recommendations.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Data & Privacy</CardTitle>
+                    <CardDescription>Control your data and privacy settings</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <p className="font-medium">Export Data</p>
+                      <p className="text-sm text-muted-foreground">
+                        Download a copy of your watchlist, ratings, and activity data.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-medium">Delete Account</p>
+                      <p className="text-sm text-muted-foreground">
+                        Permanently delete your account and all associated data.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
-            )}
-
-            {activeSection === 'settings' && (
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Account Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-4">Authentication</h3>
-                    <div className="space-y-3">
-                      <Button className="w-full bg-cinema-red hover:bg-cinema-red/90">
-                        Sign in with Google
-                      </Button>
-                      <Button variant="outline" className="w-full border-border hover:bg-card">
-                        Sign in with Apple
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-4">Preferences</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-foreground">Email Notifications</span>
-                        <Button variant="outline" size="sm">Toggle</Button>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-foreground">Dark Theme</span>
-                        <Button variant="outline" size="sm">Enabled</Button>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-foreground">Auto-play Trailers</span>
-                        <Button variant="outline" size="sm">Toggle</Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-4">Data</h3>
-                    <div className="space-y-3">
-                      <Button variant="outline" className="w-full border-border hover:bg-card">
-                        Export My Data
-                      </Button>
-                      <Button variant="destructive" className="w-full">
-                        Delete Account
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       <Navigation />
     </div>
   );

@@ -3,10 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Search, Heart, User, LogIn, Film, Tv, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 export const Navigation = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { profile } = useProfile();
   
   const navItems = user ? [
     { path: "/", icon: Home, label: "Home" },
@@ -44,9 +46,9 @@ export const Navigation = () => {
                 }`}
               >
                 <Icon className="h-5 w-5 iphone-65:h-6 iphone-65:w-6 flex-shrink-0" />
-                <span className="text-[10px] iphone-65:text-xs font-medium leading-none text-center">
-                  {item.label}
-                </span>
+                 <span className="text-[10px] iphone-65:text-xs font-medium leading-none text-center">
+                   {item.path === '/profile' ? (profile?.username || 'Profile') : item.label}
+                 </span>
               </Button>
             </Link>
           );
