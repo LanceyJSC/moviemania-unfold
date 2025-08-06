@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, UserPlus, Check, X } from "lucide-react";
+import { Users, UserPlus, Check, X, Sparkles, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -24,18 +24,26 @@ interface UserProfile {
   created_at: string;
 }
 
+interface SuggestedUser extends UserProfile {
+  reason?: string;
+  shared_movies?: number;
+}
+
 export const SocialFriends = () => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
       fetchConnections();
+      fetchSuggestedUsers();
     }
   }, [user]);
 
@@ -149,11 +157,110 @@ export const SocialFriends = () => {
       if (error) throw error;
 
       toast.success('Friend request sent!');
-      // Remove from search results
+      // Remove from search results and suggestions
       setSearchResults(prev => prev.filter(u => u.id !== targetUserId));
+      setSuggestedUsers(prev => prev.filter(u => u.id !== targetUserId));
     } catch (error) {
       console.error('Error sending friend request:', error);
       toast.error('Failed to send friend request');
+    }
+  };
+
+  const fetchSuggestedUsers = async () => {
+    if (!user) return;
+    
+    setIsLoadingSuggestions(true);
+    try {
+      // Get users with similar movie preferences (liked movies)
+      const { data: userLikes } = await supabase
+        .from('watchlist')
+        .select('movie_id')
+        .eq('user_id', user.id)
+        .eq('list_type', 'liked');
+
+      if (userLikes && userLikes.length > 0) {
+        const movieIds = userLikes.map(like => like.movie_id);
+        
+        // Find users who liked similar movies
+        const { data: similarUsers } = await supabase
+          .from('watchlist')
+          .select('user_id, movie_id')
+          .in('movie_id', movieIds)
+          .eq('list_type', 'liked')
+          .neq('user_id', user.id);
+
+        if (similarUsers && similarUsers.length > 0) {
+          // Get unique user IDs
+          const userIds = [...new Set(similarUsers.map(u => u.user_id))];
+          
+          // Fetch profile information for these users
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', userIds);
+
+          if (profiles) {
+            // Count shared movies and exclude existing connections
+            const existingConnections = connections.map(c => c.following_id);
+            const pendingConnections = pendingRequests.map(p => p.follower_id);
+            
+            const userMovieCount: { [key: string]: { profile: any, count: number } } = {};
+            
+            similarUsers.forEach(item => {
+              const userId = item.user_id;
+              const profile = profiles.find(p => p.id === userId);
+              
+              if (profile && !existingConnections.includes(userId) && !pendingConnections.includes(userId)) {
+                if (!userMovieCount[userId]) {
+                  userMovieCount[userId] = { profile, count: 0 };
+                }
+                userMovieCount[userId].count++;
+              }
+            });
+
+            // Sort by shared movies and take top 5
+            const suggestions = Object.values(userMovieCount)
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 5)
+              .map(item => ({
+                ...item.profile,
+                reason: `${item.count} shared liked movie${item.count > 1 ? 's' : ''}`,
+                shared_movies: item.count
+              }));
+
+            setSuggestedUsers(suggestions);
+          }
+        }
+      }
+
+      // If no suggestions from similar movies, get recent active users
+      if (suggestedUsers.length === 0) {
+        const { data: recentUsers } = await supabase
+          .from('profiles')
+          .select('*')
+          .neq('id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (recentUsers) {
+          const existingConnections = connections.map(c => c.following_id);
+          const pendingConnections = pendingRequests.map(p => p.follower_id);
+          
+          const filtered = recentUsers.filter(u => 
+            !existingConnections.includes(u.id) && 
+            !pendingConnections.includes(u.id)
+          );
+
+          setSuggestedUsers(filtered.map(u => ({
+            ...u,
+            reason: 'New to the community'
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching suggested users:', error);
+    } finally {
+      setIsLoadingSuggestions(false);
     }
   };
 
@@ -163,6 +270,63 @@ export const SocialFriends = () => {
       
       <div className="container mx-auto px-6 py-8">
         <div className="space-y-6">
+          {/* Discover People */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                Discover People
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoadingSuggestions ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-sm text-muted-foreground">Finding people you might like...</p>
+                </div>
+              ) : suggestedUsers.length > 0 ? (
+                <div className="space-y-3">
+                  {suggestedUsers.map((suggested) => (
+                    <div key={suggested.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                          {suggested.avatar_url ? (
+                            <img src={suggested.avatar_url} alt={suggested.username} className="w-full h-full object-cover" />
+                          ) : (
+                            <Users className="h-5 w-5 text-primary-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-foreground">{suggested.full_name || suggested.username}</div>
+                          <div className="text-sm text-muted-foreground">@{suggested.username}</div>
+                          {suggested.reason && (
+                            <div className="text-xs text-primary flex items-center gap-1 mt-1">
+                              <Heart className="h-3 w-3" />
+                              {suggested.reason}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => sendFriendRequest(suggested.id)}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Add Friend
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No suggestions available right now</p>
+                  <p className="text-xs text-muted-foreground mt-1">Like some movies to get personalized suggestions!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Search */}
           <Card className="bg-card border-border">
             <CardHeader>
