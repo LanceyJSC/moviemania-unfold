@@ -171,6 +171,39 @@ export type Database = {
         }
         Relationships: []
       }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_type: string | null
+          movie_data: Json | null
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_type?: string | null
+          movie_data?: Json | null
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string | null
+          movie_data?: Json | null
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       discussion_comments: {
         Row: {
           content: string
@@ -247,6 +280,134 @@ export type Database = {
           movie_id?: number
           movie_title?: string
           movie_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      enhanced_watchlist_items: {
+        Row: {
+          added_at: string
+          collection_id: string | null
+          expected_watch_date: string | null
+          id: string
+          mood_tags: string[] | null
+          movie_id: number
+          movie_poster: string | null
+          movie_title: string
+          personal_notes: string | null
+          priority: string | null
+          progress_percent: number | null
+          user_id: string
+          watched_at: string | null
+        }
+        Insert: {
+          added_at?: string
+          collection_id?: string | null
+          expected_watch_date?: string | null
+          id?: string
+          mood_tags?: string[] | null
+          movie_id: number
+          movie_poster?: string | null
+          movie_title: string
+          personal_notes?: string | null
+          priority?: string | null
+          progress_percent?: number | null
+          user_id: string
+          watched_at?: string | null
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string | null
+          expected_watch_date?: string | null
+          id?: string
+          mood_tags?: string[] | null
+          movie_id?: number
+          movie_poster?: string | null
+          movie_title?: string
+          personal_notes?: string | null
+          priority?: string | null
+          progress_percent?: number | null
+          user_id?: string
+          watched_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enhanced_watchlist_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "watchlist_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friend_activities: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string
+          friend_id: string
+          id: string
+          movie_id: number
+          movie_poster: string | null
+          movie_title: string
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string
+          friend_id: string
+          id?: string
+          movie_id: number
+          movie_poster?: string | null
+          movie_title: string
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string
+          friend_id?: string
+          id?: string
+          movie_id?: number
+          movie_poster?: string | null
+          movie_title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      movie_discussions: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          is_spoiler: boolean | null
+          movie_id: number
+          movie_title: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_spoiler?: boolean | null
+          movie_id: number
+          movie_title: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_spoiler?: boolean | null
+          movie_id?: number
+          movie_title?: string
           title?: string
           updated_at?: string
         }
@@ -646,6 +807,131 @@ export type Database = {
         }
         Relationships: []
       }
+      user_stats: {
+        Row: {
+          average_rating: number | null
+          created_at: string
+          experience_points: number | null
+          favorite_genres: string[] | null
+          id: string
+          last_activity_date: string | null
+          level: number | null
+          total_hours_watched: number | null
+          total_movies_watched: number | null
+          total_ratings: number | null
+          updated_at: string
+          user_id: string
+          watching_streak: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          created_at?: string
+          experience_points?: number | null
+          favorite_genres?: string[] | null
+          id?: string
+          last_activity_date?: string | null
+          level?: number | null
+          total_hours_watched?: number | null
+          total_movies_watched?: number | null
+          total_ratings?: number | null
+          updated_at?: string
+          user_id: string
+          watching_streak?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          created_at?: string
+          experience_points?: number | null
+          favorite_genres?: string[] | null
+          id?: string
+          last_activity_date?: string | null
+          level?: number | null
+          total_hours_watched?: number | null
+          total_movies_watched?: number | null
+          total_ratings?: number | null
+          updated_at?: string
+          user_id?: string
+          watching_streak?: number | null
+        }
+        Relationships: []
+      }
+      watch_parties: {
+        Row: {
+          created_at: string
+          description: string | null
+          host_id: string
+          id: string
+          is_public: boolean | null
+          max_participants: number | null
+          movie_id: number
+          movie_title: string
+          party_code: string | null
+          party_name: string
+          scheduled_at: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          host_id: string
+          id?: string
+          is_public?: boolean | null
+          max_participants?: number | null
+          movie_id: number
+          movie_title: string
+          party_code?: string | null
+          party_name: string
+          scheduled_at: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          host_id?: string
+          id?: string
+          is_public?: boolean | null
+          max_participants?: number | null
+          movie_id?: number
+          movie_title?: string
+          party_code?: string | null
+          party_name?: string
+          scheduled_at?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
+      watch_party_participants: {
+        Row: {
+          id: string
+          joined_at: string
+          party_id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          party_id: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          party_id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watch_party_participants_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "watch_parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       watch_progress: {
         Row: {
           completed: boolean | null
@@ -711,6 +997,39 @@ export type Database = {
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      watchlist_collections: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
