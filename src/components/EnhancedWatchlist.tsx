@@ -22,9 +22,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 import { MovieCard } from '@/components/MovieCard';
 import { useWatchlistCollections } from '@/hooks/useWatchlistCollections';
-import { useSupabaseUserState } from '@/hooks/useSupabaseUserState';
+import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
 import { tmdbService, Movie } from '@/lib/tmdb';
 import { toast } from 'sonner';
 
@@ -52,13 +53,23 @@ interface CollectionFormData {
 
 export const EnhancedWatchlist = () => {
   const { collections, loading: collectionsLoading, createCollection } = useWatchlistCollections();
-  const { userState } = useSupabaseUserState();
-  const [movies, setMovies] = useState<any[]>([]);
+  const { 
+    items, 
+    loading: itemsLoading, 
+    updateItem, 
+    removeItem, 
+    markAsWatched,
+    updateProgress,
+    getItemsByCollection,
+    getItemsByPriority,
+    getItemsByMoodTag
+  } = useEnhancedWatchlist();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all');
   const [filterMood, setFilterMood] = useState<string>('all');
   const [showCreateCollection, setShowCreateCollection] = useState(false);
+  const [editingItem, setEditingItem] = useState<string | null>(null);
   const [newCollection, setNewCollection] = useState<CollectionFormData>({
     name: '',
     description: '',
@@ -66,33 +77,17 @@ export const EnhancedWatchlist = () => {
     isPublic: false
   });
 
-  useEffect(() => {
-    loadMovieDetails();
-  }, [userState]);
+  const handleUpdateNotes = async (itemId: string, notes: string) => {
+    await updateItem(itemId, { personal_notes: notes });
+    setEditingItem(null);
+  };
 
-  const loadMovieDetails = async () => {
-    try {
-      const allMovieIds = [
-        ...userState.watchlist,
-        ...userState.likedMovies,
-        ...userState.currentlyWatching
-      ];
-      
-      const uniqueIds = [...new Set(allMovieIds)];
-      const moviePromises = uniqueIds.map(id => 
-        tmdbService.getMovieDetails(id).catch(() => null)
-      );
-      
-      const movieDetails = await Promise.all(moviePromises);
-      const validMovies = movieDetails
-        .filter(Boolean)
-        .map(movie => tmdbService.formatMovieForCard(movie as Movie));
-      
-      setMovies(validMovies);
-    } catch (error) {
-      console.error('Failed to load movie details:', error);
-      toast.error('Failed to load movies');
-    }
+  const handleUpdateMoodTags = async (itemId: string, tags: string[]) => {
+    await updateItem(itemId, { mood_tags: tags });
+  };
+
+  const handleUpdatePriority = async (itemId: string, priority: Priority) => {
+    await updateItem(itemId, { priority });
   };
 
   const handleCreateCollection = async () => {
@@ -119,22 +114,19 @@ export const EnhancedWatchlist = () => {
     }
   };
 
-  const getMoviesByType = (type: 'watchlist' | 'liked' | 'currentlyWatching') => {
-    const relevantIds = type === 'watchlist' ? userState.watchlist :
-                       type === 'liked' ? userState.likedMovies :
-                       userState.currentlyWatching;
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.movie_title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPriority = filterPriority === 'all' || item.priority === filterPriority;
+    const matchesMood = filterMood === 'all' || item.mood_tags.includes(filterMood);
     
-    return movies.filter(movie => relevantIds.includes(movie.id));
-  };
-
-  const filteredMovies = movies.filter(movie => {
-    const matchesSearch = movie.title.toLowerCase().includes(searchTerm.toLowerCase());
-    // For now, we'll show all movies regardless of priority/mood filters
-    // These would be implemented with the enhanced watchlist items table
-    return matchesSearch;
+    return matchesSearch && matchesPriority && matchesMood;
   });
 
-  if (collectionsLoading) {
+  const getUnwatchedItems = () => filteredItems.filter(item => !item.watched_at);
+  const getWatchedItems = () => filteredItems.filter(item => item.watched_at);
+  const getInProgressItems = () => filteredItems.filter(item => item.progress_percent > 0 && item.progress_percent < 100);
+
+  if (collectionsLoading || itemsLoading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
@@ -294,73 +286,158 @@ export const EnhancedWatchlist = () => {
         </div>
       )}
 
-      {/* Traditional Categories */}
+      {/* Enhanced Watchlist Categories */}
       <div className="space-y-8">
-        {/* Watch Later */}
+        {/* Unwatched Items */}
         <div>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            Watch Later ({getMoviesByType('watchlist').length})
+            To Watch ({getUnwatchedItems().length})
           </h2>
-          {getMoviesByType('watchlist').length > 0 ? (
-            <div className={viewMode === 'grid' ? 'poster-grid-responsive' : 'space-y-4'}>
-              {getMoviesByType('watchlist').map(movie => (
-                <div key={movie.id} className="relative group">
-                  <MovieCard movie={movie} />
-                </div>
+          {getUnwatchedItems().length > 0 ? (
+            <div className="space-y-4">
+              {getUnwatchedItems().map(item => (
+                <Card key={item.id} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      {item.movie_poster && (
+                        <img 
+                          src={`https://image.tmdb.org/t/p/w92${item.movie_poster}`}
+                          alt={item.movie_title}
+                          className="w-16 h-24 object-cover rounded"
+                        />
+                      )}
+                      
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-lg">{item.movie_title}</h3>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className={`w-3 h-3 rounded-full ${priorityColors[item.priority]}`}
+                              title={`${item.priority} priority`}
+                            />
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => markAsWatched(item.id)}
+                            >
+                              Mark Watched
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => removeItem(item.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {item.personal_notes && (
+                          <div className="bg-muted/50 p-2 rounded text-sm">
+                            <StickyNote className="h-4 w-4 inline mr-1" />
+                            {item.personal_notes}
+                          </div>
+                        )}
+                        
+                        {item.mood_tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {item.mood_tags.map(tag => (
+                              <Badge key={tag} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {item.progress_percent > 0 && (
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-sm">
+                              <span>Progress</span>
+                              <span>{item.progress_percent}%</span>
+                            </div>
+                            <Progress value={item.progress_percent} className="h-2" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           ) : (
             <Card className="p-8 text-center">
               <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No movies in your watchlist</p>
+              <p className="text-muted-foreground">No movies in your enhanced watchlist</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Add movies from movie pages to get started with smart organization!
+              </p>
             </Card>
           )}
         </div>
 
-        {/* Liked Movies */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Star className="h-5 w-5 text-primary" />
-            Liked Movies ({getMoviesByType('liked').length})
-          </h2>
-          {getMoviesByType('liked').length > 0 ? (
-            <div className={viewMode === 'grid' ? 'poster-grid-responsive' : 'space-y-4'}>
-              {getMoviesByType('liked').map(movie => (
-                <div key={movie.id} className="relative group">
-                  <MovieCard movie={movie} />
-                </div>
+        {/* In Progress */}
+        {getInProgressItems().length > 0 && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Eye className="h-5 w-5 text-primary" />
+              In Progress ({getInProgressItems().length})
+            </h2>
+            <div className="space-y-4">
+              {getInProgressItems().map(item => (
+                <Card key={item.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      {item.movie_poster && (
+                        <img 
+                          src={`https://image.tmdb.org/t/p/w92${item.movie_poster}`}
+                          alt={item.movie_title}
+                          className="w-16 h-24 object-cover rounded"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg mb-2">{item.movie_title}</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Progress</span>
+                            <span>{item.progress_percent}%</span>
+                          </div>
+                          <Progress value={item.progress_percent} className="h-2" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          ) : (
-            <Card className="p-8 text-center">
-              <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No liked movies yet</p>
-            </Card>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Currently Watching */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Eye className="h-5 w-5 text-primary" />
-            Currently Watching ({getMoviesByType('currentlyWatching').length})
-          </h2>
-          {getMoviesByType('currentlyWatching').length > 0 ? (
-            <div className={viewMode === 'grid' ? 'poster-grid-responsive' : 'space-y-4'}>
-              {getMoviesByType('currentlyWatching').map(movie => (
-                <div key={movie.id} className="relative group">
-                  <MovieCard movie={movie} />
+        {/* Watched Items */}
+        {getWatchedItems().length > 0 && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Star className="h-5 w-5 text-primary" />
+              Watched ({getWatchedItems().length})
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {getWatchedItems().map(item => (
+                <div key={item.id} className="relative group">
+                  {item.movie_poster && (
+                    <img 
+                      src={`https://image.tmdb.org/t/p/w300${item.movie_poster}`}
+                      alt={item.movie_title}
+                      className="w-full aspect-[2/3] object-cover rounded-lg"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                    <Badge className="bg-green-600">Watched</Badge>
+                  </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <Card className="p-8 text-center">
-              <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No movies currently watching</p>
-            </Card>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

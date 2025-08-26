@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { SocialActivityFeed } from "@/components/SocialActivityFeed";
+import { MovieClubHub } from "@/components/MovieClubHub";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -449,9 +450,9 @@ export const SocialFriends = () => {
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Friends</span>
             </TabsTrigger>
-            <TabsTrigger value="parties" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Parties</span>
+            <TabsTrigger value="community" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              <span className="hidden sm:inline">Community</span>
             </TabsTrigger>
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
@@ -668,69 +669,9 @@ export const SocialFriends = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="parties" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  Upcoming Watch Parties
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {watchParties.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-foreground mb-2">No watch parties scheduled</h3>
-                    <p className="text-muted-foreground mb-6">
-                      Be the first to create a watch party and invite friends!
-                    </p>
-                    <Button>
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Create Watch Party
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {watchParties.map((party) => (
-                      <Card key={party.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-foreground mb-2">{party.party_name}</h3>
-                              <p className="text-primary font-medium mb-2">🎬 {party.movie_title}</p>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarImage src={party.host_profile?.avatar_url} />
-                                    <AvatarFallback className="text-xs">
-                                      {party.host_profile?.username?.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span>Hosted by {party.host_profile?.username}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>{new Date(party.scheduled_at).toLocaleDateString()}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  <span>Max {party.max_participants} people</span>
-                                </div>
-                              </div>
-                            </div>
-                            <Button size="sm" onClick={() => joinWatchParty(party.id)}>
-                              Join Party
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="community" className="space-y-6">
+            <MovieClubHub />
           </TabsContent>
-
           <TabsContent value="activity" className="space-y-6">
             <SocialActivityFeed />
           </TabsContent>
