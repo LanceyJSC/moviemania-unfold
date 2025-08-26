@@ -52,7 +52,7 @@ export const useUserStats = () => {
       if (!existingStats) {
         const { data: newStats, error: createError } = await supabase
           .from('user_stats')
-          .insert({
+          .upsert({
             user_id: user.id,
             total_movies_watched: 0,
             experience_points: 0,
