@@ -9,9 +9,13 @@ import { Loader2, Check, X } from 'lucide-react';
 interface ProfileEditorProps {
   initialUsername: string;
   initialFullName?: string;
+  currentProfile?: {
+    username: string;
+    full_name?: string;
+  } | null;
 }
 
-export const ProfileEditor = ({ initialUsername, initialFullName }: ProfileEditorProps) => {
+export const ProfileEditor = ({ initialUsername, initialFullName, currentProfile }: ProfileEditorProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState(initialUsername);
   const [fullName, setFullName] = useState(initialFullName || '');
@@ -19,6 +23,10 @@ export const ProfileEditor = ({ initialUsername, initialFullName }: ProfileEdito
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const { updateProfile, checkUsernameAvailability } = useProfile();
   const { toast } = useToast();
+
+  // Use current profile data if available, fallback to initial props
+  const displayUsername = currentProfile?.username || initialUsername;
+  const displayFullName = currentProfile?.full_name || initialFullName;
 
   const handleUsernameChange = async (value: string) => {
     setUsername(value);
@@ -72,11 +80,11 @@ export const ProfileEditor = ({ initialUsername, initialFullName }: ProfileEdito
       <div className="space-y-4">
         <div>
           <Label className="font-medium">Username</Label>
-          <p className="text-sm text-muted-foreground">@{initialUsername}</p>
+          <p className="text-sm text-muted-foreground">@{displayUsername}</p>
         </div>
         <div>
           <Label className="font-medium">Full Name</Label>
-          <p className="text-sm text-muted-foreground">{initialFullName || 'Not set'}</p>
+          <p className="text-sm text-muted-foreground">{displayFullName || 'Not set'}</p>
         </div>
         <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
           Edit Profile

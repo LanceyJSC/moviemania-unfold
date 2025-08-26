@@ -386,6 +386,7 @@ const Profile = () => {
                     <ProfileEditor
                       initialUsername={profile.username}
                       initialFullName={profile.full_name}
+                      currentProfile={profile}
                     />
                   </CardContent>
                 </Card>
