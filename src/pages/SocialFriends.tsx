@@ -76,7 +76,7 @@ export const SocialFriends = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState("discover");
+  const [activeTab, setActiveTab] = useState("community");
   const { user } = useAuth();
 
   useEffect(() => {
