@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvatarUpload } from '@/components/AvatarUpload';
+import { ProfileEditor } from '@/components/ProfileEditor';
 import { 
   Calendar, 
   Clock, 
@@ -382,16 +383,10 @@ const Profile = () => {
                       username={profile.username}
                       onAvatarUpdate={(url) => updateProfile({ avatar_url: url })}
                     />
-                    <div className="space-y-4">
-                      <div>
-                        <p className="font-medium">Username</p>
-                        <p className="text-sm text-muted-foreground">@{profile.username}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Full Name</p>
-                        <p className="text-sm text-muted-foreground">{profile.full_name || 'Not set'}</p>
-                      </div>
-                    </div>
+                    <ProfileEditor
+                      initialUsername={profile.username}
+                      initialFullName={profile.full_name}
+                    />
                   </CardContent>
                 </Card>
 

@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -721,34 +721,34 @@ export type Database = {
     }
     Functions: {
       get_friend_rating_comparison: {
-        Args: { p_user_id: string; p_friend_id: string }
+        Args: { p_friend_id: string; p_user_id: string }
         Returns: {
+          friend_rating: number
           movie_id: number
           movie_title: string
-          user_rating: number
-          friend_rating: number
           rating_difference: number
+          user_rating: number
         }[]
       }
       get_friend_watchlist_comparison: {
-        Args: { p_user_id: string; p_friend_id: string }
+        Args: { p_friend_id: string; p_user_id: string }
         Returns: {
-          movie_id: number
-          movie_title: string
-          movie_poster: string
-          in_user_watchlist: boolean
-          in_friend_watchlist: boolean
-          user_list_type: string
           friend_list_type: string
+          in_friend_watchlist: boolean
+          in_user_watchlist: boolean
+          movie_id: number
+          movie_poster: string
+          movie_title: string
+          user_list_type: string
         }[]
       }
       get_mutual_friends: {
         Args: { p_user_id: string }
         Returns: {
+          connection_date: string
+          friend_avatar_url: string
           friend_id: string
           friend_username: string
-          friend_avatar_url: string
-          connection_date: string
         }[]
       }
     }
