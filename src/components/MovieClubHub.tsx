@@ -17,10 +17,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useMovieClubs } from '@/hooks/useMovieClubs';
-import { CreateDiscussionDialog } from '@/components/CreateDiscussionDialog';
-import { CreateClubDialog } from '@/components/CreateClubDialog';
-import { ClubDetailModal } from '@/components/ClubDetailModal';
+import { useAuth } from "@/hooks/useAuth";
+import { useMovieClubs } from "@/hooks/useMovieClubs";
+import { useUserRole } from "@/hooks/useUserRole";
+import { CreateClubDialog } from "./CreateClubDialog";
+import { CreateDiscussionDialog } from "./CreateDiscussionDialog";
+import { ClubDetailModal } from "./ClubDetailModal";
+import { useNavigate } from "react-router-dom";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -46,6 +49,9 @@ interface TopUser {
 }
 
 export const MovieClubHub = () => {
+  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
+  const navigate = useNavigate();
   const { 
     clubs, 
     suggestions, 
@@ -81,9 +87,22 @@ export const MovieClubHub = () => {
           .select('id, username, avatar_url')
           .in('id', userIds);
 
+        // Get comment counts for each discussion
+        const discussionIds = discussionsData.map(d => d.id);
+        const { data: commentCounts } = await supabase
+          .from('discussion_comments')
+          .select('thread_id')
+          .in('thread_id', discussionIds);
+
+        // Count comments per discussion
+        const commentCountMap = commentCounts?.reduce((acc: Record<string, number>, comment) => {
+          acc[comment.thread_id] = (acc[comment.thread_id] || 0) + 1;
+          return acc;
+        }, {}) || {};
+
         const discussionsWithProfiles = discussionsData.map(discussion => ({
           ...discussion,
-          comment_count: Math.floor(Math.random() * 50), // Mock comment count for now
+          comment_count: commentCountMap[discussion.id] || 0,
           user_profile: profiles?.find(p => p.id === discussion.created_by)
         }));
         
@@ -195,7 +214,7 @@ export const MovieClubHub = () => {
             <Users className="h-6 w-6 text-primary" />
             Movie Clubs
           </h2>
-          <CreateClubDialog onClubCreated={refetch} />
+          {isAdmin && <CreateClubDialog onClubCreated={refetch} />}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -271,7 +290,11 @@ export const MovieClubHub = () => {
 
         <div className="space-y-4">
           {discussions.map((discussion) => (
-            <Card key={discussion.id} className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card 
+              key={discussion.id} 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => navigate(`/discussion/${discussion.id}`)}
+            >
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-10 w-10">

@@ -31,6 +31,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
+import { AdminMakeButton } from '@/components/AdminMakeButton';
+import { useUserRole } from '@/hooks/useUserRole';
 
 // Mock user data - will be replaced with real user data later
 const mockUserData = {
@@ -53,7 +55,8 @@ const mockUserData = {
 const Profile = () => {
   const [activeSection, setActiveSection] = useState('timeline');
   const { user, signOut } = useAuth();
-  const { profile, loading, updateProfile } = useProfile();
+  const { role } = useUserRole();
+  const { profile, updateProfile, loading } = useProfile();
   const { stats, loading: statsLoading } = useUserStats();
   const navigate = useNavigate();
 
@@ -372,14 +375,25 @@ const Profile = () => {
                         <p className="text-sm text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
-                    <Button 
-                      variant="destructive" 
-                      onClick={signOut}
-                      className="w-full sm:w-auto"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
+                    {role && (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Role</p>
+                          <p className="text-sm text-muted-foreground capitalize">{role}</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-3">
+                      <AdminMakeButton />
+                      <Button 
+                        variant="destructive" 
+                        onClick={signOut}
+                        className="w-full sm:w-auto"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
 
