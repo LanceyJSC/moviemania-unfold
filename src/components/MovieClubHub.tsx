@@ -8,26 +8,18 @@ import {
   Sparkles,
   Heart,
   Star,
-  Flame
+  Flame,
+  UserPlus,
+  Check,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/useAuth';
+import { useMovieClubs } from '@/hooks/useMovieClubs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-interface MovieClub {
-  id: string;
-  name: string;
-  description: string;
-  genre: string;
-  member_count: number;
-  created_by: string;
-  is_public: boolean;
-  created_at: string;
-}
 
 interface Discussion {
   id: string;
@@ -51,52 +43,24 @@ interface TopUser {
 }
 
 export const MovieClubHub = () => {
-  const [clubs, setClubs] = useState<MovieClub[]>([]);
+  const { 
+    clubs, 
+    suggestions, 
+    loading, 
+    joinClub, 
+    leaveClub, 
+    sendFriendRequest,
+    refetch 
+  } = useMovieClubs();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
 
   useEffect(() => {
-    fetchCommunityData();
+    fetchDiscussions();
   }, []);
 
-  const fetchCommunityData = async () => {
+  const fetchDiscussions = async () => {
     try {
-      // Mock data for now - in real app, these would be proper database queries
-      setClubs([
-        {
-          id: '1',
-          name: 'Horror Movie Fans',
-          description: 'For those who love a good scare',
-          genre: 'Horror',
-          member_count: 1247,
-          created_by: 'admin',
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Rom-Com Lovers',
-          description: 'Feel-good movies that warm the heart',
-          genre: 'Romance',
-          member_count: 892,
-          created_by: 'admin',
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          name: 'Sci-Fi Enthusiasts',
-          description: 'Exploring the future through cinema',
-          genre: 'Sci-Fi',
-          member_count: 1534,
-          created_by: 'admin',
-          is_public: true,
-          created_at: new Date().toISOString()
-        }
-      ]);
-
       // Fetch recent discussions from database
       const { data: discussionsData } = await supabase
         .from('discussion_threads')
@@ -114,14 +78,14 @@ export const MovieClubHub = () => {
 
         const discussionsWithProfiles = discussionsData.map(discussion => ({
           ...discussion,
-          comment_count: Math.floor(Math.random() * 50), // Mock comment count
+          comment_count: Math.floor(Math.random() * 50), // Mock comment count for now
           user_profile: profiles?.find(p => p.id === discussion.created_by)
         }));
         
         setDiscussions(discussionsWithProfiles);
       }
 
-      // Mock top users data
+      // Mock top users data - in real app, this would come from user activity aggregation
       setTopUsers([
         {
           id: '1',
@@ -144,15 +108,8 @@ export const MovieClubHub = () => {
       ]);
 
     } catch (error) {
-      console.error('Error fetching community data:', error);
-      toast.error('Failed to load community data');
-    } finally {
-      setLoading(false);
+      console.error('Error fetching discussions:', error);
     }
-  };
-
-  const joinClub = async (clubId: string) => {
-    toast.success('Joined movie club! 🎬');
   };
 
   if (loading) {
@@ -167,6 +124,65 @@ export const MovieClubHub = () => {
 
   return (
     <div className="space-y-8">
+      {/* Natural Friend Discovery */}
+      {suggestions.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Sparkles className="h-6 w-6 text-primary" />
+              Discover Movie Friends
+            </h2>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refetch}
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {suggestions.map((suggestion) => (
+              <Card key={suggestion.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={suggestion.avatar_url} />
+                      <AvatarFallback>
+                        {suggestion.username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground">{suggestion.username}</h3>
+                      {suggestion.full_name && (
+                        <p className="text-sm text-muted-foreground">{suggestion.full_name}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <Badge variant="secondary" className="text-xs">
+                      {suggestion.reason}
+                    </Badge>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => sendFriendRequest(suggestion.id)}
+                    className="w-full"
+                    size="sm"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add Friend
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Movie Clubs */}
       <div>
         <div className="flex items-center justify-between mb-6">
@@ -193,7 +209,7 @@ export const MovieClubHub = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-semibold text-primary">
-                      {club.member_count.toLocaleString()}
+                      {(club.member_count || 0).toLocaleString()}
                     </div>
                     <div className="text-xs text-muted-foreground">members</div>
                   </div>
@@ -203,13 +219,25 @@ export const MovieClubHub = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   {club.description}
                 </p>
-                <Button 
-                  onClick={() => joinClub(club.id)}
-                  className="w-full"
-                  size="sm"
-                >
-                  Join Club
-                </Button>
+                {club.is_member ? (
+                  <Button 
+                    onClick={() => leaveClub(club.id)}
+                    variant="outline"
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Member
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => joinClub(club.id)}
+                    className="w-full"
+                    size="sm"
+                  >
+                    Join Club
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}

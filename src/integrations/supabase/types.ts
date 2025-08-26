@@ -97,6 +97,30 @@ export type Database = {
         }
         Relationships: []
       }
+      club_memberships: {
+        Row: {
+          club_id: string
+          id: string
+          joined_at: string
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_list_items: {
         Row: {
           added_at: string
@@ -374,6 +398,69 @@ export type Database = {
           movie_poster?: string | null
           movie_title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      friend_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          score: number | null
+          shared_data: Json | null
+          suggested_user_id: string
+          suggestion_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          score?: number | null
+          shared_data?: Json | null
+          suggested_user_id: string
+          suggestion_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          score?: number | null
+          shared_data?: Json | null
+          suggested_user_id?: string
+          suggestion_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      movie_clubs: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          genre: string
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          genre: string
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          genre?: string
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1039,6 +1126,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_friend_suggestions: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       get_friend_rating_comparison: {
         Args: { p_friend_id: string; p_user_id: string }
         Returns: {
