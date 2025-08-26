@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useUserStats } from '@/hooks/useUserStats';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
+import { SocialActivityFeed } from '@/components/SocialActivityFeed';
+import { UserAchievements } from '@/components/UserAchievements';
 import { 
   Calendar, 
   Clock, 
@@ -51,6 +54,7 @@ const Profile = () => {
   const [activeSection, setActiveSection] = useState('timeline');
   const { user, signOut } = useAuth();
   const { profile, loading, updateProfile } = useProfile();
+  const { stats, loading: statsLoading } = useUserStats();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -78,7 +82,7 @@ const Profile = () => {
     }
   };
 
-  if (loading) {
+  if (loading || statsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center">
         <div className="text-center">
@@ -163,11 +167,11 @@ const Profile = () => {
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="secondary" className="text-xs">
                   <Trophy className="w-3 h-3 mr-1" />
-                  Level {mockUserData.level}
+                  Level {stats?.level || 1}
                 </Badge>
                 <Badge variant="outline" className="text-xs">
                   <Star className="w-3 h-3 mr-1" />
-                  {mockUserData.points} points
+                  {stats?.experience_points || 0} XP
                 </Badge>
               </div>
             </div>
@@ -176,19 +180,19 @@ const Profile = () => {
           {/* Stats Grid */}
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground">{mockUserData.stats.moviesWatched}</div>
+              <div className="text-2xl font-bold text-foreground">{stats?.total_movies_watched || 0}</div>
               <div className="text-xs text-muted-foreground">Movies</div>
             </Card>
             <Card className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground">{mockUserData.stats.totalHours}h</div>
+              <div className="text-2xl font-bold text-foreground">{Math.round((stats?.total_hours_watched || 0))}h</div>
               <div className="text-xs text-muted-foreground">Hours</div>
             </Card>
             <Card className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground">{mockUserData.stats.avgRating}</div>
+              <div className="text-2xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
               <div className="text-xs text-muted-foreground">Avg Rating</div>
             </Card>
             <Card className="p-4 text-center">
-              <div className="text-lg font-bold text-foreground">{mockUserData.stats.favoriteGenre}</div>
+              <div className="text-lg font-bold text-foreground">{stats?.favorite_genres?.[0] || 'None'}</div>
               <div className="text-xs text-muted-foreground">Top Genre</div>
             </Card>
           </div>
@@ -197,45 +201,10 @@ const Profile = () => {
         {/* Main Content */}
         <div className="space-y-6">
           {activeSection === 'timeline' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-primary" />
-                  Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockUserData.recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg">
-                      <div className="flex-shrink-0">
-                        {activity.type === 'watched' && <Film className="h-6 w-6 text-primary" />}
-                        {activity.type === 'liked' && <Heart className="h-6 w-6 text-red-500" />}
-                        {activity.type === 'watchlist' && <List className="h-6 w-6 text-blue-500" />}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-foreground font-medium">{activity.title}</p>
-                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                          <span className="capitalize">{activity.type}</span>
-                          {activity.rating && (
-                            <>
-                              <span>•</span>
-                              <div className="flex items-center">
-                                {Array.from({ length: activity.rating }).map((_, i) => (
-                                  <Star key={i} className="h-3 w-3 text-yellow-500 fill-current" />
-                                ))}
-                              </div>
-                            </>
-                          )}
-                          <span>•</span>
-                          <span>{activity.date}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SocialActivityFeed />
+              <UserAchievements />
+            </div>
           )}
 
           {activeSection === 'friends' && (
@@ -253,7 +222,7 @@ const Profile = () => {
                       <Users className="h-8 w-8 text-primary" />
                       <div>
                         <CardTitle className="text-lg">Find Friends</CardTitle>
-                        <CardDescription>Discover and connect with friends</CardDescription>
+                        <CardDescription>Connect with movie enthusiasts</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -266,7 +235,7 @@ const Profile = () => {
                       <List className="h-8 w-8 text-primary" />
                       <div>
                         <CardTitle className="text-lg">Social Lists</CardTitle>
-                        <CardDescription>Create and share movie lists</CardDescription>
+                        <CardDescription>Create shared movie collections</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -279,7 +248,7 @@ const Profile = () => {
                       <Trophy className="h-8 w-8 text-primary" />
                       <div>
                         <CardTitle className="text-lg">Achievements</CardTitle>
-                        <CardDescription>Your movie watching achievements</CardDescription>
+                        <CardDescription>View your movie milestones</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -292,7 +261,7 @@ const Profile = () => {
                       <Sparkles className="h-8 w-8 text-primary" />
                       <div>
                         <CardTitle className="text-lg">Recommendations</CardTitle>
-                        <CardDescription>Personalized movie suggestions</CardDescription>
+                        <CardDescription>AI-powered movie suggestions</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
