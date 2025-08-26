@@ -150,12 +150,15 @@ export const useMovieClubs = () => {
     }
 
     try {
+      console.log('Joining club:', clubId);
       const { error } = await supabase
         .from('club_memberships')
         .insert({
           club_id: clubId,
           user_id: user.id
         });
+
+      console.log('Join club result:', error);
 
       if (error) {
         if (error.code === '23505') { // Unique violation
@@ -165,15 +168,14 @@ export const useMovieClubs = () => {
         throw error;
       }
 
+      toast.success('Successfully joined the club! 🎬');
+      
       // Update local state
-      setUserMemberships(prev => [...prev, clubId]);
       setClubs(prev => prev.map(club => 
         club.id === clubId 
           ? { ...club, is_member: true, member_count: (club.member_count || 0) + 1 }
           : club
       ));
-
-      toast.success('Successfully joined the club! 🎬');
     } catch (error) {
       console.error('Error joining club:', error);
       toast.error('Failed to join club');

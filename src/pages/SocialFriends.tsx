@@ -320,6 +320,7 @@ export const SocialFriends = () => {
 
     setIsSearching(true);
     try {
+      console.log('Searching for:', searchTerm);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -327,11 +328,15 @@ export const SocialFriends = () => {
         .neq('id', user?.id)
         .limit(10);
 
+      console.log('Search results:', data, 'Error:', error);
+
       if (error) throw error;
 
       setSearchResults(data || []);
       if (data && data.length === 0) {
         toast.info('No users found matching your search');
+      } else {
+        toast.success(`Found ${data?.length || 0} users`);
       }
     } catch (error) {
       console.error('Error searching users:', error);
@@ -342,9 +347,13 @@ export const SocialFriends = () => {
   };
 
   const sendFriendRequest = async (targetUserId: string) => {
-    if (!user) return;
+    if (!user) {
+      toast.error('Please sign in to send friend requests');
+      return;
+    }
 
     try {
+      console.log('Sending friend request to:', targetUserId);
       const { error } = await supabase
         .from('social_connections')
         .insert({
@@ -353,7 +362,15 @@ export const SocialFriends = () => {
           status: 'pending'
         });
 
-      if (error) throw error;
+      console.log('Friend request result:', error);
+
+      if (error) {
+        if (error.code === '23505') { // Unique violation
+          toast.info('Friend request already sent or you are already friends!');
+          return;
+        }
+        throw error;
+      }
 
       toast.success('Friend request sent! 🚀');
       setSearchResults(prev => prev.filter(u => u.id !== targetUserId));

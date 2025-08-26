@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useEnhancedWatchlist } from "@/hooks/useEnhancedWatchlist";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
@@ -20,9 +21,12 @@ interface MovieCardProps {
 }
 
 export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
-  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
+  const { toggleLike, isLiked } = useSupabaseUserState();
+  const { addItem, items } = useEnhancedWatchlist();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
+
+  const isInEnhancedWatchlist = items.some(item => item.movie_id === movie.id);
 
   const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -33,7 +37,13 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
   const handleWatchlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleWatchlist(movie.id, movie.title, movie.poster);
+    
+    if (!isInEnhancedWatchlist) {
+      await addItem(movie.id, movie.title, movie.poster, {
+        priority: 'medium',
+        moodTags: []
+      });
+    }
   };
 
   const handleImageError = () => {
@@ -91,6 +101,40 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
           <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
             <Star className="h-3 w-3 text-cinema-gold fill-current" />
             <span className="text-foreground font-semibold text-xs">{movie.rating}</span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className={`absolute bottom-2 right-2 flex gap-1 transition-opacity duration-300 ${
+            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-8 w-8 p-0 bg-cinema-black/80 backdrop-blur-sm hover:bg-cinema-black/90 border-cinema-charcoal/50"
+              onClick={handleLikeClick}
+            >
+              <Heart 
+                className={`h-4 w-4 ${
+                  isLiked(movie.id) 
+                    ? 'text-cinema-red fill-current' 
+                    : 'text-foreground'
+                }`} 
+              />
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-8 w-8 p-0 bg-cinema-black/80 backdrop-blur-sm hover:bg-cinema-black/90 border-cinema-charcoal/50"
+              onClick={handleWatchlistClick}
+            >
+              <Plus 
+                className={`h-4 w-4 ${
+                  isInEnhancedWatchlist 
+                    ? 'text-cinema-gold' 
+                    : 'text-foreground'
+                }`} 
+              />
+            </Button>
           </div>
 
         </div>

@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useMovieClubs } from '@/hooks/useMovieClubs';
+import { CreateDiscussionDialog } from '@/components/CreateDiscussionDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -246,10 +247,13 @@ export const MovieClubHub = () => {
 
       {/* Recent Discussions */}
       <div>
-        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-6">
-          <MessageCircle className="h-6 w-6 text-primary" />
-          Recent Discussions
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <MessageCircle className="h-6 w-6 text-primary" />
+            Recent Discussions
+          </h2>
+          <CreateDiscussionDialog onDiscussionCreated={fetchDiscussions} />
+        </div>
 
         <div className="space-y-4">
           {discussions.map((discussion) => (
