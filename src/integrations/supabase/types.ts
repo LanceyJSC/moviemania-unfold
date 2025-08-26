@@ -279,7 +279,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
-          movie_id: number
+          movie_id: number | null
           movie_title: string
           movie_type: string
           title: string
@@ -290,7 +290,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
-          movie_id: number
+          movie_id?: number | null
           movie_title: string
           movie_type?: string
           title: string
@@ -301,7 +301,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
-          movie_id?: number
+          movie_id?: number | null
           movie_title?: string
           movie_type?: string
           title?: string

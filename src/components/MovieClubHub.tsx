@@ -19,6 +19,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useMovieClubs } from '@/hooks/useMovieClubs';
 import { CreateDiscussionDialog } from '@/components/CreateDiscussionDialog';
+import { CreateClubDialog } from '@/components/CreateClubDialog';
+import { ClubDetailModal } from '@/components/ClubDetailModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -55,6 +57,8 @@ export const MovieClubHub = () => {
   } = useMovieClubs();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
+  const [selectedClub, setSelectedClub] = useState<any>(null);
+  const [showClubDetail, setShowClubDetail] = useState(false);
 
   useEffect(() => {
     fetchDiscussions();
@@ -191,10 +195,7 @@ export const MovieClubHub = () => {
             <Users className="h-6 w-6 text-primary" />
             Movie Clubs
           </h2>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Club
-          </Button>
+          <CreateClubDialog onClubCreated={refetch} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -221,15 +222,28 @@ export const MovieClubHub = () => {
                   {club.description}
                 </p>
                 {club.is_member ? (
-                  <Button 
-                    onClick={() => leaveClub(club.id)}
-                    variant="outline"
-                    className="w-full"
-                    size="sm"
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    Member
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={() => {
+                        setSelectedClub(club);
+                        setShowClubDetail(true);
+                      }}
+                      className="w-full"
+                      size="sm"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Enter Club
+                    </Button>
+                    <Button 
+                      onClick={() => leaveClub(club.id)}
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Leave Club
+                    </Button>
+                  </div>
                 ) : (
                   <Button 
                     onClick={() => joinClub(club.id)}
@@ -331,6 +345,13 @@ export const MovieClubHub = () => {
           ))}
         </div>
       </div>
+
+      <ClubDetailModal
+        club={selectedClub}
+        isOpen={showClubDetail}
+        onClose={() => setShowClubDetail(false)}
+        onLeaveClub={leaveClub}
+      />
     </div>
   );
 };

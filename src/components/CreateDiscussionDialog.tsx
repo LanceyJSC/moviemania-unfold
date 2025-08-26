@@ -56,7 +56,7 @@ export const CreateDiscussionDialog = ({
           title: formData.title.trim(),
           description: formData.description.trim() || null,
           movie_title: formData.movieTitle.trim(),
-          movie_id: formData.movieId || null,
+          movie_id: formData.movieId || 0,
           created_by: user.id
         });
 
