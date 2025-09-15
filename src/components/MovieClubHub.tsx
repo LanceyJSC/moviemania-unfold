@@ -11,12 +11,25 @@ import {
   Flame,
   UserPlus,
   Check,
-  RefreshCw
+  RefreshCw,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useMovieClubs } from "@/hooks/useMovieClubs";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -65,6 +78,7 @@ export const MovieClubHub = () => {
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
   const [selectedClub, setSelectedClub] = useState<any>(null);
   const [showClubDetail, setShowClubDetail] = useState(false);
+  const [deletingClub, setDeletingClub] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDiscussions();
@@ -109,30 +123,86 @@ export const MovieClubHub = () => {
         setDiscussions(discussionsWithProfiles);
       }
 
-      // Mock top users data - in real app, this would come from user activity aggregation
-      setTopUsers([
-        {
-          id: '1',
-          username: 'MovieMaster2024',
-          avatar_url: undefined,
-          activity_count: 156
-        },
-        {
-          id: '2',
-          username: 'CinemaExplorer',
-          avatar_url: undefined,
-          activity_count: 134
-        },
-        {
-          id: '3',
-          username: 'FilmCritic',
-          avatar_url: undefined,
-          activity_count: 98
+      // Fetch top users from actual user activity data
+      const { data: activityData } = await supabase
+        .from('user_activities')
+        .select('user_id, profiles!inner(username, avatar_url)')
+        .order('created_at', { ascending: false });
+
+      if (activityData) {
+        // Count activities per user
+        const userActivityCount: Record<string, { profile: any, count: number }> = {};
+        
+        activityData.forEach(activity => {
+          const userId = activity.user_id;
+          if (activity.profiles) {
+            if (!userActivityCount[userId]) {
+              userActivityCount[userId] = { 
+                profile: activity.profiles, 
+                count: 0 
+              };
+            }
+            userActivityCount[userId].count++;
+          }
+        });
+
+        // Get top 3 users by activity count
+        const topUsersData = Object.entries(userActivityCount)
+          .sort(([,a], [,b]) => b.count - a.count)
+          .slice(0, 3)
+          .map(([userId, data]) => ({
+            id: userId,
+            username: data.profile.username,
+            avatar_url: data.profile.avatar_url,
+            activity_count: data.count
+          }));
+
+        setTopUsers(topUsersData);
+      } else {
+        // Fallback to recent users if no activity data
+        const { data: recentUsers } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (recentUsers) {
+          setTopUsers(recentUsers.map(user => ({
+            ...user,
+            activity_count: 0
+          })));
         }
-      ]);
+      }
 
     } catch (error) {
       console.error('Error fetching discussions:', error);
+    }
+  };
+
+  const handleDeleteClub = async (clubId: string) => {
+    setDeletingClub(clubId);
+    try {
+      // Delete club memberships first
+      await supabase
+        .from('club_memberships')
+        .delete()
+        .eq('club_id', clubId);
+
+      // Then delete the club
+      const { error } = await supabase
+        .from('movie_clubs')
+        .delete()
+        .eq('id', clubId);
+
+      if (error) throw error;
+      
+      toast.success('Club deleted successfully');
+      refetch();
+    } catch (error) {
+      console.error('Error deleting club:', error);
+      toast.error('Failed to delete club');
+    } finally {
+      setDeletingClub(null);
     }
   };
 
@@ -237,7 +307,7 @@ export const MovieClubHub = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
+                 <p className="text-sm text-muted-foreground mb-4">
                   {club.description}
                 </p>
                 {club.is_member ? (
@@ -253,15 +323,50 @@ export const MovieClubHub = () => {
                       <Users className="h-4 w-4 mr-2" />
                       Enter Club
                     </Button>
-                    <Button 
-                      onClick={() => leaveClub(club.id)}
-                      variant="outline"
-                      className="w-full"
-                      size="sm"
-                    >
-                      <Check className="h-4 w-4 mr-2" />
-                      Leave Club
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => leaveClub(club.id)}
+                        variant="outline"
+                        className="flex-1"
+                        size="sm"
+                      >
+                        <Check className="h-4 w-4 mr-2" />
+                        Leave Club
+                      </Button>
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="destructive"
+                              size="sm"
+                              disabled={deletingClub === club.id}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="flex items-center gap-2">
+                                <AlertTriangle className="w-5 h-5 text-destructive" />
+                                Delete Club
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{club.name}"? This action cannot be undone and will remove all club data.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDeleteClub(club.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete Club
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <Button 

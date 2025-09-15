@@ -5,6 +5,7 @@ import { MovieCard } from "@/components/MovieCard";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
 import { EnhancedWatchlist } from "@/components/EnhancedWatchlist";
+import { AdminMakeButton } from "@/components/AdminMakeButton";
 import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -14,15 +15,20 @@ const Watchlist = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32">
-      <MobileHeader title="Smart Watchlist" />
+      <MobileHeader title="Watchlist" />
       
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-8">
-          <h1 className="text-4xl font-cinematic text-foreground tracking-wide mb-2">
-            SMART WATCHLIST
-          </h1>
-          <p className="text-muted-foreground">Organize your movie collection intelligently</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-cinematic text-foreground tracking-wide mb-2">
+                Watchlist
+              </h1>
+              <p className="text-muted-foreground">Organize your movie collection intelligently</p>
+            </div>
+            {user && <AdminMakeButton />}
+          </div>
         </div>
       </header>
 

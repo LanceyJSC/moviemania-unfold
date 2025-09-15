@@ -62,10 +62,14 @@ export const EnhancedWatchlist = () => {
     updateProgress,
     getItemsByCollection,
     getItemsByPriority,
-    getItemsByMoodTag
+    getItemsByMoodTag,
+    addItem
   } = useEnhancedWatchlist();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchTerm, setSearchTerm] = useState('');
+  const [movieSearchTerm, setMovieSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all');
   const [filterMood, setFilterMood] = useState<string>('all');
   const [showCreateCollection, setShowCreateCollection] = useState(false);
@@ -114,6 +118,42 @@ export const EnhancedWatchlist = () => {
     }
   };
 
+  const handleMovieSearch = async () => {
+    if (!movieSearchTerm.trim()) {
+      toast.error('Please enter a movie title');
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await tmdbService.searchMovies(movieSearchTerm);
+      const results = response.results || [];
+      setSearchResults(results);
+      if (results.length === 0) {
+        toast.info('No movies found with that title');
+      }
+    } catch (error) {
+      console.error('Error searching movies:', error);
+      toast.error('Failed to search movies');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleAddToWatchlist = async (movie: Movie) => {
+    const success = await addItem(
+      movie.id,
+      movie.title,
+      movie.poster_path,
+      { priority: 'medium' }
+    );
+    
+    if (success) {
+      setSearchResults(prev => prev.filter(m => m.id !== movie.id));
+      setMovieSearchTerm('');
+    }
+  };
+
   const filteredItems = items.filter(item => {
     const matchesSearch = item.movie_title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPriority = filterPriority === 'all' || item.priority === filterPriority;
@@ -146,8 +186,22 @@ export const EnhancedWatchlist = () => {
       {/* Header with Controls */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Smart Watchlist</h1>
-          <p className="text-muted-foreground">Organize your movies with collections, priorities, and smart filters</p>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search movies to add to watchlist..."
+                value={movieSearchTerm}
+                onChange={(e) => setMovieSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleMovieSearch()}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={handleMovieSearch} disabled={isSearching}>
+              {isSearching ? <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" /> : <Plus className="h-4 w-4" />}
+              Add Movie
+            </Button>
+          </div>
         </div>
         
         <div className="flex items-center gap-2">
@@ -211,6 +265,32 @@ export const EnhancedWatchlist = () => {
           </Dialog>
         </div>
       </div>
+
+      {/* Movie Search Results */}
+      {searchResults.length > 0 && (
+        <div className="border rounded-lg p-4 bg-card">
+          <h3 className="font-semibold mb-3">Search Results</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {searchResults.map(movie => (
+              <div key={movie.id} className="text-center">
+                <img 
+                  src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+                  alt={movie.title}
+                  className="w-full aspect-[2/3] object-cover rounded mb-2"
+                />
+                <p className="text-sm font-medium mb-2">{movie.title}</p>
+                <Button 
+                  size="sm" 
+                  onClick={() => handleAddToWatchlist(movie)}
+                  className="w-full text-xs"
+                >
+                  Add to Watchlist
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row gap-4">

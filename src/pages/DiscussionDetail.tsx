@@ -2,12 +2,24 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Trash2, AlertTriangle } from 'lucide-react';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from 'sonner';
 
 interface DiscussionThread {
@@ -40,11 +52,13 @@ export default function DiscussionDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [discussion, setDiscussion] = useState<DiscussionThread | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -180,6 +194,35 @@ export default function DiscussionDetail() {
     }
   };
 
+  const handleDeleteDiscussion = async () => {
+    if (!user || !id) return;
+
+    setDeleting(true);
+    try {
+      // First delete all comments
+      await supabase
+        .from('discussion_comments')
+        .delete()
+        .eq('thread_id', id);
+
+      // Then delete the discussion
+      const { error } = await supabase
+        .from('discussion_threads')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast.success('Discussion deleted successfully');
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting discussion:', error);
+      toast.error('Failed to delete discussion');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -214,6 +257,37 @@ export default function DiscussionDetail() {
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Discussions
       </Button>
+
+      {/* Admin Controls */}
+      {isAdmin && (
+        <div className="mb-4">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" disabled={deleting}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                {deleting ? 'Deleting...' : 'Delete Discussion'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                  Delete Discussion
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this discussion? This action cannot be undone and will remove all comments.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteDiscussion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete Discussion
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
 
       <Card className="mb-6">
         <CardHeader>
