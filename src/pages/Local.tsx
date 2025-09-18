@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { LocalMap } from '@/components/LocalMap';
+import { DiscussionModal } from '@/components/DiscussionModal';
+import { CinemaCard } from '@/components/CinemaCard';
+import { CinemaShowtimes } from '@/components/CinemaShowtimes';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +40,8 @@ import {
   Plus,
   Trash2,
   Bookmark,
-  Target
+  Target,
+  Building
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -50,10 +55,10 @@ const Local = () => {
   const { locations: userLocations, saveLocation, deleteLocation } = useUserLocations();
   const { locations: filmingLocations, isLoading: filmingLoading, fetchFilmingLocations } = useFilmingLocations();
   const { celebrities, isLoading: celebritiesLoading, fetchLocalCelebrities } = useLocalCelebrities();
-  
-  const [manualLocation, setManualLocation] = useState('');
+
+  const [radius, setRadius] = useState<number[]>([25]);
   const [showManualInput, setShowManualInput] = useState(false);
-  const [radius, setRadius] = useState([25]); // Slider expects array
+  const [manualLocation, setManualLocation] = useState('');
   const [currentLocation, setCurrentLocation] = useState<string>('');
   const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
   const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
@@ -64,55 +69,55 @@ const Local = () => {
   const [locationName, setLocationName] = useState('');
   const [showSaveLocation, setShowSaveLocation] = useState(false);
   const [autoAttempted, setAutoAttempted] = useState(false);
+  const [selectedDiscussion, setSelectedDiscussion] = useState<string | null>(null);
+  const [isDiscussionModalOpen, setIsDiscussionModalOpen] = useState(false);
+  const [selectedCinema, setSelectedCinema] = useState<any>(null);
+  const [isShowtimesModalOpen, setIsShowtimesModalOpen] = useState(false);
 
   // Combine Supabase and Overpass cinemas
   const allCinemas = [...supabaseCinemas, ...overpassCinemas];
   const isAnyCinemaLoading = cinemasLoading || overpassLoading;
 
+  // Auto-trigger location on component mount (once)
   useEffect(() => {
-    fetchTrendingMovies();
-    
-    // Auto-attempt geolocation on mount if not already done
-    if (!autoAttempted && !coordinates && !preferences?.location_latitude) {
+    if (!autoAttempted && !currentCoords && !error) {
       setAutoAttempted(true);
-      const timer = setTimeout(() => {
+      if (preferences?.location_latitude && preferences?.location_longitude) {
+        // Use saved location if available
+        setCurrentCoords([preferences.location_latitude, preferences.location_longitude]);
+        fetchLocationBasedContent(preferences.location_latitude, preferences.location_longitude);
+        if (preferences.location_city) {
+          setCurrentLocation(preferences.location_city);
+        }
+      } else {
+        // Try to get current location
         getCurrentLocation();
-        // If geolocation is slow, show manual input after 5 seconds
-        const fallbackTimer = setTimeout(() => {
-          if (!coordinates) {
-            setShowManualInput(true);
-            toast.info('Enter your location manually to see local content');
-          }
-        }, 5000);
-        
-        return () => clearTimeout(fallbackTimer);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
+      }
     }
-  }, []);
+  }, [autoAttempted, currentCoords, error, preferences, getCurrentLocation]);
 
+  // Update coords when geolocation succeeds
   useEffect(() => {
-    if (coordinates) {
-      updateLocation(coordinates.latitude, coordinates.longitude);
+    if (coordinates && !currentCoords) {
       setCurrentCoords([coordinates.latitude, coordinates.longitude]);
       fetchLocationBasedContent(coordinates.latitude, coordinates.longitude);
       reverseGeocode(coordinates.latitude, coordinates.longitude);
+      // Save to preferences
+      updateLocation(coordinates.latitude, coordinates.longitude, currentLocation);
     }
-  }, [coordinates, radius]);
+  }, [coordinates, currentCoords]);
 
+  // Fetch content when radius changes
   useEffect(() => {
-    if (preferences?.location_latitude && preferences?.location_longitude && !coordinates) {
-      setCurrentCoords([preferences.location_latitude, preferences.location_longitude]);
-      fetchLocationBasedContent(preferences.location_latitude, preferences.location_longitude);
-      reverseGeocode(preferences.location_latitude, preferences.location_longitude);
+    if (currentCoords) {
+      fetchLocationBasedContent(currentCoords[0], currentCoords[1]);
     }
-  }, [preferences, radius]);
+  }, [radius]);
 
   const fetchTrendingMovies = async () => {
     try {
-      const movies = await tmdbService.getTrendingMovies();
-      setTrendingMovies(movies.results?.slice(0, 6) || []);
+      const trending = await tmdbService.getTrendingMovies();
+      setTrendingMovies(trending.results.slice(0, 10));
     } catch (error) {
       console.error('Error fetching trending movies:', error);
     }
@@ -120,19 +125,16 @@ const Local = () => {
 
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`
-      );
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`);
+      const data = await response.json();
+      const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || 'Unknown Location';
+      setCurrentLocation(city);
       
-      if (response.ok) {
-        const data = await response.json();
-        const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown Location';
-        const country = data.address?.country || '';
-        setCurrentLocation(`${city}${country ? ', ' + country : ''}`);
-      }
+      // Update user preferences with location
+      updateLocation(lat, lng, city);
     } catch (error) {
-      console.error('Reverse geocoding error:', error);
-      setCurrentLocation('Current Location');
+      console.error('Error reverse geocoding:', error);
+      setCurrentLocation('Unknown Location');
     }
   };
 
@@ -154,35 +156,35 @@ const Local = () => {
     getCurrentLocation();
   };
 
-  const handleManualLocationSubmit = async () => {
-    if (!manualLocation.trim()) {
-      toast.error('Please enter a location');
-      return;
-    }
+  const handleManualLocationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualLocation.trim()) return;
 
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(manualLocation)}&limit=1`
-      );
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(manualLocation)}&limit=1`);
+      const data = await response.json();
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lng = parseFloat(data[0].lon);
-          updateLocation(lat, lng);
-          setCurrentCoords([lat, lng]);
-          fetchLocationBasedContent(lat, lng);
-          reverseGeocode(lat, lng);
-          setShowManualInput(false);
-          toast.success('Location updated successfully');
-        } else {
-          toast.error('Location not found. Please try a different search.');
-        }
+      if (data.length > 0) {
+        const location = data[0];
+        const lat = parseFloat(location.lat);
+        const lng = parseFloat(location.lon);
+        
+        setCurrentCoords([lat, lng]);
+        setCurrentLocation(location.display_name.split(',')[0]);
+        setShowManualInput(false);
+        setManualLocation('');
+        await fetchLocationBasedContent(lat, lng);
+        
+        // Update preferences
+        updateLocation(lat, lng, location.display_name.split(',')[0]);
+        
+        toast.success('Location found successfully');
+      } else {
+        toast.error('Location not found. Please try a different search term.');
       }
     } catch (error) {
       console.error('Geocoding error:', error);
-      toast.error('Unable to search for location. Please try again.');
+      toast.error('Error finding location. Please try again.');
     }
   };
 
@@ -198,38 +200,35 @@ const Local = () => {
       toast.error('Please enter a name for this location');
       return;
     }
-    
+
     await saveLocation(locationName, currentCoords[0], currentCoords[1]);
     setLocationName('');
     setShowSaveLocation(false);
   };
 
   const handleCinemaClick = (cinema: any) => {
-    if (cinema.id.startsWith('overpass-')) {
-      // For OpenStreetMap cinemas, show directions or info
-      const url = `https://maps.google.com/maps?daddr=${cinema.latitude},${cinema.longitude}`;
-      window.open(url, '_blank');
-    } else {
-      // For Supabase cinemas, navigate to showtimes
-      navigate(`/cinema/${cinema.id}`);
-    }
+    setSelectedCinema(cinema);
+    setIsShowtimesModalOpen(true);
   };
 
   const handleFilmingLocationClick = (location: any) => {
+    console.log('Filming location clicked:', location);
+    // Navigate to movie/show details or open modal
     if (location.tmdb_id) {
-      navigate(location.type === 'tv' ? `/tv/${location.tmdb_id}` : `/movie/${location.tmdb_id}`);
-    } else {
-      toast.info(`${location.title} was filmed at ${location.location}`);
+      navigate(`/${location.type}/detail/${location.tmdb_id}`);
     }
   };
 
   const handleCelebrityClick = (celebrity: any) => {
-    toast.info(`${celebrity.name} - ${celebrity.known_for_department} born in ${celebrity.birth_place}`);
+    console.log('Celebrity clicked:', celebrity);
+    // Navigate to person details or open modal
+    if (celebrity.tmdb_id) {
+      navigate(`/person/${celebrity.tmdb_id}`);
+    }
   };
 
   const formatDistance = (distance?: number) => {
     if (!distance) return '';
-    // Convert km to miles for display
     const miles = distance * 0.621371;
     return `${miles.toFixed(1)} mi`;
   };
@@ -241,6 +240,11 @@ const Local = () => {
     
     return `${cinemaCount} cinemas • ${filmingCount} filming spots • ${celebrityCount} stars`;
   };
+
+  // Fetch trending movies on mount
+  useEffect(() => {
+    fetchTrendingMovies();
+  }, []);
 
   if (!currentCoords && !loading && !error && !showManualInput) {
     return (
@@ -311,561 +315,456 @@ const Local = () => {
                 <MapIcon className="h-4 w-4" />
               </Button>
             </div>
-
-            <Button
-              onClick={handleGetLocation}
-              disabled={loading}
-              size="sm"
-              variant="outline"
-            >
-              <NavigationIcon className="h-4 w-4" />
-            </Button>
           </div>
         </div>
 
-        {/* Radius Slider */}
-        <div className="px-4 pb-4">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground min-w-[60px]">Radius:</span>
+        {/* Controls */}
+        <div className="p-4 pt-0 space-y-4">
+          {/* Radius Slider */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Search Radius</label>
+              <Badge variant="outline">{radius[0]} miles</Badge>
+            </div>
             <Slider
               value={radius}
               onValueChange={setRadius}
-              max={50}
+              max={100}
               min={5}
               step={5}
-              className="flex-1"
+              className="w-full"
             />
-            <Badge variant="secondary" className="min-w-[60px] justify-center">
-              {radius[0]} mi
-            </Badge>
           </div>
-        </div>
 
-        {/* Map Controls */}
-        {viewMode === 'map' && currentCoords && (
-          <div className="px-4 pb-4">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2">
-                  <Switch checked={showCinemas} onCheckedChange={setShowCinemas} />
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          {/* Map Controls */}
+          {viewMode === 'map' && (
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showCinemas}
+                  onCheckedChange={setShowCinemas}
+                  id="show-cinemas"
+                />
+                <label htmlFor="show-cinemas" className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                   Cinemas
                 </label>
-                <label className="flex items-center gap-2">
-                  <Switch checked={showFilming} onCheckedChange={setShowFilming} />
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showFilming}
+                  onCheckedChange={setShowFilming}
+                  id="show-filming"
+                />
+                <label htmlFor="show-filming" className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   Filming
                 </label>
-                <label className="flex items-center gap-2">
-                  <Switch checked={showCelebrities} onCheckedChange={setShowCelebrities} />
-                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showCelebrities}
+                  onCheckedChange={setShowCelebrities}
+                  id="show-celebrities"
+                />
+                <label htmlFor="show-celebrities" className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                   Stars
                 </label>
               </div>
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                onClick={() => setShowSaveLocation(true)}
-              >
-                <Bookmark className="h-4 w-4 mr-1" />
-                Save
-              </Button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <div className="p-4">
-        {/* Location Status */}
-        {error && (
-          <Card className="border-destructive/20 mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm text-destructive mb-3">{error}</p>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button onClick={handleGetLocation} size="sm" variant="outline">
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Try Again
-                    </Button>
-                    <Button 
-                      onClick={() => setShowManualInput(true)} 
-                      size="sm" 
-                      variant="outline"
-                    >
-                      <MapPin className="h-4 w-4 mr-2" />
-                      Enter Location Manually
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Error Display */}
+      {error && (
+        <div className="p-4">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-destructive">Location Error</p>
+              <p className="text-xs text-destructive/80">{error}</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => setShowManualInput(true)}>
+              Enter Manually
+            </Button>
+          </div>
+        </div>
+      )}
 
-        {/* Manual Location Input */}
-        {showManualInput && (
-          <Card className="mb-6">
+      {/* Manual Location Input */}
+      {showManualInput && (
+        <div className="p-4">
+          <Card>
             <CardContent className="p-4">
-              <div className="space-y-3">
-                <h3 className="font-medium">Enter your location</h3>
-                <div className="flex gap-2">
+              <form onSubmit={handleManualLocationSubmit} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Enter Location</label>
                   <Input
-                    placeholder="City, address, or postal code"
                     value={manualLocation}
                     onChange={(e) => setManualLocation(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleManualLocationSubmit()}
+                    placeholder="e.g., Los Angeles, CA or 90210"
+                    className="w-full"
                   />
-                  <Button onClick={handleManualLocationSubmit} size="sm">
-                    Search
+                </div>
+                <div className="flex gap-2">
+                  <Button type="submit" className="flex-1">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Search Location
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowManualInput(false)}
+                  >
+                    Cancel
                   </Button>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowManualInput(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
+              </form>
             </CardContent>
           </Card>
-        )}
+        </div>
+      )}
 
-        {/* Save Location Dialog */}
-        {showSaveLocation && (
-          <Card className="mb-6">
+      {/* Save Current Location */}
+      {showSaveLocation && currentCoords && (
+        <div className="p-4">
+          <Card>
             <CardContent className="p-4">
-              <div className="space-y-3">
-                <h3 className="font-medium">Save this location</h3>
-                <div className="flex gap-2">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Save This Location</label>
                   <Input
-                    placeholder="Location name (e.g., Home, Work)"
                     value={locationName}
                     onChange={(e) => setLocationName(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSaveCurrentLocation()}
+                    placeholder="e.g., Home, Work, etc."
+                    className="w-full"
                   />
-                  <Button onClick={handleSaveCurrentLocation} size="sm">
-                    <Plus className="h-4 w-4" />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleSaveCurrentLocation} className="flex-1">
+                    <Bookmark className="h-4 w-4 mr-2" />
+                    Save Location
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowSaveLocation(false)}
+                  >
+                    Cancel
                   </Button>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowSaveLocation(false)}
-                >
-                  Cancel
-                </Button>
               </div>
             </CardContent>
           </Card>
-        )}
+        </div>
+      )}
 
-        {/* Saved Locations */}
-        {userLocations.length > 0 && (
-          <Card className="mb-6">
+      {/* Saved Locations */}
+      {userLocations.length > 0 && (
+        <div className="p-4">
+          <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Bookmark className="h-4 w-4" />
-                Saved Locations
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Saved Locations</CardTitle>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setShowSaveLocation(true)}
+                  disabled={!currentCoords}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex gap-2 flex-wrap">
+              <div className="space-y-2">
                 {userLocations.map((location) => (
-                  <div key={location.id} className="flex items-center gap-1">
+                  <div key={location.id} className="flex items-center justify-between p-2 bg-muted rounded-lg">
                     <Button
+                      variant="ghost"
                       size="sm"
-                      variant="outline"
+                      className="flex-1 justify-start"
                       onClick={() => handleSavedLocationClick(location)}
                     >
+                      <MapPin className="h-4 w-4 mr-2" />
                       {location.name}
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-8 w-8 p-0 text-destructive"
                       onClick={() => deleteLocation(location.id)}
+                      className="p-1"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        )}
+        </div>
+      )}
 
-        {/* Map View */}
-        {viewMode === 'map' && currentCoords && (
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <LocalMap
-                center={currentCoords}
-                radius={radius[0] * 1.60934} // Convert to km
-                cinemas={allCinemas}
-                filmingLocations={filmingLocations}
-                celebrities={celebrities}
-                onCinemaClick={handleCinemaClick}
-                onFilmingLocationClick={handleFilmingLocationClick}
-                onCelebrityClick={handleCelebrityClick}
-                showCinemas={showCinemas}
-                showFilming={showFilming}
-                showCelebrities={showCelebrities}
-              />
-            </CardContent>
-          </Card>
-        )}
+      {/* Main Content */}
+      {currentCoords && (
+        <div className="flex-1">
+          {/* Map View */}
+          {viewMode === 'map' && (
+            <div className="p-4">
+              <ErrorBoundary>
+                <LocalMap
+                  center={currentCoords}
+                  radius={radius[0] * 1.60934} // Convert to km
+                  cinemas={allCinemas}
+                  filmingLocations={filmingLocations}
+                  celebrities={celebrities}
+                  onCinemaClick={handleCinemaClick}
+                  onFilmingLocationClick={handleFilmingLocationClick}
+                  onCelebrityClick={handleCelebrityClick}
+                  showCinemas={showCinemas}
+                  showFilming={showFilming}
+                  showCelebrities={showCelebrities}
+                />
+              </ErrorBoundary>
+            </div>
+          )}
 
-        {/* List View */}
-        {viewMode === 'list' && (
-          <Tabs defaultValue="cinemas" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="cinemas" className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span className="hidden sm:inline">Cinemas</span>
-              </TabsTrigger>
-              <TabsTrigger value="trending" className="flex items-center gap-1">
-                <Star className="h-4 w-4" />
-                <span className="hidden sm:inline">Trending</span>
-              </TabsTrigger>
-              <TabsTrigger value="filming" className="flex items-center gap-1">
-                <Camera className="h-4 w-4" />
-                <span className="hidden sm:inline">Filming</span>
-              </TabsTrigger>
-              <TabsTrigger value="celebrities" className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Stars</span>
-              </TabsTrigger>
-            </TabsList>
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className="p-4">
+              <Tabs defaultValue="cinemas" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="cinemas" className="text-xs">
+                    Cinemas ({allCinemas.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="trending" className="text-xs">
+                    Trending
+                  </TabsTrigger>
+                  <TabsTrigger value="filming" className="text-xs">
+                    Filming ({filmingLocations.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="celebrities" className="text-xs">
+                    Stars ({celebrities.length})
+                  </TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="cinemas" className="space-y-4">
-              {isAnyCinemaLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i}>
-                      <CardContent className="p-4">
-                        <div className="animate-pulse space-y-3">
-                          <div className="h-4 bg-muted rounded w-1/2"></div>
-                          <div className="h-3 bg-muted rounded w-3/4"></div>
-                          <div className="h-3 bg-muted rounded w-1/4"></div>
+                <TabsContent value="cinemas" className="mt-4">
+                  {isAnyCinemaLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                          <CardContent className="p-4">
+                            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-muted rounded w-1/2"></div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {allCinemas.length > 0 ? (
+                        allCinemas.map((cinema) => (
+                          <CinemaCard 
+                            key={cinema.id}
+                            cinema={cinema}
+                            onShowtimes={handleCinemaClick}
+                          />
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <Building className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                          <h3 className="text-lg font-semibold mb-2">No Cinemas Found</h3>
+                          <p className="text-muted-foreground mb-4">
+                            Try expanding your search radius or checking a different location.
+                          </p>
+                          <Button 
+                            onClick={() => setRadius([Math.min(radius[0] + 10, 100)])}
+                            variant="outline"
+                          >
+                            Expand Search Radius
+                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : allCinemas.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold mb-2">No Cinemas Found</h3>
-                    <p className="text-muted-foreground mb-4">
-                      No cinemas found within {radius[0]} miles. Try increasing your search radius.
-                    </p>
-                    <Button onClick={() => setShowManualInput(true)} variant="outline">
-                      Try Different Location
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {allCinemas.map((cinema) => (
-                    <Card key={cinema.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                              {cinema.name}
-                              {cinema.id.startsWith('overpass-') && (
-                                <Badge variant="outline" className="text-xs">
-                                  OSM
-                                </Badge>
-                              )}
-                            </CardTitle>
-                            {cinema.distance && (
-                              <Badge variant="secondary" className="mt-1">
-                                {formatDistance(cinema.distance)}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="space-y-2">
-                          <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                            <span>{cinema.address}, {cinema.city}</span>
-                          </div>
-                          
-                          <div className="flex gap-2 mt-4">
-                            <Button 
-                              onClick={() => handleCinemaClick(cinema)}
-                              size="sm"
-                              className="flex-1"
-                            >
-                              {cinema.id.startsWith('overpass-') ? (
-                                <>
-                                  <NavigationIcon className="h-4 w-4 mr-2" />
-                                  Directions
-                                </>
-                              ) : (
-                                <>
-                                  <Clock className="h-4 w-4 mr-2" />
-                                  Showtimes
-                                </>
-                              )}
-                            </Button>
-                            <Button 
-                              onClick={() => {
-                                const url = `https://maps.google.com/maps?daddr=${cinema.latitude},${cinema.longitude}`;
-                                window.open(url, '_blank');
-                              }}
-                              size="sm"
-                              variant="outline"
-                            >
-                              <NavigationIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
 
-            <TabsContent value="trending" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="h-5 w-5" />
-                    Trending Movies & Shows
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <TabsContent value="trending" className="mt-4">
+                  <div className="grid gap-4">
                     {trendingMovies.map((movie) => (
-                      <Card 
-                        key={movie.id} 
-                        className="cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => navigate(`/movie/${movie.id}`)}
-                      >
-                        <CardContent className="p-3">
-                          <div className="aspect-[2/3] mb-2 rounded-lg overflow-hidden bg-muted">
-                            {movie.poster_path ? (
-                              <img 
+                      <Card key={movie.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                            onClick={() => navigate(`/movie/detail/${movie.id}`)}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-4">
+                            {movie.poster_path && (
+                              <img
                                 src={tmdbService.getPosterUrl(movie.poster_path, 'w300')}
                                 alt={movie.title}
-                                className="w-full h-full object-cover"
+                                className="w-16 h-24 object-cover rounded"
                               />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Film className="h-8 w-8 text-muted-foreground" />
-                              </div>
                             )}
-                          </div>
-                          <h4 className="text-sm font-medium line-clamp-2">{movie.title}</h4>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Star className="h-3 w-3 text-yellow-500" />
-                            <span className="text-xs text-muted-foreground">
-                              {movie.vote_average?.toFixed(1)}
-                            </span>
+                            <div className="flex-1">
+                              <h3 className="font-semibold mb-1">{movie.title}</h3>
+                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                {movie.overview}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary">
+                                  <Star className="h-3 w-3 mr-1" />
+                                  {movie.vote_average.toFixed(1)}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(movie.release_date).getFullYear()}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </TabsContent>
 
-            <TabsContent value="filming" className="space-y-4">
-              {filmingLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i}>
-                      <CardContent className="p-4">
-                        <div className="animate-pulse space-y-3">
-                          <div className="h-4 bg-muted rounded w-3/4"></div>
-                          <div className="h-3 bg-muted rounded w-1/2"></div>
-                          <div className="h-3 bg-muted rounded w-1/4"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : filmingLocations.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold mb-2">No Filming Locations Found</h3>
-                    <p className="text-muted-foreground mb-4">
-                      No movies or TV shows found that were filmed within {radius[0]} miles of your location.
-                    </p>
-                    <Button onClick={() => setShowManualInput(true)} variant="outline">
-                      Try Different Location
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {filmingLocations.map((location) => (
-                    <Card 
-                      key={location.id} 
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => handleFilmingLocationClick(location)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex gap-4">
-                          {location.poster_path ? (
-                            <div className="w-16 h-24 flex-shrink-0 rounded overflow-hidden bg-muted">
-                              <img 
-                                src={tmdbService.getPosterUrl(location.poster_path, 'w300')}
-                                alt={location.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-24 flex-shrink-0 rounded bg-muted flex items-center justify-center">
-                              {location.type === 'tv' ? (
-                                <Tv className="h-6 w-6 text-muted-foreground" />
-                              ) : (
-                                <Film className="h-6 w-6 text-muted-foreground" />
-                              )}
-                            </div>
-                          )}
-                          
-                          <div className="flex-1 min-w-0">
+                <TabsContent value="filming" className="mt-4">
+                  {filmingLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                          <CardContent className="p-4">
+                            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-muted rounded w-1/2"></div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : filmingLocations.length > 0 ? (
+                    <div className="grid gap-4">
+                      {filmingLocations.map((location) => (
+                        <Card key={location.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                              onClick={() => handleFilmingLocationClick(location)}>
+                          <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-2">
-                              <h4 className="font-semibold text-sm line-clamp-1">{location.title}</h4>
+                              <h3 className="font-semibold">{location.title}</h3>
                               {location.distance && (
-                                <Badge variant="secondary" className="ml-2 text-xs">
+                                <Badge variant="secondary">
                                   {formatDistance(location.distance)}
                                 </Badge>
                               )}
                             </div>
-                            
                             {location.year && (
-                              <p className="text-xs text-muted-foreground mb-1">({location.year})</p>
+                              <p className="text-sm text-muted-foreground mb-1">({location.year})</p>
                             )}
-                            
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                              <Camera className="h-3 w-3" />
-                              <span className="line-clamp-1">Filmed at {location.location}</span>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Camera className="h-4 w-4" />
+                              <span>Filmed at {location.location}</span>
                             </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Filming Locations Found</h3>
+                      <p className="text-muted-foreground">
+                        Try expanding your search radius to discover more filming locations.
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
 
-                            <Badge variant="outline" className="text-xs">
-                              {location.type === 'tv' ? 'TV Show' : 'Movie'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="celebrities" className="space-y-4">
-              {celebritiesLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i}>
-                      <CardContent className="p-4">
-                        <div className="animate-pulse space-y-3">
-                          <div className="h-4 bg-muted rounded w-1/2"></div>
-                          <div className="h-3 bg-muted rounded w-3/4"></div>
-                          <div className="h-3 bg-muted rounded w-1/4"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : celebrities.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold mb-2">No Local Celebrities Found</h3>
-                    <p className="text-muted-foreground mb-4">
-                      No film/TV celebrities found that were born within {radius[0]} miles of your location.
-                    </p>
-                    <Button onClick={() => setShowManualInput(true)} variant="outline">
-                      Try Different Location
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {celebrities.map((celebrity) => (
-                    <Card 
-                      key={celebrity.id} 
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => handleCelebrityClick(celebrity)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex gap-4">
-                          {celebrity.profile_path ? (
-                            <div className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden bg-muted">
-                              <img 
-                                src={tmdbService.getProfileUrl(celebrity.profile_path, 'w185')}
-                                alt={celebrity.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-16 flex-shrink-0 rounded-full bg-muted flex items-center justify-center">
-                              <Users className="h-6 w-6 text-muted-foreground" />
-                            </div>
-                          )}
-                          
-                          <div className="flex-1 min-w-0">
+                <TabsContent value="celebrities" className="mt-4">
+                  {celebritiesLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                          <CardContent className="p-4">
+                            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-muted rounded w-1/2"></div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : celebrities.length > 0 ? (
+                    <div className="grid gap-4">
+                      {celebrities.map((celebrity) => (
+                        <Card key={celebrity.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                              onClick={() => handleCelebrityClick(celebrity)}>
+                          <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-2">
-                              <h4 className="font-semibold text-sm">{celebrity.name}</h4>
+                              <div className="flex items-center gap-3">
+                                {celebrity.profile_path && (
+                                  <img
+                                    src={tmdbService.getProfileUrl(celebrity.profile_path, 'w185')}
+                                    alt={celebrity.name}
+                                    className="w-12 h-12 object-cover rounded-full"
+                                  />
+                                )}
+                                <div>
+                                  <h3 className="font-semibold">{celebrity.name}</h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {celebrity.known_for_department}
+                                  </p>
+                                </div>
+                              </div>
                               {celebrity.distance && (
-                                <Badge variant="secondary" className="ml-2 text-xs">
+                                <Badge variant="secondary">
                                   {formatDistance(celebrity.distance)}
                                 </Badge>
                               )}
                             </div>
-                            
-                            <p className="text-xs text-muted-foreground mb-1">
-                              {celebrity.known_for_department}
-                            </p>
-                            
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                              <MapPin className="h-3 w-3" />
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                              <Users className="h-4 w-4" />
                               <span>Born in {celebrity.birth_place}</span>
                             </div>
-
-                            {celebrity.birth_date && (
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(celebrity.birth_date).getFullYear()}
-                              </p>
-                            )}
-
                             {celebrity.known_for && celebrity.known_for.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {celebrity.known_for.slice(0, 2).map((work, index) => (
+                              <div className="flex flex-wrap gap-1">
+                                {celebrity.known_for.slice(0, 3).map((work, index) => (
                                   <Badge key={index} variant="outline" className="text-xs">
                                     {work}
                                   </Badge>
                                 ))}
                               </div>
                             )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        )}
-      </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Local Celebrities Found</h3>
+                      <p className="text-muted-foreground">
+                        Try expanding your search radius to discover celebrities from your area.
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </div>
+      )}
 
       <Navigation />
+
+      {/* Modals */}
+      {selectedDiscussion && (
+        <DiscussionModal
+          isOpen={isDiscussionModalOpen}
+          onClose={() => setIsDiscussionModalOpen(false)}
+          discussionId={selectedDiscussion}
+        >
+          <div className="p-4">Discussion content for {selectedDiscussion}</div>
+        </DiscussionModal>
+      )}
+      
+      <CinemaShowtimes
+        cinema={selectedCinema}
+        isOpen={isShowtimesModalOpen}
+        onClose={() => setIsShowtimesModalOpen(false)}
+      />
     </div>
   );
 };

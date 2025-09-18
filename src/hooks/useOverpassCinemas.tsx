@@ -5,6 +5,7 @@ interface OverpassCinema {
   name: string;
   address: string;
   city: string;
+  country: string;
   latitude: number;
   longitude: number;
   distance?: number;
@@ -60,6 +61,7 @@ export const useOverpassCinemas = () => {
               ? `${element.tags['addr:housenumber'] || ''} ${element.tags['addr:street']}`.trim()
               : 'Address not available',
             city: element.tags['addr:city'] || element.tags['addr:town'] || 'Unknown',
+            country: element.tags['addr:country'] || 'Unknown',
             latitude: lat,
             longitude: lng,
             distance: Math.round(distance * 10) / 10

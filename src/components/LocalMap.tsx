@@ -142,7 +142,9 @@ export const LocalMap = ({
         ))}
 
         {/* Filming Locations */}
-        {showFilming && filmingLocations.map((location) => (
+        {showFilming && filmingLocations
+          .filter(location => location.coordinates?.lat && location.coordinates?.lng)
+          .map((location) => (
           <Marker
             key={location.id}
             position={[location.coordinates.lat, location.coordinates.lng]}
@@ -178,10 +180,12 @@ export const LocalMap = ({
         ))}
 
         {/* Celebrities */}
-        {showCelebrities && celebrities.map((celebrity) => (
+        {showCelebrities && celebrities
+          .filter(celebrity => celebrity.birth_coordinates?.lat && celebrity.birth_coordinates?.lng)
+          .map((celebrity) => (
           <Marker
             key={celebrity.id}
-            position={[celebrity.birth_coordinates?.lat || 0, celebrity.birth_coordinates?.lng || 0]}
+            position={[celebrity.birth_coordinates!.lat, celebrity.birth_coordinates!.lng]}
             icon={celebrityIcon}
           >
             <Popup>
