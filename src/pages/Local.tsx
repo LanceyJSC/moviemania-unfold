@@ -179,8 +179,8 @@ const Local = () => {
     await Promise.all([
       fetchNearbyCinemas(lat, lng, radiusKm),
       fetchOverpassCinemas(lat, lng, radiusKm),
-      fetchFilmingLocations(lat, lng, radiusKm),
-      fetchLocalCelebrities(lat, lng, radiusKm)
+      fetchFilmingLocations(lat, lng, radiusKm, currentLocation || undefined),
+      fetchLocalCelebrities(lat, lng, radiusKm, currentLocation || undefined)
     ]);
   };
 

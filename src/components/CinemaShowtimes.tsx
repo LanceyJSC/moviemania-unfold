@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -139,6 +139,9 @@ export const CinemaShowtimes = ({ cinema, isOpen, onClose }: CinemaShowtimesProp
             <Clock className="h-5 w-5" />
             Showtimes at {cinema.name}
           </DialogTitle>
+          <DialogDescription>
+            Browse available showtimes, or open the map and the cinema website for tickets and details.
+          </DialogDescription>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
             <span>{cinema.address}, {cinema.city}</span>
