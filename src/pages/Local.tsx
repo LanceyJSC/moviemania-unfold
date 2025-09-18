@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCinemas } from '@/hooks/useCinemas';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useFilmingLocations } from '@/hooks/useFilmingLocations';
+import { useLocalCelebrities } from '@/hooks/useLocalCelebrities';
 import { tmdbService } from '@/lib/tmdb';
 import { 
   MapPin, 
@@ -22,40 +24,26 @@ import {
   Film,
   Tv,
   Users,
-  Camera
+  Camera,
+  Award,
+  Heart
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-interface FilmingLocation {
-  title: string;
-  type: 'movie' | 'tv';
-  year?: number;
-  location: string;
-  poster_path?: string;
-}
-
-interface Celebrity {
-  name: string;
-  known_for_department: string;
-  profile_path?: string;
-  birth_place?: string;
-  known_for?: string[];
-}
 
 const Local = () => {
   const navigate = useNavigate();
   const { cinemas, isLoading: cinemasLoading, fetchNearbyCinemas } = useCinemas();
   const { coordinates, error, loading, getCurrentLocation, clearError } = useGeolocation();
   const { preferences, updateLocation } = useUserPreferences();
+  const { locations: filmingLocations, isLoading: filmingLoading, fetchFilmingLocations } = useFilmingLocations();
+  const { celebrities, isLoading: celebritiesLoading, fetchLocalCelebrities } = useLocalCelebrities();
   
   const [manualLocation, setManualLocation] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
   const [radius, setRadius] = useState('25');
   const [currentLocation, setCurrentLocation] = useState<string>('');
-  const [filmingLocations, setFilmingLocations] = useState<FilmingLocation[]>([]);
-  const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
-  const [loadingContent, setLoadingContent] = useState(false);
   const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
 
   useEffect(() => {
@@ -105,29 +93,15 @@ const Local = () => {
   };
 
   const fetchLocationBasedContent = async (lat: number, lng: number) => {
-    setLoadingContent(true);
+    // Convert miles to kilometers for API calls
+    const radiusKm = parseInt(radius) * 1.60934;
     
     // Fetch nearby cinemas
-    fetchNearbyCinemas(lat, lng, parseInt(radius));
+    fetchNearbyCinemas(lat, lng, radiusKm);
     
-    try {
-      // This would ideally fetch from a filming locations API or database
-      // For now, we'll create a mock structure that would be populated with real data
-      
-      // In a real implementation, you would:
-      // 1. Query a filming locations database
-      // 2. Search for celebrity birthplaces
-      // 3. Find local movie events
-      
-      setFilmingLocations([]);
-      setCelebrities([]);
-      
-    } catch (error) {
-      console.error('Error fetching location-based content:', error);
-      toast.error('Failed to load local movie content');
-    } finally {
-      setLoadingContent(false);
-    }
+    // Fetch filming locations and celebrities
+    fetchFilmingLocations(lat, lng, radiusKm);
+    fetchLocalCelebrities(lat, lng, radiusKm);
   };
 
   const handleGetLocation = () => {
@@ -168,7 +142,9 @@ const Local = () => {
 
   const formatDistance = (distance?: number) => {
     if (!distance) return '';
-    return `${distance} km away`;
+    // Convert km back to miles for display
+    const miles = distance * 0.621371;
+    return `${miles.toFixed(1)} mi away`;
   };
 
   return (
@@ -416,34 +392,138 @@ const Local = () => {
 
           {/* Filming Locations Tab */}
           <TabsContent value="filming" className="space-y-4">
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">Filming Locations</h3>
-                <p className="text-muted-foreground mb-4">
-                  Discover movies and TV shows filmed in your area. This feature will show productions shot within {radius} miles of your location.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Filming location data is being integrated. Check back soon!
-                </p>
-              </CardContent>
-            </Card>
+            {filmingLoading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <Card key={i}>
+                    <CardContent className="p-4">
+                      <div className="animate-pulse space-y-3">
+                        <div className="h-4 bg-muted rounded w-3/4"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                        <div className="h-3 bg-muted rounded w-1/4"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filmingLocations.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No Filming Locations Found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    No movies or TV shows found that were filmed within {radius} miles of your location. Try increasing your search radius.
+                  </p>
+                  <Button onClick={() => setShowManualInput(true)} variant="outline">
+                    Try Different Location
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {filmingLocations.map((location) => (
+                  <Card key={location.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            {location.type === 'tv' ? <Tv className="h-5 w-5" /> : <Film className="h-5 w-5" />}
+                            {location.title}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 mt-1">
+                            {location.year && (
+                              <Badge variant="outline">{location.year}</Badge>
+                            )}
+                            {location.distance && (
+                              <Badge variant="secondary">
+                                {formatDistance(location.distance)}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span>Filmed at: {location.location}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Celebrities Tab */}
           <TabsContent value="celebrities" className="space-y-4">
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">Local Stars</h3>
-                <p className="text-muted-foreground mb-4">
-                  Find out which famous actors, directors, and crew members were born in your area or have connections to your location.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Celebrity location data is being integrated. Check back soon!
-                </p>
-              </CardContent>
-            </Card>
+            {celebritiesLoading ? (
+              <div className="space-y-4">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i}>
+                    <CardContent className="p-4">
+                      <div className="animate-pulse flex gap-3">
+                        <div className="w-12 h-12 bg-muted rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-muted rounded w-1/2"></div>
+                          <div className="h-3 bg-muted rounded w-3/4"></div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : celebrities.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No Local Stars Found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    No famous actors, directors, or crew members found who were born within {radius} miles of your location. Try increasing your search radius.
+                  </p>
+                  <Button onClick={() => setShowManualInput(true)} variant="outline">
+                    Try Different Location
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {celebrities.map((celebrity) => (
+                  <Card key={celebrity.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex gap-3">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <Star className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-semibold">{celebrity.name}</h4>
+                              <p className="text-sm text-muted-foreground">{celebrity.known_for_department}</p>
+                            </div>
+                            {celebrity.distance && (
+                              <Badge variant="secondary" className="text-xs">
+                                {formatDistance(celebrity.distance)}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-start gap-2 mt-2 text-sm text-muted-foreground">
+                            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <span>Born in: {celebrity.birth_place}</span>
+                          </div>
+                          {celebrity.birth_date && (
+                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                              <Calendar className="h-3 w-3" />
+                              <span>{new Date(celebrity.birth_date).getFullYear()}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

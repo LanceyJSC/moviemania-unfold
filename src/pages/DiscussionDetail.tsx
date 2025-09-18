@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -248,7 +249,8 @@ export default function DiscussionDetail() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-background pb-32">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Button 
         variant="ghost" 
         onClick={() => navigate('/social')}
@@ -377,7 +379,10 @@ export default function DiscussionDetail() {
             </div>
           </CardContent>
         </Card>
-      )}
+        )}
+      </div>
+      
+      <Navigation />
     </div>
   );
 }
