@@ -78,7 +78,7 @@ const Profile = () => {
         navigate('/watchlist');
         break;
       case 'social':
-        navigate('/social/friends');
+        navigate('/social');
         break;
       default:
         break;
@@ -219,13 +219,13 @@ const Profile = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card className="cursor-pointer hover:shadow-md transition-shadow" 
-                      onClick={() => navigate('/social/friends')}>
+                      onClick={() => navigate('/social')}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
                       <Users className="h-8 w-8 text-primary" />
                       <div>
-                        <CardTitle className="text-lg">Find Friends</CardTitle>
-                        <CardDescription>Connect with movie enthusiasts</CardDescription>
+                        <CardTitle className="text-lg">Social Hub</CardTitle>
+                        <CardDescription>Connect with movie enthusiasts and manage your watchlist</CardDescription>
                       </div>
                     </div>
                   </CardHeader>

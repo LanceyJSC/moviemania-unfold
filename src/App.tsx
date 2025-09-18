@@ -28,6 +28,7 @@ import Notifications from "./pages/Notifications";
 import { DiscoverMovies } from "./pages/DiscoverMovies";
 import { DiscoverTVShows } from "./pages/DiscoverTVShows";
 import { SocialFriends } from "./pages/SocialFriends";
+import Social from "./pages/Social";
 import { SocialLists } from "./pages/SocialLists";
 import { SocialAchievements } from "./pages/SocialAchievements";
 import { Recommendations } from "./pages/Recommendations";
@@ -78,7 +79,8 @@ const App = () => {
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/discover/movies" element={<DiscoverMovies />} />
                       <Route path="/discover/tv-shows" element={<DiscoverTVShows />} />
-                      <Route path="/social/friends" element={<SocialFriends />} />
+                      <Route path="/social/friends" element={<Social />} />
+                      <Route path="/social" element={<Social />} />
                       <Route path="/social/lists" element={<SocialLists />} />
             <Route path="/social/achievements" element={<SocialAchievements />} />
             <Route path="/recommendations" element={<Recommendations />} />

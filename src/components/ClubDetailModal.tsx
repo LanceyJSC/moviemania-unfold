@@ -241,7 +241,11 @@ export const ClubDetailModal = ({
                   </div>
                 ) : (
                   discussions.map((discussion) => (
-                    <Card key={discussion.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                    <Card 
+                      key={discussion.id} 
+                      className="hover:shadow-md transition-all cursor-pointer hover:border-primary/50"
+                      onClick={() => window.open(`/discussion/${discussion.id}`, '_blank')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           <Avatar className="h-10 w-10">
@@ -252,7 +256,9 @@ export const ClubDetailModal = ({
                           </Avatar>
                           
                           <div className="flex-1">
-                            <h4 className="font-semibold mb-1">{discussion.title}</h4>
+                            <h4 className="font-semibold mb-1 text-foreground hover:text-primary transition-colors">
+                              {discussion.title}
+                            </h4>
                             {discussion.movie_title && (
                               <Badge variant="outline" className="text-xs mb-2">
                                 {discussion.movie_title}

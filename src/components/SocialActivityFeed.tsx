@@ -103,7 +103,7 @@ export const SocialActivityFeed = () => {
             <p className="text-sm text-muted-foreground">
               Connect with friends to see their movie activities here!
             </p>
-            <Link to="/social/friends">
+            <Link to="/social">
               <Button className="mt-4" size="sm">
                 Find Friends
               </Button>

@@ -65,6 +65,8 @@ export const CreateDiscussionDialog = ({
         .select('id')
         .single();
       
+      if (error) throw error;
+      
       toast.success('Discussion created successfully! 🎬');
       setOpen(false);
       setFormData({
@@ -73,6 +75,11 @@ export const CreateDiscussionDialog = ({
         movieTitle: movieTitle || '',
         movieId: movieId || 0
       });
+      
+      // Auto-navigate to the discussion if it was created successfully
+      if (inserted?.id) {
+        window.open(`/discussion/${inserted.id}`, '_blank');
+      }
       
       if (onDiscussionCreated) {
         onDiscussionCreated();
