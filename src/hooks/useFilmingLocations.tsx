@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { tmdbService } from '@/lib/tmdb';
 
 interface FilmingLocation {
   id: string;
@@ -105,7 +106,39 @@ export const useFilmingLocations = () => {
         };
       }).filter(location => location.coordinates); // Only keep locations with valid coordinates
 
-      setLocations(filmingLocations.sort((a, b) => (a.distance || 0) - (b.distance || 0)));
+      // Enrich with TMDB posters
+      const enrichedLocations = await Promise.all(
+        filmingLocations.map(async (location) => {
+          try {
+            if (location.type === 'movie') {
+              const searchResults = await tmdbService.searchMovies(location.title, location.year);
+              if (searchResults.results && searchResults.results.length > 0) {
+                const movie = searchResults.results[0];
+                return {
+                  ...location,
+                  poster_path: movie.poster_path,
+                  tmdb_id: movie.id
+                };
+              }
+            } else if (location.type === 'tv') {
+              const searchResults = await tmdbService.searchTVShows(location.title);
+              if (searchResults.results && searchResults.results.length > 0) {
+                const show = searchResults.results[0];
+                return {
+                  ...location,
+                  poster_path: show.poster_path,
+                  tmdb_id: show.id
+                };
+              }
+            }
+          } catch (error) {
+            console.error('Error enriching location with TMDB:', error);
+          }
+          return location;
+        })
+      );
+
+      setLocations(enrichedLocations.sort((a, b) => (a.distance || 0) - (b.distance || 0)));
       
     } catch (error) {
       console.error('Error fetching filming locations:', error);

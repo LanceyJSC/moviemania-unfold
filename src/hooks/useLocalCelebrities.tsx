@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { tmdbService } from '@/lib/tmdb';
 
 interface Celebrity {
   id: string;
@@ -118,7 +119,30 @@ export const useLocalCelebrities = () => {
       const celebrityList = Array.from(celebrityMap.values())
         .sort((a, b) => (a.distance || 0) - (b.distance || 0));
 
-      setCelebrities(celebrityList);
+      // Enrich with TMDB profile images
+      const enrichedCelebrities = await Promise.all(
+        celebrityList.map(async (celebrity) => {
+          try {
+            const searchResults = await tmdbService.searchMulti(celebrity.name);
+            if (searchResults.results && searchResults.results.length > 0) {
+              // Find the person result
+              const person = searchResults.results.find((result: any) => result.media_type === 'person') as any;
+              if (person) {
+                return {
+                  ...celebrity,
+                  profile_path: person.profile_path,
+                  known_for: person.known_for?.map((item: any) => item.title || item.name).slice(0, 3) || []
+                };
+              }
+            }
+          } catch (error) {
+            console.error('Error enriching celebrity with TMDB:', error);
+          }
+          return celebrity;
+        })
+      );
+
+      setCelebrities(enrichedCelebrities);
       
     } catch (error) {
       console.error('Error fetching local celebrities:', error);
