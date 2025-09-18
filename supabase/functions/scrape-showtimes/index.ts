@@ -167,10 +167,10 @@ function parseShowtimesFromHTML(html: string, baseUrl: string): ScrapedShowtime[
   
   try {
     // Look for JSON-LD structured data
-    const jsonLdMatches = html.match(/<script[^>]*type=\\\"application\\\\/ld\\\\+json\\\"[^>]*>(.*?)<\\\\/script>/gs);
+    const jsonLdMatches = html.match(/<script[^>]*type=['"]application\/ld\+json['"][^>]*>(.*?)<\/script>/gsi);
     if (jsonLdMatches) {
       for (const match of jsonLdMatches) {
-        const jsonContent = match.replace(/<script[^>]*>/, '').replace(/<\\\\/script>/, '');
+        const jsonContent = match.replace(/<script[^>]*>/i, '').replace(/<\/script>/i, '');
         try {
           const data = JSON.parse(jsonContent);
           const extracted = extractFromStructuredData(data);
