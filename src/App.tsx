@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import Genres from "./pages/Genres";
 import Cinemas from "./pages/Cinemas";
 import CinemaDetail from "./pages/CinemaDetail";
+import Local from "./pages/Local";
 import Notifications from "./pages/Notifications";
 import { DiscoverMovies } from "./pages/DiscoverMovies";
 import { DiscoverTVShows } from "./pages/DiscoverTVShows";
@@ -74,8 +75,9 @@ const App = () => {
                       <Route path="/actor/:id" element={<ActorDetail />} />
                       <Route path="/category/:category" element={<CategoryPage />} />
                       <Route path="/watchlist" element={<Watchlist />} />
-                      <Route path="/cinemas" element={<Cinemas />} />
-                      <Route path="/cinema/:id" element={<CinemaDetail />} />
+                       <Route path="/local" element={<Local />} />
+                       <Route path="/cinemas" element={<Cinemas />} />
+                       <Route path="/cinema/:id" element={<CinemaDetail />} />
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/discover/movies" element={<DiscoverMovies />} />
                       <Route path="/discover/tv-shows" element={<DiscoverTVShows />} />

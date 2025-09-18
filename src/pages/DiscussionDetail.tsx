@@ -214,7 +214,7 @@ export default function DiscussionDetail() {
       if (error) throw error;
       
       toast.success('Discussion deleted successfully');
-      navigate('/');
+      navigate('/social');
     } catch (error) {
       console.error('Error deleting discussion:', error);
       toast.error('Failed to delete discussion');
@@ -239,9 +239,9 @@ export default function DiscussionDetail() {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Discussion not found</h1>
-        <Button onClick={() => navigate('/')}>
+        <Button onClick={() => navigate('/social')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
+          Back to Social
         </Button>
       </div>
     );
@@ -251,11 +251,11 @@ export default function DiscussionDetail() {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Button 
         variant="ghost" 
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/social')}
         className="mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Discussions
+        Back to Social
       </Button>
 
       {/* Admin Controls */}
