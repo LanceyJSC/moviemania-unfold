@@ -1,1 +1,4 @@
 project_id = "pxneryedanrxbajbmcfh"
+
+[functions.scrape-showtimes]
+verify_jwt = false

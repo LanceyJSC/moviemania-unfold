@@ -1,28 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-interface Cinema {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-  phone?: string;
-  website?: string;
-  distance?: number;
-}
-
-interface CinemaShowtime {
-  id: string;
-  cinema_id: string;
-  movie_id: number;
-  movie_title: string;
-  showtime: string;
-  ticket_price?: number;
-  booking_url?: string;
-}
+import type { Cinema, CinemaShowtime } from '@/types/cinema';
 
 export const useCinemas = () => {
   const [cinemas, setCinemas] = useState<Cinema[]>([]);
@@ -105,6 +83,20 @@ export const useCinemas = () => {
     }
   };
 
+  const fetchScrapedShowtimes = async (cinema: Cinema) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-showtimes', {
+        body: { cinema }
+      });
+
+      if (error) throw error;
+      return data?.showtimes || [];
+    } catch (error) {
+      console.error('Error fetching scraped showtimes:', error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     fetchCinemas();
   }, []);
@@ -115,6 +107,7 @@ export const useCinemas = () => {
     fetchCinemas,
     fetchNearbyCinemas,
     fetchCinemaShowtimes,
+    fetchScrapedShowtimes,
   };
 };
 

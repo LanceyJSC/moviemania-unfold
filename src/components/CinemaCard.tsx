@@ -2,19 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, MapPin, Navigation as NavigationIcon, Phone, Globe, ExternalLink } from 'lucide-react';
-
-interface Cinema {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-  phone?: string;
-  website?: string;
-  distance?: number;
-}
+import type { Cinema } from '@/types/cinema';
 
 interface CinemaCardProps {
   cinema: Cinema;
@@ -44,8 +32,13 @@ export const CinemaCard = ({ cinema, onShowtimes }: CinemaCardProps) => {
 
   const handleDirections = () => {
     // Use OpenStreetMap to avoid Google being blocked in sandboxed iframes
-    const url = `https://www.openstreetmap.org/?mlat=${cinema.latitude}&mlon=${cinema.longitude}#map=16/${cinema.latitude}/${cinema.longitude}`;
-    window.open(url, '_blank', 'noopener');
+    if (cinema.latitude && cinema.longitude) {
+      const url = `https://www.openstreetmap.org/?mlat=${cinema.latitude}&mlon=${cinema.longitude}#map=16/${cinema.latitude}/${cinema.longitude}`;
+      window.open(url, '_blank', 'noopener');
+    } else {
+      const q = encodeURIComponent(`${cinema.name} ${cinema.address} ${cinema.city}`);
+      window.open(`https://www.openstreetmap.org/search?query=${q}`, '_blank', 'noopener');
+    }
   };
   const handleWebsite = () => {
     if (cinema.website) {

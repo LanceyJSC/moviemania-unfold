@@ -5,18 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Clock, ExternalLink, MapPin } from 'lucide-react';
 import { useCinemas } from '@/hooks/useCinemas';
-
-interface Cinema {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  phone?: string;
-  website?: string;
-}
+import type { Cinema } from '@/types/cinema';
 
 interface Showtime {
   id: string;
@@ -34,7 +23,7 @@ interface CinemaShowtimesProps {
 }
 
 export const CinemaShowtimes = ({ cinema, isOpen, onClose }: CinemaShowtimesProps) => {
-  const { fetchCinemaShowtimes } = useCinemas();
+  const { fetchCinemaShowtimes, fetchScrapedShowtimes } = useCinemas();
   const [showtimes, setShowtimes] = useState<Showtime[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,14 +37,32 @@ export const CinemaShowtimes = ({ cinema, isOpen, onClose }: CinemaShowtimesProp
 
   const loadShowtimes = async () => {
     if (!cinema) return;
-    // Skip querying Supabase for non-UUID IDs (e.g., Overpass-sourced cinemas)
-    if (!isUUID(cinema.id)) {
-      setShowtimes([]);
-      return;
-    }
+    
     setIsLoading(true);
     try {
-      const times = await fetchCinemaShowtimes(cinema.id);
+      let times: Showtime[] = [];
+      
+      // First try database for UUID cinemas
+      if (isUUID(cinema.id)) {
+        times = await fetchCinemaShowtimes(cinema.id);
+      }
+      
+      // If no database results, try web scraping
+      if (times.length === 0) {
+        console.log('No database showtimes found, attempting web scraping...');
+        const scrapedTimes = await fetchScrapedShowtimes(cinema);
+        
+        // Convert scraped format to expected format
+        times = scrapedTimes.map((scraped: any, index: number) => ({
+          id: `scraped-${index}`,
+          movie_id: index,
+          movie_title: scraped.movie_title,
+          showtime: scraped.showtime,
+          ticket_price: scraped.ticket_price ? parseFloat(scraped.ticket_price.replace(/[^\d.]/g, '')) : undefined,
+          booking_url: scraped.booking_url
+        }));
+      }
+      
       setShowtimes(times);
     } catch (error) {
       console.error('Error loading showtimes:', error);
