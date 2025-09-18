@@ -11,6 +11,7 @@ interface Celebrity {
   known_for?: string[];
   wikidata_id?: string;
   distance?: number;
+  birth_coordinates?: { lat: number; lng: number };
 }
 
 export const useLocalCelebrities = () => {
@@ -86,12 +87,16 @@ export const useLocalCelebrities = () => {
         if (!celebrityMap.has(personUri)) {
           const coordsStr = result.coords?.value;
           let distance = null;
+          let lat: number | null = null;
+          let lng: number | null = null;
           
           if (coordsStr) {
             // Parse "Point(lng lat)" format
             const match = coordsStr.match(/Point\(([^)]+)\)/);
             if (match) {
-              const [lng, lat] = match[1].split(' ').map(Number);
+              const parts = match[1].split(' ').map(Number);
+              lng = parts[0];
+              lat = parts[1];
               distance = calculateDistance(latitude, longitude, lat, lng);
             }
           }
@@ -104,7 +109,8 @@ export const useLocalCelebrities = () => {
             birth_date: result.birthDate?.value,
             wikidata_id: wikidataId,
             distance: distance ? Math.round(distance * 10) / 10 : undefined,
-            known_for: []
+            known_for: [],
+            birth_coordinates: lat !== null && lng !== null ? { lat, lng } : undefined
           });
         } else {
           // Add additional occupations

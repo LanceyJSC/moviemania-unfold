@@ -57,7 +57,7 @@ const Local = () => {
   const [currentLocation, setCurrentLocation] = useState<string>('');
   const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
   const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [showCinemas, setShowCinemas] = useState(true);
   const [showFilming, setShowFilming] = useState(true);
   const [showCelebrities, setShowCelebrities] = useState(true);
@@ -140,18 +140,10 @@ const Local = () => {
     // Convert miles to kilometers for API calls
     const radiusKm = radius[0] * 1.60934;
     
-    // Fetch nearby cinemas from Supabase first
-    await fetchNearbyCinemas(lat, lng, radiusKm);
-    
-    // If no Supabase cinemas found, fetch from OpenStreetMap as fallback
-    setTimeout(async () => {
-      if (supabaseCinemas.length === 0) {
-        await fetchOverpassCinemas(lat, lng, radiusKm);
-      }
-    }, 1000);
-    
-    // Fetch filming locations and celebrities in parallel
+    // Fetch everything in parallel for speed and reliability
     await Promise.all([
+      fetchNearbyCinemas(lat, lng, radiusKm),
+      fetchOverpassCinemas(lat, lng, radiusKm),
       fetchFilmingLocations(lat, lng, radiusKm),
       fetchLocalCelebrities(lat, lng, radiusKm)
     ]);
@@ -513,14 +505,8 @@ const Local = () => {
                 center={currentCoords}
                 radius={radius[0] * 1.60934} // Convert to km
                 cinemas={allCinemas}
-                filmingLocations={filmingLocations.map(loc => ({
-                  ...loc,
-                  birth_coordinates: loc.coordinates
-                }))}
-                celebrities={celebrities.map(cel => ({
-                  ...cel,
-                  birth_coordinates: cel.birth_place ? { lat: 0, lng: 0 } : undefined
-                }))}
+                filmingLocations={filmingLocations}
+                celebrities={celebrities}
                 onCinemaClick={handleCinemaClick}
                 onFilmingLocationClick={handleFilmingLocationClick}
                 onCelebrityClick={handleCelebrityClick}
