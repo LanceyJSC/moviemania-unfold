@@ -235,32 +235,38 @@ export const ClubDetailModal = ({
               </div>
               
               <div className="space-y-2">
-                {discussions.map((discussion) => (
-                  <Card key={discussion.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={discussion.user_profile?.avatar_url} />
-                          <AvatarFallback>
-                            {discussion.user_profile?.username?.slice(0, 2).toUpperCase() || 'A'}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <h4 className="font-semibold mb-1">{discussion.title}</h4>
-                          {discussion.movie_title && (
-                            <Badge variant="outline" className="text-xs mb-2">
-                              {discussion.movie_title}
-                            </Badge>
-                          )}
-                          <div className="text-sm text-muted-foreground">
-                            by {discussion.user_profile?.username} • {new Date(discussion.created_at).toLocaleDateString()}
+                {discussions.length === 0 ? (
+                  <div className="text-sm text-muted-foreground p-4 border rounded-md">
+                    No discussions yet. Be the first to start one!
+                  </div>
+                ) : (
+                  discussions.map((discussion) => (
+                    <Card key={discussion.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={discussion.user_profile?.avatar_url} />
+                            <AvatarFallback>
+                              {discussion.user_profile?.username?.slice(0, 2).toUpperCase() || 'A'}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            <h4 className="font-semibold mb-1">{discussion.title}</h4>
+                            {discussion.movie_title && (
+                              <Badge variant="outline" className="text-xs mb-2">
+                                {discussion.movie_title}
+                              </Badge>
+                            )}
+                            <div className="text-sm text-muted-foreground">
+                              by {discussion.user_profile?.username} • {new Date(discussion.created_at).toLocaleDateString()}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </TabsContent>
           </Tabs>

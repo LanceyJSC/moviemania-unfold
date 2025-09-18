@@ -52,7 +52,7 @@ export const CreateDiscussionDialog = ({
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { data: inserted, error } = await supabase
         .from('discussion_threads')
         .insert({
           title: formData.title.trim(),
@@ -61,10 +61,10 @@ export const CreateDiscussionDialog = ({
           movie_id: formData.movieId || 0,
           club_id: clubId || null,
           created_by: user.id
-        });
-
-      if (error) throw error;
-
+        })
+        .select('id')
+        .single();
+      
       toast.success('Discussion created successfully! 🎬');
       setOpen(false);
       setFormData({
