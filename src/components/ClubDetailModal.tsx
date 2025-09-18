@@ -101,19 +101,33 @@ export const ClubDetailModal = ({
         setMembers(formattedMembers);
       }
 
-      // Fetch club-related discussions (mock for now)
-      setDiscussions([
-        {
-          id: '1',
-          title: `Welcome to ${club.name}!`,
-          created_by: club.created_by,
-          created_at: club.created_at,
-          user_profile: {
-            username: 'Admin',
+      // Fetch club-related discussions
+      const { data: clubDiscussions } = await supabase
+        .from('discussion_threads')
+        .select('*')
+        .eq('club_id', club.id)
+        .order('created_at', { ascending: false });
+
+      if (clubDiscussions && clubDiscussions.length > 0) {
+        // Get user profiles for discussions
+        const discussionUserIds = clubDiscussions.map(d => d.created_by);
+        const { data: discussionProfiles } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .in('id', discussionUserIds);
+
+        const discussionsWithProfiles = clubDiscussions.map(discussion => ({
+          ...discussion,
+          user_profile: discussionProfiles?.find(p => p.id === discussion.created_by) || {
+            username: 'Unknown',
             avatar_url: undefined
           }
-        }
-      ]);
+        }));
+        
+        setDiscussions(discussionsWithProfiles);
+      } else {
+        setDiscussions([]);
+      }
 
     } catch (error) {
       console.error('Error fetching club data:', error);
@@ -215,6 +229,7 @@ export const ClubDetailModal = ({
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Club Discussions</h3>
                 <CreateDiscussionDialog 
+                  clubId={club.id}
                   onDiscussionCreated={fetchClubData}
                 />
               </div>

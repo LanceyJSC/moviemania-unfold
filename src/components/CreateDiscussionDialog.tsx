@@ -12,12 +12,14 @@ import { toast } from 'sonner';
 interface CreateDiscussionDialogProps {
   movieId?: number;
   movieTitle?: string;
+  clubId?: string;
   onDiscussionCreated?: () => void;
 }
 
 export const CreateDiscussionDialog = ({ 
   movieId, 
   movieTitle, 
+  clubId,
   onDiscussionCreated 
 }: CreateDiscussionDialogProps) => {
   const { user } = useAuth();
@@ -57,6 +59,7 @@ export const CreateDiscussionDialog = ({
           description: formData.description.trim() || null,
           movie_title: formData.movieTitle.trim(),
           movie_id: formData.movieId || 0,
+          club_id: clubId || null,
           created_by: user.id
         });
 

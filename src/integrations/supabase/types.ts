@@ -275,6 +275,7 @@ export type Database = {
       }
       discussion_threads: {
         Row: {
+          club_id: string | null
           created_at: string
           created_by: string
           description: string | null
@@ -286,6 +287,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          club_id?: string | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -297,6 +299,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          club_id?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
