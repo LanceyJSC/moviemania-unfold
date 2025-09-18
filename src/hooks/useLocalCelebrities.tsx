@@ -26,38 +26,45 @@ export const useLocalCelebrities = () => {
     try {
       // Wikidata SPARQL query to find celebrities born in the area
       const sparqlQuery = `
-        SELECT DISTINCT ?person ?personLabel ?birthPlace ?birthPlaceLabel ?coords ?birthDate ?occupation ?occupationLabel WHERE {
-          ?person wdt:P31 wd:Q5 ;              # human
-                  wdt:P19 ?birthPlace ;         # place of birth
-                  wdt:P106 ?occupation .        # occupation
-          
-          ?birthPlace wdt:P625 ?coords .        # coordinates of birth place
-          
-          # Filter by film/TV related occupations
-          VALUES ?occupation {
-            wd:Q33999     # actor
-            wd:Q2526255   # film director
-            wd:Q3455803   # director
-            wd:Q1053574   # film producer
-            wd:Q28389     # screenwriter
-            wd:Q483501    # artist
-            wd:Q177220    # singer
-            wd:Q639669    # musician
-          }
-          
-          OPTIONAL { ?person wdt:P569 ?birthDate . }
-          
-          # Get location coordinates and filter by distance
-          SERVICE wikibase:around {
-            ?birthPlace wdt:P625 ?coords .
-            bd:serviceParam wikibase:center "Point(${longitude} ${latitude})"^^geo:wktLiteral .
-            bd:serviceParam wikibase:radius "${radiusKm}" .
-          }
-          
-          SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
-        }
-        ORDER BY ?personLabel
-        LIMIT 30
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+SELECT DISTINCT ?person ?personLabel ?birthPlace ?birthPlaceLabel ?coords ?birthDate ?occupation ?occupationLabel WHERE {
+  ?person wdt:P31 wd:Q5 ;              # human
+          wdt:P19 ?birthPlace ;         # place of birth
+          wdt:P106 ?occupation .        # occupation
+
+  ?birthPlace wdt:P625 ?coords .        # coordinates of birth place
+
+  # Filter by film/TV related occupations
+  VALUES ?occupation {
+    wd:Q33999     # actor
+    wd:Q2526255   # film director
+    wd:Q3455803   # director
+    wd:Q1053574   # film producer
+    wd:Q28389     # screenwriter
+    wd:Q177220    # singer
+    wd:Q639669    # musician
+    wd:Q245068    # comedian
+    wd:Q947873    # television presenter
+  }
+
+  OPTIONAL { ?person wdt:P569 ?birthDate . }
+
+  # Get location coordinates and filter by distance
+  SERVICE wikibase:around {
+    ?birthPlace wdt:P625 ?coords .
+    bd:serviceParam wikibase:center "Point(${longitude} ${latitude})"^^geo:wktLiteral .
+    bd:serviceParam wikibase:radius "${radiusKm}" .
+  }
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
+}
+ORDER BY ?personLabel
+LIMIT 100
       `;
 
       const encodedQuery = encodeURIComponent(sparqlQuery);

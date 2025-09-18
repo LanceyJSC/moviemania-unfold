@@ -129,8 +129,8 @@ export const LocalMap = ({
                     variant="outline"
                     className="text-xs h-7"
                     onClick={() => {
-                      const url = `https://maps.google.com/maps?daddr=${cinema.latitude},${cinema.longitude}`;
-                      window.open(url, '_blank');
+                      const url = `https://www.openstreetmap.org/?mlat=${cinema.latitude}&mlon=${cinema.longitude}#map=16/${cinema.latitude}/${cinema.longitude}`;
+                      window.open(url, '_blank', 'noopener');
                     }}
                   >
                     <Navigation className="h-3 w-3" />

@@ -26,32 +26,41 @@ export const useFilmingLocations = () => {
     setError(null);
     
     try {
-      // Wikidata SPARQL query to find filming locations
+      // Wikidata SPARQL query to find filming and narrative locations for both films and TV
       const sparqlQuery = `
-        SELECT DISTINCT ?film ?filmLabel ?location ?locationLabel ?coords ?year ?type WHERE {
-          ?film wdt:P31/wdt:P279* wd:Q11424 ;  # instance of film
-                wdt:P915 ?location .             # filming location
-          ?location wdt:P625 ?coords .           # coordinates
-          
-          OPTIONAL { ?film wdt:P577 ?date . BIND(YEAR(?date) as ?year) }
-          
-          # Get location coordinates and filter by distance
-          SERVICE wikibase:around {
-            ?location wdt:P625 ?coords .
-            bd:serviceParam wikibase:center "Point(${longitude} ${latitude})"^^geo:wktLiteral .
-            bd:serviceParam wikibase:radius "${radiusKm}" .
-          }
-          
-          # Try to get if it's a TV series instead
-          OPTIONAL {
-            ?film wdt:P31/wdt:P279* wd:Q5398426 .  # TV series
-            BIND("tv" as ?type)
-          }
-          BIND(IF(BOUND(?type), ?type, "movie") as ?type)
-          
-          SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
-        }
-        LIMIT 50
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+SELECT DISTINCT ?film ?filmLabel ?location ?locationLabel ?coords ?year ?type WHERE {
+  {
+    ?film wdt:P31/wdt:P279* wd:Q11424 .
+    BIND("movie" as ?type)
+  }
+  UNION
+  {
+    ?film wdt:P31/wdt:P279* wd:Q5398426 .
+    BIND("tv" as ?type)
+  }
+  {
+    ?film wdt:P915 ?location .
+  }
+  UNION
+  {
+    ?film wdt:P840 ?location .
+  }
+  ?location wdt:P625 ?coords .
+  OPTIONAL { ?film wdt:P577 ?date . BIND(YEAR(?date) as ?year) }
+  SERVICE wikibase:around {
+    ?location wdt:P625 ?coords .
+    bd:serviceParam wikibase:center "Point(${longitude} ${latitude})"^^geo:wktLiteral .
+    bd:serviceParam wikibase:radius "${radiusKm}" .
+  }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
+}
+LIMIT 100
       `;
 
       const encodedQuery = encodeURIComponent(sparqlQuery);

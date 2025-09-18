@@ -44,9 +44,15 @@ export const CinemaShowtimes = ({ cinema, isOpen, onClose }: CinemaShowtimesProp
     }
   }, [cinema, isOpen]);
 
+  const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
   const loadShowtimes = async () => {
     if (!cinema) return;
-    
+    // Skip querying Supabase for non-UUID IDs (e.g., Overpass-sourced cinemas)
+    if (!isUUID(cinema.id)) {
+      setShowtimes([]);
+      return;
+    }
     setIsLoading(true);
     try {
       const times = await fetchCinemaShowtimes(cinema.id);

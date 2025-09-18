@@ -8,6 +8,8 @@ interface OverpassCinema {
   country: string;
   latitude: number;
   longitude: number;
+  phone?: string;
+  website?: string;
   distance?: number;
 }
 
@@ -64,6 +66,8 @@ export const useOverpassCinemas = () => {
             country: element.tags['addr:country'] || 'Unknown',
             latitude: lat,
             longitude: lng,
+            phone: element.tags.phone || element.tags['contact:phone'],
+            website: element.tags.website || element.tags['contact:website'] || element.tags['brand:website'],
             distance: Math.round(distance * 10) / 10,
           };
         })

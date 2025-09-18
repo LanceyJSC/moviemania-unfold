@@ -152,7 +152,13 @@ const Local = () => {
 
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`);
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
+      const response = await fetch(url, {
+        headers: {
+          'Accept-Language': 'en',
+          'User-Agent': 'LocalCinemaApp/1.0'
+        }
+      });
       const data = await response.json();
       const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || 'Unknown Location';
       setCurrentLocation(city);
