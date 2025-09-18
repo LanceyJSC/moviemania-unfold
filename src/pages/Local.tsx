@@ -21,6 +21,7 @@ import { useUserLocations } from '@/hooks/useUserLocations';
 import { useFilmingLocations } from '@/hooks/useFilmingLocations';
 import { useLocalCelebrities } from '@/hooks/useLocalCelebrities';
 import { tmdbService } from '@/lib/tmdb';
+import { useDebounce } from '@/hooks/useDebounce';
 import { 
   MapPin, 
   Navigation as NavigationIcon,
@@ -61,11 +62,16 @@ const Local = () => {
   const { celebrities, isLoading: celebritiesLoading, fetchLocalCelebrities } = useLocalCelebrities();
 
   const [radius, setRadius] = useState<number[]>([25]);
+  const debouncedRadius = useDebounce(radius[0], 500);
   const [showManualInput, setShowManualInput] = useState(false);
   const [manualLocation, setManualLocation] = useState('');
   const [currentLocation, setCurrentLocation] = useState<string>('');
   const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
   const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
+  const [nowPlayingMovies, setNowPlayingMovies] = useState<any[]>([]);
+  const [upcomingMovies, setUpcomingMovies] = useState<any[]>([]);
+  const [popularTV, setPopularTV] = useState<any[]>([]);
+  const [onTheAirTV, setOnTheAirTV] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [showCinemas, setShowCinemas] = useState(true);
   const [showFilming, setShowFilming] = useState(true);
@@ -111,19 +117,29 @@ const Local = () => {
     }
   }, [coordinates, currentCoords]);
 
-  // Fetch content when radius changes
+  // Fetch content when radius changes (debounced)
   useEffect(() => {
     if (currentCoords) {
-      fetchLocationBasedContent(currentCoords[0], currentCoords[1]);
+      fetchLocationBasedContent(currentCoords[0], currentCoords[1], debouncedRadius * 1.60934);
     }
-  }, [radius]);
+  }, [debouncedRadius, currentCoords]);
 
   const fetchTrendingMovies = async () => {
     try {
-      const trending = await tmdbService.getTrendingMovies();
+      const [trending, nowPlaying, upcoming, tvPopular, tvOnAir] = await Promise.all([
+        tmdbService.getTrendingMovies('week', true),
+        tmdbService.getNowPlayingMovies(1, true),
+        tmdbService.getUpcomingMovies(1, true),
+        tmdbService.getPopularTVShows(1, true),
+        tmdbService.getOnTheAirTVShows(1, true),
+      ]);
       setTrendingMovies(trending.results.slice(0, 10));
+      setNowPlayingMovies(nowPlaying.results.slice(0, 10));
+      setUpcomingMovies(upcoming.results.slice(0, 10));
+      setPopularTV(tvPopular.results.slice(0, 10));
+      setOnTheAirTV(tvOnAir.results.slice(0, 10));
     } catch (error) {
-      console.error('Error fetching trending movies:', error);
+      console.error('Error fetching local content:', error);
     }
   };
 
@@ -142,9 +158,9 @@ const Local = () => {
     }
   };
 
-  const fetchLocationBasedContent = async (lat: number, lng: number) => {
+  const fetchLocationBasedContent = async (lat: number, lng: number, radiusOverrideKm?: number) => {
     // Convert miles to kilometers for API calls
-    const radiusKm = radius[0] * 1.60934;
+    const radiusKm = typeof radiusOverrideKm === 'number' ? radiusOverrideKm : radius[0] * 1.60934;
     
     // Fetch everything in parallel for speed and reliability
     await Promise.all([
@@ -216,18 +232,16 @@ const Local = () => {
   };
 
   const handleFilmingLocationClick = (location: any) => {
-    console.log('Filming location clicked:', location);
     // Navigate to movie/show details or open modal
-    if (location.tmdb_id) {
-      navigate(`/${location.type}/detail/${location.tmdb_id}`);
+    if (location.tmdb_id && (location.type === 'movie' || location.type === 'tv')) {
+      navigate(`/${location.type}/${location.tmdb_id}`);
     }
   };
 
   const handleCelebrityClick = (celebrity: any) => {
-    console.log('Celebrity clicked:', celebrity);
-    // Navigate to person details or open modal
+    // Navigate to actor details
     if (celebrity.tmdb_id) {
-      navigate(`/person/${celebrity.tmdb_id}`);
+      navigate(`/actor/${celebrity.tmdb_id}`);
     }
   };
 
@@ -612,7 +626,7 @@ const Local = () => {
                   <div className="grid gap-4">
                     {trendingMovies.map((movie) => (
                       <Card key={movie.id} className="hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => navigate(`/movie/detail/${movie.id}`)}>
+                             onClick={() => navigate(`/movie/${movie.id}`)}>
                         <CardContent className="p-4">
                           <div className="flex items-start gap-4">
                             {movie.poster_path && (
