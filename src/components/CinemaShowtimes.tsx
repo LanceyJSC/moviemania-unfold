@@ -11,6 +11,9 @@ interface Cinema {
   name: string;
   address: string;
   city: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
   phone?: string;
   website?: string;
 }
@@ -73,10 +76,36 @@ export const CinemaShowtimes = ({ cinema, isOpen, onClose }: CinemaShowtimesProp
 
   const handleBooking = (showtime: Showtime) => {
     if (showtime.booking_url) {
-      window.open(showtime.booking_url, '_blank');
+      window.open(showtime.booking_url, '_blank', 'noopener');
     }
   };
 
+  const openOSM = () => {
+    if (!cinema) return;
+    if (cinema.latitude && cinema.longitude) {
+      const url = `https://www.openstreetmap.org/?mlat=${cinema.latitude}&mlon=${cinema.longitude}#map=16/${cinema.latitude}/${cinema.longitude}`;
+      window.open(url, '_blank', 'noopener');
+    } else {
+      const q = encodeURIComponent(`${cinema.name} ${cinema.address} ${cinema.city}`);
+      window.open(`https://www.openstreetmap.org/search?query=${q}`, '_blank', 'noopener');
+    }
+  };
+
+  const searchWeb = () => {
+    if (!cinema) return;
+    const q = encodeURIComponent(`${cinema.name} ${cinema.city} showtimes tickets`);
+    window.open(`https://duckduckgo.com/?q=${q}`, '_blank', 'noopener');
+  };
+
+  const copyAddress = async () => {
+    if (!cinema) return;
+    const text = `${cinema.name}, ${cinema.address}, ${cinema.city}${cinema.country ? ', ' + cinema.country : ''}`;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      console.error('Clipboard write failed', e);
+    }
+  };
   if (!cinema) return null;
 
   // Group showtimes by movie and date
@@ -163,21 +192,30 @@ export const CinemaShowtimes = ({ cinema, isOpen, onClose }: CinemaShowtimesProp
               <p className="text-muted-foreground mb-4">
                 No current showtimes found for this cinema. Check back later or contact the theater directly.
               </p>
-              <div className="flex justify-center gap-2">
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button variant="outline" onClick={openOSM}>
+                  Open Map
+                </Button>
+                <Button variant="outline" onClick={searchWeb}>
+                  Search Web
+                </Button>
+                <Button variant="outline" onClick={copyAddress}>
+                  Copy Address
+                </Button>
+                {cinema.website && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.open(cinema.website!, '_blank', 'noopener')}
+                  >
+                    Visit Website
+                  </Button>
+                )}
                 {cinema.phone && (
                   <Button 
                     variant="outline" 
                     onClick={() => window.location.href = `tel:${cinema.phone}`}
                   >
                     Call Theater
-                  </Button>
-                )}
-                {cinema.website && (
-                  <Button 
-                    variant="outline"
-                    onClick={() => window.open(cinema.website, '_blank')}
-                  >
-                    Visit Website
                   </Button>
                 )}
               </div>

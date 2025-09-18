@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Navigation, Phone, Globe } from 'lucide-react';
+import { Clock, MapPin, Navigation as NavigationIcon, Phone, Globe, ExternalLink } from 'lucide-react';
 
 interface Cinema {
   id: string;
@@ -29,13 +29,18 @@ export const CinemaCard = ({ cinema, onShowtimes }: CinemaCardProps) => {
   };
 
   const handleDirections = () => {
-    const url = `https://maps.google.com/maps?daddr=${cinema.latitude},${cinema.longitude}`;
-    window.open(url, '_blank');
+    // Use OpenStreetMap to avoid Google being blocked in sandboxed iframes
+    const url = `https://www.openstreetmap.org/?mlat=${cinema.latitude}&mlon=${cinema.longitude}#map=16/${cinema.latitude}/${cinema.longitude}`;
+    window.open(url, '_blank', 'noopener');
   };
 
   const handleWebsite = () => {
     if (cinema.website) {
-      window.open(cinema.website, '_blank');
+      window.open(cinema.website, '_blank', 'noopener');
+    } else {
+      // Fallback: search the web for the cinema's official site
+      const q = encodeURIComponent(`${cinema.name} ${cinema.city} official site`);
+      window.open(`https://duckduckgo.com/?q=${q}`, '_blank', 'noopener');
     }
   };
 
@@ -77,7 +82,7 @@ export const CinemaCard = ({ cinema, onShowtimes }: CinemaCardProps) => {
             variant="outline"
             onClick={handleDirections}
           >
-            <Navigation className="h-4 w-4" />
+            <NavigationIcon className="h-4 w-4" />
           </Button>
           {cinema.phone && (
             <Button 
@@ -88,15 +93,13 @@ export const CinemaCard = ({ cinema, onShowtimes }: CinemaCardProps) => {
               <Phone className="h-4 w-4" />
             </Button>
           )}
-          {cinema.website && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={handleWebsite}
-            >
-              <Globe className="h-4 w-4" />
-            </Button>
-          )}
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={handleWebsite}
+          >
+            {cinema.website ? <Globe className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+          </Button>
         </div>
       </CardContent>
     </Card>

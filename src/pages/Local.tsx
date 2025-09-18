@@ -117,6 +117,13 @@ const Local = () => {
     }
   }, [coordinates, currentCoords]);
 
+  // Fetch whenever coordinates change (ensures first load pulls data reliably)
+  useEffect(() => {
+    if (currentCoords) {
+      fetchLocationBasedContent(currentCoords[0], currentCoords[1]);
+    }
+  }, [currentCoords]);
+
   // Fetch content when radius changes (debounced)
   useEffect(() => {
     if (currentCoords) {
