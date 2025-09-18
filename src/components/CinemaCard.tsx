@@ -28,22 +28,38 @@ export const CinemaCard = ({ cinema, onShowtimes }: CinemaCardProps) => {
     return `${miles.toFixed(1)} mi`;
   };
 
+  const inferSite = (name: string, city: string) => {
+    const slug = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const n = (name || '').toLowerCase();
+    const citySlug = slug(city || '');
+    if (!citySlug) return undefined;
+    if (n.includes('odeon')) return `https://www.odeon.co.uk/cinemas/${citySlug}/`;
+    if (n.includes('vue')) return `https://www.myvue.com/cinema/${citySlug}/whats-on`;
+    if (n.includes('cineworld')) return `https://www.cineworld.co.uk/cinemas/${citySlug}`;
+    if (n.includes('scott') && n.includes('cinema')) return `https://www.scottcinemas.co.uk/${citySlug}`;
+    if (n.includes('everyman')) return `https://www.everymancinema.com/${citySlug}`;
+    if (n.includes('showcase')) return `https://www.showcasecinemas.co.uk/cinema/${citySlug}`;
+    return undefined;
+  };
+
   const handleDirections = () => {
     // Use OpenStreetMap to avoid Google being blocked in sandboxed iframes
     const url = `https://www.openstreetmap.org/?mlat=${cinema.latitude}&mlon=${cinema.longitude}#map=16/${cinema.latitude}/${cinema.longitude}`;
     window.open(url, '_blank', 'noopener');
   };
-
   const handleWebsite = () => {
     if (cinema.website) {
       window.open(cinema.website, '_blank', 'noopener');
     } else {
-      // Fallback: search the web for the cinema's official site
-      const q = encodeURIComponent(`${cinema.name} ${cinema.city} official site`);
-      window.open(`https://duckduckgo.com/?q=${q}`, '_blank', 'noopener');
+      const inferred = inferSite(cinema.name, cinema.city);
+      if (inferred) {
+        window.open(inferred, '_blank', 'noopener');
+      } else {
+        const q = encodeURIComponent(`${cinema.name} ${cinema.city} official site`);
+        window.open(`https://duckduckgo.com/?q=${q}`, '_blank', 'noopener');
+      }
     }
   };
-
   const handlePhone = () => {
     if (cinema.phone) {
       window.location.href = `tel:${cinema.phone}`;

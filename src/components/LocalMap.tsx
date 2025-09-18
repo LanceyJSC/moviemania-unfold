@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Navigation, Camera, Users } from 'lucide-react';
+import { Clock, MapPin, Navigation, Camera, Users, Globe } from 'lucide-react';
 
 // Fix for default markers in React Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -26,6 +26,22 @@ const createCustomIcon = (color: string) => L.divIcon({
 const cinemaIcon = createCustomIcon('#3b82f6'); // blue
 const filmingIcon = createCustomIcon('#10b981'); // green  
 const celebrityIcon = createCustomIcon('#f59e0b'); // orange
+
+// Infer common UK cinema chain websites if missing
+const inferCinemaWebsite = (name?: string, city?: string): string | undefined => {
+  if (!name || !city) return undefined;
+  const slug = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const n = name.toLowerCase();
+  const citySlug = slug(city);
+  if (!citySlug) return undefined;
+  if (n.includes('odeon')) return `https://www.odeon.co.uk/cinemas/${citySlug}/`;
+  if (n.includes('vue')) return `https://www.myvue.com/cinema/${citySlug}/whats-on`;
+  if (n.includes('cineworld')) return `https://www.cineworld.co.uk/cinemas/${citySlug}`;
+  if (n.includes('scott') && n.includes('cinema')) return `https://www.scottcinemas.co.uk/${citySlug}`;
+  if (n.includes('everyman')) return `https://www.everymancinema.com/${citySlug}`;
+  if (n.includes('showcase')) return `https://www.showcasecinemas.co.uk/cinema/${citySlug}`;
+  return undefined;
+};
 
 interface MapProps {
   center: [number, number];
@@ -134,6 +150,22 @@ export const LocalMap = ({
                     }}
                   >
                     <Navigation className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-7"
+                    onClick={() => {
+                      const site = cinema.website || inferCinemaWebsite(cinema.name, cinema.city);
+                      if (site) {
+                        window.open(site, '_blank', 'noopener');
+                      } else {
+                        const q = encodeURIComponent(`${cinema.name} ${cinema.city} official site`);
+                        window.open(`https://duckduckgo.com/?q=${q}`, '_blank', 'noopener');
+                      }
+                    }}
+                  >
+                    <Globe className="h-3 w-3" />
                   </Button>
                 </div>
               </div>

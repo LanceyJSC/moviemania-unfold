@@ -216,6 +216,17 @@ export const CinemaShowtimes = ({ cinema, isOpen, onClose }: CinemaShowtimesProp
                     Visit Website
                   </Button>
                 )}
+                {!cinema.website && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      const q = encodeURIComponent(`${cinema.name} ${cinema.city} official site`);
+                      window.open(`https://duckduckgo.com/?q=${q}`, '_blank', 'noopener');
+                    }}
+                  >
+                    Find Website
+                  </Button>
+                )}
                 {cinema.phone && (
                   <Button 
                     variant="outline" 

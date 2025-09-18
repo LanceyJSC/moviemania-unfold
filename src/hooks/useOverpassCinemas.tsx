@@ -67,7 +67,7 @@ export const useOverpassCinemas = () => {
             latitude: lat,
             longitude: lng,
             phone: element.tags.phone || element.tags['contact:phone'],
-            website: element.tags.website || element.tags['contact:website'] || element.tags['brand:website'],
+            website: element.tags.website || element.tags['contact:website'] || element.tags['brand:website'] || inferWebsite(element.tags.name, (element.tags['addr:city'] || element.tags['addr:town'] || 'Unknown')),
             distance: Math.round(distance * 10) / 10,
           };
         })
@@ -135,6 +135,42 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+// Helper to slugify city names for known chains
+function slugifyCity(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+// Attempt to infer an official website for common UK cinema chains
+function inferWebsite(name: string, city: string): string | undefined {
+  const n = (name || '').toLowerCase();
+  const citySlug = slugifyCity(city || '');
+  if (!citySlug) return undefined;
+
+  if (n.includes('odeon')) {
+    return `https://www.odeon.co.uk/cinemas/${citySlug}/`;
+  }
+  if (n.includes('vue')) {
+    return `https://www.myvue.com/cinema/${citySlug}/whats-on`;
+  }
+  if (n.includes('cineworld')) {
+    return `https://www.cineworld.co.uk/cinemas/${citySlug}`;
+  }
+  if (n.includes('scott') && n.includes('cinema')) {
+    return `https://www.scottcinemas.co.uk/${citySlug}`;
+  }
+  if (n.includes('everyman')) {
+    return `https://www.everymancinema.com/${citySlug}`;
+  }
+  if (n.includes('showcase')) {
+    return `https://www.showcasecinemas.co.uk/cinema/${citySlug}`;
+  }
+  return undefined;
 }
 
 // Reverse geocode helper (Nominatim)
