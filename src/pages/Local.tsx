@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { LocalMap } from '@/components/LocalMap';
+
 import { DiscussionModal } from '@/components/DiscussionModal';
 import { CinemaCard } from '@/components/CinemaCard';
 import { CinemaShowtimes } from '@/components/CinemaShowtimes';
@@ -46,6 +46,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+// Lazy-load the map to prevent initial crashes and heavy bundle cost
+const LocalMapLazy = lazy(() => import('@/components/LocalMap').then(m => ({ default: m.LocalMap })));
+
+
 const Local = () => {
   const navigate = useNavigate();
   const { cinemas: supabaseCinemas, isLoading: cinemasLoading, fetchNearbyCinemas } = useCinemas();
@@ -62,7 +66,7 @@ const Local = () => {
   const [currentLocation, setCurrentLocation] = useState<string>('');
   const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
   const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [showCinemas, setShowCinemas] = useState(true);
   const [showFilming, setShowFilming] = useState(true);
   const [showCelebrities, setShowCelebrities] = useState(true);
@@ -512,20 +516,34 @@ const Local = () => {
           {/* Map View */}
           {viewMode === 'map' && (
             <div className="p-4">
-              <ErrorBoundary>
-                <LocalMap
-                  center={currentCoords}
-                  radius={radius[0] * 1.60934} // Convert to km
-                  cinemas={allCinemas}
-                  filmingLocations={filmingLocations}
-                  celebrities={celebrities}
-                  onCinemaClick={handleCinemaClick}
-                  onFilmingLocationClick={handleFilmingLocationClick}
-                  onCelebrityClick={handleCelebrityClick}
-                  showCinemas={showCinemas}
-                  showFilming={showFilming}
-                  showCelebrities={showCelebrities}
-                />
+              <ErrorBoundary
+                fallback={
+                  <div className="h-[400px] w-full rounded-lg border bg-muted/30 flex items-center justify-center">
+                    <div className="text-center text-sm text-muted-foreground">
+                      Map failed to load. Please try again or use List view.
+                    </div>
+                  </div>
+                }
+              >
+                <Suspense
+                  fallback={
+                    <div className="h-[400px] w-full rounded-lg border bg-muted/30 animate-pulse" />
+                  }
+                >
+                  <LocalMapLazy
+                    center={currentCoords}
+                    radius={radius[0] * 1.60934}
+                    cinemas={allCinemas}
+                    filmingLocations={filmingLocations}
+                    celebrities={celebrities}
+                    onCinemaClick={handleCinemaClick}
+                    onFilmingLocationClick={handleFilmingLocationClick}
+                    onCelebrityClick={handleCelebrityClick}
+                    showCinemas={showCinemas}
+                    showFilming={showFilming}
+                    showCelebrities={showCelebrities}
+                  />
+                </Suspense>
               </ErrorBoundary>
             </div>
           )}
