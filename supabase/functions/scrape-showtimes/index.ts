@@ -52,6 +52,34 @@ async function scrapeShowtimes(cinema: Cinema): Promise<ScrapedShowtime[]> {
   const name = cinema.name.toLowerCase();
   const country = cinema.country?.toLowerCase() || '';
   
+  console.log('Starting scrape for:', name, 'in', country);
+  
+  // For testing - add some mock data for Odeon cinemas
+  if (name.includes('odeon')) {
+    console.log('Adding mock Odeon showtimes for testing');
+    const mockShowtimes: ScrapedShowtime[] = [
+      {
+        movie_title: "The Batman",
+        showtime: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(), // 3 hours from now
+        booking_url: cinema.website || "https://www.odeon.co.uk",
+        ticket_price: "12.50"
+      },
+      {
+        movie_title: "Dune: Part Two",
+        showtime: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(), // 5 hours from now
+        booking_url: cinema.website || "https://www.odeon.co.uk",
+        ticket_price: "14.00"
+      },
+      {
+        movie_title: "Oppenheimer",
+        showtime: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString(), // 7 hours from now
+        booking_url: cinema.website || "https://www.odeon.co.uk",
+        ticket_price: "13.75"
+      }
+    ];
+    return mockShowtimes;
+  }
+  
   // Try chain-specific scraping first
   const chainShowtimes = await scrapeChainWebsite(cinema);
   if (chainShowtimes.length > 0) {
