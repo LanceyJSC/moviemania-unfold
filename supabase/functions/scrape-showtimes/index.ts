@@ -166,44 +166,60 @@ function parseShowtimesFromHTML(html: string, baseUrl: string): ScrapedShowtime[
   const showtimes: ScrapedShowtime[] = [];
   
   try {
+    console.log('Parsing HTML for showtimes, length:', html.length);
+    
     // Look for JSON-LD structured data
     const jsonLdMatches = html.match(/<script[^>]*type=['"]application\/ld\+json['"][^>]*>(.*?)<\/script>/gsi);
     if (jsonLdMatches) {
+      console.log('Found JSON-LD scripts:', jsonLdMatches.length);
       for (const match of jsonLdMatches) {
         const jsonContent = match.replace(/<script[^>]*>/i, '').replace(/<\/script>/i, '');
         try {
           const data = JSON.parse(jsonContent);
           const extracted = extractFromStructuredData(data);
           showtimes.push(...extracted);
+          console.log('Extracted from JSON-LD:', extracted.length);
         } catch (e) {
           console.log('Failed to parse JSON-LD:', e);
         }
       }
     }
     
-    // Look for common showtime patterns
-    const timePatterns = [
-      /(\d{1,2}:\d{2})\s*(AM|PM|am|pm)/g,
-      /(\d{1,2}:\d{2})/g
-    ];
+    // Look for Odeon-specific patterns
+    if (baseUrl.includes('odeon.co.uk')) {
+      console.log('Using Odeon-specific parsing');
+      const odeonShowtimes = parseOdeonSpecific(html, baseUrl);
+      showtimes.push(...odeonShowtimes);
+    }
     
-    for (const pattern of timePatterns) {
-      const matches = html.match(pattern);
-      if (matches && matches.length > 0) {
-        matches.slice(0, 10).forEach((time, index) => {
-          const today = new Date();
-          const showtime = new Date(today.toDateString() + ' ' + time);
-          
-          showtimes.push({
-            movie_title: `Movie ${index + 1}`,
-            showtime: showtime.toISOString(),
-            booking_url: baseUrl
+    // Look for common showtime patterns if no structured data found
+    if (showtimes.length === 0) {
+      console.log('No structured data found, trying common patterns');
+      const timePatterns = [
+        /(\d{1,2}:\d{2})\s*(AM|PM|am|pm)/g,
+        /(\d{1,2}:\d{2})/g
+      ];
+      
+      for (const pattern of timePatterns) {
+        const matches = html.match(pattern);
+        if (matches && matches.length > 0) {
+          console.log('Found time matches:', matches.length);
+          matches.slice(0, 10).forEach((time, index) => {
+            const today = new Date();
+            const showtime = new Date(today.toDateString() + ' ' + time);
+            
+            showtimes.push({
+              movie_title: `Movie ${index + 1}`,
+              showtime: showtime.toISOString(),
+              booking_url: baseUrl
+            });
           });
-        });
-        break;
+          break;
+        }
       }
     }
     
+    console.log('Total showtimes found:', showtimes.length);
     return showtimes;
   } catch (error) {
     console.error('HTML parsing failed:', error);
@@ -265,10 +281,84 @@ function inferWebsite(name: string, city: string, country?: string): string | nu
 }
 
 // Chain-specific scrapers (simplified implementations)
+function parseOdeonSpecific(html: string, baseUrl: string): ScrapedShowtime[] {
+  const showtimes: ScrapedShowtime[] = [];
+  
+  try {
+    // Look for Odeon's showtime structure
+    // They often use data attributes or specific class patterns
+    const movieMatches = html.match(/data-film-title="([^"]+)"/g);
+    const timeMatches = html.match(/data-start-time="([^"]+)"/g);
+    
+    if (movieMatches && timeMatches) {
+      const movies = movieMatches.map(m => m.match(/data-film-title="([^"]+)"/)?.[1]).filter(Boolean);
+      const times = timeMatches.map(t => t.match(/data-start-time="([^"]+)"/)?.[1]).filter(Boolean);
+      
+      movies.forEach((movie, index) => {
+        if (times[index]) {
+          showtimes.push({
+            movie_title: movie!,
+            showtime: new Date(times[index]!).toISOString(),
+            booking_url: baseUrl
+          });
+        }
+      });
+    }
+    
+    // Alternative pattern for Odeon
+    const showtimeBlocks = html.match(/<div[^>]*class="[^"]*showtime[^"]*"[^>]*>.*?<\/div>/gsi);
+    if (showtimeBlocks) {
+      showtimeBlocks.forEach((block, index) => {
+        const timeMatch = block.match(/(\d{1,2}:\d{2})/);
+        if (timeMatch) {
+          const today = new Date();
+          const showtime = new Date(today.toDateString() + ' ' + timeMatch[1]);
+          
+          showtimes.push({
+            movie_title: `Featured Movie ${index + 1}`,
+            showtime: showtime.toISOString(),
+            booking_url: baseUrl
+          });
+        }
+      });
+    }
+    
+    console.log('Odeon-specific parsing found:', showtimes.length, 'showtimes');
+    return showtimes;
+  } catch (error) {
+    console.error('Odeon-specific parsing failed:', error);
+    return [];
+  }
+}
+
 async function scrapeOdeon(cinema: Cinema): Promise<ScrapedShowtime[]> {
-  const citySlug = cinema.city.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const url = `https://www.odeon.co.uk/cinemas/${citySlug}/`;
-  return await scrapeWebsite(url, cinema);
+  try {
+    console.log('Scraping Odeon cinema:', cinema.name, cinema.city);
+    
+    // Try multiple URL patterns for Odeon
+    const citySlug = cinema.city.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const urls = [
+      cinema.website, // Use provided website first
+      `https://www.odeon.co.uk/cinemas/${citySlug}/`,
+      `https://www.odeon.co.uk/cinemas/${citySlug}`,
+      `https://www.odeon.co.uk/cinemas/${cinema.city.toLowerCase()}/`
+    ].filter(Boolean);
+
+    for (const url of urls) {
+      console.log('Trying Odeon URL:', url);
+      const showtimes = await scrapeWebsite(url!, cinema);
+      if (showtimes.length > 0) {
+        console.log('Found showtimes from Odeon URL:', url, showtimes.length);
+        return showtimes;
+      }
+    }
+    
+    console.log('No showtimes found from any Odeon URL');
+    return [];
+  } catch (error) {
+    console.error('Error scraping Odeon:', error);
+    return [];
+  }
 }
 
 async function scrapeVue(cinema: Cinema): Promise<ScrapedShowtime[]> {
