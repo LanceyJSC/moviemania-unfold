@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   Users, 
   UserPlus, 
@@ -13,7 +14,8 @@ import {
   Search,
   RefreshCw,
   Trophy,
-  Percent
+  Percent,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +31,8 @@ import { FriendCompatibilityCard } from "@/components/social/FriendCompatibility
 import { WeeklyChallengesCard } from "@/components/social/WeeklyChallengesCard";
 import { LeaderboardCard } from "@/components/social/LeaderboardCard";
 import { MovieNightPollCard } from "@/components/social/MovieNightPollCard";
+import { WatchingInsightsCard } from "@/components/social/WatchingInsightsCard";
+import { ShareStatsCard } from "@/components/social/ShareStatsCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriendCompatibility } from "@/hooks/useFriendCompatibility";
 import { useWeeklyChallenges } from "@/hooks/useWeeklyChallenges";
@@ -274,11 +278,12 @@ export default function Social() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-card/50">
+          <TabsList className="grid w-full grid-cols-6 bg-card/50">
             <TabsTrigger value="discover"><Sparkles className="h-4 w-4" /></TabsTrigger>
             <TabsTrigger value="friends"><Users className="h-4 w-4" /></TabsTrigger>
             <TabsTrigger value="compatibility"><Percent className="h-4 w-4" /></TabsTrigger>
             <TabsTrigger value="challenges"><Target className="h-4 w-4" /></TabsTrigger>
+            <TabsTrigger value="insights"><BarChart3 className="h-4 w-4" /></TabsTrigger>
             <TabsTrigger value="activity"><Zap className="h-4 w-4" /></TabsTrigger>
           </TabsList>
 
@@ -349,13 +354,14 @@ export default function Social() {
                 ) : (
                   <div className="space-y-2">
                     {connections.map(conn => (
-                      <div key={conn.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+                      <Link key={conn.id} to={`/user/${conn.following_id}`} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
                         <Avatar><AvatarImage src={conn.profiles?.avatar_url} /><AvatarFallback>{conn.profiles?.username?.charAt(0)}</AvatarFallback></Avatar>
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">{conn.profiles?.full_name || conn.profiles?.username}</p>
                           <p className="text-sm text-muted-foreground">@{conn.profiles?.username}</p>
                         </div>
-                      </div>
+                        <Badge variant="outline">View Profile</Badge>
+                      </Link>
                     ))}
                   </div>
                 )}
@@ -389,6 +395,22 @@ export default function Social() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="insights" className="space-y-6">
+            <WatchingInsightsCard />
+            <ShareStatsCard 
+              username={user?.email?.split('@')[0] || 'User'} 
+              stats={{
+                moviesWatched: 0,
+                totalRatings: 0,
+                averageRating: 0,
+                level: 1,
+                xp: 0,
+                achievements: 0,
+                watchHours: 0
+              }} 
+            />
           </TabsContent>
 
           <TabsContent value="activity">
