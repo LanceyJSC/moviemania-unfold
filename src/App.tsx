@@ -34,6 +34,7 @@ import { SocialLists } from "./pages/SocialLists";
 import { SocialAchievements } from "./pages/SocialAchievements";
 import { Recommendations } from "./pages/Recommendations";
 import DiscussionDetail from "./pages/DiscussionDetail";
+import UserProfile from "./pages/UserProfile";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -85,6 +86,7 @@ const App = () => {
                       <Route path="/social" element={<Social />} />
                       <Route path="/social/lists" element={<SocialLists />} />
             <Route path="/social/achievements" element={<SocialAchievements />} />
+            <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/recommendations" element={<Recommendations />} />
             <Route path="/discussion/:id" element={<DiscussionDetail />} />
                       <Route path="/profile" element={<Profile />} />
