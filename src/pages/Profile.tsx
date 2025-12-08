@@ -8,19 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
-import { UserAchievements } from '@/components/UserAchievements';
 import { 
-  Calendar, 
-  Clock, 
   Star, 
   Trophy, 
   Bell, 
   MapPin, 
   List,
   Sparkles,
-  Heart,
   LogOut,
-  User,
   Settings,
   Grid3X3,
   Film
@@ -189,35 +184,32 @@ const Profile = () => {
         {/* Main Content */}
         <div className="space-y-6">
           {activeSection === 'stats' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <UserAchievements />
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Film className="h-5 w-5 text-primary" />
-                    Recent Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mockUserData.recentActivity.map((activity) => (
-                      <div key={activity.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <div className="flex-1">
-                          <p className="font-medium">{activity.title}</p>
-                          <p className="text-sm text-muted-foreground capitalize">{activity.type} • {activity.date}</p>
-                        </div>
-                        {activity.rating && (
-                          <Badge variant="secondary">
-                            <Star className="w-3 h-3 mr-1 fill-current" />
-                            {activity.rating}
-                          </Badge>
-                        )}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Film className="h-5 w-5 text-primary" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockUserData.recentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <div className="flex-1">
+                        <p className="font-medium">{activity.title}</p>
+                        <p className="text-sm text-muted-foreground capitalize">{activity.type} • {activity.date}</p>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                      {activity.rating && (
+                        <Badge variant="secondary">
+                          <Star className="w-3 h-3 mr-1 fill-current" />
+                          {activity.rating}
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {activeSection === 'features' && (
