@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -20,30 +20,33 @@ export type Database = {
           cinema_id: string
           created_at: string
           id: string
-          movie_id: number
+          movie_id: number | null
           movie_title: string
+          scraped_at: string
           showtime: string
-          ticket_price: number | null
+          ticket_price: string | null
         }
         Insert: {
           booking_url?: string | null
           cinema_id: string
           created_at?: string
           id?: string
-          movie_id: number
+          movie_id?: number | null
           movie_title: string
+          scraped_at?: string
           showtime: string
-          ticket_price?: number | null
+          ticket_price?: string | null
         }
         Update: {
           booking_url?: string | null
           cinema_id?: string
           created_at?: string
           id?: string
-          movie_id?: number
+          movie_id?: number | null
           movie_title?: string
+          scraped_at?: string
           showtime?: string
-          ticket_price?: number | null
+          ticket_price?: string | null
         }
         Relationships: [
           {
@@ -57,42 +60,42 @@ export type Database = {
       }
       cinemas: {
         Row: {
-          address: string
-          city: string
-          country: string
+          address: string | null
+          chain: string | null
+          city: string | null
+          country: string | null
           created_at: string
           id: string
-          latitude: number
-          longitude: number
+          latitude: number | null
+          longitude: number | null
           name: string
           phone: string | null
-          updated_at: string
           website: string | null
         }
         Insert: {
-          address: string
-          city: string
-          country: string
+          address?: string | null
+          chain?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
-          latitude: number
-          longitude: number
+          latitude?: number | null
+          longitude?: number | null
           name: string
           phone?: string | null
-          updated_at?: string
           website?: string | null
         }
         Update: {
-          address?: string
-          city?: string
-          country?: string
+          address?: string | null
+          chain?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
-          latitude?: number
-          longitude?: number
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           phone?: string | null
-          updated_at?: string
           website?: string | null
         }
         Relationships: []
@@ -102,55 +105,57 @@ export type Database = {
           club_id: string
           id: string
           joined_at: string
-          role: string | null
+          role: string
           user_id: string
         }
         Insert: {
           club_id: string
           id?: string
           joined_at?: string
-          role?: string | null
+          role?: string
           user_id: string
         }
         Update: {
           club_id?: string
           id?: string
           joined_at?: string
-          role?: string | null
+          role?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "club_memberships_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "movie_clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       community_list_items: {
         Row: {
           added_at: string
-          added_by: string
           id: string
           list_id: string
           movie_id: number
           movie_poster: string | null
           movie_title: string
-          movie_type: string
         }
         Insert: {
           added_at?: string
-          added_by: string
           id?: string
           list_id: string
           movie_id: number
           movie_poster?: string | null
           movie_title: string
-          movie_type?: string
         }
         Update: {
           added_at?: string
-          added_by?: string
           id?: string
           list_id?: string
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string
-          movie_type?: string
         }
         Relationships: [
           {
@@ -170,7 +175,6 @@ export type Database = {
           is_collaborative: boolean | null
           is_public: boolean | null
           title: string
-          updated_at: string
           user_id: string
         }
         Insert: {
@@ -180,7 +184,6 @@ export type Database = {
           is_collaborative?: boolean | null
           is_public?: boolean | null
           title: string
-          updated_at?: string
           user_id: string
         }
         Update: {
@@ -190,41 +193,7 @@ export type Database = {
           is_collaborative?: boolean | null
           is_public?: boolean | null
           title?: string
-          updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      direct_messages: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          message_type: string | null
-          movie_data: Json | null
-          read_at: string | null
-          recipient_id: string
-          sender_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          message_type?: string | null
-          movie_data?: Json | null
-          read_at?: string | null
-          recipient_id: string
-          sender_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          message_type?: string | null
-          movie_data?: Json | null
-          read_at?: string | null
-          recipient_id?: string
-          sender_id?: string
         }
         Relationships: []
       }
@@ -235,8 +204,7 @@ export type Database = {
           id: string
           parent_comment_id: string | null
           thread_id: string
-          updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           content: string
@@ -244,8 +212,7 @@ export type Database = {
           id?: string
           parent_comment_id?: string | null
           thread_id: string
-          updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           content?: string
@@ -253,8 +220,7 @@ export type Database = {
           id?: string
           parent_comment_id?: string | null
           thread_id?: string
-          updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -275,54 +241,61 @@ export type Database = {
       }
       discussion_threads: {
         Row: {
-          club_id: string | null
+          club_id: string
+          content: string | null
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string | null
           id: string
           movie_id: number | null
-          movie_title: string
-          movie_type: string
+          movie_poster: string | null
+          movie_title: string | null
           title: string
-          updated_at: string
         }
         Insert: {
-          club_id?: string | null
+          club_id: string
+          content?: string | null
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description?: string | null
           id?: string
           movie_id?: number | null
-          movie_title: string
-          movie_type?: string
+          movie_poster?: string | null
+          movie_title?: string | null
           title: string
-          updated_at?: string
         }
         Update: {
-          club_id?: string | null
+          club_id?: string
+          content?: string | null
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           movie_id?: number | null
-          movie_title?: string
-          movie_type?: string
+          movie_poster?: string | null
+          movie_title?: string | null
           title?: string
-          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "discussion_threads_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "movie_clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       enhanced_watchlist_items: {
         Row: {
           added_at: string
           collection_id: string | null
-          expected_watch_date: string | null
           id: string
           mood_tags: string[] | null
           movie_id: number
           movie_poster: string | null
           movie_title: string
-          personal_notes: string | null
+          notes: string | null
           priority: string | null
           progress_percent: number | null
           user_id: string
@@ -331,13 +304,12 @@ export type Database = {
         Insert: {
           added_at?: string
           collection_id?: string | null
-          expected_watch_date?: string | null
           id?: string
           mood_tags?: string[] | null
           movie_id: number
           movie_poster?: string | null
           movie_title: string
-          personal_notes?: string | null
+          notes?: string | null
           priority?: string | null
           progress_percent?: number | null
           user_id: string
@@ -346,13 +318,12 @@ export type Database = {
         Update: {
           added_at?: string
           collection_id?: string | null
-          expected_watch_date?: string | null
           id?: string
           mood_tags?: string[] | null
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string
-          personal_notes?: string | null
+          notes?: string | null
           priority?: string | null
           progress_percent?: number | null
           user_id?: string
@@ -360,7 +331,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "enhanced_watchlist_items_collection_id_fkey"
+            foreignKeyName: "fk_collection"
             columns: ["collection_id"]
             isOneToOne: false
             referencedRelation: "watchlist_collections"
@@ -375,9 +346,9 @@ export type Database = {
           created_at: string
           friend_id: string
           id: string
-          movie_id: number
+          movie_id: number | null
           movie_poster: string | null
-          movie_title: string
+          movie_title: string | null
           user_id: string
         }
         Insert: {
@@ -386,9 +357,9 @@ export type Database = {
           created_at?: string
           friend_id: string
           id?: string
-          movie_id: number
+          movie_id?: number | null
           movie_poster?: string | null
-          movie_title: string
+          movie_title?: string | null
           user_id: string
         }
         Update: {
@@ -397,9 +368,9 @@ export type Database = {
           created_at?: string
           friend_id?: string
           id?: string
-          movie_id?: number
+          movie_id?: number | null
           movie_poster?: string | null
-          movie_title?: string
+          movie_title?: string | null
           user_id?: string
         }
         Relationships: []
@@ -437,152 +408,39 @@ export type Database = {
       movie_clubs: {
         Row: {
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string | null
-          genre: string
+          genre: string | null
           id: string
-          is_public: boolean | null
+          is_public: boolean
           name: string
-          updated_at: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description?: string | null
-          genre: string
+          genre?: string | null
           id?: string
-          is_public?: boolean | null
+          is_public?: boolean
           name: string
-          updated_at?: string
         }
         Update: {
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string | null
-          genre?: string
+          genre?: string | null
           id?: string
-          is_public?: boolean | null
+          is_public?: boolean
           name?: string
-          updated_at?: string
         }
         Relationships: []
-      }
-      movie_discussions: {
-        Row: {
-          content: string
-          created_at: string
-          created_by: string
-          id: string
-          is_spoiler: boolean | null
-          movie_id: number
-          movie_title: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          created_by: string
-          id?: string
-          is_spoiler?: boolean | null
-          movie_id: number
-          movie_title: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          created_by?: string
-          id?: string
-          is_spoiler?: boolean | null
-          movie_id?: number
-          movie_title?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      movie_preferences: {
-        Row: {
-          created_at: string
-          id: string
-          movie_id: number
-          movie_poster: string | null
-          movie_title: string
-          preference: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          movie_id: number
-          movie_poster?: string | null
-          movie_title: string
-          preference: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          movie_id?: number
-          movie_poster?: string | null
-          movie_title?: string
-          preference?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      movie_streaming_availability: {
-        Row: {
-          available_from: string | null
-          available_until: string | null
-          created_at: string
-          id: string
-          movie_id: number
-          movie_title: string
-          platform_id: string
-          streaming_url: string | null
-          updated_at: string
-        }
-        Insert: {
-          available_from?: string | null
-          available_until?: string | null
-          created_at?: string
-          id?: string
-          movie_id: number
-          movie_title: string
-          platform_id: string
-          streaming_url?: string | null
-          updated_at?: string
-        }
-        Update: {
-          available_from?: string | null
-          available_until?: string | null
-          created_at?: string
-          id?: string
-          movie_id?: number
-          movie_title?: string
-          platform_id?: string
-          streaming_url?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "movie_streaming_availability_platform_id_fkey"
-            columns: ["platform_id"]
-            isOneToOne: false
-            referencedRelation: "streaming_platforms"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       notifications: {
         Row: {
           created_at: string
           data: Json | null
           id: string
-          message: string
+          message: string | null
           read_at: string | null
           title: string
           type: string
@@ -592,7 +450,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           id?: string
-          message: string
+          message?: string | null
           read_at?: string | null
           title: string
           type: string
@@ -602,7 +460,7 @@ export type Database = {
           created_at?: string
           data?: Json | null
           id?: string
-          message?: string
+          message?: string | null
           read_at?: string | null
           title?: string
           type?: string
@@ -617,7 +475,7 @@ export type Database = {
           full_name: string | null
           id: string
           updated_at: string
-          username: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -625,7 +483,7 @@ export type Database = {
           full_name?: string | null
           id: string
           updated_at?: string
-          username: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -633,7 +491,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
-          username?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -644,7 +502,6 @@ export type Database = {
           movie_id: number
           movie_title: string
           rating: number
-          updated_at: string
           user_id: string
         }
         Insert: {
@@ -653,7 +510,6 @@ export type Database = {
           movie_id: number
           movie_title: string
           rating: number
-          updated_at?: string
           user_id: string
         }
         Update: {
@@ -662,88 +518,37 @@ export type Database = {
           movie_id?: number
           movie_title?: string
           rating?: number
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
-      }
-      review_interactions: {
-        Row: {
-          created_at: string
-          id: string
-          interaction_type: string
-          review_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          interaction_type: string
-          review_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          interaction_type?: string
-          review_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_interactions_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "user_reviews"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       social_connections: {
         Row: {
           created_at: string
-          follower_id: string
-          following_id: string
+          follower_id: string | null
+          following_id: string | null
+          friend_id: string | null
           id: string
           status: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
-          follower_id: string
-          following_id: string
+          follower_id?: string | null
+          following_id?: string | null
+          friend_id?: string | null
           id?: string
           status?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
-          follower_id?: string
-          following_id?: string
+          follower_id?: string | null
+          following_id?: string | null
+          friend_id?: string | null
           id?: string
           status?: string
-        }
-        Relationships: []
-      }
-      streaming_platforms: {
-        Row: {
-          created_at: string
-          id: string
-          logo_url: string | null
-          name: string
-          website_url: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          logo_url?: string | null
-          name: string
-          website_url?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          logo_url?: string | null
-          name?: string
-          website_url?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -773,33 +578,33 @@ export type Database = {
       }
       user_activities: {
         Row: {
+          activity_data: Json | null
           activity_type: string
           created_at: string
           id: string
-          metadata: Json | null
-          movie_id: number
-          movie_title: string
-          movie_type: string
+          movie_id: number | null
+          movie_poster: string | null
+          movie_title: string | null
           user_id: string
         }
         Insert: {
+          activity_data?: Json | null
           activity_type: string
           created_at?: string
           id?: string
-          metadata?: Json | null
-          movie_id: number
-          movie_title: string
-          movie_type?: string
+          movie_id?: number | null
+          movie_poster?: string | null
+          movie_title?: string | null
           user_id: string
         }
         Update: {
+          activity_data?: Json | null
           activity_type?: string
           created_at?: string
           id?: string
-          metadata?: Json | null
-          movie_id?: number
-          movie_title?: string
-          movie_type?: string
+          movie_id?: number | null
+          movie_poster?: string | null
+          movie_title?: string | null
           user_id?: string
         }
         Relationships: []
@@ -844,7 +649,6 @@ export type Database = {
           preferred_actors: string[] | null
           preferred_directors: string[] | null
           preferred_genres: string[] | null
-          push_notifications: boolean | null
           updated_at: string
           user_id: string
         }
@@ -860,7 +664,6 @@ export type Database = {
           preferred_actors?: string[] | null
           preferred_directors?: string[] | null
           preferred_genres?: string[] | null
-          push_notifications?: boolean | null
           updated_at?: string
           user_id: string
         }
@@ -876,8 +679,37 @@ export type Database = {
           preferred_actors?: string[] | null
           preferred_directors?: string[] | null
           preferred_genres?: string[] | null
-          push_notifications?: boolean | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_ratings: {
+        Row: {
+          created_at: string
+          id: string
+          movie_id: number
+          movie_poster: string | null
+          movie_title: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          movie_id: number
+          movie_poster?: string | null
+          movie_title: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          movie_id?: number
+          movie_poster?: string | null
+          movie_title?: string
+          rating?: number
           user_id?: string
         }
         Relationships: []
@@ -885,12 +717,11 @@ export type Database = {
       user_reviews: {
         Row: {
           created_at: string
-          helpful_count: number | null
           id: string
           is_spoiler: boolean | null
           movie_id: number
+          movie_poster: string | null
           movie_title: string
-          movie_type: string
           rating: number | null
           review_text: string | null
           updated_at: string
@@ -898,12 +729,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          helpful_count?: number | null
           id?: string
           is_spoiler?: boolean | null
           movie_id: number
+          movie_poster?: string | null
           movie_title: string
-          movie_type?: string
           rating?: number | null
           review_text?: string | null
           updated_at?: string
@@ -911,12 +741,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          helpful_count?: number | null
           id?: string
           is_spoiler?: boolean | null
           movie_id?: number
+          movie_poster?: string | null
           movie_title?: string
-          movie_type?: string
           rating?: number | null
           review_text?: string | null
           updated_at?: string
@@ -926,22 +755,16 @@ export type Database = {
       }
       user_roles: {
         Row: {
-          assigned_at: string
-          assigned_by: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
-          assigned_at?: string
-          assigned_by?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
-          assigned_at?: string
-          assigned_by?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -950,6 +773,7 @@ export type Database = {
       }
       user_stats: {
         Row: {
+          activity_streak: number | null
           average_rating: number | null
           created_at: string
           experience_points: number | null
@@ -957,14 +781,18 @@ export type Database = {
           id: string
           last_activity_date: string | null
           level: number | null
+          movies_watched: number | null
+          reviews_written: number | null
           total_hours_watched: number | null
           total_movies_watched: number | null
           total_ratings: number | null
+          total_watch_time: number | null
           updated_at: string
           user_id: string
           watching_streak: number | null
         }
         Insert: {
+          activity_streak?: number | null
           average_rating?: number | null
           created_at?: string
           experience_points?: number | null
@@ -972,14 +800,18 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number | null
+          movies_watched?: number | null
+          reviews_written?: number | null
           total_hours_watched?: number | null
           total_movies_watched?: number | null
           total_ratings?: number | null
+          total_watch_time?: number | null
           updated_at?: string
           user_id: string
           watching_streak?: number | null
         }
         Update: {
+          activity_streak?: number | null
           average_rating?: number | null
           created_at?: string
           experience_points?: number | null
@@ -987,9 +819,12 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number | null
+          movies_watched?: number | null
+          reviews_written?: number | null
           total_hours_watched?: number | null
           total_movies_watched?: number | null
           total_ratings?: number | null
+          total_watch_time?: number | null
           updated_at?: string
           user_id?: string
           watching_streak?: number | null
@@ -999,45 +834,33 @@ export type Database = {
       watch_parties: {
         Row: {
           created_at: string
-          description: string | null
           host_id: string
           id: string
-          is_public: boolean | null
           max_participants: number | null
-          movie_id: number
           movie_title: string
-          party_code: string | null
           party_name: string
           scheduled_at: string
-          status: string | null
+          status: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
           host_id: string
           id?: string
-          is_public?: boolean | null
           max_participants?: number | null
-          movie_id: number
           movie_title: string
-          party_code?: string | null
           party_name: string
           scheduled_at: string
-          status?: string | null
+          status?: string
         }
         Update: {
           created_at?: string
-          description?: string | null
           host_id?: string
           id?: string
-          is_public?: boolean | null
           max_participants?: number | null
-          movie_id?: number
           movie_title?: string
-          party_code?: string | null
           party_name?: string
           scheduled_at?: string
-          status?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -1046,21 +869,18 @@ export type Database = {
           id: string
           joined_at: string
           party_id: string
-          status: string | null
           user_id: string
         }
         Insert: {
           id?: string
           joined_at?: string
           party_id: string
-          status?: string | null
           user_id: string
         }
         Update: {
           id?: string
           joined_at?: string
           party_id?: string
-          status?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1073,48 +893,9 @@ export type Database = {
           },
         ]
       }
-      watch_progress: {
-        Row: {
-          completed: boolean | null
-          episode_number: number | null
-          id: string
-          last_watched: string
-          movie_id: number
-          movie_title: string
-          movie_type: string
-          progress_percent: number | null
-          season_number: number | null
-          user_id: string
-        }
-        Insert: {
-          completed?: boolean | null
-          episode_number?: number | null
-          id?: string
-          last_watched?: string
-          movie_id: number
-          movie_title: string
-          movie_type?: string
-          progress_percent?: number | null
-          season_number?: number | null
-          user_id: string
-        }
-        Update: {
-          completed?: boolean | null
-          episode_number?: number | null
-          id?: string
-          last_watched?: string
-          movie_id?: number
-          movie_title?: string
-          movie_type?: string
-          progress_percent?: number | null
-          season_number?: number | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       watchlist: {
         Row: {
-          added_at: string
+          created_at: string
           id: string
           list_type: string
           movie_id: number
@@ -1123,16 +904,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          added_at?: string
+          created_at?: string
           id?: string
-          list_type: string
+          list_type?: string
           movie_id: number
           movie_poster?: string | null
           movie_title: string
           user_id: string
         }
         Update: {
-          added_at?: string
+          created_at?: string
           id?: string
           list_type?: string
           movie_id?: number
@@ -1181,43 +962,8 @@ export type Database = {
     }
     Functions: {
       generate_friend_suggestions: {
-        Args: { p_user_id: string }
+        Args: { p_user_id?: string }
         Returns: undefined
-      }
-      get_friend_rating_comparison: {
-        Args: { p_friend_id: string; p_user_id: string }
-        Returns: {
-          friend_rating: number
-          movie_id: number
-          movie_title: string
-          rating_difference: number
-          user_rating: number
-        }[]
-      }
-      get_friend_watchlist_comparison: {
-        Args: { p_friend_id: string; p_user_id: string }
-        Returns: {
-          friend_list_type: string
-          in_friend_watchlist: boolean
-          in_user_watchlist: boolean
-          movie_id: number
-          movie_poster: string
-          movie_title: string
-          user_list_type: string
-        }[]
-      }
-      get_mutual_friends: {
-        Args: { p_user_id: string }
-        Returns: {
-          connection_date: string
-          friend_avatar_url: string
-          friend_id: string
-          friend_username: string
-        }[]
-      }
-      get_user_role: {
-        Args: { _user_id: string }
-        Returns: Database["public"]["Enums"]["app_role"]
       }
       has_role: {
         Args: {

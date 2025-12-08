@@ -359,8 +359,9 @@ export const SocialFriends = () => {
         .insert({
           follower_id: user.id,
           following_id: targetUserId,
+          friend_id: targetUserId,
           status: 'pending'
-        });
+        } as any);
 
       console.log('Friend request result:', error);
 
