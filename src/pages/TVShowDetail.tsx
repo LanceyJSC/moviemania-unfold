@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen } from "lucide-react";
+import AddToDiaryButton from "@/components/AddToDiaryButton";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
@@ -261,6 +262,18 @@ const TVShowDetail = () => {
               <Share className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+
+        {/* Add to Diary */}
+        <div className="mb-6">
+          <AddToDiaryButton
+            type="tv"
+            id={tvShowId}
+            title={tvShow.name}
+            poster={tvShow.poster_path}
+            variant="outline"
+            className="w-full"
+          />
         </div>
 
         {/* Rating */}
