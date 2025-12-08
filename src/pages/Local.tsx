@@ -1,7 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Navigation } from '@/components/Navigation';
-
-import { DiscussionModal } from '@/components/DiscussionModal';
 import { CinemaCard } from '@/components/CinemaCard';
 import { CinemaShowtimes } from '@/components/CinemaShowtimes';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -79,8 +77,6 @@ const Local = () => {
   const [locationName, setLocationName] = useState('');
   const [showSaveLocation, setShowSaveLocation] = useState(false);
   const [autoAttempted, setAutoAttempted] = useState(false);
-  const [selectedDiscussion, setSelectedDiscussion] = useState<string | null>(null);
-  const [isDiscussionModalOpen, setIsDiscussionModalOpen] = useState(false);
   const [selectedCinema, setSelectedCinema] = useState<any>(null);
   const [isShowtimesModalOpen, setIsShowtimesModalOpen] = useState(false);
 
@@ -795,15 +791,6 @@ const Local = () => {
       <Navigation />
 
       {/* Modals */}
-      {selectedDiscussion && (
-        <DiscussionModal
-          isOpen={isDiscussionModalOpen}
-          onClose={() => setIsDiscussionModalOpen(false)}
-          discussionId={selectedDiscussion}
-        >
-          <div className="p-4">Discussion content for {selectedDiscussion}</div>
-        </DiscussionModal>
-      )}
       
       <CinemaShowtimes
         cinema={selectedCinema}

@@ -8,14 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
-import { SocialActivityFeed } from '@/components/SocialActivityFeed';
 import { UserAchievements } from '@/components/UserAchievements';
 import { 
   Calendar, 
   Clock, 
   Star, 
   Trophy, 
-  Users, 
   Bell, 
   MapPin, 
   List,
@@ -24,7 +22,6 @@ import {
   LogOut,
   User,
   Settings,
-  UserPlus,
   Grid3X3,
   Film
 } from 'lucide-react';
@@ -53,7 +50,7 @@ const mockUserData = {
 };
 
 const Profile = () => {
-  const [activeSection, setActiveSection] = useState('timeline');
+  const [activeSection, setActiveSection] = useState('stats');
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const { profile, updateProfile, loading } = useProfile();
@@ -76,9 +73,6 @@ const Profile = () => {
         break;
       case 'watchlist':
         navigate('/watchlist');
-        break;
-      case 'social':
-        navigate('/social');
         break;
       default:
         break;
@@ -115,13 +109,13 @@ const Profile = () => {
         {/* Navigation Buttons */}
         <div className="flex flex-wrap gap-2 mb-6">
           <Button
-            variant={activeSection === 'timeline' ? 'default' : 'outline'}
+            variant={activeSection === 'stats' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setActiveSection('timeline')}
+            onClick={() => setActiveSection('stats')}
             className="flex items-center gap-2"
           >
-            <Clock className="h-4 w-4" />
-            Timeline
+            <Trophy className="h-4 w-4" />
+            Stats
           </Button>
           <Button
             variant={activeSection === 'features' ? 'default' : 'outline'}
@@ -131,15 +125,6 @@ const Profile = () => {
           >
             <Grid3X3 className="h-4 w-4" />
             Features
-          </Button>
-          <Button
-            variant={activeSection === 'friends' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setActiveSection('friends')}
-            className="flex items-center gap-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            Friends
           </Button>
           <Button
             variant={activeSection === 'settings' ? 'default' : 'outline'}
@@ -203,73 +188,35 @@ const Profile = () => {
 
         {/* Main Content */}
         <div className="space-y-6">
-          {activeSection === 'timeline' && (
+          {activeSection === 'stats' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SocialActivityFeed />
               <UserAchievements />
-            </div>
-          )}
-
-          {activeSection === 'friends' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <UserPlus className="h-5 w-5 text-primary" />
-                Friends & Social
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
-                      onClick={() => navigate('/social')}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <Users className="h-8 w-8 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Social Hub</CardTitle>
-                        <CardDescription>Connect with movie enthusiasts and manage your watchlist</CardDescription>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Film className="h-5 w-5 text-primary" />
+                    Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockUserData.recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                        <div className="flex-1">
+                          <p className="font-medium">{activity.title}</p>
+                          <p className="text-sm text-muted-foreground capitalize">{activity.type} • {activity.date}</p>
+                        </div>
+                        {activity.rating && (
+                          <Badge variant="secondary">
+                            <Star className="w-3 h-3 mr-1 fill-current" />
+                            {activity.rating}
+                          </Badge>
+                        )}
                       </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
-                      onClick={() => navigate('/social/lists')}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <List className="h-8 w-8 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Social Lists</CardTitle>
-                        <CardDescription>Create shared movie collections</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
-                      onClick={() => navigate('/social/achievements')}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <Trophy className="h-8 w-8 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Achievements</CardTitle>
-                        <CardDescription>View your movie milestones</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
-                      onClick={() => navigate('/recommendations')}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <Sparkles className="h-8 w-8 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">Recommendations</CardTitle>
-                        <CardDescription>AI-powered movie suggestions</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
@@ -328,6 +275,19 @@ const Profile = () => {
                       <div>
                         <CardTitle className="text-lg">Discover</CardTitle>
                         <CardDescription>Find new movies to watch</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => navigate('/recommendations')}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <Sparkles className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">Recommendations</CardTitle>
+                        <CardDescription>AI-powered movie suggestions</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -406,7 +366,7 @@ const Profile = () => {
                     <div className="space-y-2">
                       <p className="font-medium">Notification Settings</p>
                       <p className="text-sm text-muted-foreground">
-                        Manage how you receive updates about new releases, friend activity, and more.
+                        Manage how you receive updates about new releases and more.
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -427,7 +387,7 @@ const Profile = () => {
                     <div className="space-y-2">
                       <p className="font-medium">Export Data</p>
                       <p className="text-sm text-muted-foreground">
-                        Download a copy of your watchlist, ratings, and activity data.
+                        Download a copy of your watchlist, ratings, and reviews.
                       </p>
                     </div>
                     <div className="space-y-2">

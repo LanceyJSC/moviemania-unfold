@@ -28,13 +28,7 @@ import Local from "./pages/Local";
 import Notifications from "./pages/Notifications";
 import { DiscoverMovies } from "./pages/DiscoverMovies";
 import { DiscoverTVShows } from "./pages/DiscoverTVShows";
-import { SocialFriends } from "./pages/SocialFriends";
-import Social from "./pages/Social";
-import { SocialLists } from "./pages/SocialLists";
-import { SocialAchievements } from "./pages/SocialAchievements";
 import { Recommendations } from "./pages/Recommendations";
-import DiscussionDetail from "./pages/DiscussionDetail";
-import UserProfile from "./pages/UserProfile";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -76,19 +70,13 @@ const App = () => {
                       <Route path="/actor/:id" element={<ActorDetail />} />
                       <Route path="/category/:category" element={<CategoryPage />} />
                       <Route path="/watchlist" element={<Watchlist />} />
-                       <Route path="/local" element={<Local />} />
-                       <Route path="/cinemas" element={<Cinemas />} />
-                       <Route path="/cinema/:id" element={<CinemaDetail />} />
+                      <Route path="/local" element={<Local />} />
+                      <Route path="/cinemas" element={<Cinemas />} />
+                      <Route path="/cinema/:id" element={<CinemaDetail />} />
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/discover/movies" element={<DiscoverMovies />} />
                       <Route path="/discover/tv-shows" element={<DiscoverTVShows />} />
-                      <Route path="/social/friends" element={<Social />} />
-                      <Route path="/social" element={<Social />} />
-                      <Route path="/social/lists" element={<SocialLists />} />
-            <Route path="/social/achievements" element={<SocialAchievements />} />
-            <Route path="/user/:userId" element={<UserProfile />} />
-            <Route path="/recommendations" element={<Recommendations />} />
-            <Route path="/discussion/:id" element={<DiscussionDetail />} />
+                      <Route path="/recommendations" element={<Recommendations />} />
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/auth" element={<Auth />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
