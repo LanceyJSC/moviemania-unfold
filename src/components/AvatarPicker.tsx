@@ -14,10 +14,13 @@ interface AvatarOption {
   category: string;
 }
 
-// Grid is 14 columns x 9 rows
+// Grid is 14 columns x 9 rows - each avatar is ~110px with the circle
 const COLS = 14;
 const ROWS = 9;
-const AVATAR_SIZE = 110; // approximate size of each avatar in the sprite
+const SPRITE_WIDTH = 1540;
+const SPRITE_HEIGHT = 990;
+const CELL_WIDTH = SPRITE_WIDTH / COLS;
+const CELL_HEIGHT = SPRITE_HEIGHT / ROWS;
 
 const avatarOptions: AvatarOption[] = [
   // Row 1 - Star Wars, Star Trek, LOTR, Harry Potter, Doctor Who
@@ -190,15 +193,21 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
     }
   };
 
-  // Calculate background position for sprite using percentage
+  // Calculate background position for sprite - pixel-based for accuracy
   const getAvatarStyle = (row: number, col: number, size: number = 56) => {
-    const xPercent = (col / (COLS - 1)) * 100;
-    const yPercent = (row / (ROWS - 1)) * 100;
+    // Scale factor from original cell size to display size
+    const scale = size / CELL_WIDTH;
+    const scaledSpriteWidth = SPRITE_WIDTH * scale;
+    const scaledSpriteHeight = SPRITE_HEIGHT * scale;
+    
+    // Position to center of each cell
+    const xPos = col * CELL_WIDTH * scale;
+    const yPos = row * CELL_HEIGHT * scale;
     
     return {
       backgroundImage: `url(${avatarSprite})`,
-      backgroundPosition: `${xPercent}% ${yPercent}%`,
-      backgroundSize: `${COLS * 100}%`,
+      backgroundPosition: `-${xPos}px -${yPos}px`,
+      backgroundSize: `${scaledSpriteWidth}px ${scaledSpriteHeight}px`,
       width: `${size}px`,
       height: `${size}px`,
       borderRadius: '50%',
@@ -301,15 +310,18 @@ export const SpriteAvatar = ({ avatarUrl, size = 40, fallback }: { avatarUrl?: s
   const spriteData = parseAvatarUrl(avatarUrl);
 
   if (spriteData) {
-    const xPercent = (spriteData.col / (COLS - 1)) * 100;
-    const yPercent = (spriteData.row / (ROWS - 1)) * 100;
+    const scale = size / CELL_WIDTH;
+    const scaledSpriteWidth = SPRITE_WIDTH * scale;
+    const scaledSpriteHeight = SPRITE_HEIGHT * scale;
+    const xPos = spriteData.col * CELL_WIDTH * scale;
+    const yPos = spriteData.row * CELL_HEIGHT * scale;
 
     return (
       <div
         style={{
           backgroundImage: `url(${avatarSprite})`,
-          backgroundPosition: `${xPercent}% ${yPercent}%`,
-          backgroundSize: `${COLS * 100}%`,
+          backgroundPosition: `-${xPos}px -${yPos}px`,
+          backgroundSize: `${scaledSpriteWidth}px ${scaledSpriteHeight}px`,
           width: `${size}px`,
           height: `${size}px`,
           borderRadius: '50%',
