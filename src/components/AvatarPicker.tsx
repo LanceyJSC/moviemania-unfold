@@ -4,72 +4,164 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Camera, Check } from 'lucide-react';
-
-// Import all avatar images
-import darthVader from '@/assets/avatars/darth-vader.png';
-import babyYoda from '@/assets/avatars/baby-yoda.png';
-import ironMan from '@/assets/avatars/iron-man.png';
-import batman from '@/assets/avatars/batman.png';
-import spiderMan from '@/assets/avatars/spider-man.png';
-import harryPotter from '@/assets/avatars/harry-potter.png';
-import stormtrooper from '@/assets/avatars/stormtrooper.png';
-import captainAmerica from '@/assets/avatars/captain-america.png';
-import wonderWoman from '@/assets/avatars/wonder-woman.png';
-import joker from '@/assets/avatars/joker.png';
-import pikachu from '@/assets/avatars/pikachu.png';
-import groot from '@/assets/avatars/groot.png';
-import deadpool from '@/assets/avatars/deadpool.png';
-import superman from '@/assets/avatars/superman.png';
-import r2d2 from '@/assets/avatars/r2d2.png';
-import blackPanther from '@/assets/avatars/black-panther.png';
-import stitch from '@/assets/avatars/stitch.png';
-import rick from '@/assets/avatars/rick.png';
-import thanos from '@/assets/avatars/thanos.png';
-import thor from '@/assets/avatars/thor.png';
-import hulk from '@/assets/avatars/hulk.png';
-import yoda from '@/assets/avatars/yoda.png';
-import mandalorian from '@/assets/avatars/mandalorian.png';
-import loki from '@/assets/avatars/loki.png';
+import avatarSprite from '@/assets/avatars/avatar-sprite.png';
 
 interface AvatarOption {
   id: string;
   name: string;
-  src: string;
+  row: number;
+  col: number;
   category: string;
 }
 
+// Grid is 14 columns x 9 rows
+const COLS = 14;
+const ROWS = 9;
+const AVATAR_SIZE = 110; // approximate size of each avatar in the sprite
+
 const avatarOptions: AvatarOption[] = [
-  // Star Wars
-  { id: 'darth-vader', name: 'Darth Vader', src: darthVader, category: 'Star Wars' },
-  { id: 'baby-yoda', name: 'Grogu', src: babyYoda, category: 'Star Wars' },
-  { id: 'stormtrooper', name: 'Stormtrooper', src: stormtrooper, category: 'Star Wars' },
-  { id: 'r2d2', name: 'R2-D2', src: r2d2, category: 'Star Wars' },
-  { id: 'yoda', name: 'Yoda', src: yoda, category: 'Star Wars' },
-  { id: 'mandalorian', name: 'Mandalorian', src: mandalorian, category: 'Star Wars' },
+  // Row 1 - Star Wars, Star Trek, LOTR, Harry Potter, Doctor Who
+  { id: 'darth-vader', name: 'Darth Vader', row: 0, col: 0, category: 'Star Wars' },
+  { id: 'baby-yoda', name: 'Grogu', row: 0, col: 1, category: 'Star Wars' },
+  { id: 'stormtrooper', name: 'Stormtrooper', row: 0, col: 2, category: 'Star Wars' },
+  { id: 'r2d2', name: 'R2-D2', row: 0, col: 3, category: 'Star Wars' },
+  { id: 'spock-hand', name: 'Vulcan Salute', row: 0, col: 4, category: 'Star Trek' },
+  { id: 'starfleet', name: 'Starfleet', row: 0, col: 5, category: 'Star Trek' },
+  { id: 'one-ring', name: 'The One Ring', row: 0, col: 6, category: 'Lord of the Rings' },
+  { id: 'wizard-hat', name: 'Wizard Hat', row: 0, col: 7, category: 'Harry Potter' },
+  { id: 'harry-potter', name: 'Harry Potter', row: 0, col: 8, category: 'Harry Potter' },
+  { id: 'sorting-hat', name: 'Sorting Hat', row: 0, col: 9, category: 'Harry Potter' },
+  { id: 'tardis', name: 'TARDIS', row: 0, col: 10, category: 'Doctor Who' },
+  { id: 'target', name: 'Target', row: 0, col: 11, category: 'Misc' },
+  { id: 'neytiri', name: 'Neytiri', row: 0, col: 12, category: 'Avatar' },
+  { id: 'terminator', name: 'Terminator', row: 0, col: 13, category: 'Sci-Fi' },
   
-  // Marvel
-  { id: 'iron-man', name: 'Iron Man', src: ironMan, category: 'Marvel' },
-  { id: 'spider-man', name: 'Spider-Man', src: spiderMan, category: 'Marvel' },
-  { id: 'captain-america', name: 'Captain America', src: captainAmerica, category: 'Marvel' },
-  { id: 'black-panther', name: 'Black Panther', src: blackPanther, category: 'Marvel' },
-  { id: 'deadpool', name: 'Deadpool', src: deadpool, category: 'Marvel' },
-  { id: 'groot', name: 'Groot', src: groot, category: 'Marvel' },
-  { id: 'thanos', name: 'Thanos', src: thanos, category: 'Marvel' },
-  { id: 'thor', name: 'Thor', src: thor, category: 'Marvel' },
-  { id: 'hulk', name: 'Hulk', src: hulk, category: 'Marvel' },
-  { id: 'loki', name: 'Loki', src: loki, category: 'Marvel' },
-  
-  // DC
-  { id: 'batman', name: 'Batman', src: batman, category: 'DC' },
-  { id: 'superman', name: 'Superman', src: superman, category: 'DC' },
-  { id: 'wonder-woman', name: 'Wonder Woman', src: wonderWoman, category: 'DC' },
-  { id: 'joker', name: 'The Joker', src: joker, category: 'DC' },
-  
-  // Other
-  { id: 'harry-potter', name: 'Harry Potter', src: harryPotter, category: 'Harry Potter' },
-  { id: 'pikachu', name: 'Pikachu', src: pikachu, category: 'Pokémon' },
-  { id: 'stitch', name: 'Stitch', src: stitch, category: 'Disney' },
-  { id: 'rick', name: 'Rick Sanchez', src: rick, category: 'Rick and Morty' },
+  // Row 2 - Marvel & DC
+  { id: 'iron-man', name: 'Iron Man', row: 1, col: 0, category: 'Marvel' },
+  { id: 'captain-america', name: 'Captain America', row: 1, col: 1, category: 'Marvel' },
+  { id: 'spider-man', name: 'Spider-Man', row: 1, col: 2, category: 'Marvel' },
+  { id: 'infinity-gauntlet', name: 'Infinity Gauntlet', row: 1, col: 3, category: 'Marvel' },
+  { id: 'black-panther', name: 'Black Panther', row: 1, col: 4, category: 'Marvel' },
+  { id: 'batman', name: 'Batman', row: 1, col: 5, category: 'DC' },
+  { id: 'superman', name: 'Superman', row: 1, col: 6, category: 'DC' },
+  { id: 'wonder-woman', name: 'Wonder Woman', row: 1, col: 7, category: 'DC' },
+  { id: 'joker', name: 'The Joker', row: 1, col: 8, category: 'DC' },
+  { id: 'star-lord', name: 'Star-Lord', row: 1, col: 9, category: 'Marvel' },
+  { id: 'eleven', name: 'Eleven', row: 1, col: 10, category: 'Stranger Things' },
+  { id: 'harley-quinn', name: 'Harley Quinn', row: 1, col: 11, category: 'DC' },
+  { id: 'hellboy', name: 'Hellboy', row: 1, col: 12, category: 'Comics' },
+  { id: 'v-vendetta', name: 'V for Vendetta', row: 1, col: 13, category: 'Comics' },
+
+  // Row 3 - Animation & TV
+  { id: 'mickey-mouse', name: 'Mickey Mouse', row: 2, col: 0, category: 'Disney' },
+  { id: 'indiana-jones', name: 'Indiana Jones', row: 2, col: 1, category: 'Adventure' },
+  { id: 'woody', name: 'Woody', row: 2, col: 2, category: 'Toy Story' },
+  { id: 'astronaut', name: 'Astronaut', row: 2, col: 3, category: 'Space' },
+  { id: 'mike-wazowski', name: 'Mike Wazowski', row: 2, col: 4, category: 'Monsters Inc' },
+  { id: 'stitch', name: 'Stitch', row: 2, col: 5, category: 'Disney' },
+  { id: 'homer-simpson', name: 'Homer Simpson', row: 2, col: 6, category: 'Simpsons' },
+  { id: 'donut', name: 'Donut', row: 2, col: 7, category: 'Simpsons' },
+  { id: 'rick', name: 'Rick Sanchez', row: 2, col: 8, category: 'Rick and Morty' },
+  { id: 'pokeball', name: 'Pokeball', row: 2, col: 9, category: 'Pokémon' },
+  { id: 'pikachu', name: 'Pikachu', row: 2, col: 10, category: 'Pokémon' },
+  { id: 'pikachu-face', name: 'Pikachu Face', row: 2, col: 11, category: 'Pokémon' },
+  { id: 'no-face', name: 'No-Face', row: 2, col: 12, category: 'Ghibli' },
+  { id: 'dragon-ball', name: 'Dragon Ball', row: 2, col: 13, category: 'Anime' },
+
+  // Row 4 - TV Shows
+  { id: 'friends-frame', name: 'Friends Frame', row: 3, col: 0, category: 'Friends' },
+  { id: 'coffee-cup', name: 'Coffee Cup', row: 3, col: 1, category: 'Friends' },
+  { id: 'dunder-mifflin', name: 'Dunder Mifflin', row: 3, col: 2, category: 'The Office' },
+  { id: 'dwight', name: 'Dwight', row: 3, col: 3, category: 'The Office' },
+  { id: 'walter-white', name: 'Walter White', row: 3, col: 4, category: 'Breaking Bad' },
+  { id: 'crystal', name: 'Crystal', row: 3, col: 5, category: 'Breaking Bad' },
+  { id: 'iron-throne', name: 'Iron Throne', row: 3, col: 6, category: 'Game of Thrones' },
+  { id: 'dire-wolf', name: 'Dire Wolf', row: 3, col: 7, category: 'Game of Thrones' },
+  { id: 'waffle', name: 'Eggo Waffle', row: 3, col: 8, category: 'Stranger Things' },
+  { id: 'demogorgon', name: 'Demogorgon', row: 3, col: 9, category: 'Stranger Things' },
+  { id: 'demogorgon-2', name: 'Mind Flayer', row: 3, col: 10, category: 'Stranger Things' },
+  { id: 'magneto', name: 'Magneto', row: 3, col: 11, category: 'Marvel' },
+  { id: 'ted-lasso', name: 'Ted Lasso', row: 3, col: 12, category: 'Ted Lasso' },
+  { id: 'ted-lasso-face', name: 'Ted Lasso Face', row: 3, col: 13, category: 'Ted Lasso' },
+
+  // Row 5 - Mixed
+  { id: 'spock', name: 'Spock', row: 4, col: 0, category: 'Star Trek' },
+  { id: 'kylo-ren', name: 'Kylo Ren', row: 4, col: 1, category: 'Star Wars' },
+  { id: 'x-files', name: 'X-Files', row: 4, col: 2, category: 'X-Files' },
+  { id: 'thanos', name: 'Thanos Gauntlet', row: 4, col: 3, category: 'Marvel' },
+  { id: 'thanos-face', name: 'Thanos', row: 4, col: 4, category: 'Marvel' },
+  { id: 'mega-mind', name: 'Mega Mind', row: 4, col: 5, category: 'Animation' },
+  { id: 'twin-peaks', name: 'Twin Peaks', row: 4, col: 6, category: 'Twin Peaks' },
+  { id: 'doctor-strange', name: 'Doctor Strange', row: 4, col: 7, category: 'Marvel' },
+  { id: 'anchorman', name: 'Anchorman', row: 4, col: 8, category: 'Comedy' },
+  { id: 'joker-card', name: 'Joker Card', row: 4, col: 9, category: 'DC' },
+  { id: 'twin-peaks-floor', name: 'Twin Peaks Floor', row: 4, col: 10, category: 'Twin Peaks' },
+  { id: 'curly-red', name: 'Curly Red', row: 4, col: 11, category: 'Misc' },
+  { id: 'merida', name: 'Merida', row: 4, col: 12, category: 'Disney' },
+
+  // Row 6 - Classic Movies
+  { id: 'james-bond', name: 'James Bond', row: 5, col: 0, category: 'Action' },
+  { id: 'ruby-slippers', name: 'Ruby Slippers', row: 5, col: 1, category: 'Wizard of Oz' },
+  { id: 'indy-hat', name: 'Indiana Jones Hat', row: 5, col: 2, category: 'Adventure' },
+  { id: '007', name: '007', row: 5, col: 3, category: 'Action' },
+  { id: 'delorean', name: 'DeLorean', row: 5, col: 4, category: 'Back to the Future' },
+  { id: 'flux-capacitor', name: 'Flux Capacitor', row: 5, col: 5, category: 'Back to the Future' },
+  { id: 'et', name: 'E.T.', row: 5, col: 6, category: 'Sci-Fi' },
+  { id: 'jurassic-park', name: 'Jurassic Park', row: 5, col: 7, category: 'Jurassic Park' },
+  { id: 'ghostbusters', name: 'Ghostbusters', row: 5, col: 8, category: 'Ghostbusters' },
+  { id: 'leon', name: 'Leon', row: 5, col: 9, category: 'Action' },
+  { id: 'fight-club', name: 'Fight Club Soap', row: 5, col: 10, category: 'Drama' },
+  { id: 'home-alone', name: 'Home Alone', row: 5, col: 11, category: 'Comedy' },
+  { id: 'christmas-sweater', name: 'Christmas Sweater', row: 5, col: 12, category: 'Holiday' },
+  { id: 'bucket-hat', name: 'Bucket Hat', row: 5, col: 13, category: 'Misc' },
+
+  // Row 7 - More Movies
+  { id: 'wilson', name: 'Wilson', row: 6, col: 0, category: 'Cast Away' },
+  { id: 'volleyball', name: 'Volleyball', row: 6, col: 1, category: 'Cast Away' },
+  { id: 'chihuahua', name: 'Chihuahua', row: 6, col: 2, category: 'Beverly Hills' },
+  { id: 'burn-book', name: 'Burn Book', row: 6, col: 3, category: 'Mean Girls' },
+  { id: 'big-hero', name: 'Big Hero 6', row: 6, col: 4, category: 'Animation' },
+  { id: 'ghostface', name: 'Ghostface', row: 6, col: 5, category: 'Horror' },
+  { id: 'it-balloon', name: 'IT Balloon', row: 6, col: 6, category: 'Horror' },
+  { id: 'jason', name: 'Jason', row: 6, col: 7, category: 'Horror' },
+  { id: 'michael-myers', name: 'Michael Myers', row: 6, col: 8, category: 'Horror' },
+  { id: 'edward-scissor', name: 'Edward Scissorhands', row: 6, col: 9, category: 'Fantasy' },
+  { id: 'predator', name: 'Predator', row: 6, col: 10, category: 'Sci-Fi' },
+  { id: 'predator-mask', name: 'Predator Mask', row: 6, col: 11, category: 'Sci-Fi' },
+  { id: 'kratos', name: 'Kratos', row: 6, col: 12, category: 'Gaming' },
+  { id: 'axe', name: 'Axe', row: 6, col: 13, category: 'Horror' },
+
+  // Row 8 - Mixed Characters
+  { id: 'blonde-girl', name: 'Blonde Girl', row: 7, col: 0, category: 'Misc' },
+  { id: 'maleficent', name: 'Maleficent', row: 7, col: 1, category: 'Disney' },
+  { id: 'hunger-games', name: 'Hunger Games', row: 7, col: 2, category: 'Hunger Games' },
+  { id: 'loki', name: 'Loki Helmet', row: 7, col: 3, category: 'Marvel' },
+  { id: 'sorting-hat-2', name: 'Sorting Hat', row: 7, col: 4, category: 'Harry Potter' },
+  { id: 'dog-1', name: 'Dog', row: 7, col: 5, category: 'Pets' },
+  { id: 'paddington', name: 'Paddington', row: 7, col: 6, category: 'Animation' },
+  { id: 'dog-2', name: 'Golden Retriever', row: 7, col: 7, category: 'Pets' },
+  { id: 'minion', name: 'Minion', row: 7, col: 8, category: 'Minions' },
+  { id: 'groot', name: 'Groot', row: 7, col: 9, category: 'Marvel' },
+  { id: 'deadpool', name: 'Deadpool', row: 7, col: 10, category: 'Marvel' },
+  { id: 'furiosa', name: 'Furiosa', row: 7, col: 11, category: 'Mad Max' },
+  { id: 'lamp', name: 'Pixar Lamp', row: 7, col: 12, category: 'Pixar' },
+  { id: 'apple', name: 'Apple', row: 7, col: 13, category: 'Misc' },
+
+  // Row 9 - Bottom Row
+  { id: 'blonde-2', name: 'Blonde', row: 8, col: 0, category: 'Misc' },
+  { id: 'bitmoji', name: 'Bitmoji Style', row: 8, col: 1, category: 'Misc' },
+  { id: 'purple-b', name: 'Purple B', row: 8, col: 2, category: 'Misc' },
+  { id: 'cat', name: 'Cat', row: 8, col: 3, category: 'Pets' },
+  { id: 'winged-ball', name: 'Golden Snitch', row: 8, col: 4, category: 'Harry Potter' },
+  { id: 'corgi', name: 'Corgi', row: 8, col: 5, category: 'Pets' },
+  { id: 'marty-mcfly', name: 'Marty McFly', row: 8, col: 6, category: 'Back to the Future' },
+  { id: 'puppy', name: 'Puppy', row: 8, col: 7, category: 'Pets' },
+  { id: 'gizmo', name: 'Gizmo', row: 8, col: 8, category: 'Gremlins' },
+  { id: 'gizmo-2', name: 'Gizmo Face', row: 8, col: 9, category: 'Gremlins' },
+  { id: 'totoro', name: 'Totoro', row: 8, col: 10, category: 'Ghibli' },
+  { id: 'soot-sprite', name: 'Soot Sprite', row: 8, col: 11, category: 'Ghibli' },
+  { id: 'simpsons-donut', name: 'Simpsons Donut', row: 8, col: 12, category: 'Simpsons' },
+  { id: 'orange', name: 'Orange', row: 8, col: 13, category: 'Misc' },
 ];
 
 interface AvatarPickerProps {
@@ -80,30 +172,70 @@ interface AvatarPickerProps {
 
 export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: AvatarPickerProps) => {
   const [open, setOpen] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption | null>(null);
 
   const categories = [...new Set(avatarOptions.map(a => a.category))];
 
   const handleSelect = (avatar: AvatarOption) => {
-    setSelectedAvatar(avatar.src);
+    setSelectedAvatar(avatar);
   };
 
   const handleConfirm = () => {
     if (selectedAvatar) {
-      onAvatarSelect(selectedAvatar);
+      // Store as a special format that includes sprite info
+      const avatarData = `sprite:${selectedAvatar.row}:${selectedAvatar.col}`;
+      onAvatarSelect(avatarData);
       setOpen(false);
       setSelectedAvatar(null);
     }
   };
 
+  // Calculate background position for sprite
+  const getAvatarStyle = (row: number, col: number, size: number = 56) => {
+    const spriteWidth = 1540; // approximate total width
+    const spriteHeight = 990; // approximate total height
+    const avatarWidth = spriteWidth / COLS;
+    const avatarHeight = spriteHeight / ROWS;
+    
+    return {
+      backgroundImage: `url(${avatarSprite})`,
+      backgroundPosition: `-${col * avatarWidth * (size / avatarWidth)}px -${row * avatarHeight * (size / avatarHeight)}px`,
+      backgroundSize: `${COLS * size}px ${ROWS * size}px`,
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: '50%',
+    };
+  };
+
+  // Parse current avatar if it's a sprite reference
+  const parseAvatarUrl = (url?: string) => {
+    if (url?.startsWith('sprite:')) {
+      const parts = url.split(':');
+      return { row: parseInt(parts[1]), col: parseInt(parts[2]) };
+    }
+    return null;
+  };
+
+  const currentSpriteData = parseAvatarUrl(currentAvatarUrl);
+
   return (
     <div className="flex flex-col items-center space-y-4">
-      <Avatar className="h-24 w-24 ring-2 ring-primary/20">
-        <AvatarImage src={currentAvatarUrl} alt={username} />
-        <AvatarFallback className="text-xl font-semibold bg-primary text-primary-foreground">
-          {username.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      <div className="h-24 w-24 ring-2 ring-primary/20 rounded-full overflow-hidden">
+        {currentSpriteData ? (
+          <div style={getAvatarStyle(currentSpriteData.row, currentSpriteData.col, 96)} />
+        ) : currentAvatarUrl ? (
+          <Avatar className="h-24 w-24">
+            <AvatarImage src={currentAvatarUrl} alt={username} />
+            <AvatarFallback className="text-xl font-semibold bg-primary text-primary-foreground">
+              {username.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <div className="h-24 w-24 flex items-center justify-center bg-primary text-primary-foreground text-xl font-semibold rounded-full">
+            {username.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
@@ -112,35 +244,35 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
             Choose Avatar
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-lg max-h-[80vh]">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle>Choose Your Avatar</DialogTitle>
           </DialogHeader>
           
-          <ScrollArea className="h-[50vh] pr-4">
+          <ScrollArea className="h-[60vh] pr-4">
             <div className="space-y-6">
               {categories.map((category) => (
                 <div key={category}>
                   <h3 className="text-sm font-semibold text-muted-foreground mb-3">{category}</h3>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
                     {avatarOptions
                       .filter(a => a.category === category)
                       .map((avatar) => (
                         <button
                           key={avatar.id}
                           onClick={() => handleSelect(avatar)}
-                          className={`relative p-1 rounded-full transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary ${
-                            selectedAvatar === avatar.src 
-                              ? 'ring-2 ring-primary bg-primary/10' 
+                          className={`relative p-1 rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary ${
+                            selectedAvatar?.id === avatar.id 
+                              ? 'ring-2 ring-primary bg-primary/10 scale-110' 
                               : 'hover:bg-muted'
                           }`}
                           title={avatar.name}
                         >
-                          <Avatar className="h-14 w-14">
-                            <AvatarImage src={avatar.src} alt={avatar.name} />
-                            <AvatarFallback>{avatar.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          {selectedAvatar === avatar.src && (
+                          <div 
+                            style={getAvatarStyle(avatar.row, avatar.col, 48)}
+                            className="mx-auto"
+                          />
+                          {selectedAvatar?.id === avatar.id && (
                             <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5">
                               <Check className="h-3 w-3" />
                             </div>
@@ -163,6 +295,59 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+// Export helper for displaying sprite avatars elsewhere
+export const SpriteAvatar = ({ avatarUrl, size = 40, fallback }: { avatarUrl?: string; size?: number; fallback?: string }) => {
+  const parseAvatarUrl = (url?: string) => {
+    if (url?.startsWith('sprite:')) {
+      const parts = url.split(':');
+      return { row: parseInt(parts[1]), col: parseInt(parts[2]) };
+    }
+    return null;
+  };
+
+  const spriteData = parseAvatarUrl(avatarUrl);
+
+  if (spriteData) {
+    const COLS = 14;
+    const ROWS = 9;
+    const spriteWidth = 1540;
+    const spriteHeight = 990;
+    const avatarWidth = spriteWidth / COLS;
+    const avatarHeight = spriteHeight / ROWS;
+
+    return (
+      <div
+        style={{
+          backgroundImage: `url(${avatarSprite})`,
+          backgroundPosition: `-${spriteData.col * avatarWidth * (size / avatarWidth)}px -${spriteData.row * avatarHeight * (size / avatarHeight)}px`,
+          backgroundSize: `${COLS * size}px ${ROWS * size}px`,
+          width: `${size}px`,
+          height: `${size}px`,
+          borderRadius: '50%',
+        }}
+      />
+    );
+  }
+
+  if (avatarUrl) {
+    return (
+      <Avatar style={{ width: size, height: size }}>
+        <AvatarImage src={avatarUrl} />
+        <AvatarFallback>{fallback?.charAt(0).toUpperCase()}</AvatarFallback>
+      </Avatar>
+    );
+  }
+
+  return (
+    <div 
+      className="flex items-center justify-center bg-primary text-primary-foreground rounded-full font-semibold"
+      style={{ width: size, height: size, fontSize: size * 0.4 }}
+    >
+      {fallback?.charAt(0).toUpperCase()}
     </div>
   );
 };
