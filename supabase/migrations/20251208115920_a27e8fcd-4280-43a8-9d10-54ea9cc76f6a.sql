@@ -1,0 +1,24 @@
+-- Drop all social-related tables in correct order (respecting foreign key dependencies)
+DROP TABLE IF EXISTS club_memberships CASCADE;
+DROP TABLE IF EXISTS discussion_comments CASCADE;
+DROP TABLE IF EXISTS discussion_threads CASCADE;
+DROP TABLE IF EXISTS community_list_items CASCADE;
+DROP TABLE IF EXISTS community_lists CASCADE;
+DROP TABLE IF EXISTS friend_reactions CASCADE;
+DROP TABLE IF EXISTS friend_activities CASCADE;
+DROP TABLE IF EXISTS friend_suggestions CASCADE;
+DROP TABLE IF EXISTS movie_night_poll_votes CASCADE;
+DROP TABLE IF EXISTS movie_night_poll_options CASCADE;
+DROP TABLE IF EXISTS movie_night_polls CASCADE;
+DROP TABLE IF EXISTS shared_watchlist_items CASCADE;
+DROP TABLE IF EXISTS shared_watchlist_members CASCADE;
+DROP TABLE IF EXISTS shared_watchlists CASCADE;
+DROP TABLE IF EXISTS social_connections CASCADE;
+DROP TABLE IF EXISTS taste_compatibility CASCADE;
+DROP TABLE IF EXISTS user_achievements CASCADE;
+DROP TABLE IF EXISTS user_activities CASCADE;
+DROP TABLE IF EXISTS user_challenge_progress CASCADE;
+DROP TABLE IF EXISTS watch_party_participants CASCADE;
+DROP TABLE IF EXISTS watch_parties CASCADE;
+DROP TABLE IF EXISTS weekly_challenges CASCADE;
+DROP TABLE IF EXISTS movie_clubs CASCADE;
