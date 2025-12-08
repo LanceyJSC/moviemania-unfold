@@ -190,17 +190,15 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
     }
   };
 
-  // Calculate background position for sprite
+  // Calculate background position for sprite using percentage
   const getAvatarStyle = (row: number, col: number, size: number = 56) => {
-    const spriteWidth = 1540; // approximate total width
-    const spriteHeight = 990; // approximate total height
-    const avatarWidth = spriteWidth / COLS;
-    const avatarHeight = spriteHeight / ROWS;
+    const xPercent = (col / (COLS - 1)) * 100;
+    const yPercent = (row / (ROWS - 1)) * 100;
     
     return {
       backgroundImage: `url(${avatarSprite})`,
-      backgroundPosition: `-${col * avatarWidth * (size / avatarWidth)}px -${row * avatarHeight * (size / avatarHeight)}px`,
-      backgroundSize: `${COLS * size}px ${ROWS * size}px`,
+      backgroundPosition: `${xPercent}% ${yPercent}%`,
+      backgroundSize: `${COLS * 100}%`,
       width: `${size}px`,
       height: `${size}px`,
       borderRadius: '50%',
@@ -250,37 +248,28 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
           </DialogHeader>
           
           <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-6">
-              {categories.map((category) => (
-                <div key={category}>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3">{category}</h3>
-                  <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
-                    {avatarOptions
-                      .filter(a => a.category === category)
-                      .map((avatar) => (
-                        <button
-                          key={avatar.id}
-                          onClick={() => handleSelect(avatar)}
-                          className={`relative p-1 rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary ${
-                            selectedAvatar?.id === avatar.id 
-                              ? 'ring-2 ring-primary bg-primary/10 scale-110' 
-                              : 'hover:bg-muted'
-                          }`}
-                          title={avatar.name}
-                        >
-                          <div 
-                            style={getAvatarStyle(avatar.row, avatar.col, 48)}
-                            className="mx-auto"
-                          />
-                          {selectedAvatar?.id === avatar.id && (
-                            <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5">
-                              <Check className="h-3 w-3" />
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                  </div>
-                </div>
+            <div className="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-14 gap-1">
+              {avatarOptions.map((avatar) => (
+                <button
+                  key={avatar.id}
+                  onClick={() => handleSelect(avatar)}
+                  className={`relative p-0.5 rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary ${
+                    selectedAvatar?.id === avatar.id 
+                      ? 'ring-2 ring-primary bg-primary/10 scale-110' 
+                      : 'hover:bg-muted'
+                  }`}
+                  title={avatar.name}
+                >
+                  <div 
+                    style={getAvatarStyle(avatar.row, avatar.col, 44)}
+                    className="mx-auto"
+                  />
+                  {selectedAvatar?.id === avatar.id && (
+                    <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                      <Check className="h-3 w-3" />
+                    </div>
+                  )}
+                </button>
               ))}
             </div>
           </ScrollArea>
@@ -312,19 +301,15 @@ export const SpriteAvatar = ({ avatarUrl, size = 40, fallback }: { avatarUrl?: s
   const spriteData = parseAvatarUrl(avatarUrl);
 
   if (spriteData) {
-    const COLS = 14;
-    const ROWS = 9;
-    const spriteWidth = 1540;
-    const spriteHeight = 990;
-    const avatarWidth = spriteWidth / COLS;
-    const avatarHeight = spriteHeight / ROWS;
+    const xPercent = (spriteData.col / (COLS - 1)) * 100;
+    const yPercent = (spriteData.row / (ROWS - 1)) * 100;
 
     return (
       <div
         style={{
           backgroundImage: `url(${avatarSprite})`,
-          backgroundPosition: `-${spriteData.col * avatarWidth * (size / avatarWidth)}px -${spriteData.row * avatarHeight * (size / avatarHeight)}px`,
-          backgroundSize: `${COLS * size}px ${ROWS * size}px`,
+          backgroundPosition: `${xPercent}% ${yPercent}%`,
+          backgroundSize: `${COLS * 100}%`,
           width: `${size}px`,
           height: `${size}px`,
           borderRadius: '50%',
