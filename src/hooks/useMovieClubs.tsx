@@ -221,8 +221,9 @@ export const useMovieClubs = () => {
         .insert({
           follower_id: user.id,
           following_id: targetUserId,
+          friend_id: targetUserId,
           status: 'pending'
-        });
+        } as any);
 
       if (error) {
         if (error.code === '23505') { // Unique violation - already connected

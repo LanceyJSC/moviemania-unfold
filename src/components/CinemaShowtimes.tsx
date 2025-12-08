@@ -9,10 +9,10 @@ import type { Cinema } from '@/types/cinema';
 
 interface Showtime {
   id: string;
-  movie_id: number;
+  movie_id?: number;
   movie_title: string;
   showtime: string;
-  ticket_price?: number;
+  ticket_price?: string | number;
   booking_url?: string;
 }
 

@@ -19,10 +19,10 @@ import {
 interface CinemaShowtime {
   id: string;
   cinema_id: string;
-  movie_id: number;
+  movie_id?: number;
   movie_title: string;
   showtime: string;
-  ticket_price?: number;
+  ticket_price?: string | number;
   booking_url?: string;
 }
 
