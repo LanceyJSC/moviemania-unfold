@@ -193,16 +193,23 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
     }
   };
 
-  // Calculate background position for sprite - pixel-based for accuracy
+  // Calculate background position for sprite - center each avatar circle
   const getAvatarStyle = (row: number, col: number, size: number = 56) => {
-    // Scale factor from original cell size to display size
+    // Each cell in sprite is CELL_WIDTH x CELL_HEIGHT
+    // We want to show the center of each cell, scaled to fit 'size'
     const scale = size / CELL_WIDTH;
     const scaledSpriteWidth = SPRITE_WIDTH * scale;
     const scaledSpriteHeight = SPRITE_HEIGHT * scale;
+    const scaledCellWidth = CELL_WIDTH * scale;
+    const scaledCellHeight = CELL_HEIGHT * scale;
     
-    // Position to center of each cell
-    const xPos = col * CELL_WIDTH * scale;
-    const yPos = row * CELL_HEIGHT * scale;
+    // Center of the cell we want to display
+    const cellCenterX = (col + 0.5) * scaledCellWidth;
+    const cellCenterY = (row + 0.5) * scaledCellHeight;
+    
+    // Offset so center of cell aligns with center of display area
+    const xPos = cellCenterX - size / 2;
+    const yPos = cellCenterY - size / 2;
     
     return {
       backgroundImage: `url(${avatarSprite})`,
@@ -313,8 +320,13 @@ export const SpriteAvatar = ({ avatarUrl, size = 40, fallback }: { avatarUrl?: s
     const scale = size / CELL_WIDTH;
     const scaledSpriteWidth = SPRITE_WIDTH * scale;
     const scaledSpriteHeight = SPRITE_HEIGHT * scale;
-    const xPos = spriteData.col * CELL_WIDTH * scale;
-    const yPos = spriteData.row * CELL_HEIGHT * scale;
+    const scaledCellWidth = CELL_WIDTH * scale;
+    const scaledCellHeight = CELL_HEIGHT * scale;
+    
+    const cellCenterX = (spriteData.col + 0.5) * scaledCellWidth;
+    const cellCenterY = (spriteData.row + 0.5) * scaledCellHeight;
+    const xPos = cellCenterX - size / 2;
+    const yPos = cellCenterY - size / 2;
 
     return (
       <div
