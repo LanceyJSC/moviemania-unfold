@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen } from "lucide-react";
+import AddToDiaryButton from "@/components/AddToDiaryButton";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
@@ -254,6 +255,18 @@ const MovieDetail = () => {
               <Share className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+
+        {/* Add to Diary */}
+        <div className="mb-6">
+          <AddToDiaryButton
+            type="movie"
+            id={movieId}
+            title={title}
+            poster={movie.poster_path}
+            variant="outline"
+            className="w-full"
+          />
         </div>
 
         {/* Rating */}

@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Heart, User, LogIn, Film, Tv, MapPin } from "lucide-react";
+import { Home, Search, Heart, User, LogIn, Film, Tv, MapPin, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -13,14 +13,14 @@ export const Navigation = () => {
   const navItems = user ? [
     { path: "/", icon: Home, label: "Home" },
     { path: "/movies", icon: Film, label: "Movies" },
-    { path: "/tv-shows", icon: Tv, label: "TV Shows" },
+    { path: "/tv-shows", icon: Tv, label: "TV" },
+    { path: "/diary", icon: BookOpen, label: "Diary" },
     { path: "/search", icon: Search, label: "Search" },
-    { path: "/local", icon: MapPin, label: "Local" },
     { path: "/profile", icon: User, label: "Profile" }
   ] : [
     { path: "/", icon: Home, label: "Home" },
     { path: "/movies", icon: Film, label: "Movies" },
-    { path: "/tv-shows", icon: Tv, label: "TV Shows" },
+    { path: "/tv-shows", icon: Tv, label: "TV" },
     { path: "/search", icon: Search, label: "Search" },
     { path: "/local", icon: MapPin, label: "Local" },
     { path: "/auth", icon: LogIn, label: "Sign In" }

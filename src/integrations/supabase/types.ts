@@ -153,6 +153,42 @@ export type Database = {
           },
         ]
       }
+      movie_diary: {
+        Row: {
+          created_at: string
+          id: string
+          movie_id: number
+          movie_poster: string | null
+          movie_title: string
+          notes: string | null
+          rating: number | null
+          user_id: string
+          watched_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          movie_id: number
+          movie_poster?: string | null
+          movie_title: string
+          notes?: string | null
+          rating?: number | null
+          user_id: string
+          watched_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          movie_id?: number
+          movie_poster?: string | null
+          movie_title?: string
+          notes?: string | null
+          rating?: number | null
+          user_id?: string
+          watched_date?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -237,6 +273,48 @@ export type Database = {
           movie_title?: string
           rating?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      tv_diary: {
+        Row: {
+          created_at: string
+          episode_number: number | null
+          id: string
+          notes: string | null
+          rating: number | null
+          season_number: number | null
+          tv_id: number
+          tv_poster: string | null
+          tv_title: string
+          user_id: string
+          watched_date: string
+        }
+        Insert: {
+          created_at?: string
+          episode_number?: number | null
+          id?: string
+          notes?: string | null
+          rating?: number | null
+          season_number?: number | null
+          tv_id: number
+          tv_poster?: string | null
+          tv_title: string
+          user_id: string
+          watched_date?: string
+        }
+        Update: {
+          created_at?: string
+          episode_number?: number | null
+          id?: string
+          notes?: string | null
+          rating?: number | null
+          season_number?: number | null
+          tv_id?: number
+          tv_poster?: string | null
+          tv_title?: string
+          user_id?: string
+          watched_date?: string
         }
         Relationships: []
       }

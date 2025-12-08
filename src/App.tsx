@@ -29,6 +29,7 @@ import Notifications from "./pages/Notifications";
 import { DiscoverMovies } from "./pages/DiscoverMovies";
 import { DiscoverTVShows } from "./pages/DiscoverTVShows";
 import { Recommendations } from "./pages/Recommendations";
+import Diary from "./pages/Diary";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -78,6 +79,7 @@ const App = () => {
                       <Route path="/discover/tv-shows" element={<DiscoverTVShows />} />
                       <Route path="/recommendations" element={<Recommendations />} />
                       <Route path="/profile" element={<Profile />} />
+                      <Route path="/diary" element={<Diary />} />
                       <Route path="/auth" element={<Auth />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
