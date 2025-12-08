@@ -8,6 +8,7 @@ import avatarGrid from '@/assets/avatars/avatar-grid.png';
 
 const GRID_COLS = 15;
 const GRID_ROWS = 10;
+const CELL_SIZE = 100; // Assumed pixel size of each cell in the sprite
 
 // Generate all 150 avatar positions
 const avatarOptions = Array.from({ length: GRID_ROWS * GRID_COLS }, (_, index) => {
@@ -20,15 +21,18 @@ const avatarOptions = Array.from({ length: GRID_ROWS * GRID_COLS }, (_, index) =
   };
 });
 
-const getAvatarStyle = (row: number, col: number, size: number = 64) => ({
-  width: size,
-  height: size,
-  backgroundImage: `url(${avatarGrid})`,
-  backgroundSize: `${GRID_COLS * 100}% ${GRID_ROWS * 100}%`,
-  backgroundPosition: `${(col / (GRID_COLS - 1)) * 100}% ${(row / (GRID_ROWS - 1)) * 100}%`,
-  backgroundRepeat: 'no-repeat' as const,
-  borderRadius: '50%',
-});
+const getAvatarStyle = (row: number, col: number, displaySize: number = 64) => {
+  const scale = displaySize / CELL_SIZE;
+  return {
+    width: displaySize,
+    height: displaySize,
+    backgroundImage: `url(${avatarGrid})`,
+    backgroundSize: `${GRID_COLS * CELL_SIZE * scale}px ${GRID_ROWS * CELL_SIZE * scale}px`,
+    backgroundPosition: `-${col * CELL_SIZE * scale}px -${row * CELL_SIZE * scale}px`,
+    backgroundRepeat: 'no-repeat' as const,
+    borderRadius: '50%',
+  };
+};
 
 interface AvatarPickerProps {
   currentAvatarUrl?: string | null;
