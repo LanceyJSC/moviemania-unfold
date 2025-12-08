@@ -1,115 +1,78 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Camera, Check } from 'lucide-react';
+import { Camera } from 'lucide-react';
+import avatarGrid from '@/assets/avatars/avatar-grid.png';
 
-// Import individual avatar images
-import darthVader from '@/assets/avatars/darth-vader.png';
-import babyYoda from '@/assets/avatars/baby-yoda.png';
-import stormtrooper from '@/assets/avatars/stormtrooper.png';
-import r2d2 from '@/assets/avatars/r2d2.png';
-import mandalorian from '@/assets/avatars/mandalorian.png';
-import yoda from '@/assets/avatars/yoda.png';
-import ironMan from '@/assets/avatars/iron-man.png';
-import captainAmerica from '@/assets/avatars/captain-america.png';
-import spiderMan from '@/assets/avatars/spider-man.png';
-import blackPanther from '@/assets/avatars/black-panther.png';
-import thanos from '@/assets/avatars/thanos.png';
-import groot from '@/assets/avatars/groot.png';
-import deadpool from '@/assets/avatars/deadpool.png';
-import thor from '@/assets/avatars/thor.png';
-import hulk from '@/assets/avatars/hulk.png';
-import loki from '@/assets/avatars/loki.png';
-import batman from '@/assets/avatars/batman.png';
-import superman from '@/assets/avatars/superman.png';
-import wonderWoman from '@/assets/avatars/wonder-woman.png';
-import joker from '@/assets/avatars/joker.png';
-import harryPotter from '@/assets/avatars/harry-potter.png';
-import stitch from '@/assets/avatars/stitch.png';
-import pikachu from '@/assets/avatars/pikachu.png';
-import rick from '@/assets/avatars/rick.png';
+const GRID_COLS = 15;
+const GRID_ROWS = 10;
 
-interface AvatarOption {
-  id: string;
-  name: string;
-  src: string;
-  category: 'Star Wars' | 'Marvel' | 'DC' | 'Other';
-}
+// Generate all 150 avatar positions
+const avatarOptions = Array.from({ length: GRID_ROWS * GRID_COLS }, (_, index) => {
+  const row = Math.floor(index / GRID_COLS);
+  const col = index % GRID_COLS;
+  return {
+    id: `avatar-${row}-${col}`,
+    row,
+    col,
+  };
+});
 
-const avatarOptions: AvatarOption[] = [
-  // Star Wars
-  { id: 'darth-vader', name: 'Darth Vader', src: darthVader, category: 'Star Wars' },
-  { id: 'baby-yoda', name: 'Baby Yoda', src: babyYoda, category: 'Star Wars' },
-  { id: 'stormtrooper', name: 'Stormtrooper', src: stormtrooper, category: 'Star Wars' },
-  { id: 'r2d2', name: 'R2-D2', src: r2d2, category: 'Star Wars' },
-  { id: 'mandalorian', name: 'Mandalorian', src: mandalorian, category: 'Star Wars' },
-  { id: 'yoda', name: 'Yoda', src: yoda, category: 'Star Wars' },
-  
-  // Marvel
-  { id: 'iron-man', name: 'Iron Man', src: ironMan, category: 'Marvel' },
-  { id: 'captain-america', name: 'Captain America', src: captainAmerica, category: 'Marvel' },
-  { id: 'spider-man', name: 'Spider-Man', src: spiderMan, category: 'Marvel' },
-  { id: 'black-panther', name: 'Black Panther', src: blackPanther, category: 'Marvel' },
-  { id: 'thanos', name: 'Thanos', src: thanos, category: 'Marvel' },
-  { id: 'groot', name: 'Groot', src: groot, category: 'Marvel' },
-  { id: 'deadpool', name: 'Deadpool', src: deadpool, category: 'Marvel' },
-  { id: 'thor', name: 'Thor', src: thor, category: 'Marvel' },
-  { id: 'hulk', name: 'Hulk', src: hulk, category: 'Marvel' },
-  { id: 'loki', name: 'Loki', src: loki, category: 'Marvel' },
-  
-  // DC
-  { id: 'batman', name: 'Batman', src: batman, category: 'DC' },
-  { id: 'superman', name: 'Superman', src: superman, category: 'DC' },
-  { id: 'wonder-woman', name: 'Wonder Woman', src: wonderWoman, category: 'DC' },
-  { id: 'joker', name: 'Joker', src: joker, category: 'DC' },
-  
-  // Other
-  { id: 'harry-potter', name: 'Harry Potter', src: harryPotter, category: 'Other' },
-  { id: 'stitch', name: 'Stitch', src: stitch, category: 'Other' },
-  { id: 'pikachu', name: 'Pikachu', src: pikachu, category: 'Other' },
-  { id: 'rick', name: 'Rick', src: rick, category: 'Other' },
-];
+const getAvatarStyle = (row: number, col: number, size: number = 64) => ({
+  width: size,
+  height: size,
+  backgroundImage: `url(${avatarGrid})`,
+  backgroundSize: `${GRID_COLS * 100}% ${GRID_ROWS * 100}%`,
+  backgroundPosition: `${(col / (GRID_COLS - 1)) * 100}% ${(row / (GRID_ROWS - 1)) * 100}%`,
+  backgroundRepeat: 'no-repeat' as const,
+  borderRadius: '50%',
+});
 
 interface AvatarPickerProps {
-  currentAvatarUrl?: string;
-  username: string;
-  onAvatarSelect: (url: string) => void;
+  currentAvatarUrl?: string | null;
+  username?: string | null;
+  onAvatarSelect: (avatarUrl: string) => void;
 }
 
 export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: AvatarPickerProps) => {
   const [open, setOpen] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption | null>(null);
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
 
-  const categories = ['Star Wars', 'Marvel', 'DC', 'Other'] as const;
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
 
-  const handleSelect = (avatar: AvatarOption) => {
-    setSelectedAvatar(avatar);
+  const parseAvatarId = (avatarUrl: string | null | undefined) => {
+    if (!avatarUrl) return null;
+    const match = avatarUrl.match(/avatar-(\d+)-(\d+)/);
+    if (match) {
+      return { row: parseInt(match[1]), col: parseInt(match[2]) };
+    }
+    return null;
+  };
+
+  const currentAvatarPos = parseAvatarId(currentAvatarUrl);
+
+  const handleSelect = (avatarId: string) => {
+    setSelectedAvatar(avatarId);
   };
 
   const handleConfirm = () => {
     if (selectedAvatar) {
-      onAvatarSelect(selectedAvatar.src);
+      onAvatarSelect(selectedAvatar);
       setOpen(false);
       setSelectedAvatar(null);
     }
   };
 
-  const getInitials = (name?: string | null) => {
-    if (!name) return '?';
-    return name.charAt(0).toUpperCase();
-  };
-
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="h-24 w-24 ring-2 ring-primary/20 rounded-full overflow-hidden">
-        {currentAvatarUrl ? (
-          <img 
-            src={currentAvatarUrl} 
-            alt={username} 
-            className="h-full w-full object-cover"
-          />
+        {currentAvatarPos ? (
+          <div style={getAvatarStyle(currentAvatarPos.row, currentAvatarPos.col, 96)} />
         ) : (
           <div className="h-24 w-24 flex items-center justify-center bg-primary text-primary-foreground text-xl font-semibold rounded-full">
             {getInitials(username)}
@@ -130,42 +93,19 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
           </DialogHeader>
           
           <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-6">
-              {categories.map((category) => {
-                const categoryAvatars = avatarOptions.filter(a => a.category === category);
-                if (categoryAvatars.length === 0) return null;
-                
+            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 p-2">
+              {avatarOptions.map((avatar) => {
+                const isSelected = selectedAvatar === avatar.id;
                 return (
-                  <div key={category}>
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                      {category}
-                    </h3>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                      {categoryAvatars.map((avatar) => (
-                        <button
-                          key={avatar.id}
-                          onClick={() => handleSelect(avatar)}
-                          className={`relative aspect-square rounded-full overflow-hidden border-2 transition-all hover:scale-105 focus:outline-none ${
-                            selectedAvatar?.id === avatar.id
-                              ? 'border-primary ring-2 ring-primary/30 scale-110'
-                              : 'border-transparent hover:border-primary/50'
-                          }`}
-                          title={avatar.name}
-                        >
-                          <img
-                            src={avatar.src}
-                            alt={avatar.name}
-                            className="w-full h-full object-cover"
-                          />
-                          {selectedAvatar?.id === avatar.id && (
-                            <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                              <Check className="w-5 h-5 text-primary" />
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <button
+                    key={avatar.id}
+                    onClick={() => handleSelect(avatar.id)}
+                    className={`relative rounded-full transition-all hover:scale-110 focus:outline-none ${
+                      isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background scale-110' : ''
+                    }`}
+                  >
+                    <div style={getAvatarStyle(avatar.row, avatar.col, 48)} />
+                  </button>
                 );
               })}
             </div>
@@ -185,7 +125,7 @@ export const AvatarPicker = ({ currentAvatarUrl, username, onAvatarSelect }: Ava
   );
 };
 
-// Simplified SpriteAvatar that just displays images
+// Helper component to display sprite avatars elsewhere in the app
 interface SpriteAvatarProps {
   avatarUrl?: string | null;
   size?: number;
@@ -199,14 +139,23 @@ export const SpriteAvatar: React.FC<SpriteAvatarProps> = ({
   fallback = '?',
   className = ''
 }) => {
-  if (avatarUrl) {
+  const parseAvatarId = (url: string | null | undefined) => {
+    if (!url) return null;
+    const match = url.match(/avatar-(\d+)-(\d+)/);
+    if (match) {
+      return { row: parseInt(match[1]), col: parseInt(match[2]) };
+    }
+    return null;
+  };
+
+  const avatarPos = parseAvatarId(avatarUrl);
+
+  if (avatarPos) {
     return (
-      <Avatar className={className} style={{ width: size, height: size }}>
-        <AvatarImage src={avatarUrl} alt="Avatar" className="object-cover" />
-        <AvatarFallback className="bg-primary/10">
-          {fallback?.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      <div 
+        style={getAvatarStyle(avatarPos.row, avatarPos.col, size)}
+        className={className}
+      />
     );
   }
 
