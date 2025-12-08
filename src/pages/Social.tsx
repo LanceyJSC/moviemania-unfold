@@ -6,14 +6,14 @@ import {
   X, 
   Sparkles, 
   Heart,
-  MessageSquare,
   Calendar,
   Target,
   Zap,
   Globe,
   Search,
   RefreshCw,
-  Plus
+  Trophy,
+  Percent
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,8 +25,14 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { SocialActivityFeed } from "@/components/SocialActivityFeed";
 import { MovieClubHub } from "@/components/MovieClubHub";
-import { EnhancedWatchlist } from "@/components/EnhancedWatchlist";
+import { FriendCompatibilityCard } from "@/components/social/FriendCompatibilityCard";
+import { WeeklyChallengesCard } from "@/components/social/WeeklyChallengesCard";
+import { LeaderboardCard } from "@/components/social/LeaderboardCard";
+import { MovieNightPollCard } from "@/components/social/MovieNightPollCard";
 import { useAuth } from "@/hooks/useAuth";
+import { useFriendCompatibility } from "@/hooks/useFriendCompatibility";
+import { useWeeklyChallenges } from "@/hooks/useWeeklyChallenges";
+import { useMovieNightPolls } from "@/hooks/useMovieNightPolls";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -55,31 +61,20 @@ interface SuggestedUser extends UserProfile {
   shared_movies?: number;
 }
 
-interface WatchParty {
-  id: string;
-  host_id: string;
-  movie_title: string;
-  party_name: string;
-  scheduled_at: string;
-  max_participants: number;
-  status: string;
-  host_profile?: {
-    username: string;
-    avatar_url?: string;
-  };
-}
-
 export default function Social() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
-  const [watchParties, setWatchParties] = useState<WatchParty[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState("discover");
   const { user } = useAuth();
+
+  const { compatibilities, loading: compatLoading } = useFriendCompatibility();
+  const { challenges, loading: challengesLoading } = useWeeklyChallenges();
+  const { polls, vote, closePoll } = useMovieNightPolls();
 
   useEffect(() => {
     if (user) {
@@ -90,8 +85,7 @@ export default function Social() {
   const fetchAllData = async () => {
     await Promise.all([
       fetchConnections(),
-      fetchSuggestedUsers(),
-      fetchWatchParties()
+      fetchSuggestedUsers()
     ]);
     setIsLoading(false);
   };
@@ -100,25 +94,18 @@ export default function Social() {
     if (!user) return;
     
     try {
-      // Fetch accepted connections first
-      const { data: accepted, error: acceptedError } = await supabase
+      const { data: accepted } = await supabase
         .from('social_connections')
         .select('*')
         .eq('follower_id', user.id)
         .eq('status', 'accepted');
 
-      if (acceptedError) throw acceptedError;
-
-      // Fetch pending requests
-      const { data: pending, error: pendingError } = await supabase
+      const { data: pending } = await supabase
         .from('social_connections')
         .select('*')
         .eq('following_id', user.id)
         .eq('status', 'pending');
 
-      if (pendingError) throw pendingError;
-
-      // Get profile data for connections
       if (accepted && accepted.length > 0) {
         const followingIds = accepted.map(conn => conn.following_id);
         const { data: profiles } = await supabase
@@ -126,14 +113,12 @@ export default function Social() {
           .select('id, username, full_name, avatar_url')
           .in('id', followingIds);
 
-        const connectionsWithProfiles = accepted.map(conn => ({
+        setConnections(accepted.map(conn => ({
           ...conn,
           profiles: profiles?.find(p => p.id === conn.following_id)
-        }));
-        setConnections(connectionsWithProfiles);
+        })));
       }
 
-      // Get profile data for pending requests
       if (pending && pending.length > 0) {
         const followerIds = pending.map(req => req.follower_id);
         const { data: profiles } = await supabase
@@ -141,51 +126,13 @@ export default function Social() {
           .select('id, username, full_name, avatar_url')
           .in('id', followerIds);
 
-        const requestsWithProfiles = pending.map(req => ({
+        setPendingRequests(pending.map(req => ({
           ...req,
           profiles: profiles?.find(p => p.id === req.follower_id)
-        }));
-        setPendingRequests(requestsWithProfiles);
+        })));
       }
     } catch (error) {
       console.error('Error fetching connections:', error);
-    }
-  };
-
-  const fetchWatchParties = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('watch_parties')
-        .select('*')
-        .eq('status', 'scheduled')
-        .gte('scheduled_at', new Date().toISOString())
-        .order('scheduled_at', { ascending: true })
-        .limit(5);
-
-      if (error) throw error;
-
-      // Get host profiles separately
-      if (data && data.length > 0) {
-        const hostIds = data.map(party => party.host_id);
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, username, avatar_url')
-          .in('id', hostIds);
-
-        const partiesWithProfiles = data.map(party => ({
-          ...party,
-          host_profile: profiles?.find(p => p.id === party.host_id)
-        }));
-
-        setWatchParties(partiesWithProfiles);
-      } else {
-        setWatchParties([]);
-      }
-    } catch (error) {
-      console.error('Error fetching watch parties:', error);
-      setWatchParties([]);
     }
   };
 
@@ -193,67 +140,6 @@ export default function Social() {
     if (!user) return;
     
     try {
-      // Get users with similar movie preferences
-      const { data: userLikes } = await supabase
-        .from('watchlist')
-        .select('movie_id')
-        .eq('user_id', user.id)
-        .eq('list_type', 'liked')
-        .limit(10);
-
-      if (userLikes && userLikes.length > 0) {
-        const movieIds = userLikes.map(like => like.movie_id);
-        
-        const { data: similarUsers } = await supabase
-          .from('watchlist')
-          .select('user_id, movie_id')
-          .in('movie_id', movieIds)
-          .eq('list_type', 'liked')
-          .neq('user_id', user.id);
-
-        if (similarUsers && similarUsers.length > 0) {
-          const userIds = [...new Set(similarUsers.map(u => u.user_id))];
-          
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('*')
-            .in('id', userIds)
-            .limit(8);
-
-          if (profiles) {
-            const existingConnections = connections.map(c => c.following_id);
-            const pendingConnections = pendingRequests.map(p => p.follower_id);
-            
-            const userMovieCount: { [key: string]: { profile: any, count: number } } = {};
-            
-            similarUsers.forEach(item => {
-              const userId = item.user_id;
-              const profile = profiles.find(p => p.id === userId);
-              
-              if (profile && !existingConnections.includes(userId) && !pendingConnections.includes(userId)) {
-                if (!userMovieCount[userId]) {
-                  userMovieCount[userId] = { profile, count: 0 };
-                }
-                userMovieCount[userId].count++;
-              }
-            });
-
-            const suggestions = Object.values(userMovieCount)
-              .sort((a, b) => b.count - a.count)
-              .slice(0, 6)
-              .map(item => ({
-                ...item.profile,
-                reason: `${item.count} shared liked movie${item.count > 1 ? 's' : ''}`,
-                shared_movies: item.count
-              }));
-
-            setSuggestedUsers(suggestions);
-            return;
-          }
-        }
-      }
-
-      // Fallback: Get recent active users
       const { data: recentUsers } = await supabase
         .from('profiles')
         .select('*')
@@ -262,15 +148,7 @@ export default function Social() {
         .limit(6);
 
       if (recentUsers) {
-        const existingConnections = connections.map(c => c.following_id);
-        const pendingConnections = pendingRequests.map(p => p.follower_id);
-        
-        const filtered = recentUsers.filter(u => 
-          !existingConnections.includes(u.id) && 
-          !pendingConnections.includes(u.id)
-        );
-
-        setSuggestedUsers(filtered.map(u => ({
+        setSuggestedUsers(recentUsers.map(u => ({
           ...u,
           reason: 'New to the community'
         })));
@@ -282,120 +160,56 @@ export default function Social() {
 
   const handleAcceptRequest = async (connectionId: string) => {
     try {
-      const { error } = await supabase
-        .from('social_connections')
-        .update({ status: 'accepted' })
-        .eq('id', connectionId);
-
-      if (error) throw error;
-
-      toast.success('Friend request accepted! 🎉');
+      await supabase.from('social_connections').update({ status: 'accepted' }).eq('id', connectionId);
+      toast.success('Friend request accepted!');
       fetchConnections();
     } catch (error) {
-      console.error('Error accepting request:', error);
       toast.error('Failed to accept request');
     }
   };
 
   const handleRejectRequest = async (connectionId: string) => {
     try {
-      const { error } = await supabase
-        .from('social_connections')
-        .delete()
-        .eq('id', connectionId);
-
-      if (error) throw error;
-
-      toast.success('Friend request rejected');
+      await supabase.from('social_connections').delete().eq('id', connectionId);
+      toast.success('Request rejected');
       fetchConnections();
     } catch (error) {
-      console.error('Error rejecting request:', error);
       toast.error('Failed to reject request');
     }
   };
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      toast.error('Please enter a username to search');
-      return;
-    }
-
+    if (!searchTerm.trim()) return;
     setIsSearching(true);
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .or(`username.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%`)
         .neq('id', user?.id)
         .limit(10);
-
-      if (error) throw error;
-
       setSearchResults(data || []);
-      if (data && data.length === 0) {
-        toast.info('No users found matching your search');
-      } else {
-        toast.success(`Found ${data?.length || 0} users`);
-      }
     } catch (error) {
-      console.error('Error searching users:', error);
-      toast.error('Failed to search users');
+      toast.error('Search failed');
     } finally {
       setIsSearching(false);
     }
   };
 
   const sendFriendRequest = async (targetUserId: string) => {
-    if (!user) {
-      toast.error('Please sign in to send friend requests');
-      return;
-    }
-
+    if (!user) return;
     try {
-      const { error } = await supabase
-        .from('social_connections')
-        .insert({
-          follower_id: user.id,
-          following_id: targetUserId,
-          friend_id: targetUserId,
-          status: 'pending'
-        } as any);
-
-      if (error) {
-        if (error.code === '23505') { // Unique violation
-          toast.info('Friend request already sent or you are already friends!');
-          return;
-        }
-        throw error;
-      }
-
-      toast.success('Friend request sent! 🚀');
+      await supabase.from('social_connections').insert({
+        follower_id: user.id,
+        following_id: targetUserId,
+        friend_id: targetUserId,
+        status: 'pending'
+      } as any);
+      toast.success('Friend request sent!');
       setSearchResults(prev => prev.filter(u => u.id !== targetUserId));
       setSuggestedUsers(prev => prev.filter(u => u.id !== targetUserId));
     } catch (error) {
-      console.error('Error sending friend request:', error);
-      toast.error('Failed to send friend request');
-    }
-  };
-
-  const joinWatchParty = async (partyId: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('watch_party_participants')
-        .insert({
-          party_id: partyId,
-          user_id: user.id
-        });
-
-      if (error) throw error;
-
-      toast.success('Joined watch party! 🎬');
-      fetchWatchParties();
-    } catch (error) {
-      console.error('Error joining watch party:', error);
-      toast.error('Failed to join watch party');
+      toast.error('Failed to send request');
     }
   };
 
@@ -406,18 +220,9 @@ export default function Social() {
         <div className="container mx-auto px-6 py-8">
           <div className="text-center py-16">
             <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-2xl font-semibold text-foreground mb-2">
-              Join the Movie Community
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Connect with fellow movie lovers, share your watchlist, and discover new films together
-            </p>
-            <Button 
-              onClick={() => window.location.href = '/auth'}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              Sign In to Get Started
-            </Button>
+            <h3 className="text-2xl font-semibold text-foreground mb-2">Join the Movie Community</h3>
+            <p className="text-muted-foreground mb-6">Connect with fellow movie lovers</p>
+            <Button onClick={() => window.location.href = '/auth'}>Sign In</Button>
           </div>
         </div>
         <Navigation />
@@ -429,13 +234,8 @@ export default function Social() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
         <MobileHeader title="Social Hub" />
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center justify-center py-16">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading your social world...</p>
-            </div>
-          </div>
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </div>
       </div>
     );
@@ -445,240 +245,153 @@ export default function Social() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 pb-32">
       <MobileHeader title="Social Hub" />
       
-      {/* Hero Section */}
+      {/* Hero Stats */}
       <div className="bg-gradient-to-r from-primary/10 via-accent/5 to-secondary/10 border-b border-border/50">
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Your Movie <span className="text-primary">Social Hub</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Connect with fellow movie enthusiasts, organize your watchlist, and share your cinematic journey
-            </p>
-          </div>
-          
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-2xl mx-auto">
-            <Card className="text-center p-4 bg-card/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-primary">{connections.length}</div>
+        <div className="container mx-auto px-6 py-8">
+          <h1 className="text-3xl font-bold text-center mb-6">
+            Your Movie <span className="text-primary">Social Hub</span>
+          </h1>
+          <div className="grid grid-cols-4 gap-3 max-w-lg mx-auto">
+            <Card className="text-center p-3 bg-card/80">
+              <div className="text-xl font-bold text-primary">{connections.length}</div>
               <div className="text-xs text-muted-foreground">Friends</div>
             </Card>
-            <Card className="text-center p-4 bg-card/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-primary">{pendingRequests.length}</div>
+            <Card className="text-center p-3 bg-card/80">
+              <div className="text-xl font-bold text-primary">{pendingRequests.length}</div>
               <div className="text-xs text-muted-foreground">Requests</div>
             </Card>
-            <Card className="text-center p-4 bg-card/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-primary">{suggestedUsers.length}</div>
-              <div className="text-xs text-muted-foreground">Suggestions</div>
+            <Card className="text-center p-3 bg-card/80">
+              <div className="text-xl font-bold text-primary">{challenges.filter(c => c.completed).length}</div>
+              <div className="text-xs text-muted-foreground">Challenges</div>
             </Card>
-            <Card className="text-center p-4 bg-card/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-primary">{watchParties.length}</div>
-              <div className="text-xs text-muted-foreground">Watch Parties</div>
+            <Card className="text-center p-3 bg-card/80">
+              <div className="text-xl font-bold text-primary">{polls.length}</div>
+              <div className="text-xs text-muted-foreground">Polls</div>
             </Card>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-card/50 backdrop-blur-sm">
-            <TabsTrigger value="discover" className="flex items-center gap-2 text-xs sm:text-sm">
-              <Sparkles className="h-4 w-4" />
-              <span className="hidden sm:inline">Discover</span>
-            </TabsTrigger>
-            <TabsTrigger value="friends" className="flex items-center gap-2 text-xs sm:text-sm">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Friends</span>
-            </TabsTrigger>
-            <TabsTrigger value="watchlist" className="flex items-center gap-2 text-xs sm:text-sm">
-              <Heart className="h-4 w-4" />
-              <span className="hidden sm:inline">Watchlist</span>
-            </TabsTrigger>
-            <TabsTrigger value="community" className="flex items-center gap-2 text-xs sm:text-sm">
-              <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline">Community</span>
-            </TabsTrigger>
-            <TabsTrigger value="activity" className="flex items-center gap-2 text-xs sm:text-sm">
-              <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">Activity</span>
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-card/50">
+            <TabsTrigger value="discover"><Sparkles className="h-4 w-4" /></TabsTrigger>
+            <TabsTrigger value="friends"><Users className="h-4 w-4" /></TabsTrigger>
+            <TabsTrigger value="compatibility"><Percent className="h-4 w-4" /></TabsTrigger>
+            <TabsTrigger value="challenges"><Target className="h-4 w-4" /></TabsTrigger>
+            <TabsTrigger value="activity"><Zap className="h-4 w-4" /></TabsTrigger>
           </TabsList>
 
           <TabsContent value="discover" className="space-y-6">
-            {/* Search Section */}
-            <Card className="bg-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="h-5 w-5 text-primary" />
-                  Find Movie Friends
-                </CardTitle>
-              </CardHeader>
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Search className="h-5 w-5" />Find Friends</CardTitle></CardHeader>
               <CardContent>
-                <div className="flex gap-4">
-                  <Input
-                    placeholder="Search by username..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    className="flex-1 bg-background/50"
-                  />
-                  <Button onClick={handleSearch} disabled={isSearching}>
-                    {isSearching ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                    Search
-                  </Button>
+                <div className="flex gap-2">
+                  <Input placeholder="Search username..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
+                  <Button onClick={handleSearch} disabled={isSearching}><Search className="h-4 w-4" /></Button>
                 </div>
-                
-                {/* Search Results */}
                 {searchResults.length > 0 && (
-                  <div className="mt-6">
-                    <h4 className="font-semibold mb-3">Search Results</h4>
-                    <div className="grid gap-3">
-                      {searchResults.map(user => (
-                        <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg bg-background/30">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={user.avatar_url} />
-                              <AvatarFallback>{user.username[0]?.toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-semibold text-foreground">{user.username}</p>
-                              {user.full_name && <p className="text-sm text-muted-foreground">{user.full_name}</p>}
-                            </div>
-                          </div>
-                          <Button size="sm" onClick={() => sendFriendRequest(user.id)}>
-                            <UserPlus className="h-4 w-4 mr-1" />
-                            Add Friend
-                          </Button>
+                  <div className="mt-4 space-y-2">
+                    {searchResults.map(user => (
+                      <div key={user.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar><AvatarImage src={user.avatar_url} /><AvatarFallback>{user.username?.charAt(0)}</AvatarFallback></Avatar>
+                          <span className="font-medium">{user.full_name || user.username}</span>
                         </div>
-                      ))}
-                    </div>
+                        <Button size="sm" onClick={() => sendFriendRequest(user.id)}><UserPlus className="h-4 w-4" /></Button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
             </Card>
-
-            {/* Suggested Users */}
             {suggestedUsers.length > 0 && (
-              <Card className="bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    Suggested for You
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {suggestedUsers.map(user => (
-                      <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg bg-background/30 hover:bg-background/50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={user.avatar_url} />
-                            <AvatarFallback>{user.username[0]?.toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-semibold text-foreground">{user.username}</p>
-                            <p className="text-xs text-muted-foreground">{user.reason}</p>
-                          </div>
-                        </div>
-                        <Button size="sm" onClick={() => sendFriendRequest(user.id)}>
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+              <Card>
+                <CardHeader><CardTitle>Suggested Friends</CardTitle></CardHeader>
+                <CardContent className="grid grid-cols-2 gap-3">
+                  {suggestedUsers.map(user => (
+                    <div key={user.id} className="p-3 bg-muted/20 rounded-lg text-center">
+                      <Avatar className="mx-auto mb-2"><AvatarImage src={user.avatar_url} /><AvatarFallback>{user.username?.charAt(0)}</AvatarFallback></Avatar>
+                      <p className="font-medium text-sm truncate">{user.username}</p>
+                      <Button size="sm" className="mt-2 w-full" onClick={() => sendFriendRequest(user.id)}>Add</Button>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
           </TabsContent>
 
           <TabsContent value="friends" className="space-y-6">
-            {/* Pending Requests */}
             {pendingRequests.length > 0 && (
-              <Card className="bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserPlus className="h-5 w-5 text-primary" />
-                    Friend Requests ({pendingRequests.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {pendingRequests.map(request => (
-                      <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg bg-background/30">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={request.profiles?.avatar_url} />
-                            <AvatarFallback>{request.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-semibold text-foreground">{request.profiles?.username}</p>
-                            <p className="text-sm text-muted-foreground">wants to be friends</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleAcceptRequest(request.id)}>
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleRejectRequest(request.id)}>
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
+              <Card>
+                <CardHeader><CardTitle>Pending Requests ({pendingRequests.length})</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  {pendingRequests.map(req => (
+                    <div key={req.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar><AvatarImage src={req.profiles?.avatar_url} /><AvatarFallback>{req.profiles?.username?.charAt(0)}</AvatarFallback></Avatar>
+                        <span>{req.profiles?.username}</span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handleAcceptRequest(req.id)}><Check className="h-4 w-4" /></Button>
+                        <Button size="sm" variant="outline" onClick={() => handleRejectRequest(req.id)}><X className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
-
-            {/* Friends List */}
-            <Card className="bg-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  My Friends ({connections.length})
-                </CardTitle>
-              </CardHeader>
+            <Card>
+              <CardHeader><CardTitle>Your Friends ({connections.length})</CardTitle></CardHeader>
               <CardContent>
-                {connections.length > 0 ? (
-                  <div className="grid gap-3">
-                    {connections.map(connection => (
-                      <div key={connection.id} className="flex items-center gap-3 p-3 border rounded-lg bg-background/30">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={connection.profiles?.avatar_url} />
-                          <AvatarFallback>{connection.profiles?.username?.[0]?.toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-semibold text-foreground">{connection.profiles?.username}</p>
-                          {connection.profiles?.full_name && (
-                            <p className="text-sm text-muted-foreground">{connection.profiles.full_name}</p>
-                          )}
+                {connections.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No friends yet. Start connecting!</p>
+                ) : (
+                  <div className="space-y-2">
+                    {connections.map(conn => (
+                      <div key={conn.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+                        <Avatar><AvatarImage src={conn.profiles?.avatar_url} /><AvatarFallback>{conn.profiles?.username?.charAt(0)}</AvatarFallback></Avatar>
+                        <div>
+                          <p className="font-medium">{conn.profiles?.full_name || conn.profiles?.username}</p>
+                          <p className="text-sm text-muted-foreground">@{conn.profiles?.username}</p>
                         </div>
-                        <Badge variant="secondary">Friend</Badge>
                       </div>
                     ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No friends yet</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Start connecting with other movie lovers in the Discover tab!
-                    </p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="watchlist" className="space-y-6">
-            <EnhancedWatchlist />
+          <TabsContent value="compatibility" className="space-y-6">
+            <h2 className="text-xl font-semibold flex items-center gap-2"><Heart className="h-5 w-5 text-primary" />Taste Compatibility</h2>
+            {compatLoading ? (
+              <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="animate-pulse h-32 bg-muted rounded-lg" />)}</div>
+            ) : compatibilities.length === 0 ? (
+              <Card><CardContent className="py-8 text-center text-muted-foreground">Add friends to see compatibility scores!</CardContent></Card>
+            ) : (
+              <div className="space-y-4">
+                {compatibilities.map(comp => (
+                  <FriendCompatibilityCard key={comp.friendId} {...comp} profile={comp.friendProfile} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="community" className="space-y-6">
-            <MovieClubHub />
+          <TabsContent value="challenges" className="space-y-6">
+            <WeeklyChallengesCard challenges={challenges} loading={challengesLoading} />
+            <LeaderboardCard />
+            {polls.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" />Movie Night Polls</h2>
+                {polls.map(poll => (
+                  <MovieNightPollCard key={poll.id} {...poll} onVote={vote} onClose={closePoll} isCreator={poll.createdBy === user?.id} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="activity" className="space-y-6">
+          <TabsContent value="activity">
             <SocialActivityFeed />
           </TabsContent>
         </Tabs>

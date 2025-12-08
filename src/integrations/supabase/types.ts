@@ -375,6 +375,41 @@ export type Database = {
         }
         Relationships: []
       }
+      friend_reactions: {
+        Row: {
+          activity_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_reactions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "friend_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friend_suggestions: {
         Row: {
           created_at: string
@@ -432,6 +467,116 @@ export type Database = {
           id?: string
           is_public?: boolean
           name?: string
+        }
+        Relationships: []
+      }
+      movie_night_poll_options: {
+        Row: {
+          added_by: string
+          created_at: string
+          id: string
+          movie_id: number
+          movie_poster: string | null
+          movie_title: string
+          poll_id: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          id?: string
+          movie_id: number
+          movie_poster?: string | null
+          movie_title: string
+          poll_id: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          id?: string
+          movie_id?: number
+          movie_poster?: string | null
+          movie_title?: string
+          poll_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_night_poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "movie_night_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movie_night_poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_night_poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "movie_night_poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_night_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "movie_night_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movie_night_polls: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          scheduled_at: string | null
+          status: string
+          title: string
+          winner_movie_id: number | null
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          scheduled_at?: string | null
+          status?: string
+          title: string
+          winner_movie_id?: number | null
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          scheduled_at?: string | null
+          status?: string
+          title?: string
+          winner_movie_id?: number | null
         }
         Relationships: []
       }
@@ -522,6 +667,109 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_watchlist_items: {
+        Row: {
+          added_at: string
+          added_by: string
+          id: string
+          movie_id: number
+          movie_poster: string | null
+          movie_title: string
+          votes: number | null
+          watchlist_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by: string
+          id?: string
+          movie_id: number
+          movie_poster?: string | null
+          movie_title: string
+          votes?: number | null
+          watchlist_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string
+          id?: string
+          movie_id?: number
+          movie_poster?: string | null
+          movie_title?: string
+          votes?: number | null
+          watchlist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_watchlist_items_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "shared_watchlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_watchlist_members: {
+        Row: {
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+          watchlist_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+          watchlist_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+          watchlist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_watchlist_members_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "shared_watchlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_watchlists: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_connections: {
         Row: {
           created_at: string
@@ -549,6 +797,36 @@ export type Database = {
           id?: string
           status?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      taste_compatibility: {
+        Row: {
+          common_movies: number | null
+          compatibility_score: number | null
+          friend_id: string
+          id: string
+          last_calculated: string
+          shared_genres: string[] | null
+          user_id: string
+        }
+        Insert: {
+          common_movies?: number | null
+          compatibility_score?: number | null
+          friend_id: string
+          id?: string
+          last_calculated?: string
+          shared_genres?: string[] | null
+          user_id: string
+        }
+        Update: {
+          common_movies?: number | null
+          compatibility_score?: number | null
+          friend_id?: string
+          id?: string
+          last_calculated?: string
+          shared_genres?: string[] | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -608,6 +886,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_challenge_progress: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          created_at: string
+          current_count: number | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenge_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_locations: {
         Row: {
@@ -953,6 +1266,42 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string
+          description: string | null
+          ends_at: string
+          id: string
+          starts_at: string
+          target_count: number | null
+          title: string
+          xp_reward: number | null
+        }
+        Insert: {
+          challenge_type: string
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          starts_at: string
+          target_count?: number | null
+          title: string
+          xp_reward?: number | null
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          starts_at?: string
+          target_count?: number | null
+          title?: string
+          xp_reward?: number | null
         }
         Relationships: []
       }
