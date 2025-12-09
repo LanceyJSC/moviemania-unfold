@@ -78,7 +78,6 @@ export const useDiary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
-      toast.success('Added to movie diary');
     },
     onError: (error) => {
       toast.error('Failed to add to diary');
@@ -99,7 +98,6 @@ export const useDiary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
-      toast.success('Added to TV diary');
     },
     onError: (error) => {
       toast.error('Failed to add to diary');
@@ -120,7 +118,6 @@ export const useDiary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
-      toast.success('Diary entry updated');
     },
   });
 
@@ -137,7 +134,6 @@ export const useDiary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
-      toast.success('Diary entry updated');
     },
   });
 
@@ -151,7 +147,6 @@ export const useDiary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
-      toast.success('Entry deleted');
     },
   });
 
@@ -165,7 +160,6 @@ export const useDiary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
-      toast.success('Entry deleted');
     },
   });
 
