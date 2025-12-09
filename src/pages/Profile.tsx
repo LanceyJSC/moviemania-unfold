@@ -63,7 +63,7 @@ const Profile = () => {
           
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">
-              {profile.full_name || profile.username}
+              {profile.username}
             </h1>
             <p className="text-muted-foreground text-sm">@{profile.username}</p>
           </div>
@@ -89,7 +89,6 @@ const Profile = () => {
               />
               <ProfileEditor
                 initialUsername={profile.username}
-                initialFullName={profile.full_name}
                 currentProfile={profile}
               />
             </CardContent>
