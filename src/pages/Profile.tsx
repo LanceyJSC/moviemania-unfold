@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AvatarPicker } from '@/components/AvatarPicker';
+import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
 import { 
   Star, 
@@ -302,10 +302,10 @@ const Profile = () => {
                     <CardDescription>Manage your profile information</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <AvatarPicker
+                    <AvatarUpload
                       currentAvatarUrl={profile.avatar_url}
-                      username={profile.username}
-                      onAvatarSelect={(url) => updateProfile({ avatar_url: url })}
+                      userId={user?.id || ''}
+                      onAvatarUpdate={(url) => updateProfile({ avatar_url: url })}
                     />
                     <ProfileEditor
                       initialUsername={profile.username}
