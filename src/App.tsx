@@ -27,8 +27,6 @@ import Cinemas from "./pages/Cinemas";
 import CinemaDetail from "./pages/CinemaDetail";
 import Local from "./pages/Local";
 import Notifications from "./pages/Notifications";
-import { DiscoverMovies } from "./pages/DiscoverMovies";
-import { DiscoverTVShows } from "./pages/DiscoverTVShows";
 import { Recommendations } from "./pages/Recommendations";
 import Members from "./pages/Members";
 import UserProfile from "./pages/UserProfile";
@@ -81,8 +79,6 @@ const App = () => {
                         <Route path="/cinemas" element={<Cinemas />} />
                         <Route path="/cinema/:id" element={<CinemaDetail />} />
                         <Route path="/notifications" element={<Notifications />} />
-                        <Route path="/discover/movies" element={<DiscoverMovies />} />
-                        <Route path="/discover/tv-shows" element={<DiscoverTVShows />} />
                         <Route path="/recommendations" element={<Recommendations />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/members" element={<Members />} />
