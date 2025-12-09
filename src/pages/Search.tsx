@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { AdvancedFilters } from "@/components/AdvancedFilters";
-import { PhotoSearch } from "@/components/PhotoSearch";
+
 import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -28,7 +28,7 @@ const Search = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
   const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date' | 'title'>('popularity');
-  const [showPhotoSearch, setShowPhotoSearch] = useState(false);
+  
   const [isSurpriseMode, setIsSurpriseMode] = useState(false);
   const [originalSurpriseResults, setOriginalSurpriseResults] = useState([]);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -267,11 +267,6 @@ const Search = () => {
     navigate('/category/trending');
   };
 
-  const handlePhotoSearchMovie = (movie: any) => {
-    // Simulate finding the movie and showing it in results
-    setSearchResults([movie]);
-    setShowPhotoSearch(false);
-  };
 
   const handleSurpriseMe = async () => {
     console.log("Surprise Me clicked!");
@@ -633,12 +628,6 @@ const Search = () => {
         </div>
       )}
 
-      {/* Photo Search Component */}
-      <PhotoSearch 
-        onMovieFound={handlePhotoSearchMovie}
-        isOpen={showPhotoSearch}
-        onToggle={() => setShowPhotoSearch(!showPhotoSearch)}
-      />
 
       {/* Search Results */}
       <div className="container mx-auto px-4 mt-8 pb-8">
