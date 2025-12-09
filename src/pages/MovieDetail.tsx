@@ -375,6 +375,7 @@ const MovieDetail = () => {
         mediaTitle={title}
         mediaPoster={movie.poster_path}
         mediaType="movie"
+        initialRating={userRating}
       />
 
       {/* Mobile Navigation */}

@@ -400,6 +400,7 @@ const TVShowDetail = () => {
         mediaTitle={tvShow.name}
         mediaPoster={tvShow.poster_path}
         mediaType="tv"
+        initialRating={userRating}
       />
 
       {/* Mobile Navigation */}

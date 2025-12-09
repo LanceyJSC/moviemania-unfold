@@ -24,6 +24,7 @@ interface LogMediaModalProps {
   mediaType: 'movie' | 'tv';
   seasonNumber?: number;
   episodeNumber?: number;
+  initialRating?: number;
 }
 
 export const LogMediaModal = ({
@@ -34,18 +35,26 @@ export const LogMediaModal = ({
   mediaPoster,
   mediaType,
   seasonNumber,
-  episodeNumber
+  episodeNumber,
+  initialRating = 0
 }: LogMediaModalProps) => {
   const { user } = useAuth();
   const { addMovieDiaryEntry, addTVDiaryEntry } = useDiary();
   const { recalculateStats } = useUserStats();
   const [watchedDate, setWatchedDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState('');
-  const [rating, setRating] = useState<number>(0);
+  const [rating, setRating] = useState<number>(initialRating);
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [shareAsReview, setShareAsReview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [runtime, setRuntime] = useState<number | null>(null);
+
+  // Sync rating with initialRating when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setRating(initialRating);
+    }
+  }, [isOpen, initialRating]);
 
   // Fetch runtime when modal opens
   useEffect(() => {
