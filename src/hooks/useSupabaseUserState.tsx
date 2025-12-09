@@ -84,6 +84,28 @@ export const useSupabaseUserState = () => {
     }
   };
 
+  // Helper to log activity
+  const logActivity = async (
+    activityType: string,
+    movie: { id: number; title: string; poster?: string },
+    metadata?: any
+  ) => {
+    if (!user) return;
+    
+    try {
+      await supabase.from('activity_feed').insert({
+        user_id: user.id,
+        activity_type: activityType,
+        movie_id: movie.id,
+        movie_title: movie.title,
+        movie_poster: movie.poster,
+        metadata
+      });
+    } catch (error) {
+      console.error('Error logging activity:', error);
+    }
+  };
+
   const toggleLike = async (movieId: number, movieTitle: string, moviePoster?: string) => {
     if (!user) {
       toast.error('Please sign in to like movies');
@@ -121,6 +143,9 @@ export const useSupabaseUserState = () => {
           ...prev,
           likedMovies: [...prev.likedMovies, movieId]
         }));
+        
+        // Log activity
+        await logActivity('liked', { id: movieId, title: movieTitle, poster: moviePoster });
         toast.success('Added to favorites ❤️');
       }
     } catch (error) {
@@ -168,6 +193,9 @@ export const useSupabaseUserState = () => {
           ...prev,
           watchlist: [...prev.watchlist, movieId]
         }));
+        
+        // Log activity
+        await logActivity('listed', { id: movieId, title: movieTitle, poster: moviePoster });
         toast.success('Added to watchlist ✓');
       }
     } catch (error) {
@@ -213,6 +241,9 @@ export const useSupabaseUserState = () => {
           ...prev,
           currentlyWatching: [...prev.currentlyWatching, movieId]
         }));
+        
+        // Log activity
+        await logActivity('watched', { id: movieId, title: movieTitle, poster: moviePoster });
         toast.success('Marked as currently watching 🎬');
       }
     } catch (error) {
@@ -221,7 +252,7 @@ export const useSupabaseUserState = () => {
     }
   };
 
-  const setRating = async (movieId: number, rating: number, movieTitle: string) => {
+  const setRating = async (movieId: number, rating: number, movieTitle: string, moviePoster?: string) => {
     if (!user) {
       toast.error('Please sign in to rate movies');
       return;
@@ -241,6 +272,9 @@ export const useSupabaseUserState = () => {
         ...prev,
         ratings: { ...prev.ratings, [movieId]: rating }
       }));
+      
+      // Log activity
+      await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating });
       toast.success(`Rated ${rating} star${rating > 1 ? 's' : ''} ⭐`);
     } catch (error) {
       console.error('Error setting rating:', error);

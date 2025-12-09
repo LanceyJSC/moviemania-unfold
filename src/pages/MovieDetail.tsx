@@ -275,7 +275,7 @@ const MovieDetail = () => {
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
-              onClick={() => setRating(movieId, star, title)}
+              onClick={() => setRating(movieId, star, title, movie.poster_path)}
               className="p-2 touch-target"
             >
               <Star 
