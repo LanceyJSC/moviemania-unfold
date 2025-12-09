@@ -9,7 +9,7 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { tmdbService, TVShow } from "@/lib/tmdb";
-import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
@@ -31,7 +31,7 @@ const TVShowDetail = () => {
     isLiked,
     isInWatchlist,
     getRating
-  } = useSupabaseUserState();
+  } = useUserStateContext();
 
   const tvShowId = Number(id);
   const isTVShowLiked = isLiked(tvShowId);

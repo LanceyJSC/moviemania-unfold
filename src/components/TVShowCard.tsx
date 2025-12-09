@@ -4,7 +4,7 @@ import { Star, Heart, Plus, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
@@ -21,7 +21,7 @@ interface TVShowCardProps {
 }
 
 export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) => {
-  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useSupabaseUserState();
+  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useUserStateContext();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
 

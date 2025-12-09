@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { tmdbService } from "@/lib/tmdb";
-import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useAuth } from "@/hooks/useAuth";
 
 export interface DiscoveryItem {
@@ -21,7 +21,7 @@ export const useDiscovery = (type: "movie" | "tv") => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [excludedIds, setExcludedIds] = useState<Set<number>>(new Set());
-  const { toggleLike } = useSupabaseUserState();
+  const { toggleLike } = useUserStateContext();
   const { user } = useAuth();
 
   const fetchMoreContent = useCallback(async () => {

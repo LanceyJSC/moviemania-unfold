@@ -13,7 +13,7 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
-import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
@@ -34,7 +34,7 @@ const MovieDetail = () => {
     isLiked,
     isInWatchlist,
     getRating
-  } = useSupabaseUserState();
+  } = useUserStateContext();
 
   const movieId = Number(id);
   const isMovieLiked = isLiked(movieId);
