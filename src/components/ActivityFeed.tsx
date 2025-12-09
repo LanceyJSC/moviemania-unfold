@@ -42,15 +42,17 @@ export const ActivityFeed = ({ userId, limit }: ActivityFeedProps) => {
       case 'watched':
         return 'watched';
       case 'rated':
-        return `rated ${activity.metadata?.rating ? `${activity.metadata.rating}/10` : ''}`;
+        return `rated ${activity.metadata?.rating ? `${activity.metadata.rating}/5 ★` : ''}`;
       case 'reviewed':
         return 'reviewed';
       case 'liked':
-        return 'liked a review of';
+        return 'liked';
       case 'listed':
         return 'added to a list';
       case 'followed':
         return 'started following';
+      case 'logged':
+        return 'logged';
       default:
         return 'interacted with';
     }
