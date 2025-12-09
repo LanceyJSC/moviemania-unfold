@@ -127,10 +127,67 @@ const Gallery = () => {
     return favorites;
   };
 
-  const getFilteredRated = () => {
-    if (mediaFilter === 'movies') return ratedMovies.filter(item => item.media_type !== 'tv');
-    if (mediaFilter === 'tv') return ratedMovies.filter(item => item.media_type === 'tv');
-    return ratedMovies;
+  // Combine rated items with diary entries for "Watched" - diary entries are also watched
+  const getWatchedItems = () => {
+    // Create a map to deduplicate by movie_id
+    const watchedMap = new Map<number, any>();
+    
+    // Add rated items
+    ratedMovies.forEach(item => {
+      watchedMap.set(item.movie_id, {
+        id: item.id,
+        movie_id: item.movie_id,
+        movie_title: item.movie_title,
+        movie_poster: item.movie_poster,
+        rating: item.rating,
+        media_type: item.media_type || 'movie',
+        source: 'rating'
+      });
+    });
+    
+    // Add movie diary entries (if not already rated)
+    movieDiary.forEach(entry => {
+      if (!watchedMap.has(entry.movie_id)) {
+        watchedMap.set(entry.movie_id, {
+          id: entry.id,
+          movie_id: entry.movie_id,
+          movie_title: entry.movie_title,
+          movie_poster: entry.movie_poster,
+          rating: entry.rating,
+          media_type: 'movie',
+          source: 'diary'
+        });
+      } else if (entry.rating && entry.rating > (watchedMap.get(entry.movie_id)?.rating || 0)) {
+        // Update rating if diary has higher rating
+        const existing = watchedMap.get(entry.movie_id);
+        watchedMap.set(entry.movie_id, { ...existing, rating: entry.rating });
+      }
+    });
+    
+    // Add TV diary entries (if not already rated)
+    tvDiary.forEach(entry => {
+      if (!watchedMap.has(entry.tv_id)) {
+        watchedMap.set(entry.tv_id, {
+          id: entry.id,
+          movie_id: entry.tv_id,
+          movie_title: entry.tv_title,
+          movie_poster: entry.tv_poster,
+          rating: entry.rating,
+          media_type: 'tv',
+          source: 'diary'
+        });
+      } else if (entry.rating && entry.rating > (watchedMap.get(entry.tv_id)?.rating || 0)) {
+        const existing = watchedMap.get(entry.tv_id);
+        watchedMap.set(entry.tv_id, { ...existing, rating: entry.rating });
+      }
+    });
+    
+    let items = Array.from(watchedMap.values());
+    
+    if (mediaFilter === 'movies') items = items.filter(item => item.media_type !== 'tv');
+    if (mediaFilter === 'tv') items = items.filter(item => item.media_type === 'tv');
+    
+    return items;
   };
 
   const getCombinedDiary = () => {
@@ -291,7 +348,7 @@ const Gallery = () => {
             <TabsTrigger value="watched" className="flex items-center gap-1 text-xs sm:text-sm">
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">Watched</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{getFilteredRated().length}</Badge>
+              <Badge variant="secondary" className="ml-1 text-xs">{getWatchedItems().length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="diary" className="flex items-center gap-1 text-xs sm:text-sm">
               <BookOpen className="w-4 h-4" />
@@ -419,14 +476,14 @@ const Gallery = () => {
             )}
           </TabsContent>
 
-          {/* Watched Tab - Shows rated movies/tv */}
+          {/* Watched Tab - Shows rated movies/tv and diary entries */}
           <TabsContent value="watched" className="space-y-4">
             {isLoading ? (
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full" />)}</div>
-            ) : getFilteredRated().length > 0 ? (
+            ) : getWatchedItems().length > 0 ? (
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {getFilteredRated().map(item => (
-                  <div key={item.id} className="relative group">
+                {getWatchedItems().map(item => (
+                  <div key={`${item.source}-${item.id}`} className="relative group">
                     <Link to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
                       {item.movie_poster ? (
                         <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
@@ -443,10 +500,12 @@ const Gallery = () => {
                         <Film className="h-4 w-4 text-white bg-cinema-red rounded p-0.5" />
                       )}
                     </div>
-                    <div className="absolute top-2 right-2 bg-black/70 rounded-full px-2 py-1 flex items-center gap-1">
-                      <Star className="h-3 w-3 text-cinema-gold fill-cinema-gold" />
-                      <span className="text-xs text-white font-medium">{item.rating}</span>
-                    </div>
+                    {item.rating && item.rating > 0 && (
+                      <div className="absolute top-2 right-2 bg-black/70 rounded-full px-2 py-1 flex items-center gap-1">
+                        <Star className="h-3 w-3 text-cinema-gold fill-cinema-gold" />
+                        <span className="text-xs text-white font-medium">{item.rating}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
