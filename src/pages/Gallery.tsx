@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
-  Film, Star, Clock, Heart, Eye, 
+  Film, Tv, Star, Clock, Heart, Eye, 
   Plus, Search, Trash2, Trophy, BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,19 +24,29 @@ import { format } from 'date-fns';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
+type MediaFilter = 'all' | 'movies' | 'tv';
+
 const Gallery = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { items, loading: itemsLoading, removeItem, addItem } = useEnhancedWatchlist();
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
-  const { stats } = useUserStats();
-  const { movieDiary, isLoading: diaryLoading, deleteMovieDiaryEntry } = useDiary();
+  const { stats, recalculateStats } = useUserStats();
+  const { movieDiary, tvDiary, isLoading: diaryLoading, deleteMovieDiaryEntry, deleteTVDiaryEntry } = useDiary();
   
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [ratedMovies, setRatedMovies] = useState<any[]>([]);
   const [ratedLoading, setRatedLoading] = useState(true);
+  const [mediaFilter, setMediaFilter] = useState<MediaFilter>('all');
+
+  // Recalculate stats on mount
+  useEffect(() => {
+    if (user) {
+      recalculateStats();
+    }
+  }, [user]);
 
   // Load rated movies (watched)
   useEffect(() => {
@@ -104,7 +114,38 @@ const Gallery = () => {
     }
   };
 
-  const getUnwatchedItems = () => items.filter(item => !item.watched_at);
+  const getUnwatchedItems = () => {
+    const unwatched = items.filter(item => !item.watched_at);
+    if (mediaFilter === 'movies') return unwatched.filter(item => (item as any).media_type !== 'tv');
+    if (mediaFilter === 'tv') return unwatched.filter(item => (item as any).media_type === 'tv');
+    return unwatched;
+  };
+
+  const getFilteredFavorites = () => {
+    if (mediaFilter === 'movies') return favorites.filter(item => (item as any).media_type !== 'tv');
+    if (mediaFilter === 'tv') return favorites.filter(item => (item as any).media_type === 'tv');
+    return favorites;
+  };
+
+  const getFilteredRated = () => {
+    if (mediaFilter === 'movies') return ratedMovies.filter(item => item.media_type !== 'tv');
+    if (mediaFilter === 'tv') return ratedMovies.filter(item => item.media_type === 'tv');
+    return ratedMovies;
+  };
+
+  const getCombinedDiary = () => {
+    const movies = movieDiary.map(entry => ({ ...entry, type: 'movie' as const }));
+    const tv = tvDiary.map(entry => ({ ...entry, type: 'tv' as const }));
+    
+    let combined = [...movies, ...tv];
+    
+    if (mediaFilter === 'movies') combined = movies;
+    if (mediaFilter === 'tv') combined = tv;
+    
+    return combined.sort((a, b) =>
+      new Date(b.watched_date).getTime() - new Date(a.watched_date).getTime()
+    );
+  };
 
   const isLoading = itemsLoading || favoritesLoading || ratedLoading || diaryLoading;
 
@@ -114,21 +155,33 @@ const Gallery = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 py-6">
-        {/* Stats Section */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
+        {/* Stats Section - Now shows Movies AND TV */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6">
           <Card className="p-3 text-center">
-            <div className="text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</div>
+            <div className="flex items-center justify-center gap-1">
+              <Film className="h-4 w-4 text-cinema-red" />
+              <span className="text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</span>
+            </div>
             <div className="text-xs text-muted-foreground">Movies</div>
           </Card>
           <Card className="p-3 text-center">
-            <div className="text-xl font-bold text-foreground">{Math.round((stats?.total_hours_watched || 0))}h</div>
-            <div className="text-xs text-muted-foreground">Hours</div>
+            <div className="flex items-center justify-center gap-1">
+              <Tv className="h-4 w-4 text-primary" />
+              <span className="text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
+            </div>
+            <div className="text-xs text-muted-foreground">TV Shows</div>
+          </Card>
+          <Card className="p-3 text-center">
+            <div className="text-xl font-bold text-foreground">
+              {((stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0))}h
+            </div>
+            <div className="text-xs text-muted-foreground">Total Hours</div>
           </Card>
           <Card className="p-3 text-center">
             <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
             <div className="text-xs text-muted-foreground">Avg Rating</div>
           </Card>
-          <Card className="p-3 text-center">
+          <Card className="p-3 text-center col-span-2 sm:col-span-1">
             <div className="flex items-center justify-center gap-1">
               <Trophy className="h-4 w-4 text-primary" />
               <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
@@ -144,6 +197,36 @@ const Gallery = () => {
           </div>
         </div>
 
+        {/* Media Type Filter */}
+        <div className="flex gap-2 mb-4">
+          <Button
+            size="sm"
+            variant={mediaFilter === 'all' ? 'default' : 'outline'}
+            onClick={() => setMediaFilter('all')}
+            className="text-xs"
+          >
+            All
+          </Button>
+          <Button
+            size="sm"
+            variant={mediaFilter === 'movies' ? 'default' : 'outline'}
+            onClick={() => setMediaFilter('movies')}
+            className="text-xs"
+          >
+            <Film className="h-3 w-3 mr-1" />
+            Movies
+          </Button>
+          <Button
+            size="sm"
+            variant={mediaFilter === 'tv' ? 'default' : 'outline'}
+            onClick={() => setMediaFilter('tv')}
+            className="text-xs"
+          >
+            <Tv className="h-3 w-3 mr-1" />
+            TV Shows
+          </Button>
+        </div>
+
         <Tabs defaultValue="watchlist" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="watchlist" className="flex items-center gap-1 text-xs sm:text-sm">
@@ -154,17 +237,17 @@ const Gallery = () => {
             <TabsTrigger value="favorites" className="flex items-center gap-1 text-xs sm:text-sm">
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Favorites</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{favorites.length}</Badge>
+              <Badge variant="secondary" className="ml-1 text-xs">{getFilteredFavorites().length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="watched" className="flex items-center gap-1 text-xs sm:text-sm">
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">Watched</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{ratedMovies.length}</Badge>
+              <Badge variant="secondary" className="ml-1 text-xs">{getFilteredRated().length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="diary" className="flex items-center gap-1 text-xs sm:text-sm">
               <BookOpen className="w-4 h-4" />
               <span className="hidden sm:inline">Diary</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{movieDiary.length}</Badge>
+              <Badge variant="secondary" className="ml-1 text-xs">{getCombinedDiary().length}</Badge>
             </TabsTrigger>
           </TabsList>
 
@@ -207,18 +290,25 @@ const Gallery = () => {
               <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full" />)}</div>
             ) : getUnwatchedItems().length > 0 ? (
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {getUnwatchedItems().map(item => (
+                {getUnwatchedItems().map(item => {
+                  const itemMediaType = (item as any).media_type;
+                  return (
                   <div key={item.id} className="relative group">
-                    <Link to={`/movie/${item.movie_id}`}>
+                    <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
                       {item.movie_poster ? (
                         <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
                       ) : (
                         <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
-                          <Film className="h-8 w-8 text-muted-foreground" />
+                          {itemMediaType === 'tv' ? <Tv className="h-8 w-8 text-muted-foreground" /> : <Film className="h-8 w-8 text-muted-foreground" />}
                         </div>
                       )}
                     </Link>
-                    <div className="absolute top-2 right-2">
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      {itemMediaType === 'tv' ? (
+                        <Tv className="h-4 w-4 text-white bg-primary rounded p-0.5" />
+                      ) : (
+                        <Film className="h-4 w-4 text-white bg-cinema-red rounded p-0.5" />
+                      )}
                       <Plus className="h-5 w-5 text-cinema-gold fill-cinema-gold" />
                     </div>
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2 p-2">
@@ -228,13 +318,14 @@ const Gallery = () => {
                       </Button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <Card className="p-8 text-center">
                 <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No movies in your watchlist</p>
-                <p className="text-sm text-muted-foreground mt-2">Add movies using the + button on movie pages!</p>
+                <p className="text-muted-foreground">No {mediaFilter === 'all' ? 'items' : mediaFilter} in your watchlist</p>
+                <p className="text-sm text-muted-foreground mt-2">Add movies/shows using the + button on their pages!</p>
               </Card>
             )}
           </TabsContent>
@@ -243,51 +334,66 @@ const Gallery = () => {
           <TabsContent value="favorites" className="space-y-4">
             {isLoading ? (
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full" />)}</div>
-            ) : favorites.length > 0 ? (
+            ) : getFilteredFavorites().length > 0 ? (
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {favorites.map(item => (
+                {getFilteredFavorites().map(item => {
+                  const itemMediaType = (item as any).media_type;
+                  return (
                   <div key={item.id} className="relative group">
-                    <Link to={`/movie/${item.movie_id}`}>
+                    <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
                       {item.movie_poster ? (
                         <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
                       ) : (
                         <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center"><Heart className="h-8 w-8 text-muted-foreground" /></div>
                       )}
                     </Link>
-                    <div className="absolute top-2 right-2"><Heart className="h-5 w-5 text-cinema-red fill-cinema-red" /></div>
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      {itemMediaType === 'tv' && (
+                        <Tv className="h-4 w-4 text-white bg-primary rounded p-0.5" />
+                      )}
+                      <Heart className="h-5 w-5 text-cinema-red fill-cinema-red" />
+                    </div>
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2 p-2">
                       <p className="text-white text-xs font-medium text-center line-clamp-2">{item.movie_title}</p>
                       <Button size="sm" variant="destructive" onClick={() => removeFavorite(item.movie_id)}><Trash2 className="h-3 w-3" /></Button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <Card className="p-8 text-center">
                 <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No favorite movies yet</p>
-                <p className="text-sm text-muted-foreground mt-2">Like movies using the ❤️ button!</p>
+                <p className="text-muted-foreground">No favorite {mediaFilter === 'all' ? 'items' : mediaFilter} yet</p>
+                <p className="text-sm text-muted-foreground mt-2">Like movies/shows using the ❤️ button!</p>
               </Card>
             )}
           </TabsContent>
 
-          {/* Watched Tab - Shows rated movies */}
+          {/* Watched Tab - Shows rated movies/tv */}
           <TabsContent value="watched" className="space-y-4">
             {isLoading ? (
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full" />)}</div>
-            ) : ratedMovies.length > 0 ? (
+            ) : getFilteredRated().length > 0 ? (
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {ratedMovies.map(item => (
+                {getFilteredRated().map(item => (
                   <div key={item.id} className="relative group">
-                    <Link to={`/movie/${item.movie_id}`}>
+                    <Link to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
                       {item.movie_poster ? (
                         <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
                       ) : (
                         <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
-                          <Film className="h-8 w-8 text-muted-foreground" />
+                          {item.media_type === 'tv' ? <Tv className="h-8 w-8 text-muted-foreground" /> : <Film className="h-8 w-8 text-muted-foreground" />}
                         </div>
                       )}
                     </Link>
+                    <div className="absolute top-2 left-2">
+                      {item.media_type === 'tv' ? (
+                        <Tv className="h-4 w-4 text-white bg-primary rounded p-0.5" />
+                      ) : (
+                        <Film className="h-4 w-4 text-white bg-cinema-red rounded p-0.5" />
+                      )}
+                    </div>
                     <div className="absolute top-2 right-2 bg-black/70 rounded-full px-2 py-1 flex items-center gap-1">
                       <Star className="h-3 w-3 text-cinema-gold fill-cinema-gold" />
                       <span className="text-xs text-white font-medium">{item.rating}</span>
@@ -298,68 +404,93 @@ const Gallery = () => {
             ) : (
               <Card className="p-8 text-center">
                 <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No watched movies yet</p>
-                <p className="text-sm text-muted-foreground mt-2">Rate movies using the ⭐ rating to mark them as watched!</p>
+                <p className="text-muted-foreground">No watched {mediaFilter === 'all' ? 'items' : mediaFilter} yet</p>
+                <p className="text-sm text-muted-foreground mt-2">Rate movies/shows using the ⭐ rating to mark them as watched!</p>
               </Card>
             )}
           </TabsContent>
 
-          {/* Diary Tab */}
+          {/* Diary Tab - Combined Movies and TV */}
           <TabsContent value="diary" className="space-y-4">
             {isLoading ? (
               <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
-            ) : movieDiary.length > 0 ? (
+            ) : getCombinedDiary().length > 0 ? (
               <div className="space-y-3">
-                {movieDiary.map(entry => (
-                  <Card key={entry.id} className="p-4">
-                    <div className="flex gap-4">
-                      <Link to={`/movie/${entry.movie_id}`}>
-                        {entry.movie_poster ? (
-                          <img src={`${IMAGE_BASE}${entry.movie_poster}`} alt={entry.movie_title} className="w-16 h-24 object-cover rounded" />
-                        ) : (
-                          <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
-                            <Film className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                        )}
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        <Link to={`/movie/${entry.movie_id}`} className="font-semibold hover:underline line-clamp-1">
-                          {entry.movie_title}
+                {getCombinedDiary().map(entry => {
+                  const isMovie = entry.type === 'movie';
+                  const id = isMovie ? (entry as any).movie_id : (entry as any).tv_id;
+                  const title = isMovie ? (entry as any).movie_title : (entry as any).tv_title;
+                  const poster = isMovie ? (entry as any).movie_poster : (entry as any).tv_poster;
+                  
+                  return (
+                    <Card key={entry.id} className="p-4">
+                      <div className="flex gap-4">
+                        <Link to={isMovie ? `/movie/${id}` : `/tv/${id}`}>
+                          {poster ? (
+                            <img src={`${IMAGE_BASE}${poster}`} alt={title} className="w-16 h-24 object-cover rounded" />
+                          ) : (
+                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
+                              {isMovie ? <Film className="h-6 w-6 text-muted-foreground" /> : <Tv className="h-6 w-6 text-muted-foreground" />}
+                            </div>
+                          )}
                         </Link>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
-                        </p>
-                        {entry.rating && (
-                          <div className="flex items-center gap-1 mt-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= entry.rating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
-                              />
-                            ))}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {isMovie ? (
+                              <Film className="h-4 w-4 text-cinema-red shrink-0" />
+                            ) : (
+                              <Tv className="h-4 w-4 text-primary shrink-0" />
+                            )}
+                            <Link to={isMovie ? `/movie/${id}` : `/tv/${id}`} className="font-semibold hover:underline line-clamp-1">
+                              {title}
+                            </Link>
                           </div>
-                        )}
-                        {entry.notes && (
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{entry.notes}</p>
-                        )}
+                          <p className="text-sm text-muted-foreground">
+                            {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
+                          </p>
+                          {!isMovie && ((entry as any).season_number || (entry as any).episode_number) && (
+                            <p className="text-xs text-muted-foreground">
+                              S{(entry as any).season_number || '?'} E{(entry as any).episode_number || '?'}
+                            </p>
+                          )}
+                          {entry.rating && (
+                            <div className="flex items-center gap-1 mt-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-3 w-3 ${star <= entry.rating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
+                                />
+                              ))}
+                            </div>
+                          )}
+                          {entry.notes && (
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{entry.notes}</p>
+                          )}
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => {
+                            if (isMovie) {
+                              deleteMovieDiaryEntry.mutate(entry.id);
+                            } else {
+                              deleteTVDiaryEntry.mutate(entry.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => deleteMovieDiaryEntry.mutate(entry.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             ) : (
               <Card className="p-8 text-center">
                 <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No diary entries yet</p>
-                <p className="text-sm text-muted-foreground mt-2">Use the Log button on movie pages to track when you watched!</p>
+                <p className="text-sm text-muted-foreground mt-2">Use the Log button on movie/TV pages to track when you watched!</p>
               </Card>
             )}
           </TabsContent>

@@ -144,6 +144,7 @@ export type Database = {
           added_at: string
           collection_id: string | null
           id: string
+          media_type: string | null
           mood_tags: string[] | null
           movie_id: number
           movie_poster: string | null
@@ -158,6 +159,7 @@ export type Database = {
           added_at?: string
           collection_id?: string | null
           id?: string
+          media_type?: string | null
           mood_tags?: string[] | null
           movie_id: number
           movie_poster?: string | null
@@ -172,6 +174,7 @@ export type Database = {
           added_at?: string
           collection_id?: string | null
           id?: string
+          media_type?: string | null
           mood_tags?: string[] | null
           movie_id?: number
           movie_poster?: string | null
@@ -630,6 +633,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          media_type: string | null
           movie_id: number
           movie_poster: string | null
           movie_title: string
@@ -639,6 +643,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          media_type?: string | null
           movie_id: number
           movie_poster?: string | null
           movie_title: string
@@ -648,6 +653,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          media_type?: string | null
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string
@@ -728,6 +734,8 @@ export type Database = {
           total_hours_watched: number | null
           total_movies_watched: number | null
           total_ratings: number | null
+          total_tv_hours_watched: number | null
+          total_tv_shows_watched: number | null
           total_watch_time: number | null
           updated_at: string
           user_id: string
@@ -747,6 +755,8 @@ export type Database = {
           total_hours_watched?: number | null
           total_movies_watched?: number | null
           total_ratings?: number | null
+          total_tv_hours_watched?: number | null
+          total_tv_shows_watched?: number | null
           total_watch_time?: number | null
           updated_at?: string
           user_id: string
@@ -766,6 +776,8 @@ export type Database = {
           total_hours_watched?: number | null
           total_movies_watched?: number | null
           total_ratings?: number | null
+          total_tv_hours_watched?: number | null
+          total_tv_shows_watched?: number | null
           total_watch_time?: number | null
           updated_at?: string
           user_id?: string
@@ -778,6 +790,7 @@ export type Database = {
           created_at: string
           id: string
           list_type: string
+          media_type: string | null
           movie_id: number
           movie_poster: string | null
           movie_title: string
@@ -787,6 +800,7 @@ export type Database = {
           created_at?: string
           id?: string
           list_type?: string
+          media_type?: string | null
           movie_id: number
           movie_poster?: string | null
           movie_title: string
@@ -796,6 +810,7 @@ export type Database = {
           created_at?: string
           id?: string
           list_type?: string
+          media_type?: string | null
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string

@@ -17,12 +17,13 @@ const defaultUserState: UserState = {
   currentlyWatching: []
 };
 
+export type MediaType = 'movie' | 'tv';
+
 export const useSupabaseUserState = () => {
   const { user, session } = useAuth();
   const [userState, setUserState] = useState<UserState>(defaultUserState);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load user data when user is authenticated
   useEffect(() => {
     if (session?.user) {
       loadUserData();
@@ -36,19 +37,16 @@ export const useSupabaseUserState = () => {
     
     setIsLoading(true);
     try {
-      // Load from enhanced_watchlist_items (unified table)
       const { data: enhancedData } = await supabase
         .from('enhanced_watchlist_items')
         .select('movie_id, priority, watched_at, mood_tags')
         .eq('user_id', user.id);
 
-      // Load from watchlist (for liked movies)
       const { data: watchlistData } = await supabase
         .from('watchlist')
         .select('movie_id, list_type')
         .eq('user_id', user.id);
 
-      // Load ratings
       const { data: ratingsData } = await supabase
         .from('ratings')
         .select('movie_id, rating')
@@ -58,7 +56,6 @@ export const useSupabaseUserState = () => {
         ?.filter(item => item.list_type === 'liked')
         .map(item => item.movie_id) || [];
       
-      // Movies in enhanced watchlist are in the "watchlist"
       const watchlist = enhancedData?.map(item => item.movie_id) || [];
       
       const currentlyWatching = watchlistData
@@ -84,7 +81,6 @@ export const useSupabaseUserState = () => {
     }
   };
 
-  // Helper to log activity
   const logActivity = async (
     activityType: string,
     movie: { id: number; title: string; poster?: string },
@@ -106,9 +102,9 @@ export const useSupabaseUserState = () => {
     }
   };
 
-  const toggleLike = async (movieId: number, movieTitle: string, moviePoster?: string) => {
+  const toggleLike = async (movieId: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
     if (!user) {
-      toast.error('Please sign in to like movies');
+      toast.error('Please sign in to like');
       return;
     }
 
@@ -136,7 +132,8 @@ export const useSupabaseUserState = () => {
             movie_id: movieId,
             movie_title: movieTitle,
             movie_poster: moviePoster,
-            list_type: 'liked'
+            list_type: 'liked',
+            media_type: mediaType
           });
         
         setUserState(prev => ({
@@ -144,8 +141,7 @@ export const useSupabaseUserState = () => {
           likedMovies: [...prev.likedMovies, movieId]
         }));
         
-        // Log activity
-        await logActivity('liked', { id: movieId, title: movieTitle, poster: moviePoster });
+        await logActivity('liked', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });
         toast.success('Added to favorites ❤️');
       }
     } catch (error) {
@@ -154,7 +150,7 @@ export const useSupabaseUserState = () => {
     }
   };
 
-  const toggleWatchlist = async (movieId: number, movieTitle: string, moviePoster?: string) => {
+  const toggleWatchlist = async (movieId: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
     if (!user) {
       toast.error('Please sign in to add to watchlist');
       return;
@@ -164,7 +160,6 @@ export const useSupabaseUserState = () => {
     
     try {
       if (isInWatchlist) {
-        // Remove from enhanced_watchlist_items
         await supabase
           .from('enhanced_watchlist_items')
           .delete()
@@ -177,7 +172,6 @@ export const useSupabaseUserState = () => {
         }));
         toast.success('Removed from watchlist');
       } else {
-        // Add to enhanced_watchlist_items
         await supabase
           .from('enhanced_watchlist_items')
           .insert({
@@ -186,7 +180,8 @@ export const useSupabaseUserState = () => {
             movie_title: movieTitle,
             movie_poster: moviePoster,
             priority: 'medium',
-            mood_tags: []
+            mood_tags: [],
+            media_type: mediaType
           });
         
         setUserState(prev => ({
@@ -194,8 +189,7 @@ export const useSupabaseUserState = () => {
           watchlist: [...prev.watchlist, movieId]
         }));
         
-        // Log activity
-        await logActivity('listed', { id: movieId, title: movieTitle, poster: moviePoster });
+        await logActivity('listed', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });
         toast.success('Added to watchlist ✓');
       }
     } catch (error) {
@@ -242,7 +236,6 @@ export const useSupabaseUserState = () => {
           currentlyWatching: [...prev.currentlyWatching, movieId]
         }));
         
-        // Log activity
         await logActivity('watched', { id: movieId, title: movieTitle, poster: moviePoster });
         toast.success('Marked as currently watching 🎬');
       }
@@ -252,9 +245,9 @@ export const useSupabaseUserState = () => {
     }
   };
 
-  const setRating = async (movieId: number, rating: number, movieTitle: string, moviePoster?: string) => {
+  const setRating = async (movieId: number, rating: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
     if (!user) {
-      toast.error('Please sign in to rate movies');
+      toast.error('Please sign in to rate');
       return;
     }
 
@@ -268,13 +261,24 @@ export const useSupabaseUserState = () => {
           rating: rating
         });
 
+      // Also save to user_ratings with media_type
+      await supabase
+        .from('user_ratings')
+        .upsert({
+          user_id: user.id,
+          movie_id: movieId,
+          movie_title: movieTitle,
+          movie_poster: moviePoster,
+          rating: rating,
+          media_type: mediaType
+        }, { onConflict: 'user_id,movie_id' });
+
       setUserState(prev => ({
         ...prev,
         ratings: { ...prev.ratings, [movieId]: rating }
       }));
       
-      // Log activity
-      await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating });
+      await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating, media_type: mediaType });
       toast.success(`Rated ${rating} star${rating > 1 ? 's' : ''} ⭐`);
     } catch (error) {
       console.error('Error setting rating:', error);

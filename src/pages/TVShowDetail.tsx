@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
@@ -13,6 +13,7 @@ import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
+import { LogMediaModal } from "@/components/LogMediaModal";
 
 const TVShowDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ const TVShowDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showSynopsis, setShowSynopsis] = useState(false);
+  const [showLogModal, setShowLogModal] = useState(false);
   const isMobile = useIsMobile();
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
   const {
@@ -42,11 +44,9 @@ const TVShowDetail = () => {
       
       setIsLoading(true);
       try {
-        // Get TV show details with images for logo
         const tvShowData = await tmdbService.getTVShowDetails(Number(id));
         setTVShow(tvShowData);
         
-        // Find trailer
         const trailer = tvShowData.videos?.results.find(
           video => video.type === 'Trailer' && video.site === 'YouTube'
         );
@@ -123,7 +123,6 @@ const TVShowDetail = () => {
   const releaseYear = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : 'TBA';
   const genres = tvShow.genres?.map(g => g.name).join(', ') || 'Unknown';
   
-  // Fixed cast and crew data access
   const cast = tvShow.credits?.cast?.slice(0, 8) || [];
   const crew = tvShow.credits?.crew || [];
   const creator = tvShow.created_by?.[0];
@@ -144,15 +143,12 @@ const TVShowDetail = () => {
             backgroundColor: 'hsl(var(--background))'
           }}
         >
-          {/* Base overlays for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/50 via-transparent to-transparent" />
         </div>
 
-        {/* Bottom Gradient Blend - Creates smooth transition to page background */}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
-        {/* Poster positioned on top and to the left */}
         <div className="absolute bottom-6 left-4 z-30 iphone-65:left-3">
           <img 
             src={posterUrl} 
@@ -161,9 +157,7 @@ const TVShowDetail = () => {
           />
         </div>
 
-        {/* TV Show Info positioned to the right of poster - Responsive spacing */}
         <div className="absolute bottom-6 left-32 right-4 z-30 iphone-65:left-36 iphone-67:left-40">
-          {/* TV Show Logo */}
           {logoUrl && (
             <div className="mb-3">
               <img 
@@ -238,7 +232,7 @@ const TVShowDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
               }`}
-              onClick={() => toggleLike(tvShowId, tvShow.name, posterUrl)}
+              onClick={() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv')}
             >
               <Heart className={`h-4 w-4 ${isTVShowLiked ? 'fill-current' : ''}`} />
             </Button>
@@ -248,7 +242,7 @@ const TVShowDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
               }`}
-              onClick={() => toggleWatchlist(tvShowId, tvShow.name, posterUrl)}
+              onClick={() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv')}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -260,6 +254,14 @@ const TVShowDetail = () => {
             >
               <Share className="h-4 w-4" />
             </Button>
+
+            <Button 
+              variant="outline" 
+              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
+              onClick={() => setShowLogModal(true)}
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -269,7 +271,7 @@ const TVShowDetail = () => {
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
-              onClick={() => setRating(tvShowId, star, tvShow.name)}
+              onClick={() => setRating(tvShowId, star, tvShow.name, posterUrl, 'tv')}
               className="p-2 touch-target"
             >
               <Star 
@@ -299,7 +301,7 @@ const TVShowDetail = () => {
             </h2>
             <div className="space-y-3">
               {tvShow.seasons
-                .filter(season => season.season_number > 0) // Filter out "Season 0" (specials)
+                .filter(season => season.season_number > 0)
                 .map((season) => (
                 <Link 
                   key={season.id} 
@@ -374,7 +376,6 @@ const TVShowDetail = () => {
         />
       </div>
 
-
       {/* Synopsis Modal */}
       {showSynopsis && (
         <SynopsisModal
@@ -385,6 +386,16 @@ const TVShowDetail = () => {
           posterUrl={posterUrl}
         />
       )}
+
+      {/* Log Modal */}
+      <LogMediaModal
+        isOpen={showLogModal}
+        onClose={() => setShowLogModal(false)}
+        mediaId={tvShowId}
+        mediaTitle={tvShow.name}
+        mediaPoster={tvShow.poster_path}
+        mediaType="tv"
+      />
 
       {/* Mobile Navigation */}
       <Navigation />
