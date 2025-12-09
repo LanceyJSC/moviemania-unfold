@@ -61,7 +61,7 @@ export const UserReviews = ({ movieId, isTV = false }: UserReviewsProps) => {
   if (loading) {
     return (
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-foreground mb-3">User Reviews</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-3">TMDB Reviews</h3>
         <Card className="p-4 bg-muted/50 animate-pulse">
           <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
           <div className="h-3 bg-muted rounded w-full mb-1"></div>
@@ -79,7 +79,7 @@ export const UserReviews = ({ movieId, isTV = false }: UserReviewsProps) => {
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold text-foreground mb-3">User Reviews</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-3">TMDB Reviews</h3>
       <Card className="p-4 bg-muted/50">
         <div className="space-y-3">
           {topReview.author_details.rating && (

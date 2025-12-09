@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
 import { UserReviews } from "@/components/UserReviews";
+import { CommunityReviews } from "@/components/CommunityReviews";
+import { LogMovieModal } from "@/components/LogMovieModal";
+import { WriteReviewModal } from "@/components/WriteReviewModal";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -22,6 +25,8 @@ const MovieDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showSynopsis, setShowSynopsis] = useState(false);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const isMobile = useIsMobile();
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
   const {
@@ -256,6 +261,26 @@ const MovieDetail = () => {
           </div>
         </div>
 
+        {/* Log & Review Buttons */}
+        <div className="flex gap-3 mb-6">
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => setShowLogModal(true)}
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            Log
+          </Button>
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => setShowReviewModal(true)}
+          >
+            <PenLine className="mr-2 h-4 w-4" />
+            Review
+          </Button>
+        </div>
+
         {/* Rating - marks as watched */}
         <div className="flex items-center justify-center space-x-2 mb-6">
           <span className="text-foreground text-sm">Your Rating:</span>
@@ -295,7 +320,10 @@ const MovieDetail = () => {
         {/* Fun Facts Carousel - Only show for movies */}
         {!isTV && <FunFacts movie={movie as Movie} />}
         
-        {/* User Reviews Section */}
+        {/* Community Reviews Section */}
+        <CommunityReviews movieId={movie.id} />
+        
+        {/* TMDB Reviews Section */}
         <UserReviews movieId={movie.id} isTV={isTV} />
       </div>
 
@@ -348,6 +376,24 @@ const MovieDetail = () => {
           posterUrl={posterUrl}
         />
       )}
+
+      {/* Log Movie Modal */}
+      <LogMovieModal
+        isOpen={showLogModal}
+        onClose={() => setShowLogModal(false)}
+        movieId={movieId}
+        movieTitle={title}
+        moviePoster={movie.poster_path}
+      />
+
+      {/* Write Review Modal */}
+      <WriteReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        movieId={movieId}
+        movieTitle={title}
+        moviePoster={movie.poster_path}
+      />
 
       {/* Mobile Navigation */}
       <Navigation />

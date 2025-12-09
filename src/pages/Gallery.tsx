@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Film, Star, Clock, Heart, Eye, 
-  Plus, Search, Trash2, Trophy
+  Plus, Search, Trash2, Trophy, BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserStats } from '@/hooks/useUserStats';
+import { useDiary } from '@/hooks/useDiary';
 import { tmdbService, Movie } from '@/lib/tmdb';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,6 +20,7 @@ import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
@@ -28,6 +30,7 @@ const Gallery = () => {
   const { items, loading: itemsLoading, removeItem, addItem } = useEnhancedWatchlist();
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
   const { stats } = useUserStats();
+  const { movieDiary, isLoading: diaryLoading, deleteMovieDiaryEntry } = useDiary();
   
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -103,7 +106,7 @@ const Gallery = () => {
 
   const getUnwatchedItems = () => items.filter(item => !item.watched_at);
 
-  const isLoading = itemsLoading || favoritesLoading || ratedLoading;
+  const isLoading = itemsLoading || favoritesLoading || ratedLoading || diaryLoading;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -142,7 +145,7 @@ const Gallery = () => {
         </div>
 
         <Tabs defaultValue="watchlist" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="watchlist" className="flex items-center gap-1 text-xs sm:text-sm">
               <Clock className="w-4 h-4" />
               <span className="hidden sm:inline">Watchlist</span>
@@ -157,6 +160,11 @@ const Gallery = () => {
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">Watched</span>
               <Badge variant="secondary" className="ml-1 text-xs">{ratedMovies.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="diary" className="flex items-center gap-1 text-xs sm:text-sm">
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Diary</span>
+              <Badge variant="secondary" className="ml-1 text-xs">{movieDiary.length}</Badge>
             </TabsTrigger>
           </TabsList>
 
@@ -272,12 +280,13 @@ const Gallery = () => {
                 {ratedMovies.map(item => (
                   <div key={item.id} className="relative group">
                     <Link to={`/movie/${item.movie_id}`}>
-                      <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
-                        <div className="text-center">
-                          <Film className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-xs text-muted-foreground px-2 line-clamp-2">{item.movie_title}</p>
+                      {item.movie_poster ? (
+                        <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
+                      ) : (
+                        <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
+                          <Film className="h-8 w-8 text-muted-foreground" />
                         </div>
-                      </div>
+                      )}
                     </Link>
                     <div className="absolute top-2 right-2 bg-black/70 rounded-full px-2 py-1 flex items-center gap-1">
                       <Star className="h-3 w-3 text-cinema-gold fill-cinema-gold" />
@@ -291,6 +300,66 @@ const Gallery = () => {
                 <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No watched movies yet</p>
                 <p className="text-sm text-muted-foreground mt-2">Rate movies using the ⭐ rating to mark them as watched!</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Diary Tab */}
+          <TabsContent value="diary" className="space-y-4">
+            {isLoading ? (
+              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
+            ) : movieDiary.length > 0 ? (
+              <div className="space-y-3">
+                {movieDiary.map(entry => (
+                  <Card key={entry.id} className="p-4">
+                    <div className="flex gap-4">
+                      <Link to={`/movie/${entry.movie_id}`}>
+                        {entry.movie_poster ? (
+                          <img src={`${IMAGE_BASE}${entry.movie_poster}`} alt={entry.movie_title} className="w-16 h-24 object-cover rounded" />
+                        ) : (
+                          <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
+                            <Film className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <Link to={`/movie/${entry.movie_id}`} className="font-semibold hover:underline line-clamp-1">
+                          {entry.movie_title}
+                        </Link>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
+                        </p>
+                        {entry.rating && (
+                          <div className="flex items-center gap-1 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-3 w-3 ${star <= entry.rating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        {entry.notes && (
+                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{entry.notes}</p>
+                        )}
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => deleteMovieDiaryEntry.mutate(entry.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No diary entries yet</p>
+                <p className="text-sm text-muted-foreground mt-2">Use the Log button on movie pages to track when you watched!</p>
               </Card>
             )}
           </TabsContent>
