@@ -3,7 +3,7 @@ import { Heart, Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { useSupabaseUserState } from "@/hooks/useSupabaseUserState";
+import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useEnhancedWatchlist } from "@/hooks/useEnhancedWatchlist";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
@@ -21,7 +21,7 @@ interface MovieCardProps {
 }
 
 export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
-  const { toggleLike, isLiked } = useSupabaseUserState();
+  const { toggleLike, isLiked } = useUserStateContext();
   const { addItem, items } = useEnhancedWatchlist();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);

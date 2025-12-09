@@ -1,0 +1,331 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+
+export interface UserState {
+  likedMovies: number[];
+  watchlist: number[];
+  ratings: Record<number, number>;
+  currentlyWatching: number[];
+}
+
+const defaultUserState: UserState = {
+  likedMovies: [],
+  watchlist: [],
+  ratings: {},
+  currentlyWatching: []
+};
+
+export type MediaType = 'movie' | 'tv';
+
+interface UserStateContextType {
+  userState: UserState;
+  isLoading: boolean;
+  toggleLike: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
+  toggleWatchlist: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
+  setRating: (movieId: number, rating: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
+  toggleCurrentlyWatching: (movieId: number, movieTitle: string, moviePoster?: string) => Promise<void>;
+  isLiked: (movieId: number) => boolean;
+  isInWatchlist: (movieId: number) => boolean;
+  isCurrentlyWatching: (movieId: number) => boolean;
+  getRating: (movieId: number) => number;
+  refetch: () => Promise<void>;
+}
+
+const UserStateContext = createContext<UserStateContextType | undefined>(undefined);
+
+export const useUserStateContext = () => {
+  const context = useContext(UserStateContext);
+  if (context === undefined) {
+    throw new Error('useUserStateContext must be used within a UserStateProvider');
+  }
+  return context;
+};
+
+export const UserStateProvider = ({ children }: { children: ReactNode }) => {
+  const { user, session } = useAuth();
+  const [userState, setUserState] = useState<UserState>(defaultUserState);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (session?.user) {
+      loadUserData();
+    } else {
+      setUserState(defaultUserState);
+    }
+  }, [session?.user?.id]);
+
+  const loadUserData = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      const { data: enhancedData } = await supabase
+        .from('enhanced_watchlist_items')
+        .select('movie_id, priority, watched_at, mood_tags')
+        .eq('user_id', user.id);
+
+      const { data: watchlistData } = await supabase
+        .from('watchlist')
+        .select('movie_id, list_type')
+        .eq('user_id', user.id);
+
+      const { data: ratingsData } = await supabase
+        .from('ratings')
+        .select('movie_id, rating')
+        .eq('user_id', user.id);
+
+      const likedMovies = watchlistData
+        ?.filter(item => item.list_type === 'liked')
+        .map(item => item.movie_id) || [];
+      
+      const watchlist = enhancedData?.map(item => item.movie_id) || [];
+      
+      const currentlyWatching = watchlistData
+        ?.filter(item => item.list_type === 'currently_watching')
+        .map(item => item.movie_id) || [];
+
+      const ratings = ratingsData?.reduce((acc, item) => {
+        acc[item.movie_id] = item.rating;
+        return acc;
+      }, {} as Record<number, number>) || {};
+
+      setUserState({
+        likedMovies,
+        watchlist,
+        currentlyWatching,
+        ratings
+      });
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      toast.error('Failed to load your data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logActivity = async (
+    activityType: string,
+    movie: { id: number; title: string; poster?: string },
+    metadata?: any
+  ) => {
+    if (!user) return;
+    
+    try {
+      await supabase.from('activity_feed').insert({
+        user_id: user.id,
+        activity_type: activityType,
+        movie_id: movie.id,
+        movie_title: movie.title,
+        movie_poster: movie.poster,
+        metadata
+      });
+    } catch (error) {
+      console.error('Error logging activity:', error);
+    }
+  };
+
+  const toggleLike = async (movieId: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
+    if (!user) {
+      toast.error('Please sign in to like');
+      return;
+    }
+
+    const isLiked = userState.likedMovies.includes(movieId);
+    
+    try {
+      if (isLiked) {
+        await supabase
+          .from('watchlist')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId)
+          .eq('list_type', 'liked');
+        
+        setUserState(prev => ({
+          ...prev,
+          likedMovies: prev.likedMovies.filter(id => id !== movieId)
+        }));
+        toast.success('Removed from favorites');
+      } else {
+        await supabase
+          .from('watchlist')
+          .insert({
+            user_id: user.id,
+            movie_id: movieId,
+            movie_title: movieTitle,
+            movie_poster: moviePoster,
+            list_type: 'liked',
+            media_type: mediaType
+          });
+        
+        setUserState(prev => ({
+          ...prev,
+          likedMovies: [...prev.likedMovies, movieId]
+        }));
+        
+        await logActivity('liked', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });
+        toast.success('Added to favorites ❤️');
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast.error('Failed to update favorites');
+    }
+  };
+
+  const toggleWatchlist = async (movieId: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
+    if (!user) {
+      toast.error('Please sign in to add to watchlist');
+      return;
+    }
+
+    const isInWatchlist = userState.watchlist.includes(movieId);
+    
+    try {
+      if (isInWatchlist) {
+        await supabase
+          .from('enhanced_watchlist_items')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId);
+        
+        setUserState(prev => ({
+          ...prev,
+          watchlist: prev.watchlist.filter(id => id !== movieId)
+        }));
+        toast.success('Removed from watchlist');
+      } else {
+        await supabase
+          .from('enhanced_watchlist_items')
+          .insert({
+            user_id: user.id,
+            movie_id: movieId,
+            movie_title: movieTitle,
+            movie_poster: moviePoster,
+            priority: 'medium',
+            mood_tags: [],
+            media_type: mediaType
+          });
+        
+        setUserState(prev => ({
+          ...prev,
+          watchlist: [...prev.watchlist, movieId]
+        }));
+        
+        await logActivity('listed', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });
+        toast.success('Added to watchlist ✓');
+      }
+    } catch (error) {
+      console.error('Error toggling watchlist:', error);
+      toast.error('Failed to update watchlist');
+    }
+  };
+
+  const toggleCurrentlyWatching = async (movieId: number, movieTitle: string, moviePoster?: string) => {
+    if (!user) {
+      toast.error('Please sign in to mark as currently watching');
+      return;
+    }
+
+    const isCurrentlyWatching = userState.currentlyWatching.includes(movieId);
+    
+    try {
+      if (isCurrentlyWatching) {
+        await supabase
+          .from('watchlist')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId)
+          .eq('list_type', 'currently_watching');
+        
+        setUserState(prev => ({
+          ...prev,
+          currentlyWatching: prev.currentlyWatching.filter(id => id !== movieId)
+        }));
+        toast.success('Removed from currently watching');
+      } else {
+        await supabase
+          .from('watchlist')
+          .insert({
+            user_id: user.id,
+            movie_id: movieId,
+            movie_title: movieTitle,
+            movie_poster: moviePoster,
+            list_type: 'currently_watching'
+          });
+        
+        setUserState(prev => ({
+          ...prev,
+          currentlyWatching: [...prev.currentlyWatching, movieId]
+        }));
+        
+        await logActivity('watched', { id: movieId, title: movieTitle, poster: moviePoster });
+        toast.success('Marked as currently watching 🎬');
+      }
+    } catch (error) {
+      console.error('Error toggling currently watching:', error);
+      toast.error('Failed to update currently watching status');
+    }
+  };
+
+  const setRating = async (movieId: number, rating: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
+    if (!user) {
+      toast.error('Please sign in to rate');
+      return;
+    }
+
+    try {
+      await supabase
+        .from('ratings')
+        .upsert({
+          user_id: user.id,
+          movie_id: movieId,
+          movie_title: movieTitle,
+          rating: rating
+        });
+
+      await supabase
+        .from('user_ratings')
+        .upsert({
+          user_id: user.id,
+          movie_id: movieId,
+          movie_title: movieTitle,
+          movie_poster: moviePoster,
+          rating: rating,
+          media_type: mediaType
+        }, { onConflict: 'user_id,movie_id' });
+
+      setUserState(prev => ({
+        ...prev,
+        ratings: { ...prev.ratings, [movieId]: rating }
+      }));
+      
+      await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating, media_type: mediaType });
+      toast.success(`Rated ${rating} star${rating > 1 ? 's' : ''} ⭐`);
+    } catch (error) {
+      console.error('Error setting rating:', error);
+      toast.error('Failed to save rating');
+    }
+  };
+
+  const value: UserStateContextType = {
+    userState,
+    isLoading,
+    toggleLike,
+    toggleWatchlist,
+    setRating,
+    toggleCurrentlyWatching,
+    isLiked: (movieId: number) => userState.likedMovies.includes(movieId),
+    isInWatchlist: (movieId: number) => userState.watchlist.includes(movieId),
+    isCurrentlyWatching: (movieId: number) => userState.currentlyWatching.includes(movieId),
+    getRating: (movieId: number) => userState.ratings[movieId] || 0,
+    refetch: loadUserData
+  };
+
+  return (
+    <UserStateContext.Provider value={value}>
+      {children}
+    </UserStateContext.Provider>
+  );
+};
