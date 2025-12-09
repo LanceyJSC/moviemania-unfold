@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Info, Star, Calendar, TrendingUp, Users, Sparkles } from "lucide-react";
+import { Play, Info, Star, Calendar, TrendingUp, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { tmdbService } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -220,19 +220,6 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
                 </Button>
               </Link>
             </div>
-            
-            {/* Discover Button */}
-            <Link to={`/discover/${type === 'movie' ? 'movies' : 'tv-shows'}`}>
-              <Button 
-                variant="outline" 
-                className="border-primary/30 text-primary bg-primary/10 backdrop-blur-sm hover:bg-primary/20 rounded-xl h-12 px-6 font-medium w-full"
-                disabled={isRefreshing}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                <span className="hidden xs:inline">Discover More {type === 'movie' ? 'Movies' : 'TV Shows'}</span>
-                <span className="xs:hidden">Discover</span>
-              </Button>
-            </Link>
           </div>
         </div>
       </div>
