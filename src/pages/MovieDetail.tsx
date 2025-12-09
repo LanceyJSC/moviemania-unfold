@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen } from "lucide-react";
-import AddToDiaryButton from "@/components/AddToDiaryButton";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
@@ -257,19 +256,7 @@ const MovieDetail = () => {
           </div>
         </div>
 
-        {/* Add to Diary */}
-        <div className="mb-6">
-          <AddToDiaryButton
-            type="movie"
-            id={movieId}
-            title={title}
-            poster={movie.poster_path}
-            variant="outline"
-            className="w-full"
-          />
-        </div>
-
-        {/* Rating */}
+        {/* Rating - marks as watched */}
         <div className="flex items-center justify-center space-x-2 mb-6">
           <span className="text-foreground text-sm">Your Rating:</span>
           {[1, 2, 3, 4, 5].map((star) => (

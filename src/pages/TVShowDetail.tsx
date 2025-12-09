@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen } from "lucide-react";
-import AddToDiaryButton from "@/components/AddToDiaryButton";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
@@ -264,19 +263,7 @@ const TVShowDetail = () => {
           </div>
         </div>
 
-        {/* Add to Diary */}
-        <div className="mb-6">
-          <AddToDiaryButton
-            type="tv"
-            id={tvShowId}
-            title={tvShow.name}
-            poster={tvShow.poster_path}
-            variant="outline"
-            className="w-full"
-          />
-        </div>
-
-        {/* Rating */}
+        {/* Rating - marks as watched */}
         <div className="flex items-center justify-center space-x-2 mb-6">
           <span className="text-foreground text-sm">Your Rating:</span>
           {[1, 2, 3, 4, 5].map((star) => (
