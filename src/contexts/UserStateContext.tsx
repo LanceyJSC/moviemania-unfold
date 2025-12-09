@@ -147,7 +147,6 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
           ...prev,
           likedMovies: prev.likedMovies.filter(id => id !== movieId)
         }));
-        toast.success('Removed from favorites');
       } else {
         await supabase
           .from('watchlist')
@@ -166,7 +165,6 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         }));
         
         await logActivity('liked', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });
-        toast.success('Added to favorites ❤️');
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -194,7 +192,6 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
           ...prev,
           watchlist: prev.watchlist.filter(id => id !== movieId)
         }));
-        toast.success('Removed from watchlist');
       } else {
         await supabase
           .from('enhanced_watchlist_items')
@@ -214,7 +211,6 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         }));
         
         await logActivity('listed', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });
-        toast.success('Added to watchlist ✓');
       }
     } catch (error) {
       console.error('Error toggling watchlist:', error);
@@ -243,7 +239,6 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
           ...prev,
           currentlyWatching: prev.currentlyWatching.filter(id => id !== movieId)
         }));
-        toast.success('Removed from currently watching');
       } else {
         await supabase
           .from('watchlist')
@@ -261,7 +256,6 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         }));
         
         await logActivity('watched', { id: movieId, title: movieTitle, poster: moviePoster });
-        toast.success('Marked as currently watching 🎬');
       }
     } catch (error) {
       console.error('Error toggling currently watching:', error);
@@ -276,33 +270,53 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      await supabase
-        .from('ratings')
-        .upsert({
-          user_id: user.id,
-          movie_id: movieId,
-          movie_title: movieTitle,
-          rating: rating
+      // If rating is 0, remove the rating
+      if (rating === 0) {
+        await supabase
+          .from('ratings')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId);
+
+        await supabase
+          .from('user_ratings')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId);
+
+        setUserState(prev => {
+          const newRatings = { ...prev.ratings };
+          delete newRatings[movieId];
+          return { ...prev, ratings: newRatings };
         });
+      } else {
+        await supabase
+          .from('ratings')
+          .upsert({
+            user_id: user.id,
+            movie_id: movieId,
+            movie_title: movieTitle,
+            rating: rating
+          });
 
-      await supabase
-        .from('user_ratings')
-        .upsert({
-          user_id: user.id,
-          movie_id: movieId,
-          movie_title: movieTitle,
-          movie_poster: moviePoster,
-          rating: rating,
-          media_type: mediaType
-        }, { onConflict: 'user_id,movie_id' });
+        await supabase
+          .from('user_ratings')
+          .upsert({
+            user_id: user.id,
+            movie_id: movieId,
+            movie_title: movieTitle,
+            movie_poster: moviePoster,
+            rating: rating,
+            media_type: mediaType
+          }, { onConflict: 'user_id,movie_id' });
 
-      setUserState(prev => ({
-        ...prev,
-        ratings: { ...prev.ratings, [movieId]: rating }
-      }));
-      
-      await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating, media_type: mediaType });
-      toast.success(`Rated ${rating} star${rating > 1 ? 's' : ''} ⭐`);
+        setUserState(prev => ({
+          ...prev,
+          ratings: { ...prev.ratings, [movieId]: rating }
+        }));
+        
+        await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating, media_type: mediaType });
+      }
     } catch (error) {
       console.error('Error setting rating:', error);
       toast.error('Failed to save rating');

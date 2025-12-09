@@ -276,7 +276,7 @@ const TVShowDetail = () => {
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
-              onClick={() => setRating(tvShowId, star, tvShow.name, posterUrl, 'tv')}
+              onClick={() => setRating(tvShowId, star === userRating ? 0 : star, tvShow.name, posterUrl, 'tv')}
               className="p-2 touch-target"
             >
               <Star 
