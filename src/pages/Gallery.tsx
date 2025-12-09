@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
+import { GalleryMediaCard } from '@/components/GalleryMediaCard';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -401,50 +402,21 @@ const Gallery = () => {
             ) : getUnwatchedItems().length > 0 ? (
               <div className="space-y-3">
                 {getUnwatchedItems().map(item => {
-                  const itemMediaType = (item as any).media_type;
+                  const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
                   return (
-                    <Card key={item.id} className="p-4">
-                      <div className="flex gap-4">
-                        <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                          {item.movie_poster ? (
-                            <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-16 h-24 object-cover rounded" />
-                          ) : (
-                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
-                              {itemMediaType === 'tv' ? <Tv className="h-6 w-6 text-muted-foreground" /> : <Film className="h-6 w-6 text-muted-foreground" />}
-                            </div>
-                          )}
-                        </Link>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            {itemMediaType === 'tv' ? (
-                              <Tv className="h-4 w-4 text-primary shrink-0" />
-                            ) : (
-                              <Film className="h-4 w-4 text-cinema-red shrink-0" />
-                            )}
-                            <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`} className="font-semibold hover:underline line-clamp-1">
-                              {item.movie_title}
-                            </Link>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
-                          </p>
-                          {item.priority && (
-                            <Badge variant="outline" className="mt-1 text-xs capitalize">{item.priority} priority</Badge>
-                          )}
-                          {item.personal_notes && (
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.personal_notes}</p>
-                          )}
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </Card>
+                    <GalleryMediaCard
+                      key={item.id}
+                      id={item.id}
+                      movieId={item.movie_id}
+                      title={item.movie_title}
+                      poster={item.movie_poster}
+                      mediaType={itemMediaType}
+                      onDelete={() => removeItem(item.id)}
+                    >
+                      <p className="text-sm text-muted-foreground">
+                        Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
+                      </p>
+                    </GalleryMediaCard>
                   );
                 })}
               </div>
@@ -464,45 +436,22 @@ const Gallery = () => {
             ) : getFilteredFavorites().length > 0 ? (
               <div className="space-y-3">
                 {getFilteredFavorites().map(item => {
-                  const itemMediaType = (item as any).media_type;
+                  const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
                   return (
-                    <Card key={item.id} className="p-4">
-                      <div className="flex gap-4">
-                        <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                          {item.movie_poster ? (
-                            <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-16 h-24 object-cover rounded" />
-                          ) : (
-                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
-                              {itemMediaType === 'tv' ? <Tv className="h-6 w-6 text-muted-foreground" /> : <Film className="h-6 w-6 text-muted-foreground" />}
-                            </div>
-                          )}
-                        </Link>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            {itemMediaType === 'tv' ? (
-                              <Tv className="h-4 w-4 text-primary shrink-0" />
-                            ) : (
-                              <Film className="h-4 w-4 text-cinema-red shrink-0" />
-                            )}
-                            <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`} className="font-semibold hover:underline line-clamp-1">
-                              {item.movie_title}
-                            </Link>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
-                            <span className="text-sm text-muted-foreground">Favorited</span>
-                          </div>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => removeFavorite(item.movie_id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    <GalleryMediaCard
+                      key={item.id}
+                      id={item.id}
+                      movieId={item.movie_id}
+                      title={item.movie_title}
+                      poster={item.movie_poster}
+                      mediaType={itemMediaType}
+                      onDelete={() => removeFavorite(item.movie_id)}
+                    >
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
+                        <span className="text-sm text-muted-foreground">Favorited</span>
                       </div>
-                    </Card>
+                    </GalleryMediaCard>
                   );
                 })}
               </div>
@@ -522,63 +471,31 @@ const Gallery = () => {
             ) : getWatchedItems().length > 0 ? (
               <div className="space-y-3">
                 {getWatchedItems().map(item => (
-                  <Card key={`${item.source}-${item.id}`} className="p-4">
-                    <div className="flex gap-4">
-                      <Link to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                        {item.movie_poster ? (
-                          <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-16 h-24 object-cover rounded" />
-                        ) : (
-                          <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
-                            {item.media_type === 'tv' ? <Tv className="h-6 w-6 text-muted-foreground" /> : <Film className="h-6 w-6 text-muted-foreground" />}
-                          </div>
-                        )}
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          {item.media_type === 'tv' ? (
-                            <Tv className="h-4 w-4 text-primary shrink-0" />
-                          ) : (
-                            <Film className="h-4 w-4 text-cinema-red shrink-0" />
-                          )}
-                          <Link to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`} className="font-semibold hover:underline line-clamp-1">
-                            {item.movie_title}
-                          </Link>
-                        </div>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Eye className="h-4 w-4 text-cinema-gold" />
-                          <span className="text-sm text-muted-foreground">Watched</span>
-                        </div>
-                        {item.rating && item.rating > 0 && (
-                          <div className="flex items-center gap-1 mt-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= item.rating ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => {
-                          if (item.source === 'ratings') {
-                            setRating(item.movie_id, 0, item.movie_title, item.movie_poster || undefined, item.media_type as 'movie' | 'tv');
-                          } else {
-                            if (item.media_type === 'tv') {
-                              deleteTVDiaryEntry.mutate(item.id);
-                            } else {
-                              deleteMovieDiaryEntry.mutate(item.id);
-                            }
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  <GalleryMediaCard
+                    key={`${item.source}-${item.id}`}
+                    id={item.id}
+                    movieId={item.movie_id}
+                    title={item.movie_title}
+                    poster={item.movie_poster}
+                    mediaType={(item.media_type || 'movie') as 'movie' | 'tv'}
+                    userRating={item.rating}
+                    onDelete={() => {
+                      if (item.source === 'ratings') {
+                        setRating(item.movie_id, 0, item.movie_title, item.movie_poster || undefined, item.media_type as 'movie' | 'tv');
+                      } else {
+                        if (item.media_type === 'tv') {
+                          deleteTVDiaryEntry.mutate(item.id);
+                        } else {
+                          deleteMovieDiaryEntry.mutate(item.id);
+                        }
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      <Eye className="h-4 w-4 text-cinema-gold" />
+                      <span className="text-sm text-muted-foreground">Watched</span>
                     </div>
-                  </Card>
+                  </GalleryMediaCard>
                 ))}
               </div>
             ) : (
@@ -601,68 +518,37 @@ const Gallery = () => {
                   const id = isMovie ? (entry as any).movie_id : (entry as any).tv_id;
                   const title = isMovie ? (entry as any).movie_title : (entry as any).tv_title;
                   const poster = isMovie ? (entry as any).movie_poster : (entry as any).tv_poster;
+                  const mediaType = isMovie ? 'movie' : 'tv';
                   
                   return (
-                    <Card key={entry.id} className="p-4">
-                      <div className="flex gap-4">
-                        <Link to={isMovie ? `/movie/${id}` : `/tv/${id}`}>
-                          {poster ? (
-                            <img src={`${IMAGE_BASE}${poster}`} alt={title} className="w-16 h-24 object-cover rounded" />
-                          ) : (
-                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
-                              {isMovie ? <Film className="h-6 w-6 text-muted-foreground" /> : <Tv className="h-6 w-6 text-muted-foreground" />}
-                            </div>
-                          )}
-                        </Link>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            {isMovie ? (
-                              <Film className="h-4 w-4 text-cinema-red shrink-0" />
-                            ) : (
-                              <Tv className="h-4 w-4 text-primary shrink-0" />
-                            )}
-                            <Link to={isMovie ? `/movie/${id}` : `/tv/${id}`} className="font-semibold hover:underline line-clamp-1">
-                              {title}
-                            </Link>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
-                          </p>
-                          {!isMovie && ((entry as any).season_number || (entry as any).episode_number) && (
-                            <p className="text-xs text-muted-foreground">
-                              S{(entry as any).season_number || '?'} E{(entry as any).episode_number || '?'}
-                            </p>
-                          )}
-                          {entry.rating && (
-                            <div className="flex items-center gap-1 mt-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  className={`h-3 w-3 ${star <= entry.rating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
-                                />
-                              ))}
-                            </div>
-                          )}
-                          {entry.notes && (
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{entry.notes}</p>
-                          )}
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => {
-                            if (isMovie) {
-                              deleteMovieDiaryEntry.mutate(entry.id);
-                            } else {
-                              deleteTVDiaryEntry.mutate(entry.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </Card>
+                    <GalleryMediaCard
+                      key={entry.id}
+                      id={entry.id}
+                      movieId={id}
+                      title={title}
+                      poster={poster}
+                      mediaType={mediaType as 'movie' | 'tv'}
+                      userRating={entry.rating}
+                      onDelete={() => {
+                        if (isMovie) {
+                          deleteMovieDiaryEntry.mutate(entry.id);
+                        } else {
+                          deleteTVDiaryEntry.mutate(entry.id);
+                        }
+                      }}
+                    >
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
+                      </p>
+                      {!isMovie && ((entry as any).season_number || (entry as any).episode_number) && (
+                        <p className="text-xs text-muted-foreground">
+                          S{(entry as any).season_number || '?'} E{(entry as any).episode_number || '?'}
+                        </p>
+                      )}
+                      {entry.notes && (
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{entry.notes}</p>
+                      )}
+                    </GalleryMediaCard>
                   );
                 })}
               </div>
