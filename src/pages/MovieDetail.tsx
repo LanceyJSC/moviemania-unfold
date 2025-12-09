@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen, PenLine } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
 import { UserReviews } from "@/components/UserReviews";
 import { CommunityReviews } from "@/components/CommunityReviews";
 import { LogMovieModal } from "@/components/LogMovieModal";
-import { WriteReviewModal } from "@/components/WriteReviewModal";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -26,7 +25,6 @@ const MovieDetail = () => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showSynopsis, setShowSynopsis] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
   const isMobile = useIsMobile();
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
   const {
@@ -261,23 +259,15 @@ const MovieDetail = () => {
           </div>
         </div>
 
-        {/* Log & Review Buttons */}
-        <div className="flex gap-3 mb-6">
+        {/* Log Button */}
+        <div className="mb-6">
           <Button 
             variant="outline" 
-            className="flex-1"
+            className="w-full"
             onClick={() => setShowLogModal(true)}
           >
             <BookOpen className="mr-2 h-4 w-4" />
-            Log
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => setShowReviewModal(true)}
-          >
-            <PenLine className="mr-2 h-4 w-4" />
-            Review
+            Log Movie
           </Button>
         </div>
 
@@ -381,15 +371,6 @@ const MovieDetail = () => {
       <LogMovieModal
         isOpen={showLogModal}
         onClose={() => setShowLogModal(false)}
-        movieId={movieId}
-        movieTitle={title}
-        moviePoster={movie.poster_path}
-      />
-
-      {/* Write Review Modal */}
-      <WriteReviewModal
-        isOpen={showReviewModal}
-        onClose={() => setShowReviewModal(false)}
         movieId={movieId}
         movieTitle={title}
         moviePoster={movie.poster_path}

@@ -4,10 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CalendarIcon, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useDiary } from '@/hooks/useDiary';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface LogMovieModalProps {
   isOpen: boolean;
@@ -22,20 +26,71 @@ export const LogMovieModal = ({ isOpen, onClose, movieId, movieTitle, moviePoste
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState<number | null>(null);
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
+  const [isSpoiler, setIsSpoiler] = useState(false);
+  const [shareAsReview, setShareAsReview] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addMovieDiaryEntry } = useDiary();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async () => {
-    await addMovieDiaryEntry.mutateAsync({
-      movie_id: movieId,
-      movie_title: movieTitle,
-      movie_poster: moviePoster,
-      watched_date: format(watchedDate, 'yyyy-MM-dd'),
-      notes: notes || null,
-      rating: rating,
-    });
-    onClose();
+    setIsSubmitting(true);
+    try {
+      // Always save to diary
+      await addMovieDiaryEntry.mutateAsync({
+        movie_id: movieId,
+        movie_title: movieTitle,
+        movie_poster: moviePoster,
+        watched_date: format(watchedDate, 'yyyy-MM-dd'),
+        notes: notes || null,
+        rating: rating,
+      });
+
+      // If sharing as review, also save to user_reviews
+      if (shareAsReview && notes.trim()) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error } = await supabase.from('user_reviews').insert({
+            user_id: user.id,
+            movie_id: movieId,
+            movie_title: movieTitle,
+            movie_poster: moviePoster,
+            review_text: notes,
+            rating: rating,
+            is_spoiler: isSpoiler,
+          });
+
+          if (error) throw error;
+
+          // Log review activity
+          await supabase.from('activity_feed').insert({
+            user_id: user.id,
+            activity_type: 'reviewed',
+            movie_id: movieId,
+            movie_title: movieTitle,
+            movie_poster: moviePoster,
+          });
+
+          queryClient.invalidateQueries({ queryKey: ['user-reviews', movieId] });
+          toast.success('Review shared publicly!');
+        }
+      }
+
+      onClose();
+      resetForm();
+    } catch (error) {
+      console.error('Error logging movie:', error);
+      toast.error('Failed to log movie');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
     setNotes('');
     setRating(null);
+    setIsSpoiler(false);
+    setShareAsReview(false);
+    setWatchedDate(new Date());
   };
 
   const displayRating = hoveredRating ?? rating;
@@ -70,6 +125,7 @@ export const LogMovieModal = ({ isOpen, onClose, movieId, movieTitle, moviePoste
                   selected={watchedDate}
                   onSelect={(date) => date && setWatchedDate(date)}
                   initialFocus
+                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
@@ -101,22 +157,47 @@ export const LogMovieModal = ({ isOpen, onClose, movieId, movieTitle, moviePoste
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Notes/Review */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Notes (optional)</label>
+            <label className="text-sm font-medium">Notes / Review (optional)</label>
             <Textarea
-              placeholder="Add your thoughts about the movie..."
+              placeholder="What did you think?"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
             />
           </div>
 
+          {/* Spoiler checkbox */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="spoiler"
+              checked={isSpoiler}
+              onCheckedChange={(checked) => setIsSpoiler(checked as boolean)}
+            />
+            <label htmlFor="spoiler" className="text-sm cursor-pointer">
+              Contains spoilers
+            </label>
+          </div>
+
+          {/* Share as review checkbox */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="share-review"
+              checked={shareAsReview}
+              onCheckedChange={(checked) => setShareAsReview(checked as boolean)}
+              disabled={!notes.trim()}
+            />
+            <label htmlFor="share-review" className="text-sm cursor-pointer">
+              Share as a public review
+            </label>
+          </div>
+
           {/* Actions */}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={addMovieDiaryEntry.isPending}>
-              {addMovieDiaryEntry.isPending ? 'Saving...' : 'Log Movie'}
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Log Movie'}
             </Button>
           </div>
         </div>
