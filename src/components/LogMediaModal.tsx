@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useDiary } from '@/hooks/useDiary';
 import { useUserStats } from '@/hooks/useUserStats';
+import { tmdbService } from '@/lib/tmdb';
 
 interface LogMediaModalProps {
   isOpen: boolean;
@@ -44,6 +45,32 @@ export const LogMediaModal = ({
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [shareAsReview, setShareAsReview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [runtime, setRuntime] = useState<number | null>(null);
+
+  // Fetch runtime when modal opens
+  useEffect(() => {
+    const fetchRuntime = async () => {
+      if (!isOpen || !mediaId) return;
+      
+      try {
+        if (mediaType === 'movie') {
+          const movie = await tmdbService.getMovieDetails(mediaId);
+          setRuntime(movie.runtime || null);
+        } else {
+          const tvShow = await tmdbService.getTVShowDetails(mediaId);
+          // Use average episode runtime
+          const avgRuntime = tvShow.episode_run_time?.[0] || 45;
+          setRuntime(avgRuntime);
+        }
+      } catch (error) {
+        console.error('Error fetching runtime:', error);
+        // Fallback to defaults
+        setRuntime(mediaType === 'movie' ? 120 : 45);
+      }
+    };
+
+    fetchRuntime();
+  }, [isOpen, mediaId, mediaType]);
 
   const handleSubmit = async () => {
     if (!user) {
@@ -61,7 +88,8 @@ export const LogMediaModal = ({
           movie_poster: mediaPoster,
           watched_date: format(watchedDate, 'yyyy-MM-dd'),
           rating: rating > 0 ? rating : null,
-          notes: notes || null
+          notes: notes || null,
+          runtime: runtime
         });
       } else {
         await addTVDiaryEntry.mutateAsync({
@@ -72,7 +100,8 @@ export const LogMediaModal = ({
           rating: rating > 0 ? rating : null,
           notes: notes || null,
           season_number: seasonNumber || null,
-          episode_number: episodeNumber || null
+          episode_number: episodeNumber || null,
+          runtime: runtime
         });
       }
 
@@ -95,7 +124,6 @@ export const LogMediaModal = ({
         if (reviewError) {
           console.error('Error saving review:', reviewError);
         } else {
-          // Log activity for review
           await supabase.from('activity_feed').insert({
             user_id: user.id,
             activity_type: 'reviewed',
@@ -114,7 +142,7 @@ export const LogMediaModal = ({
         movie_id: mediaId,
         movie_title: mediaTitle,
         movie_poster: mediaPoster,
-        metadata: { rating, media_type: mediaType }
+        metadata: { rating, media_type: mediaType, runtime }
       });
 
       // Recalculate stats after logging
@@ -136,11 +164,22 @@ export const LogMediaModal = ({
     setRating(0);
     setIsSpoiler(false);
     setShareAsReview(false);
+    setRuntime(null);
   };
 
   const handleClose = () => {
     resetForm();
     onClose();
+  };
+
+  const formatRuntime = (mins: number | null) => {
+    if (!mins) return '';
+    const hours = Math.floor(mins / 60);
+    const minutes = mins % 60;
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
   };
 
   return (
@@ -154,6 +193,13 @@ export const LogMediaModal = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Runtime Display */}
+          {runtime && (
+            <div className="text-sm text-muted-foreground text-center bg-muted/50 rounded-md py-2">
+              Runtime: {formatRuntime(runtime)}
+            </div>
+          )}
+
           {/* Date Picker */}
           <div className="space-y-2">
             <label className="text-sm font-medium">When did you watch it?</label>

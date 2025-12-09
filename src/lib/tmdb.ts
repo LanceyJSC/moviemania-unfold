@@ -45,6 +45,7 @@ export interface TVShow {
   origin_country: string[];
   number_of_episodes?: number;
   number_of_seasons?: number;
+  episode_run_time?: number[];
   genres?: { id: number; name: string }[];
   created_by?: { id: number; name: string; profile_path: string | null }[];
   credits?: {
