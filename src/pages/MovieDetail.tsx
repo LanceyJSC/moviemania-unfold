@@ -6,7 +6,7 @@ import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
 import { UserReviews } from "@/components/UserReviews";
 import { CommunityReviews } from "@/components/CommunityReviews";
-import { LogMovieModal } from "@/components/LogMovieModal";
+import { LogMediaModal } from "@/components/LogMediaModal";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -368,12 +368,13 @@ const MovieDetail = () => {
       )}
 
       {/* Log Movie Modal */}
-      <LogMovieModal
+      <LogMediaModal
         isOpen={showLogModal}
         onClose={() => setShowLogModal(false)}
-        movieId={movieId}
-        movieTitle={title}
-        moviePoster={movie.poster_path}
+        mediaId={movieId}
+        mediaTitle={title}
+        mediaPoster={movie.poster_path}
+        mediaType="movie"
       />
 
       {/* Mobile Navigation */}
