@@ -8,17 +8,14 @@ import { Loader2, Check, X } from 'lucide-react';
 
 interface ProfileEditorProps {
   initialUsername: string;
-  initialFullName?: string;
   currentProfile?: {
     username: string;
-    full_name?: string;
   } | null;
 }
 
-export const ProfileEditor = ({ initialUsername, initialFullName, currentProfile }: ProfileEditorProps) => {
+export const ProfileEditor = ({ initialUsername, currentProfile }: ProfileEditorProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState(initialUsername);
-  const [fullName, setFullName] = useState(initialFullName || '');
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const { updateProfile, checkUsernameAvailability } = useProfile();
@@ -26,7 +23,6 @@ export const ProfileEditor = ({ initialUsername, initialFullName, currentProfile
 
   // Use current profile data if available, fallback to initial props
   const displayUsername = currentProfile?.username || initialUsername;
-  const displayFullName = currentProfile?.full_name || initialFullName;
 
   const handleUsernameChange = async (value: string) => {
     setUsername(value);
@@ -60,7 +56,6 @@ export const ProfileEditor = ({ initialUsername, initialFullName, currentProfile
     try {
       await updateProfile({
         username: username,
-        full_name: fullName || null,
       });
       setIsEditing(false);
     } catch (error) {
@@ -70,7 +65,6 @@ export const ProfileEditor = ({ initialUsername, initialFullName, currentProfile
 
   const handleCancel = () => {
     setUsername(initialUsername);
-    setFullName(initialFullName || '');
     setUsernameAvailable(null);
     setIsEditing(false);
   };
@@ -81,10 +75,6 @@ export const ProfileEditor = ({ initialUsername, initialFullName, currentProfile
         <div>
           <Label className="font-medium">Username</Label>
           <p className="text-sm text-muted-foreground">@{displayUsername}</p>
-        </div>
-        <div>
-          <Label className="font-medium">Full Name</Label>
-          <p className="text-sm text-muted-foreground">{displayFullName || 'Not set'}</p>
         </div>
         <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
           Edit Profile
@@ -126,16 +116,6 @@ export const ProfileEditor = ({ initialUsername, initialFullName, currentProfile
             ) : null}
           </p>
         )}
-      </div>
-      
-      <div>
-        <Label htmlFor="fullName">Full Name</Label>
-        <Input
-          id="fullName"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          placeholder="Enter your full name"
-        />
       </div>
 
       <div className="flex gap-2">
