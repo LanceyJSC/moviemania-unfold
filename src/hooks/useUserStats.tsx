@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -7,7 +7,9 @@ interface UserStats {
   id: string;
   user_id: string;
   total_movies_watched: number;
+  total_tv_shows_watched: number;
   total_hours_watched: number;
+  total_tv_hours_watched: number;
   total_ratings: number;
   average_rating: number;
   favorite_genres: string[];
@@ -24,22 +26,12 @@ export const useUserStats = () => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserStats();
-    } else {
-      setStats(null);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchUserStats = async () => {
+  const fetchUserStats = useCallback(async () => {
     if (!user) return;
     
     try {
       setLoading(true);
       
-      // Try to get existing stats
       let { data: existingStats, error } = await supabase
         .from('user_stats')
         .select('*')
@@ -48,13 +40,15 @@ export const useUserStats = () => {
 
       if (error) throw error;
 
-      // If no stats exist, create initial stats
       if (!existingStats) {
         const { data: newStats, error: createError } = await supabase
           .from('user_stats')
           .upsert({
             user_id: user.id,
             total_movies_watched: 0,
+            total_tv_shows_watched: 0,
+            total_hours_watched: 0,
+            total_tv_hours_watched: 0,
             experience_points: 0,
             level: 1
           })
@@ -68,11 +62,91 @@ export const useUserStats = () => {
       setStats(existingStats);
     } catch (error) {
       console.error('Error fetching user stats:', error);
-      toast.error('Failed to load user statistics');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserStats();
+    } else {
+      setStats(null);
+      setLoading(false);
+    }
+  }, [user, fetchUserStats]);
+
+  const recalculateStats = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      // Count movies from diary
+      const { count: movieCount } = await supabase
+        .from('movie_diary')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Count TV shows from tv_diary
+      const { count: tvCount } = await supabase
+        .from('tv_diary')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Get all ratings to calculate average
+      const { data: movieRatings } = await supabase
+        .from('user_ratings')
+        .select('rating, media_type')
+        .eq('user_id', user.id);
+
+      const { data: diaryRatings } = await supabase
+        .from('movie_diary')
+        .select('rating')
+        .eq('user_id', user.id)
+        .not('rating', 'is', null);
+
+      const { data: tvDiaryRatings } = await supabase
+        .from('tv_diary')
+        .select('rating')
+        .eq('user_id', user.id)
+        .not('rating', 'is', null);
+
+      // Calculate average rating from all sources
+      const allRatings = [
+        ...(movieRatings?.map(r => r.rating) || []),
+        ...(diaryRatings?.map(r => r.rating) || []),
+        ...(tvDiaryRatings?.map(r => r.rating) || [])
+      ].filter(r => r !== null && r !== undefined);
+
+      const avgRating = allRatings.length > 0 
+        ? allRatings.reduce((a, b) => a + b, 0) / allRatings.length 
+        : 0;
+
+      // Estimate watch time (average 2 hours per movie, 45 min per TV entry)
+      const movieHours = (movieCount || 0) * 2;
+      const tvHours = Math.round((tvCount || 0) * 0.75);
+
+      const updates = {
+        total_movies_watched: movieCount || 0,
+        total_tv_shows_watched: tvCount || 0,
+        total_hours_watched: movieHours,
+        total_tv_hours_watched: tvHours,
+        total_ratings: allRatings.length,
+        average_rating: Math.round(avgRating * 10) / 10,
+        last_activity_date: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('user_stats')
+        .update(updates)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setStats(prev => prev ? { ...prev, ...updates } : null);
+    } catch (error) {
+      console.error('Error recalculating stats:', error);
+    }
+  }, [user]);
 
   const updateStats = async (updates: Partial<UserStats>) => {
     if (!user || !stats) return;
@@ -113,6 +187,7 @@ export const useUserStats = () => {
     loading,
     updateStats,
     addExperience,
+    recalculateStats,
     refetch: fetchUserStats
   };
 };
