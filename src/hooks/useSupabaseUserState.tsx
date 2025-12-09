@@ -22,7 +22,7 @@ export const useSupabaseUserState = () => {
   const [userState, setUserState] = useState<UserState>(defaultUserState);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load user data from Supabase when user is authenticated
+  // Load user data when user is authenticated
   useEffect(() => {
     if (session?.user) {
       loadUserData();
@@ -36,7 +36,13 @@ export const useSupabaseUserState = () => {
     
     setIsLoading(true);
     try {
-      // Load watchlist
+      // Load from enhanced_watchlist_items (unified table)
+      const { data: enhancedData } = await supabase
+        .from('enhanced_watchlist_items')
+        .select('movie_id, priority, watched_at, mood_tags')
+        .eq('user_id', user.id);
+
+      // Load from watchlist (for liked movies)
       const { data: watchlistData } = await supabase
         .from('watchlist')
         .select('movie_id, list_type')
@@ -48,31 +54,28 @@ export const useSupabaseUserState = () => {
         .select('movie_id, rating')
         .eq('user_id', user.id);
 
-      if (watchlistData && ratingsData) {
-        const likedMovies = watchlistData
-          .filter(item => item.list_type === 'liked')
-          .map(item => item.movie_id);
-        
-        const watchlist = watchlistData
-          .filter(item => item.list_type === 'watchlist')
-          .map(item => item.movie_id);
-        
-        const currentlyWatching = watchlistData
-          .filter(item => item.list_type === 'currently_watching')
-          .map(item => item.movie_id);
+      const likedMovies = watchlistData
+        ?.filter(item => item.list_type === 'liked')
+        .map(item => item.movie_id) || [];
+      
+      // Movies in enhanced watchlist are in the "watchlist"
+      const watchlist = enhancedData?.map(item => item.movie_id) || [];
+      
+      const currentlyWatching = watchlistData
+        ?.filter(item => item.list_type === 'currently_watching')
+        .map(item => item.movie_id) || [];
 
-        const ratings = ratingsData.reduce((acc, item) => {
-          acc[item.movie_id] = item.rating;
-          return acc;
-        }, {} as Record<number, number>);
+      const ratings = ratingsData?.reduce((acc, item) => {
+        acc[item.movie_id] = item.rating;
+        return acc;
+      }, {} as Record<number, number>) || {};
 
-        setUserState({
-          likedMovies,
-          watchlist,
-          currentlyWatching,
-          ratings
-        });
-      }
+      setUserState({
+        likedMovies,
+        watchlist,
+        currentlyWatching,
+        ratings
+      });
     } catch (error) {
       console.error('Error loading user data:', error);
       toast.error('Failed to load your data');
@@ -102,6 +105,7 @@ export const useSupabaseUserState = () => {
           ...prev,
           likedMovies: prev.likedMovies.filter(id => id !== movieId)
         }));
+        toast.success('Removed from favorites');
       } else {
         await supabase
           .from('watchlist')
@@ -117,10 +121,11 @@ export const useSupabaseUserState = () => {
           ...prev,
           likedMovies: [...prev.likedMovies, movieId]
         }));
+        toast.success('Added to favorites ❤️');
       }
     } catch (error) {
       console.error('Error toggling like:', error);
-      toast.error('Failed to update like status');
+      toast.error('Failed to update favorites');
     }
   };
 
@@ -134,32 +139,36 @@ export const useSupabaseUserState = () => {
     
     try {
       if (isInWatchlist) {
+        // Remove from enhanced_watchlist_items
         await supabase
-          .from('watchlist')
+          .from('enhanced_watchlist_items')
           .delete()
           .eq('user_id', user.id)
-          .eq('movie_id', movieId)
-          .eq('list_type', 'watchlist');
+          .eq('movie_id', movieId);
         
         setUserState(prev => ({
           ...prev,
           watchlist: prev.watchlist.filter(id => id !== movieId)
         }));
+        toast.success('Removed from watchlist');
       } else {
+        // Add to enhanced_watchlist_items
         await supabase
-          .from('watchlist')
+          .from('enhanced_watchlist_items')
           .insert({
             user_id: user.id,
             movie_id: movieId,
             movie_title: movieTitle,
             movie_poster: moviePoster,
-            list_type: 'watchlist'
+            priority: 'medium',
+            mood_tags: []
           });
         
         setUserState(prev => ({
           ...prev,
           watchlist: [...prev.watchlist, movieId]
         }));
+        toast.success('Added to watchlist ✓');
       }
     } catch (error) {
       console.error('Error toggling watchlist:', error);
@@ -188,6 +197,7 @@ export const useSupabaseUserState = () => {
           ...prev,
           currentlyWatching: prev.currentlyWatching.filter(id => id !== movieId)
         }));
+        toast.success('Removed from currently watching');
       } else {
         await supabase
           .from('watchlist')
@@ -203,6 +213,7 @@ export const useSupabaseUserState = () => {
           ...prev,
           currentlyWatching: [...prev.currentlyWatching, movieId]
         }));
+        toast.success('Marked as currently watching 🎬');
       }
     } catch (error) {
       console.error('Error toggling currently watching:', error);
@@ -230,6 +241,7 @@ export const useSupabaseUserState = () => {
         ...prev,
         ratings: { ...prev.ratings, [movieId]: rating }
       }));
+      toast.success(`Rated ${rating} star${rating > 1 ? 's' : ''} ⭐`);
     } catch (error) {
       console.error('Error setting rating:', error);
       toast.error('Failed to save rating');

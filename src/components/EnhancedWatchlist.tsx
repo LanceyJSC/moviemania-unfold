@@ -2,18 +2,16 @@ import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Star, 
   Clock, 
-  Calendar,
   Tag,
   StickyNote,
   Palette,
   Eye,
   Trash2,
-  Edit3,
   Grid,
-  List as ListIcon
+  List as ListIcon,
+  Heart
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,11 +21,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { MovieCard } from '@/components/MovieCard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWatchlistCollections } from '@/hooks/useWatchlistCollections';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
+import { useFavorites } from '@/hooks/useFavorites';
 import { tmdbService, Movie } from '@/lib/tmdb';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 type ViewMode = 'grid' | 'list';
 type Priority = 'low' | 'medium' | 'high';
@@ -59,12 +59,10 @@ export const EnhancedWatchlist = () => {
     updateItem, 
     removeItem, 
     markAsWatched,
-    updateProgress,
-    getItemsByCollection,
-    getItemsByPriority,
-    getItemsByMoodTag,
     addItem
   } = useEnhancedWatchlist();
+  const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
+  
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
@@ -73,26 +71,13 @@ export const EnhancedWatchlist = () => {
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all');
   const [filterMood, setFilterMood] = useState<string>('all');
   const [showCreateCollection, setShowCreateCollection] = useState(false);
-  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('to-watch');
   const [newCollection, setNewCollection] = useState<CollectionFormData>({
     name: '',
     description: '',
     color: '#4F46E5',
     isPublic: false
   });
-
-  const handleUpdateNotes = async (itemId: string, notes: string) => {
-    await updateItem(itemId, { personal_notes: notes });
-    setEditingItem(null);
-  };
-
-  const handleUpdateMoodTags = async (itemId: string, tags: string[]) => {
-    await updateItem(itemId, { mood_tags: tags });
-  };
-
-  const handleUpdatePriority = async (itemId: string, priority: Priority) => {
-    await updateItem(itemId, { priority });
-  };
 
   const handleCreateCollection = async () => {
     if (!newCollection.name.trim()) {
@@ -166,7 +151,7 @@ export const EnhancedWatchlist = () => {
   const getWatchedItems = () => filteredItems.filter(item => item.watched_at);
   const getInProgressItems = () => filteredItems.filter(item => item.progress_percent > 0 && item.progress_percent < 100);
 
-  if (collectionsLoading || itemsLoading) {
+  if (collectionsLoading || itemsLoading || favoritesLoading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
@@ -278,7 +263,7 @@ export const EnhancedWatchlist = () => {
                   alt={movie.title}
                   className="w-full aspect-[2/3] object-cover rounded mb-2"
                 />
-                <p className="text-sm font-medium mb-2">{movie.title}</p>
+                <p className="text-sm font-medium mb-2 line-clamp-2">{movie.title}</p>
                 <Button 
                   size="sm" 
                   onClick={() => handleAddToWatchlist(movie)}
@@ -292,88 +277,107 @@ export const EnhancedWatchlist = () => {
         </div>
       )}
 
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search your movies..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      {/* Tabs for different sections */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsTrigger value="to-watch" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <span className="hidden sm:inline">To Watch</span>
+            <Badge variant="secondary" className="ml-1">{getUnwatchedItems().length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="favorites" className="flex items-center gap-2">
+            <Heart className="h-4 w-4" />
+            <span className="hidden sm:inline">Favorites</span>
+            <Badge variant="secondary" className="ml-1">{favorites.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="in-progress" className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            <span className="hidden sm:inline">In Progress</span>
+            <Badge variant="secondary" className="ml-1">{getInProgressItems().length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="watched" className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            <span className="hidden sm:inline">Watched</span>
+            <Badge variant="secondary" className="ml-1">{getWatchedItems().length}</Badge>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search your movies..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <Select value={filterPriority} onValueChange={(value: Priority | 'all') => setFilterPriority(value)}>
+            <SelectTrigger className="w-full md:w-[160px]">
+              <SelectValue placeholder="Priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priorities</SelectItem>
+              <SelectItem value="high">High Priority</SelectItem>
+              <SelectItem value="medium">Medium Priority</SelectItem>
+              <SelectItem value="low">Low Priority</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterMood} onValueChange={setFilterMood}>
+            <SelectTrigger className="w-full md:w-[160px]">
+              <SelectValue placeholder="Mood" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Moods</SelectItem>
+              {moodTags.map(mood => (
+                <SelectItem key={mood} value={mood}>{mood}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        
-        <Select value={filterPriority} onValueChange={(value: Priority | 'all') => setFilterPriority(value)}>
-          <SelectTrigger className="w-full md:w-[160px]">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
-            <SelectItem value="high">High Priority</SelectItem>
-            <SelectItem value="medium">Medium Priority</SelectItem>
-            <SelectItem value="low">Low Priority</SelectItem>
-          </SelectContent>
-        </Select>
 
-        <Select value={filterMood} onValueChange={setFilterMood}>
-          <SelectTrigger className="w-full md:w-[160px]">
-            <SelectValue placeholder="Mood" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Moods</SelectItem>
-            {moodTags.map(mood => (
-              <SelectItem key={mood} value={mood}>{mood}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Collections Grid */}
-      {collections.length > 0 && (
-        <div>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Tag className="h-5 w-5" />
-            My Collections
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {collections.map(collection => (
-              <Card key={collection.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: collection.color }}
-                    />
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{collection.name}</CardTitle>
-                      {collection.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {collection.description}
-                        </p>
+        {/* Collections Grid */}
+        {collections.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Tag className="h-5 w-5" />
+              My Collections
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {collections.map(collection => (
+                <Card key={collection.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: collection.color }}
+                      />
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{collection.name}</CardTitle>
+                        {collection.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {collection.description}
+                          </p>
+                        )}
+                      </div>
+                      {collection.is_public && (
+                        <Badge variant="secondary" className="text-xs">
+                          Public
+                        </Badge>
                       )}
                     </div>
-                    {collection.is_public && (
-                      <Badge variant="secondary" className="text-xs">
-                        Public
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Enhanced Watchlist Categories */}
-      <div className="space-y-8">
-        {/* Unwatched Items */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            To Watch ({getUnwatchedItems().length})
-          </h2>
+        {/* To Watch Tab */}
+        <TabsContent value="to-watch" className="space-y-4">
           {getUnwatchedItems().length > 0 ? (
             <div className="space-y-4">
               {getUnwatchedItems().map(item => (
@@ -381,16 +385,20 @@ export const EnhancedWatchlist = () => {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       {item.movie_poster && (
-                        <img 
-                          src={`https://image.tmdb.org/t/p/w92${item.movie_poster}`}
-                          alt={item.movie_title}
-                          className="w-16 h-24 object-cover rounded"
-                        />
+                        <Link to={`/movie/${item.movie_id}`}>
+                          <img 
+                            src={`https://image.tmdb.org/t/p/w92${item.movie_poster}`}
+                            alt={item.movie_title}
+                            className="w-16 h-24 object-cover rounded hover:opacity-80 transition-opacity"
+                          />
+                        </Link>
                       )}
                       
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-lg">{item.movie_title}</h3>
+                          <Link to={`/movie/${item.movie_id}`}>
+                            <h3 className="font-semibold text-lg hover:text-primary transition-colors">{item.movie_title}</h3>
+                          </Link>
                           <div className="flex items-center gap-2">
                             <div 
                               className={`w-3 h-3 rounded-full ${priorityColors[item.priority]}`}
@@ -448,35 +456,85 @@ export const EnhancedWatchlist = () => {
           ) : (
             <Card className="p-8 text-center">
               <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No movies in your enhanced watchlist</p>
+              <p className="text-muted-foreground">No movies in your watchlist</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Add movies from movie pages to get started with smart organization!
+                Add movies from movie pages using the + button!
               </p>
             </Card>
           )}
-        </div>
+        </TabsContent>
 
-        {/* In Progress */}
-        {getInProgressItems().length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Eye className="h-5 w-5 text-primary" />
-              In Progress ({getInProgressItems().length})
-            </h2>
+        {/* Favorites Tab */}
+        <TabsContent value="favorites" className="space-y-4">
+          {favorites.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {favorites.map(item => (
+                <div key={item.id} className="relative group">
+                  <Link to={`/movie/${item.movie_id}`}>
+                    {item.movie_poster ? (
+                      <img 
+                        src={`https://image.tmdb.org/t/p/w300${item.movie_poster}`}
+                        alt={item.movie_title}
+                        className="w-full aspect-[2/3] object-cover rounded-lg hover:opacity-80 transition-opacity"
+                      />
+                    ) : (
+                      <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
+                        <Heart className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+                  </Link>
+                  <div className="absolute top-2 right-2">
+                    <Heart className="h-5 w-5 text-cinema-red fill-cinema-red" />
+                  </div>
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2">
+                    <p className="text-white text-sm font-medium text-center px-2">{item.movie_title}</p>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        removeFavorite(item.movie_id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-8 text-center">
+              <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No favorite movies yet</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Like movies using the ❤️ button on movie pages!
+              </p>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* In Progress Tab */}
+        <TabsContent value="in-progress" className="space-y-4">
+          {getInProgressItems().length > 0 ? (
             <div className="space-y-4">
               {getInProgressItems().map(item => (
                 <Card key={item.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       {item.movie_poster && (
-                        <img 
-                          src={`https://image.tmdb.org/t/p/w92${item.movie_poster}`}
-                          alt={item.movie_title}
-                          className="w-16 h-24 object-cover rounded"
-                        />
+                        <Link to={`/movie/${item.movie_id}`}>
+                          <img 
+                            src={`https://image.tmdb.org/t/p/w92${item.movie_poster}`}
+                            alt={item.movie_title}
+                            className="w-16 h-24 object-cover rounded hover:opacity-80 transition-opacity"
+                          />
+                        </Link>
                       )}
                       <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-2">{item.movie_title}</h3>
+                        <Link to={`/movie/${item.movie_id}`}>
+                          <h3 className="font-semibold text-lg mb-2 hover:text-primary transition-colors">{item.movie_title}</h3>
+                        </Link>
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span>Progress</span>
@@ -485,40 +543,61 @@ export const EnhancedWatchlist = () => {
                           <Progress value={item.progress_percent} className="h-2" />
                         </div>
                       </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => markAsWatched(item.id)}
+                      >
+                        Mark Complete
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <Card className="p-8 text-center">
+              <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No movies in progress</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Movies you're currently watching will appear here
+              </p>
+            </Card>
+          )}
+        </TabsContent>
 
-        {/* Watched Items */}
-        {getWatchedItems().length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Star className="h-5 w-5 text-primary" />
-              Watched ({getWatchedItems().length})
-            </h2>
+        {/* Watched Tab */}
+        <TabsContent value="watched" className="space-y-4">
+          {getWatchedItems().length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {getWatchedItems().map(item => (
                 <div key={item.id} className="relative group">
-                  {item.movie_poster && (
-                    <img 
-                      src={`https://image.tmdb.org/t/p/w300${item.movie_poster}`}
-                      alt={item.movie_title}
-                      className="w-full aspect-[2/3] object-cover rounded-lg"
-                    />
-                  )}
+                  <Link to={`/movie/${item.movie_id}`}>
+                    {item.movie_poster && (
+                      <img 
+                        src={`https://image.tmdb.org/t/p/w300${item.movie_poster}`}
+                        alt={item.movie_title}
+                        className="w-full aspect-[2/3] object-cover rounded-lg hover:opacity-80 transition-opacity"
+                      />
+                    )}
+                  </Link>
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                     <Badge className="bg-green-600">Watched</Badge>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-      </div>
+          ) : (
+            <Card className="p-8 text-center">
+              <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No watched movies yet</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Mark movies as watched to track your viewing history
+              </p>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
