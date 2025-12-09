@@ -17,7 +17,7 @@ import TVShowDetail from "./pages/TVShowDetail";
 import SeasonDetail from "./pages/SeasonDetail";
 import ActorDetail from "./pages/ActorDetail";
 import CategoryPage from "./pages/CategoryPage";
-import Watchlist from "./pages/Watchlist";
+import Gallery from "./pages/Gallery";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -29,7 +29,6 @@ import Notifications from "./pages/Notifications";
 import { DiscoverMovies } from "./pages/DiscoverMovies";
 import { DiscoverTVShows } from "./pages/DiscoverTVShows";
 import { Recommendations } from "./pages/Recommendations";
-import Diary from "./pages/Diary";
 import Members from "./pages/Members";
 import UserProfile from "./pages/UserProfile";
 import Lists from "./pages/Lists";
@@ -75,7 +74,7 @@ const App = () => {
                       <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
                       <Route path="/actor/:id" element={<ActorDetail />} />
                       <Route path="/category/:category" element={<CategoryPage />} />
-                      <Route path="/watchlist" element={<Watchlist />} />
+                      <Route path="/gallery" element={<Gallery />} />
                       <Route path="/local" element={<Local />} />
                       <Route path="/cinemas" element={<Cinemas />} />
                       <Route path="/cinema/:id" element={<CinemaDetail />} />
@@ -84,7 +83,6 @@ const App = () => {
                       <Route path="/discover/tv-shows" element={<DiscoverTVShows />} />
                       <Route path="/recommendations" element={<Recommendations />} />
                       <Route path="/profile" element={<Profile />} />
-                      <Route path="/diary" element={<Diary />} />
                       <Route path="/members" element={<Members />} />
                       <Route path="/user/:username" element={<UserProfile />} />
                       <Route path="/lists" element={<Lists />} />
