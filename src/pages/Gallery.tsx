@@ -3,13 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { 
   Calendar, Film, Tv, Star, Edit2, Trash2, Clock, Heart, Eye, 
-  Plus, Search, Grid, List as ListIcon, Tag, StickyNote, Palette
+  Plus, Search, Tag, Palette, Trophy
 } from 'lucide-react';
 import { useDiary, MovieDiaryEntry, TVDiaryEntry } from '@/hooks/useDiary';
 import { useAuth } from '@/hooks/useAuth';
 import { useWatchlistCollections } from '@/hooks/useWatchlistCollections';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useUserStats } from '@/hooks/useUserStats';
 import { tmdbService, Movie } from '@/lib/tmdb';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,7 +21,6 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DiaryEntryModal from '@/components/DiaryEntryModal';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
@@ -36,12 +36,6 @@ const priorityColors = {
   high: 'bg-red-500'
 };
 
-const moodTags = [
-  'Action-packed', 'Romantic', 'Mindless Fun', 'Thought-provoking',
-  'Feel-good', 'Tearjerker', 'Thrilling', 'Comedy Gold', 'Artistic',
-  'Family Time', 'Date Night', 'Solo Watch', 'Weekend Binge'
-];
-
 const Gallery = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -49,6 +43,7 @@ const Gallery = () => {
   const { collections, loading: collectionsLoading, createCollection } = useWatchlistCollections();
   const { items, loading: itemsLoading, removeItem, markAsWatched, addItem } = useEnhancedWatchlist();
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
+  const { stats, loading: statsLoading } = useUserStats();
   
   const [editingEntry, setEditingEntry] = useState<MovieDiaryEntry | TVDiaryEntry | null>(null);
   const [entryType, setEntryType] = useState<'movie' | 'tv'>('movie');
@@ -304,10 +299,33 @@ const Gallery = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
+        {/* Stats Section */}
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          <Card className="p-3 text-center">
+            <div className="text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</div>
+            <div className="text-xs text-muted-foreground">Movies</div>
+          </Card>
+          <Card className="p-3 text-center">
+            <div className="text-xl font-bold text-foreground">{Math.round((stats?.total_hours_watched || 0))}h</div>
+            <div className="text-xs text-muted-foreground">Hours</div>
+          </Card>
+          <Card className="p-3 text-center">
+            <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
+            <div className="text-xs text-muted-foreground">Avg Rating</div>
+          </Card>
+          <Card className="p-3 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Trophy className="h-4 w-4 text-primary" />
+              <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
+            </div>
+            <div className="text-xs text-muted-foreground">Level</div>
+          </Card>
+        </div>
+
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold">My Gallery</h1>
-            <p className="text-muted-foreground text-sm">Your personal movie & TV collection</p>
+            <h1 className="text-xl font-bold">My Gallery</h1>
+            <p className="text-muted-foreground text-xs">Your personal collection</p>
           </div>
         </div>
 
