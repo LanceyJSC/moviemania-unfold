@@ -12,6 +12,7 @@ export interface MovieDiaryEntry {
   watched_date: string;
   notes: string | null;
   rating: number | null;
+  runtime?: number | null;
   created_at: string;
 }
 
@@ -26,6 +27,7 @@ export interface TVDiaryEntry {
   watched_date: string;
   notes: string | null;
   rating: number | null;
+  runtime?: number | null;
   created_at: string;
 }
 

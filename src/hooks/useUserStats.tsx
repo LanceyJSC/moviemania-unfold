@@ -80,54 +80,48 @@ export const useUserStats = () => {
     if (!user) return;
 
     try {
-      // Count movies from diary
-      const { count: movieCount } = await supabase
+      // Get movie diary entries with runtime
+      const { data: movieDiary } = await supabase
         .from('movie_diary')
-        .select('*', { count: 'exact', head: true })
+        .select('runtime, rating')
         .eq('user_id', user.id);
 
-      // Count TV shows from tv_diary
-      const { count: tvCount } = await supabase
+      // Get TV diary entries with runtime
+      const { data: tvDiary } = await supabase
         .from('tv_diary')
-        .select('*', { count: 'exact', head: true })
+        .select('runtime, rating')
         .eq('user_id', user.id);
 
-      // Get all ratings to calculate average
-      const { data: movieRatings } = await supabase
-        .from('user_ratings')
-        .select('rating, media_type')
-        .eq('user_id', user.id);
+      const movieCount = movieDiary?.length || 0;
+      const tvCount = tvDiary?.length || 0;
 
-      const { data: diaryRatings } = await supabase
-        .from('movie_diary')
-        .select('rating')
-        .eq('user_id', user.id)
-        .not('rating', 'is', null);
+      // Calculate actual movie hours from runtime (in minutes)
+      const movieMinutes = movieDiary?.reduce((sum, entry) => {
+        // Use stored runtime, fallback to 120 min if not available
+        return sum + (entry.runtime || 120);
+      }, 0) || 0;
+      const movieHours = Math.round(movieMinutes / 60);
 
-      const { data: tvDiaryRatings } = await supabase
-        .from('tv_diary')
-        .select('rating')
-        .eq('user_id', user.id)
-        .not('rating', 'is', null);
+      // Calculate actual TV hours from runtime (in minutes per episode)
+      const tvMinutes = tvDiary?.reduce((sum, entry) => {
+        // Use stored runtime, fallback to 45 min if not available
+        return sum + (entry.runtime || 45);
+      }, 0) || 0;
+      const tvHours = Math.round(tvMinutes / 60);
 
       // Calculate average rating from all sources
       const allRatings = [
-        ...(movieRatings?.map(r => r.rating) || []),
-        ...(diaryRatings?.map(r => r.rating) || []),
-        ...(tvDiaryRatings?.map(r => r.rating) || [])
-      ].filter(r => r !== null && r !== undefined);
+        ...(movieDiary?.map(r => r.rating).filter(r => r !== null) || []),
+        ...(tvDiary?.map(r => r.rating).filter(r => r !== null) || [])
+      ] as number[];
 
       const avgRating = allRatings.length > 0 
         ? allRatings.reduce((a, b) => a + b, 0) / allRatings.length 
         : 0;
 
-      // Estimate watch time (average 2 hours per movie, 45 min per TV entry)
-      const movieHours = (movieCount || 0) * 2;
-      const tvHours = Math.round((tvCount || 0) * 0.75);
-
       const updates = {
-        total_movies_watched: movieCount || 0,
-        total_tv_shows_watched: tvCount || 0,
+        total_movies_watched: movieCount,
+        total_tv_shows_watched: tvCount,
         total_hours_watched: movieHours,
         total_tv_hours_watched: tvHours,
         total_ratings: allRatings.length,

@@ -275,6 +275,7 @@ export type Database = {
           movie_title: string
           notes: string | null
           rating: number | null
+          runtime: number | null
           user_id: string
           watched_date: string
         }
@@ -287,6 +288,7 @@ export type Database = {
           movie_title: string
           notes?: string | null
           rating?: number | null
+          runtime?: number | null
           user_id: string
           watched_date?: string
         }
@@ -299,6 +301,7 @@ export type Database = {
           movie_title?: string
           notes?: string | null
           rating?: number | null
+          runtime?: number | null
           user_id?: string
           watched_date?: string
         }
@@ -468,6 +471,7 @@ export type Database = {
           id: string
           notes: string | null
           rating: number | null
+          runtime: number | null
           season_number: number | null
           tv_id: number
           tv_poster: string | null
@@ -481,6 +485,7 @@ export type Database = {
           id?: string
           notes?: string | null
           rating?: number | null
+          runtime?: number | null
           season_number?: number | null
           tv_id: number
           tv_poster?: string | null
@@ -494,6 +499,7 @@ export type Database = {
           id?: string
           notes?: string | null
           rating?: number | null
+          runtime?: number | null
           season_number?: number | null
           tv_id?: number
           tv_poster?: string | null
