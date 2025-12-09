@@ -105,22 +105,25 @@ export const LogMediaModal = ({
         });
       }
 
-      // Also add to user_ratings (marks as "Watched") if rating provided or just to track as watched
-      const { error: ratingError } = await supabase
-        .from('user_ratings')
-        .upsert({
-          user_id: user.id,
-          movie_id: mediaId,
-          movie_title: mediaTitle,
-          movie_poster: mediaPoster,
-          rating: rating > 0 ? rating : 0,
-          media_type: mediaType
-        }, {
-          onConflict: 'user_id,movie_id'
-        });
+      // Also add to user_ratings (marks as "Watched")
+      // Only insert if rating > 0, otherwise the check constraint will fail
+      if (rating > 0) {
+        const { error: ratingError } = await supabase
+          .from('user_ratings')
+          .upsert({
+            user_id: user.id,
+            movie_id: mediaId,
+            movie_title: mediaTitle,
+            movie_poster: mediaPoster,
+            rating: rating,
+            media_type: mediaType
+          }, {
+            onConflict: 'user_id,movie_id'
+          });
 
-      if (ratingError) {
-        console.error('Error saving to watched:', ratingError);
+        if (ratingError) {
+          console.error('Error saving to watched:', ratingError);
+        }
       }
 
       // If sharing as review and has notes, also save to user_reviews
