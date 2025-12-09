@@ -395,37 +395,54 @@ const Gallery = () => {
           {/* Watchlist Tab */}
           <TabsContent value="watchlist" className="space-y-4">
             {isLoading ? (
-              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full" />)}</div>
+              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
             ) : getUnwatchedItems().length > 0 ? (
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div className="space-y-3">
                 {getUnwatchedItems().map(item => {
                   const itemMediaType = (item as any).media_type;
                   return (
-                  <div key={item.id} className="relative group">
-                    <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                      {item.movie_poster ? (
-                        <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
-                      ) : (
-                        <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
-                          {itemMediaType === 'tv' ? <Tv className="h-8 w-8 text-muted-foreground" /> : <Film className="h-8 w-8 text-muted-foreground" />}
+                    <Card key={item.id} className="p-4">
+                      <div className="flex gap-4">
+                        <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
+                          {item.movie_poster ? (
+                            <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-16 h-24 object-cover rounded" />
+                          ) : (
+                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
+                              {itemMediaType === 'tv' ? <Tv className="h-6 w-6 text-muted-foreground" /> : <Film className="h-6 w-6 text-muted-foreground" />}
+                            </div>
+                          )}
+                        </Link>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {itemMediaType === 'tv' ? (
+                              <Tv className="h-4 w-4 text-primary shrink-0" />
+                            ) : (
+                              <Film className="h-4 w-4 text-cinema-red shrink-0" />
+                            )}
+                            <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`} className="font-semibold hover:underline line-clamp-1">
+                              {item.movie_title}
+                            </Link>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
+                          </p>
+                          {item.priority && (
+                            <Badge variant="outline" className="mt-1 text-xs capitalize">{item.priority} priority</Badge>
+                          )}
+                          {item.personal_notes && (
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.personal_notes}</p>
+                          )}
                         </div>
-                      )}
-                    </Link>
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      {itemMediaType === 'tv' ? (
-                        <Tv className="h-4 w-4 text-white bg-primary rounded p-0.5" />
-                      ) : (
-                        <Film className="h-4 w-4 text-white bg-cinema-red rounded p-0.5" />
-                      )}
-                      <Plus className="h-5 w-5 text-cinema-gold fill-cinema-gold" />
-                    </div>
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2 p-2">
-                      <p className="text-white text-xs font-medium text-center line-clamp-2">{item.movie_title}</p>
-                      <Button size="sm" variant="destructive" onClick={() => removeItem(item.id)}>
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </Card>
                   );
                 })}
               </div>
@@ -441,31 +458,49 @@ const Gallery = () => {
           {/* Favorites Tab */}
           <TabsContent value="favorites" className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-4">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full" />)}</div>
+              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
             ) : getFilteredFavorites().length > 0 ? (
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div className="space-y-3">
                 {getFilteredFavorites().map(item => {
                   const itemMediaType = (item as any).media_type;
                   return (
-                  <div key={item.id} className="relative group">
-                    <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                      {item.movie_poster ? (
-                        <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
-                      ) : (
-                        <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center"><Heart className="h-8 w-8 text-muted-foreground" /></div>
-                      )}
-                    </Link>
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      {itemMediaType === 'tv' && (
-                        <Tv className="h-4 w-4 text-white bg-primary rounded p-0.5" />
-                      )}
-                      <Heart className="h-5 w-5 text-cinema-red fill-cinema-red" />
-                    </div>
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2 p-2">
-                      <p className="text-white text-xs font-medium text-center line-clamp-2">{item.movie_title}</p>
-                      <Button size="sm" variant="destructive" onClick={() => removeFavorite(item.movie_id)}><Trash2 className="h-3 w-3" /></Button>
-                    </div>
-                  </div>
+                    <Card key={item.id} className="p-4">
+                      <div className="flex gap-4">
+                        <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
+                          {item.movie_poster ? (
+                            <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-16 h-24 object-cover rounded" />
+                          ) : (
+                            <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
+                              {itemMediaType === 'tv' ? <Tv className="h-6 w-6 text-muted-foreground" /> : <Film className="h-6 w-6 text-muted-foreground" />}
+                            </div>
+                          )}
+                        </Link>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {itemMediaType === 'tv' ? (
+                              <Tv className="h-4 w-4 text-primary shrink-0" />
+                            ) : (
+                              <Film className="h-4 w-4 text-cinema-red shrink-0" />
+                            )}
+                            <Link to={itemMediaType === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`} className="font-semibold hover:underline line-clamp-1">
+                              {item.movie_title}
+                            </Link>
+                          </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
+                            <span className="text-sm text-muted-foreground">Favorited</span>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => removeFavorite(item.movie_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </Card>
                   );
                 })}
               </div>
@@ -481,34 +516,49 @@ const Gallery = () => {
           {/* Watched Tab - Shows rated movies/tv and diary entries */}
           <TabsContent value="watched" className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-4">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full" />)}</div>
+              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
             ) : getWatchedItems().length > 0 ? (
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div className="space-y-3">
                 {getWatchedItems().map(item => (
-                  <div key={`${item.source}-${item.id}`} className="relative group">
-                    <Link to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                      {item.movie_poster ? (
-                        <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-full aspect-[2/3] object-cover rounded-lg" />
-                      ) : (
-                        <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
-                          {item.media_type === 'tv' ? <Tv className="h-8 w-8 text-muted-foreground" /> : <Film className="h-8 w-8 text-muted-foreground" />}
+                  <Card key={`${item.source}-${item.id}`} className="p-4">
+                    <div className="flex gap-4">
+                      <Link to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
+                        {item.movie_poster ? (
+                          <img src={`${IMAGE_BASE}${item.movie_poster}`} alt={item.movie_title} className="w-16 h-24 object-cover rounded" />
+                        ) : (
+                          <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
+                            {item.media_type === 'tv' ? <Tv className="h-6 w-6 text-muted-foreground" /> : <Film className="h-6 w-6 text-muted-foreground" />}
+                          </div>
+                        )}
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          {item.media_type === 'tv' ? (
+                            <Tv className="h-4 w-4 text-primary shrink-0" />
+                          ) : (
+                            <Film className="h-4 w-4 text-cinema-red shrink-0" />
+                          )}
+                          <Link to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`} className="font-semibold hover:underline line-clamp-1">
+                            {item.movie_title}
+                          </Link>
                         </div>
-                      )}
-                    </Link>
-                    <div className="absolute top-2 left-2">
-                      {item.media_type === 'tv' ? (
-                        <Tv className="h-4 w-4 text-white bg-primary rounded p-0.5" />
-                      ) : (
-                        <Film className="h-4 w-4 text-white bg-cinema-red rounded p-0.5" />
-                      )}
-                    </div>
-                    {item.rating && item.rating > 0 && (
-                      <div className="absolute top-2 right-2 bg-black/70 rounded-full px-2 py-1 flex items-center gap-1">
-                        <Star className="h-3 w-3 text-cinema-gold fill-cinema-gold" />
-                        <span className="text-xs text-white font-medium">{item.rating}</span>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Eye className="h-4 w-4 text-cinema-gold" />
+                          <span className="text-sm text-muted-foreground">Watched</span>
+                        </div>
+                        {item.rating && item.rating > 0 && (
+                          <div className="flex items-center gap-1 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-3 w-3 ${star <= item.rating ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  </Card>
                 ))}
               </div>
             ) : (
