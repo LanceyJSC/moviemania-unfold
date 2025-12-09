@@ -272,17 +272,16 @@ const MovieDetail = () => {
         </div>
 
         {/* Rating - marks as watched */}
-        <div className="flex items-center justify-center space-x-1 mb-6">
-          <span className="text-foreground text-sm mr-2">Your Rating:</span>
+        <div className="flex items-center justify-center space-x-2 mb-6">
+          <span className="text-foreground text-sm">Your Rating:</span>
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
-              type="button"
               onClick={() => setRating(movieId, star === userRating ? 0 : star, title, movie.poster_path)}
-              className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-90 transition-transform"
+              className="p-2 touch-target"
             >
               <Star 
-                className={`h-6 w-6 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}
+                className={`h-5 w-5 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}
               />
             </button>
           ))}

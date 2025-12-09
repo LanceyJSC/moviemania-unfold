@@ -2,11 +2,11 @@
 import { Heart, Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useEnhancedWatchlist } from "@/hooks/useEnhancedWatchlist";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 interface MovieCardProps {
   movie: {
@@ -24,39 +24,26 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
   const { toggleLike, isLiked } = useUserStateContext();
   const { addItem, items } = useEnhancedWatchlist();
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
-  const buttonClickedRef = useRef(false);
 
   const isInEnhancedWatchlist = items.some(item => item.movie_id === movie.id);
 
-  const handleLikeClick = async (e: React.MouseEvent | React.TouchEvent) => {
+  const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    buttonClickedRef.current = true;
     await toggleLike(movie.id, movie.title, movie.poster);
-    setTimeout(() => { buttonClickedRef.current = false; }, 100);
   };
 
-  const handleWatchlistClick = async (e: React.MouseEvent | React.TouchEvent) => {
+  const handleWatchlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    buttonClickedRef.current = true;
+    
     if (!isInEnhancedWatchlist) {
       await addItem(movie.id, movie.title, movie.poster, {
         priority: 'medium',
         moodTags: []
       });
     }
-    setTimeout(() => { buttonClickedRef.current = false; }, 100);
-  };
-
-  const handleCardClick = (e: React.MouseEvent | React.TouchEvent) => {
-    if (buttonClickedRef.current) {
-      e.preventDefault();
-      return;
-    }
-    navigate(`/movie/${movie.id}`);
   };
 
   const handleImageError = () => {
@@ -74,8 +61,8 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
   };
 
   return (
-    <div onClick={handleCardClick} className="cursor-pointer">
-      <Card className={`group relative overflow-hidden bg-card border-border transition-all duration-300 flex-shrink-0 ${getCardClasses()}`}>
+    <Link to={`/movie/${movie.id}`}>
+      <Card className={`group relative overflow-hidden bg-card border-border transition-all duration-300 cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* Movie Poster */}
           {!imageError ? (
@@ -97,13 +84,13 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
           )}
           
           {/* Base Gradient Overlay - Very light for consistent brightness */}
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent" />
           </div>
           
           {/* Subtle Hover Enhancement - Very light */}
-          <div className={`absolute inset-0 transition-opacity duration-300 pointer-events-none ${
+          <div className={`absolute inset-0 transition-opacity duration-300 ${
             isMobile ? 'opacity-0 group-active:opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}>
             <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
@@ -111,20 +98,25 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
           </div>
           
           {/* Rating Badge */}
-          <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1 pointer-events-none">
+          <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
             <Star className="h-3 w-3 text-cinema-gold fill-current" />
             <span className="text-foreground font-semibold text-xs">{movie.rating}</span>
           </div>
 
-          {/* Action Buttons */}
-          <div className={`absolute bottom-2 right-2 flex gap-2 transition-opacity duration-300 z-20 ${
+          {/* Action Buttons - pointer-events-auto ensures touch events work on mobile */}
+          <div className={`absolute bottom-2 right-2 flex gap-1 transition-opacity duration-300 pointer-events-auto z-10 ${
             isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}>
-            <button
-              type="button"
-              className="h-11 w-11 flex items-center justify-center rounded-md bg-cinema-black/95 backdrop-blur-sm border border-cinema-charcoal/50 active:scale-95 transition-transform"
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-10 w-10 p-0 bg-cinema-black/90 backdrop-blur-sm hover:bg-cinema-black active:bg-cinema-black border-cinema-charcoal/50 touch-manipulation"
               onClick={handleLikeClick}
-              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleLike(movie.id, movie.title, movie.poster);
+              }}
             >
               <Heart 
                 className={`h-5 w-5 ${
@@ -133,12 +125,22 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
                     : 'text-foreground'
                 }`} 
               />
-            </button>
-            <button
-              type="button"
-              className="h-11 w-11 flex items-center justify-center rounded-md bg-cinema-black/95 backdrop-blur-sm border border-cinema-charcoal/50 active:scale-95 transition-transform"
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-10 w-10 p-0 bg-cinema-black/90 backdrop-blur-sm hover:bg-cinema-black active:bg-cinema-black border-cinema-charcoal/50 touch-manipulation"
               onClick={handleWatchlistClick}
-              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isInEnhancedWatchlist) {
+                  addItem(movie.id, movie.title, movie.poster, {
+                    priority: 'medium',
+                    moodTags: []
+                  });
+                }
+              }}
             >
               <Plus 
                 className={`h-5 w-5 ${
@@ -147,11 +149,11 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
                     : 'text-foreground'
                 }`} 
               />
-            </button>
+            </Button>
           </div>
 
         </div>
       </Card>
-    </div>
+    </Link>
   );
 };
