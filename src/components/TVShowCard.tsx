@@ -24,6 +24,8 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
   const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useUserStateContext();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
+  
+  const inWatchlist = isInWatchlist(tvShow.id);
 
   const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -92,6 +94,50 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
           <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
             <Star className="h-3 w-3 text-cinema-gold fill-current" />
             <span className="text-foreground font-semibold text-xs">{tvShow.rating}</span>
+          </div>
+
+          {/* Action Buttons - pointer-events-auto ensures touch events work on mobile */}
+          <div className={`absolute bottom-2 right-2 flex gap-1 transition-opacity duration-300 pointer-events-auto z-10 ${
+            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-10 w-10 p-0 bg-cinema-black/90 backdrop-blur-sm hover:bg-cinema-black active:bg-cinema-black border-cinema-charcoal/50 touch-manipulation"
+              onClick={handleLikeClick}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleLike(tvShow.id, tvShow.title, tvShow.poster);
+              }}
+            >
+              <Heart 
+                className={`h-5 w-5 ${
+                  isLiked(tvShow.id) 
+                    ? 'text-cinema-red fill-current' 
+                    : 'text-foreground'
+                }`} 
+              />
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-10 w-10 p-0 bg-cinema-black/90 backdrop-blur-sm hover:bg-cinema-black active:bg-cinema-black border-cinema-charcoal/50 touch-manipulation"
+              onClick={handleWatchlistClick}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster);
+              }}
+            >
+              <Plus 
+                className={`h-5 w-5 ${
+                  inWatchlist 
+                    ? 'text-cinema-gold' 
+                    : 'text-foreground'
+                }`} 
+              />
+            </Button>
           </div>
 
         </div>
