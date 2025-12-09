@@ -155,39 +155,88 @@ const Gallery = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 py-6">
-        {/* Stats Section - Now shows Movies AND TV */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6">
-          <Card className="p-3 text-center">
-            <div className="flex items-center justify-center gap-1">
-              <Film className="h-4 w-4 text-cinema-red" />
-              <span className="text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">Movies</div>
-          </Card>
-          <Card className="p-3 text-center">
-            <div className="flex items-center justify-center gap-1">
-              <Tv className="h-4 w-4 text-primary" />
-              <span className="text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">TV Shows</div>
-          </Card>
-          <Card className="p-3 text-center">
-            <div className="text-xl font-bold text-foreground">
-              {((stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0))}h
-            </div>
-            <div className="text-xs text-muted-foreground">Total Hours</div>
-          </Card>
-          <Card className="p-3 text-center">
-            <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
-            <div className="text-xs text-muted-foreground">Avg Rating</div>
-          </Card>
-          <Card className="p-3 text-center col-span-2 sm:col-span-1">
-            <div className="flex items-center justify-center gap-1">
-              <Trophy className="h-4 w-4 text-primary" />
-              <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">Level</div>
-          </Card>
+        {/* Stats Section - Filtered by media type */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+          {mediaFilter === 'all' && (
+            <>
+              <Card className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Film className="h-4 w-4 text-cinema-red" />
+                  <span className="text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">Movies</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Tv className="h-4 w-4 text-primary" />
+                  <span className="text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">TV Shows</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="text-xl font-bold text-foreground">
+                  {((stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0))}h
+                </div>
+                <div className="text-xs text-muted-foreground">Total Hours</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
+                <div className="text-xs text-muted-foreground">Avg Rating</div>
+              </Card>
+            </>
+          )}
+          {mediaFilter === 'movies' && (
+            <>
+              <Card className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Film className="h-4 w-4 text-cinema-red" />
+                  <span className="text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">Movies Watched</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="text-xl font-bold text-foreground">{stats?.total_hours_watched || 0}h</div>
+                <div className="text-xs text-muted-foreground">Movie Hours</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
+                <div className="text-xs text-muted-foreground">Avg Rating</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">Level</div>
+              </Card>
+            </>
+          )}
+          {mediaFilter === 'tv' && (
+            <>
+              <Card className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Tv className="h-4 w-4 text-primary" />
+                  <span className="text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">TV Shows Watched</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="text-xl font-bold text-foreground">{stats?.total_tv_hours_watched || 0}h</div>
+                <div className="text-xs text-muted-foreground">TV Hours</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
+                <div className="text-xs text-muted-foreground">Avg Rating</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">Level</div>
+              </Card>
+            </>
+          )}
         </div>
 
         <div className="flex items-center justify-between mb-4">
