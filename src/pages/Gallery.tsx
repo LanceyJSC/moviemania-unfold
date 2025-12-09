@@ -9,6 +9,7 @@ import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useDiary } from '@/hooks/useDiary';
+import { useUserStateContext } from '@/contexts/UserStateContext';
 import { tmdbService, Movie } from '@/lib/tmdb';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,6 +34,7 @@ const Gallery = () => {
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
   const { stats, recalculateStats } = useUserStats();
   const { movieDiary, tvDiary, isLoading: diaryLoading, deleteMovieDiaryEntry, deleteTVDiaryEntry } = useDiary();
+  const { setRating } = useUserStateContext();
   
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -557,6 +559,24 @@ const Gallery = () => {
                           </div>
                         )}
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          if (item.source === 'ratings') {
+                            setRating(item.movie_id, 0, item.movie_title, item.movie_poster || undefined, item.media_type as 'movie' | 'tv');
+                          } else {
+                            if (item.media_type === 'tv') {
+                              deleteTVDiaryEntry.mutate(item.id);
+                            } else {
+                              deleteMovieDiaryEntry.mutate(item.id);
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </Card>
                 ))}
