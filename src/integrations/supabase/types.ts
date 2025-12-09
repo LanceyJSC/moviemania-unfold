@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_feed: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          movie_id: number | null
+          movie_poster: string | null
+          movie_title: string | null
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          movie_id?: number | null
+          movie_poster?: string | null
+          movie_title?: string | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          movie_id?: number | null
+          movie_poster?: string | null
+          movie_title?: string | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cinema_showtimes: {
         Row: {
           booking_url: string | null
@@ -153,10 +192,81 @@ export type Database = {
           },
         ]
       }
+      list_items: {
+        Row: {
+          added_at: string | null
+          id: string
+          list_id: string | null
+          movie_id: number
+          movie_poster: string | null
+          movie_title: string
+          notes: string | null
+          position: number | null
+        }
+        Insert: {
+          added_at?: string | null
+          id?: string
+          list_id?: string | null
+          movie_id: number
+          movie_poster?: string | null
+          movie_title: string
+          notes?: string | null
+          position?: number | null
+        }
+        Update: {
+          added_at?: string | null
+          id?: string
+          list_id?: string | null
+          movie_id?: number
+          movie_poster?: string | null
+          movie_title?: string
+          notes?: string | null
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      list_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          list_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          list_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          list_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_likes_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movie_diary: {
         Row: {
           created_at: string
           id: string
+          is_public: boolean | null
           movie_id: number
           movie_poster: string | null
           movie_title: string
@@ -168,6 +278,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_public?: boolean | null
           movie_id: number
           movie_poster?: string | null
           movie_title: string
@@ -179,6 +290,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_public?: boolean | null
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string
@@ -225,7 +337,10 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
+          follower_count: number | null
+          following_count: number | null
           full_name: string | null
           id: string
           updated_at: string
@@ -233,7 +348,10 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          follower_count?: number | null
+          following_count?: number | null
           full_name?: string | null
           id: string
           updated_at?: string
@@ -241,7 +359,10 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          follower_count?: number | null
+          following_count?: number | null
           full_name?: string | null
           id?: string
           updated_at?: string
@@ -275,6 +396,67 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      review_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          review_id: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          review_id?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          review_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_comments_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "user_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          review_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          review_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          review_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_likes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "user_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tv_diary: {
         Row: {
@@ -315,6 +497,57 @@ export type Database = {
           tv_title?: string
           user_id?: string
           watched_date?: string
+        }
+        Relationships: []
+      }
+      user_follows: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      user_lists: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

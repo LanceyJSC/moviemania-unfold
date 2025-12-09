@@ -112,14 +112,9 @@ export const FreshPicks = () => {
             </h2>
             <Clock className="h-8 w-8 text-cinema-red" />
           </div>
-          <p className="text-muted-foreground mb-2">
-            Trending movies & TV shows this week - Live updates every 20 minutes
+          <p className="text-muted-foreground mb-4">
+            Trending movies & TV shows this week
           </p>
-          {lastUpdated && (
-            <p className="text-xs text-muted-foreground mb-4">
-              Last updated: {lastUpdated.toLocaleTimeString()}
-            </p>
-          )}
           <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
         </div>
         

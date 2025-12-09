@@ -412,14 +412,6 @@ export const HeroSection = () => {
           </div>
         )}
 
-        {/* Last updated indicator (only show when not loading/refreshing) */}
-        {lastUpdated && !isLoading && !isRefreshing && !isMobile && (
-          <div className="absolute top-16 right-6 z-30">
-            <div className="bg-background/60 backdrop-blur-sm rounded-lg px-3 py-1 text-xs text-muted-foreground">
-              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </div>
-          </div>
-        )}
       </div>
 
     </>
