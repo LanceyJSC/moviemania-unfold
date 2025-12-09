@@ -71,11 +71,8 @@ export const useReviewInteractions = (reviewId?: string) => {
       } else {
         setComments([]);
       }
-      setComments(commentsRes.data || []);
     } catch (error) {
       console.error('Error fetching review interactions:', error);
-    } catch (error) {
-      console.error('Error fetching interactions:', error);
     } finally {
       setLoading(false);
     }
