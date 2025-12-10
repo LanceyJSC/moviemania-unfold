@@ -299,7 +299,11 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         setUserState(prev => {
           const newRatings = { ...prev.ratings };
           delete newRatings[movieId];
-          return { ...prev, ratings: newRatings };
+          return { 
+            ...prev, 
+            ratings: newRatings,
+            watchedItems: prev.watchedItems.filter(id => id !== movieId)
+          };
         });
       } else {
         await supabase
@@ -322,9 +326,18 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
             media_type: mediaType
           }, { onConflict: 'user_id,movie_id' });
 
+        // Remove from watchlist since it's now watched/rated
+        await supabase
+          .from('enhanced_watchlist_items')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId);
+
         setUserState(prev => ({
           ...prev,
-          ratings: { ...prev.ratings, [movieId]: rating }
+          ratings: { ...prev.ratings, [movieId]: rating },
+          watchedItems: prev.watchedItems.includes(movieId) ? prev.watchedItems : [...prev.watchedItems, movieId],
+          watchlist: prev.watchlist.filter(id => id !== movieId)
         }));
         
         await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating, media_type: mediaType });
@@ -357,7 +370,7 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
           watchedItems: prev.watchedItems.filter(id => id !== movieId)
         }));
       } else {
-        // Add to watched (with rating 0 to indicate watched but not rated)
+        // Add to watched (with null rating to indicate watched but not rated)
         await supabase
           .from('user_ratings')
           .upsert({
@@ -365,13 +378,21 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
             movie_id: movieId,
             movie_title: movieTitle,
             movie_poster: moviePoster,
-            rating: 0,
+            rating: null,
             media_type: mediaType
           }, { onConflict: 'user_id,movie_id' });
         
+        // Also remove from watchlist if it's there
+        await supabase
+          .from('enhanced_watchlist_items')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId);
+        
         setUserState(prev => ({
           ...prev,
-          watchedItems: [...prev.watchedItems, movieId]
+          watchedItems: [...prev.watchedItems, movieId],
+          watchlist: prev.watchlist.filter(id => id !== movieId)
         }));
         
         await logActivity('watched', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });

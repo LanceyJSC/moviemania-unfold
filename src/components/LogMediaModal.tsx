@@ -114,26 +114,30 @@ export const LogMediaModal = ({
         });
       }
 
-      // Also add to user_ratings (marks as "Watched")
-      // Only insert if rating > 0, otherwise the check constraint will fail
-      if (rating > 0) {
-        const { error: ratingError } = await supabase
-          .from('user_ratings')
-          .upsert({
-            user_id: user.id,
-            movie_id: mediaId,
-            movie_title: mediaTitle,
-            movie_poster: mediaPoster,
-            rating: rating,
-            media_type: mediaType
-          }, {
-            onConflict: 'user_id,movie_id'
-          });
+      // Always add to user_ratings (marks as "Watched") - rating can be null
+      const { error: ratingError } = await supabase
+        .from('user_ratings')
+        .upsert({
+          user_id: user.id,
+          movie_id: mediaId,
+          movie_title: mediaTitle,
+          movie_poster: mediaPoster,
+          rating: rating > 0 ? rating : null,
+          media_type: mediaType
+        }, {
+          onConflict: 'user_id,movie_id'
+        });
 
-        if (ratingError) {
-          console.error('Error saving to watched:', ratingError);
-        }
+      if (ratingError) {
+        console.error('Error saving to watched:', ratingError);
       }
+
+      // Remove from watchlist since it's now watched
+      await supabase
+        .from('enhanced_watchlist_items')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('movie_id', mediaId);
 
       // If sharing as review and has notes, also save to user_reviews
       if (shareAsReview && notes.trim()) {

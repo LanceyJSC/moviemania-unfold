@@ -643,7 +643,7 @@ export type Database = {
           movie_id: number
           movie_poster: string | null
           movie_title: string
-          rating: number
+          rating: number | null
           user_id: string
         }
         Insert: {
@@ -653,7 +653,7 @@ export type Database = {
           movie_id: number
           movie_poster?: string | null
           movie_title: string
-          rating: number
+          rating?: number | null
           user_id: string
         }
         Update: {
@@ -663,7 +663,7 @@ export type Database = {
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string
-          rating?: number
+          rating?: number | null
           user_id?: string
         }
         Relationships: []
