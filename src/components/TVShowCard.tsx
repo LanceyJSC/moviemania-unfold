@@ -1,9 +1,6 @@
-
 import { Link } from "react-router-dom";
-import { Star, Heart, Plus, Calendar } from "lucide-react";
+import { Star, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
@@ -21,23 +18,11 @@ interface TVShowCardProps {
 }
 
 export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) => {
-  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useUserStateContext();
+  const { getRating } = useUserStateContext();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
   
-  const inWatchlist = isInWatchlist(tvShow.id);
-
-  const handleLikeClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await toggleLike(tvShow.id, tvShow.title, tvShow.poster, 'tv');
-  };
-
-  const handleWatchlistClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster, 'tv');
-  };
+  const userRating = getRating(tvShow.id);
 
   const handleImageError = () => {
     setImageError(true);
@@ -90,54 +75,21 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
             <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
           </div>
           
-          {/* Rating Badge */}
-          <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-            <Star className="h-3 w-3 text-cinema-gold fill-current" />
-            <span className="text-foreground font-semibold text-xs">{tvShow.rating}</span>
-          </div>
-
-          {/* Action Buttons - pointer-events-auto ensures touch events work on mobile */}
-          <div className={`absolute bottom-2 right-2 flex gap-1 transition-opacity duration-300 pointer-events-auto z-10 ${
-            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-10 w-10 p-0 bg-cinema-black/90 backdrop-blur-sm hover:bg-cinema-black active:bg-cinema-black border-cinema-charcoal/50 touch-manipulation"
-              onClick={handleLikeClick}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleLike(tvShow.id, tvShow.title, tvShow.poster, 'tv');
-              }}
-            >
-              <Heart 
-                className={`h-5 w-5 ${
-                  isLiked(tvShow.id) 
-                    ? 'text-cinema-red fill-current' 
-                    : 'text-foreground'
-                }`} 
-              />
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-10 w-10 p-0 bg-cinema-black/90 backdrop-blur-sm hover:bg-cinema-black active:bg-cinema-black border-cinema-charcoal/50 touch-manipulation"
-              onClick={handleWatchlistClick}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster, 'tv');
-              }}
-            >
-              <Plus 
-                className={`h-5 w-5 ${
-                  inWatchlist 
-                    ? 'text-cinema-gold' 
-                    : 'text-foreground'
-                }`} 
-              />
-            </Button>
+          {/* Rating Badges - TMDB and User Rating */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {/* TMDB Rating */}
+            <div className="bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+              <Star className="h-3 w-3 text-cinema-gold fill-current" />
+              <span className="text-foreground font-semibold text-xs">{tvShow.rating}</span>
+            </div>
+            
+            {/* User Rating - only show if rated */}
+            {userRating > 0 && (
+              <div className="bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+                <User className="h-3 w-3 text-primary" />
+                <span className="text-primary font-semibold text-xs">{userRating}</span>
+              </div>
+            )}
           </div>
 
         </div>
