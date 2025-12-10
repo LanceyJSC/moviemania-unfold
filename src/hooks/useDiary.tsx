@@ -163,6 +163,10 @@ export const useDiary = () => {
     },
   });
 
+  const refetchTVDiary = () => {
+    queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
+  };
+
   return {
     movieDiary: movieDiaryQuery.data || [],
     tvDiary: tvDiaryQuery.data || [],
@@ -173,5 +177,6 @@ export const useDiary = () => {
     updateTVDiaryEntry,
     deleteMovieDiaryEntry,
     deleteTVDiaryEntry,
+    refetchTVDiary,
   };
 };

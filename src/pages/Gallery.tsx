@@ -20,9 +20,10 @@ import { Input } from '@/components/ui/input';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
 import { GalleryMediaCard } from '@/components/GalleryMediaCard';
-import { toast } from 'sonner';
+import { TVShowGalleryCard } from '@/components/TVShowGalleryCard';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
@@ -469,45 +470,75 @@ const Gallery = () => {
               <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
             ) : getWatchedItems().length > 0 ? (
               <div className="space-y-3">
-                {getWatchedItems().map(item => (
-                  <GalleryMediaCard
-                    key={`${item.source}-${item.id}`}
-                    id={item.id}
-                    movieId={item.movie_id}
-                    title={item.movie_title}
-                    poster={item.movie_poster}
-                    mediaType={(item.media_type || 'movie') as 'movie' | 'tv'}
-                    userRating={item.rating}
-                    onDelete={async () => {
-                      if (item.source === 'rating') {
-                        // Delete from user_ratings table directly
-                        await supabase
-                          .from('user_ratings')
-                          .delete()
-                          .eq('id', item.id);
-                        // Refresh the rated movies list
-                        const { data } = await supabase
-                          .from('user_ratings')
-                          .select('*')
-                          .eq('user_id', user!.id)
-                          .order('created_at', { ascending: false });
-                        setRatedMovies(data || []);
-                        refetchUserState();
-                      } else {
-                        if (item.media_type === 'tv') {
-                          deleteTVDiaryEntry.mutate(item.id);
+                {getWatchedItems().map(item => {
+                  if (item.media_type === 'tv') {
+                    return (
+                      <TVShowGalleryCard
+                        key={`${item.source}-${item.id}`}
+                        id={item.id}
+                        tvId={item.movie_id}
+                        title={item.movie_title}
+                        poster={item.movie_poster}
+                        userRating={item.rating}
+                        onDelete={async () => {
+                          if (item.source === 'rating') {
+                            await supabase
+                              .from('user_ratings')
+                              .delete()
+                              .eq('id', item.id);
+                            const { data } = await supabase
+                              .from('user_ratings')
+                              .select('*')
+                              .eq('user_id', user!.id)
+                              .order('created_at', { ascending: false });
+                            setRatedMovies(data || []);
+                            refetchUserState();
+                          } else {
+                            deleteTVDiaryEntry.mutate(item.id);
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-4 w-4 text-cinema-gold" />
+                          <span className="text-sm text-muted-foreground">Watched</span>
+                        </div>
+                      </TVShowGalleryCard>
+                    );
+                  }
+                  return (
+                    <GalleryMediaCard
+                      key={`${item.source}-${item.id}`}
+                      id={item.id}
+                      movieId={item.movie_id}
+                      title={item.movie_title}
+                      poster={item.movie_poster}
+                      mediaType="movie"
+                      userRating={item.rating}
+                      onDelete={async () => {
+                        if (item.source === 'rating') {
+                          await supabase
+                            .from('user_ratings')
+                            .delete()
+                            .eq('id', item.id);
+                          const { data } = await supabase
+                            .from('user_ratings')
+                            .select('*')
+                            .eq('user_id', user!.id)
+                            .order('created_at', { ascending: false });
+                          setRatedMovies(data || []);
+                          refetchUserState();
                         } else {
                           deleteMovieDiaryEntry.mutate(item.id);
                         }
-                      }
-                    }}
-                  >
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4 text-cinema-gold" />
-                      <span className="text-sm text-muted-foreground">Watched</span>
-                    </div>
-                  </GalleryMediaCard>
-                ))}
+                      }}
+                    >
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-4 w-4 text-cinema-gold" />
+                        <span className="text-sm text-muted-foreground">Watched</span>
+                      </div>
+                    </GalleryMediaCard>
+                  );
+                })}
               </div>
             ) : (
               <Card className="p-8 text-center">

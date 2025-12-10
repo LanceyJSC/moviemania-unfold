@@ -43,10 +43,11 @@ const SeasonDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [watchedEpisodes, setWatchedEpisodes] = useState<Set<string>>(new Set());
   const [episodeRatings, setEpisodeRatings] = useState<Record<string, number>>({});
+  const [seasonRating, setSeasonRating] = useState<number>(0);
   const [showLogModal, setShowLogModal] = useState(false);
   const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
   const { user } = useAuth();
-  const { tvDiary } = useDiary();
+  const { tvDiary, refetchTVDiary } = useDiary();
 
   useEffect(() => {
     const loadSeasonDetails = async () => {
@@ -78,19 +79,80 @@ const SeasonDetail = () => {
     
     const watched = new Set<string>();
     const ratings: Record<string, number> = {};
+    let foundSeasonRating = 0;
     
     tvDiary.forEach(entry => {
-      if (entry.tv_id === tvId && entry.season_number === seasonNum && entry.episode_number) {
-        const key = `${seasonNum}-${entry.episode_number}`;
-        watched.add(key);
-        if (entry.rating) {
-          ratings[key] = entry.rating;
+      if (entry.tv_id === tvId && entry.season_number === seasonNum) {
+        if (entry.episode_number) {
+          // Episode-level entry
+          const key = `${seasonNum}-${entry.episode_number}`;
+          watched.add(key);
+          if (entry.rating) {
+            ratings[key] = entry.rating;
+          }
+        } else {
+          // Season-level entry (no episode number)
+          if (entry.rating) {
+            foundSeasonRating = entry.rating;
+          }
         }
       }
     });
     setWatchedEpisodes(watched);
     setEpisodeRatings(ratings);
+    setSeasonRating(foundSeasonRating);
   }, [id, seasonNumber, tvDiary]);
+
+  const handleRateSeason = async (rating: number) => {
+    if (!user || !tvShow || !season) return;
+
+    const currentRating = seasonRating;
+    const newRating = currentRating === rating ? null : rating;
+
+    // Check if season-level entry exists (episode_number is null)
+    const { data: existingEntry } = await supabase
+      .from('tv_diary')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('tv_id', Number(id))
+      .eq('season_number', season.season_number)
+      .is('episode_number', null)
+      .maybeSingle();
+
+    if (existingEntry) {
+      if (newRating === null) {
+        // Delete the entry if removing rating
+        await supabase
+          .from('tv_diary')
+          .delete()
+          .eq('id', existingEntry.id);
+      } else {
+        // Update existing entry
+        await supabase
+          .from('tv_diary')
+          .update({ rating: newRating })
+          .eq('id', existingEntry.id);
+      }
+    } else if (newRating !== null) {
+      // Create new season-level entry
+      await supabase
+        .from('tv_diary')
+        .insert({
+          user_id: user.id,
+          tv_id: Number(id),
+          tv_title: tvShow.name,
+          tv_poster: tvShow.poster_path,
+          season_number: season.season_number,
+          episode_number: null,
+          runtime: 0, // Season entries don't track runtime
+          rating: newRating,
+          watched_date: new Date().toISOString().split('T')[0]
+        });
+    }
+
+    setSeasonRating(newRating || 0);
+    refetchTVDiary();
+  };
 
   const isEpisodeWatched = (episodeNumber: number) => {
     return watchedEpisodes.has(`${seasonNumber}-${episodeNumber}`);
@@ -316,6 +378,42 @@ const SeasonDetail = () => {
             <p className="text-white leading-relaxed text-sm">
               {season.overview}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Season Rating */}
+      {user && (
+        <div className="container mx-auto px-4 mb-6">
+          <div className="bg-card/50 rounded-lg p-4 border border-border/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-foreground">Rate this Season</h3>
+                <p className="text-xs text-muted-foreground">Your overall rating for {season.name}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => handleRateSeason(star)}
+                    className="p-1 transition-transform hover:scale-110"
+                  >
+                    <Star 
+                      className={`h-6 w-6 transition-colors ${
+                        star <= seasonRating
+                          ? 'fill-cinema-gold text-cinema-gold'
+                          : 'text-muted-foreground hover:text-cinema-gold'
+                      }`}
+                    />
+                  </button>
+                ))}
+                {seasonRating > 0 && (
+                  <span className="text-sm text-cinema-gold ml-2 font-medium">
+                    {seasonRating}/5
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
