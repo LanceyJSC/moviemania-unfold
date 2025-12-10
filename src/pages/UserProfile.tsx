@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Film, Star, List, Heart, Eye, Bookmark, MessageSquare } from "lucide-react";
+import { Film, Star, List, Heart, Calendar } from "lucide-react";
 import { FollowButton } from "@/components/FollowButton";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,52 +41,12 @@ interface UserList {
   is_public: boolean;
 }
 
-interface WatchedItem {
-  id: string;
-  movie_id: number;
-  movie_title: string;
-  movie_poster: string | null;
-  rating: number | null;
-  media_type: string;
-}
-
-interface FavoriteItem {
-  id: string;
-  movie_id: number;
-  movie_title: string;
-  movie_poster: string | null;
-  media_type: string;
-}
-
-interface WatchlistItem {
-  id: string;
-  movie_id: number;
-  movie_title: string;
-  movie_poster: string | null;
-  media_type: string;
-}
-
-interface ReviewItem {
-  id: string;
-  movie_id: number;
-  movie_title: string;
-  movie_poster: string | null;
-  rating: number | null;
-  review_text: string | null;
-  is_spoiler: boolean;
-  created_at: string;
-}
-
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
   const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [diary, setDiary] = useState<DiaryEntry[]>([]);
   const [lists, setLists] = useState<UserList[]>([]);
-  const [watched, setWatched] = useState<WatchedItem[]>([]);
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
-  const [watchlistItems, setWatchlistItems] = useState<WatchlistItem[]>([]);
-  const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("activity");
 
@@ -130,51 +90,6 @@ const UserProfile = () => {
         .order('updated_at', { ascending: false });
 
       setLists(listsData || []);
-
-      // Fetch public watched items (from user_ratings)
-      const { data: watchedData } = await supabase
-        .from('user_ratings')
-        .select('*')
-        .eq('user_id', profileData.id)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(24);
-
-      setWatched(watchedData || []);
-
-      // Fetch public favorites (from watchlist with list_type = 'liked')
-      const { data: favoritesData } = await supabase
-        .from('watchlist')
-        .select('*')
-        .eq('user_id', profileData.id)
-        .eq('list_type', 'liked')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(24);
-
-      setFavorites(favoritesData || []);
-
-      // Fetch public watchlist items
-      const { data: watchlistData } = await supabase
-        .from('watchlist')
-        .select('*')
-        .eq('user_id', profileData.id)
-        .eq('list_type', 'watchlist')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(24);
-
-      setWatchlistItems(watchlistData || []);
-
-      // Fetch public reviews
-      const { data: reviewsData } = await supabase
-        .from('user_reviews')
-        .select('*')
-        .eq('user_id', profileData.id)
-        .order('created_at', { ascending: false })
-        .limit(24);
-
-      setReviews(reviewsData || []);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -284,25 +199,9 @@ const UserProfile = () => {
               <Heart className="h-4 w-4" />
               Activity
             </TabsTrigger>
-            <TabsTrigger value="watched" className="flex items-center gap-1">
-              <Eye className="h-4 w-4" />
-              Watched
-            </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center gap-1">
-              <Heart className="h-4 w-4" />
-              Favorites
-            </TabsTrigger>
-            <TabsTrigger value="watchlist" className="flex items-center gap-1">
-              <Bookmark className="h-4 w-4" />
-              Watchlist
-            </TabsTrigger>
-            <TabsTrigger value="reviews" className="flex items-center gap-1">
-              <MessageSquare className="h-4 w-4" />
-              Reviews
-            </TabsTrigger>
-            <TabsTrigger value="diary" className="flex items-center gap-1">
+            <TabsTrigger value="films" className="flex items-center gap-1">
               <Film className="h-4 w-4" />
-              Diary
+              Films
             </TabsTrigger>
             <TabsTrigger value="lists" className="flex items-center gap-1">
               <List className="h-4 w-4" />
@@ -314,144 +213,11 @@ const UserProfile = () => {
             <ActivityFeed userId={profile.id} />
           </TabsContent>
 
-          <TabsContent value="watched">
-            {watched.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No public watched items</p>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                {watched.map((item) => (
-                  <Link key={item.id} to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                    <div className="relative group">
-                      <img
-                        src={item.movie_poster 
-                          ? tmdbService.getPosterUrl(item.movie_poster, 'w300')
-                          : '/placeholder.svg'
-                        }
-                        alt={item.movie_title}
-                        className="w-full aspect-[2/3] object-cover rounded-lg"
-                      />
-                      {item.rating && (
-                        <div className="absolute bottom-1 right-1 bg-background/80 backdrop-blur-sm rounded px-1.5 py-0.5 flex items-center gap-0.5">
-                          <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                          <span className="text-xs font-medium">{item.rating}</span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="favorites">
-            {favorites.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No public favorites</p>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                {favorites.map((item) => (
-                  <Link key={item.id} to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                    <div className="relative group">
-                      <img
-                        src={item.movie_poster 
-                          ? tmdbService.getPosterUrl(item.movie_poster, 'w300')
-                          : '/placeholder.svg'
-                        }
-                        alt={item.movie_title}
-                        className="w-full aspect-[2/3] object-cover rounded-lg"
-                      />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="watchlist">
-            {watchlistItems.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No public watchlist items</p>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                {watchlistItems.map((item) => (
-                  <Link key={item.id} to={item.media_type === 'tv' ? `/tv/${item.movie_id}` : `/movie/${item.movie_id}`}>
-                    <div className="relative group">
-                      <img
-                        src={item.movie_poster 
-                          ? tmdbService.getPosterUrl(item.movie_poster, 'w300')
-                          : '/placeholder.svg'
-                        }
-                        alt={item.movie_title}
-                        className="w-full aspect-[2/3] object-cover rounded-lg"
-                      />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="reviews">
-            {reviews.length === 0 ? (
-              <Card className="p-8 text-center">
-                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No reviews yet</p>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {reviews.map((review) => (
-                  <Link key={review.id} to={`/movie/${review.movie_id}`}>
-                    <Card className="p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex gap-3">
-                        <img
-                          src={review.movie_poster 
-                            ? tmdbService.getPosterUrl(review.movie_poster, 'w300')
-                            : '/placeholder.svg'
-                          }
-                          alt={review.movie_title}
-                          className="w-12 h-18 object-cover rounded"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-foreground truncate">{review.movie_title}</h3>
-                            {review.rating && (
-                              <div className="flex items-center gap-0.5 shrink-0">
-                                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                                <span className="text-xs font-medium">{review.rating}</span>
-                              </div>
-                            )}
-                          </div>
-                          {review.is_spoiler ? (
-                            <p className="text-sm text-muted-foreground italic mt-1">Contains spoilers</p>
-                          ) : (
-                            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                              {review.review_text}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {new Date(review.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="diary">
+          <TabsContent value="films">
             {diary.length === 0 ? (
               <Card className="p-8 text-center">
                 <Film className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No public diary entries</p>
+                <p className="text-muted-foreground">No public films yet</p>
               </Card>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">

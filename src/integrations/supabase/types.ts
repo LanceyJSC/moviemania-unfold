@@ -469,7 +469,6 @@ export type Database = {
           created_at: string
           episode_number: number | null
           id: string
-          is_public: boolean | null
           notes: string | null
           rating: number | null
           runtime: number | null
@@ -484,7 +483,6 @@ export type Database = {
           created_at?: string
           episode_number?: number | null
           id?: string
-          is_public?: boolean | null
           notes?: string | null
           rating?: number | null
           runtime?: number | null
@@ -499,7 +497,6 @@ export type Database = {
           created_at?: string
           episode_number?: number | null
           id?: string
-          is_public?: boolean | null
           notes?: string | null
           rating?: number | null
           runtime?: number | null
@@ -642,7 +639,6 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          is_public: boolean | null
           media_type: string | null
           movie_id: number
           movie_poster: string | null
@@ -653,7 +649,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          is_public?: boolean | null
           media_type?: string | null
           movie_id: number
           movie_poster?: string | null
@@ -664,7 +659,6 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          is_public?: boolean | null
           media_type?: string | null
           movie_id?: number
           movie_poster?: string | null
@@ -801,7 +795,6 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          is_public: boolean | null
           list_type: string
           media_type: string | null
           movie_id: number
@@ -812,7 +805,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          is_public?: boolean | null
           list_type?: string
           media_type?: string | null
           movie_id: number
@@ -823,7 +815,6 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          is_public?: boolean | null
           list_type?: string
           media_type?: string | null
           movie_id?: number

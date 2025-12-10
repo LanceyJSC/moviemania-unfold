@@ -24,8 +24,8 @@ export type MediaType = 'movie' | 'tv';
 interface UserStateContextType {
   userState: UserState;
   isLoading: boolean;
-  toggleLike: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType, isPublic?: boolean) => Promise<void>;
-  toggleWatchlist: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType, isPublic?: boolean) => Promise<void>;
+  toggleLike: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
+  toggleWatchlist: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
   setRating: (movieId: number, rating: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
   toggleCurrentlyWatching: (movieId: number, movieTitle: string, moviePoster?: string) => Promise<void>;
   markAsWatched: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
@@ -142,7 +142,7 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const toggleLike = async (movieId: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie', isPublic: boolean = false) => {
+  const toggleLike = async (movieId: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
     if (!user) {
       toast.error('Please sign in to like');
       return;
@@ -172,8 +172,7 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
             movie_title: movieTitle,
             movie_poster: moviePoster,
             list_type: 'liked',
-            media_type: mediaType,
-            is_public: isPublic
+            media_type: mediaType
           });
         
         setUserState(prev => ({
