@@ -193,7 +193,7 @@ const Gallery = () => {
     return items;
   };
 
-  // Diary shows ONLY entries that have notes/reviews written
+  // Diary shows ONLY entries that have personal notes written (not just ratings/watched status)
   const getCombinedDiary = () => {
     // Create a map to deduplicate by movie_id/tv_id, preferring entries with notes
     const diaryMap = new Map<string, any>();
