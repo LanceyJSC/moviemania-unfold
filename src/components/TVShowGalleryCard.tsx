@@ -138,7 +138,7 @@ export const TVShowGalleryCard = ({
     setIsExpanded(!isExpanded);
   };
 
-  const hasContent = seriesRating || seasonReviews.length > 0 || episodeReviews.length > 0;
+  const hasContent = seriesRating || userRating || seasonReviews.length > 0 || episodeReviews.length > 0;
 
   const getPosterUrl = (posterPath: string | null) => {
     if (!posterPath) return null;
@@ -236,12 +236,12 @@ export const TVShowGalleryCard = ({
       </div>
 
       {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-border bg-card rounded-b-lg">
+        <div className="mt-4 pt-4 border-t border-border bg-card rounded-b-lg z-50 relative">
           {isLoading ? (
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
             </div>
-          ) : hasContent ? (
+          ) : (seasonReviews.length > 0 || episodeReviews.length > 0 || seriesRating || userRating) ? (
             <div className="space-y-4">
               {/* Series Rating */}
               {(seriesRating || userRating) && (

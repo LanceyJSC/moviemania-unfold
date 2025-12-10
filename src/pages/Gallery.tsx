@@ -193,33 +193,46 @@ const Gallery = () => {
     return items;
   };
 
+  // Diary shows the same items as Watched, but focuses on entries with notes
+  // Still shows all items so users can see their collection, but highlights those with diary notes
   const getCombinedDiary = () => {
-    // Only include entries that have notes (actual diary content)
-    const movies = movieDiary
-      .filter(entry => entry.notes && entry.notes.trim().length > 0)
-      .map(entry => ({ ...entry, type: 'movie' as const }));
-    const tv = tvDiary
-      .filter(entry => entry.notes && entry.notes.trim().length > 0)
-      .map(entry => ({ ...entry, type: 'tv' as const }));
+    // Create a map to deduplicate by movie_id/tv_id, preferring entries with notes
+    const diaryMap = new Map<string, any>();
     
-    let combined = [...movies, ...tv];
-    
-    if (mediaFilter === 'movies') combined = movies;
-    if (mediaFilter === 'tv') combined = tv;
-    
-    // Deduplicate by movie_id/tv_id keeping the most recent entry
-    const uniqueMap = new Map<string, typeof combined[0]>();
-    combined.forEach(entry => {
-      const key = entry.type === 'movie' 
-        ? `movie-${(entry as any).movie_id}` 
-        : `tv-${(entry as any).tv_id}`;
-      const existing = uniqueMap.get(key);
-      if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
-        uniqueMap.set(key, entry);
+    // Add movie diary entries
+    movieDiary.forEach(entry => {
+      const key = `movie-${entry.movie_id}`;
+      const existing = diaryMap.get(key);
+      // Prefer entries with notes, or most recent
+      if (!existing || 
+          (entry.notes && !existing.notes) || 
+          new Date(entry.watched_date) > new Date(existing.watched_date)) {
+        diaryMap.set(key, { ...entry, type: 'movie' as const });
       }
     });
     
-    return Array.from(uniqueMap.values()).sort((a, b) =>
+    // Add TV diary entries (group by show, not by episode)
+    const tvShowMap = new Map<number, any>();
+    tvDiary.forEach(entry => {
+      const existing = tvShowMap.get(entry.tv_id);
+      // Keep the entry with notes or the most recent one
+      if (!existing || 
+          (entry.notes && !existing.notes) || 
+          new Date(entry.watched_date) > new Date(existing.watched_date)) {
+        tvShowMap.set(entry.tv_id, { ...entry, type: 'tv' as const });
+      }
+    });
+    
+    tvShowMap.forEach((entry, tvId) => {
+      diaryMap.set(`tv-${tvId}`, entry);
+    });
+    
+    let items = Array.from(diaryMap.values());
+    
+    if (mediaFilter === 'movies') items = items.filter(item => item.type === 'movie');
+    if (mediaFilter === 'tv') items = items.filter(item => item.type === 'tv');
+    
+    return items.sort((a, b) =>
       new Date(b.watched_date).getTime() - new Date(a.watched_date).getTime()
     );
   };
