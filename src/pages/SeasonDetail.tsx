@@ -122,20 +122,32 @@ const SeasonDetail = () => {
     if (existingEntry) {
       if (newRating === null) {
         // Delete the entry if removing rating
-        await supabase
+        const { error } = await supabase
           .from('tv_diary')
           .delete()
-          .eq('id', existingEntry.id);
+          .eq('id', existingEntry.id)
+          .eq('user_id', user.id);
+        
+        if (error) {
+          console.error('Failed to delete season rating:', error);
+          return;
+        }
       } else {
-        // Update existing entry
-        await supabase
+        // Update existing entry - include user_id for RLS
+        const { error } = await supabase
           .from('tv_diary')
           .update({ rating: newRating })
-          .eq('id', existingEntry.id);
+          .eq('id', existingEntry.id)
+          .eq('user_id', user.id);
+        
+        if (error) {
+          console.error('Failed to update season rating:', error);
+          return;
+        }
       }
     } else if (newRating !== null) {
       // Create new season-level entry
-      await supabase
+      const { error } = await supabase
         .from('tv_diary')
         .insert({
           user_id: user.id,
@@ -148,6 +160,11 @@ const SeasonDetail = () => {
           rating: newRating,
           watched_date: new Date().toISOString().split('T')[0]
         });
+      
+      if (error) {
+        console.error('Failed to add season rating:', error);
+        return;
+      }
     }
 
     setSeasonRating(newRating || 0);
@@ -222,14 +239,20 @@ const SeasonDetail = () => {
       .maybeSingle();
 
     if (existingEntry) {
-      // Update existing entry
-      await supabase
+      // Update existing entry - include user_id for RLS
+      const { error } = await supabase
         .from('tv_diary')
         .update({ rating: newRating })
-        .eq('id', existingEntry.id);
+        .eq('id', existingEntry.id)
+        .eq('user_id', user.id);
+      
+      if (error) {
+        console.error('Failed to update episode rating:', error);
+        return;
+      }
     } else {
       // Create new entry with rating
-      await supabase
+      const { error } = await supabase
         .from('tv_diary')
         .insert({
           user_id: user.id,
@@ -242,6 +265,11 @@ const SeasonDetail = () => {
           rating: newRating,
           watched_date: new Date().toISOString().split('T')[0]
         });
+      
+      if (error) {
+        console.error('Failed to add episode rating:', error);
+        return;
+      }
       
       // Also mark as watched
       setWatchedEpisodes(prev => new Set(prev).add(key));
@@ -256,6 +284,9 @@ const SeasonDetail = () => {
       }
       return { ...prev, [key]: newRating };
     });
+    
+    // Refetch diary to sync state
+    refetchTVDiary();
   };
 
   const getEpisodeRating = (episodeNumber: number) => {
