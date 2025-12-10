@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
@@ -28,14 +28,17 @@ const TVShowDetail = () => {
     toggleLike,
     toggleWatchlist,
     setRating,
+    markAsWatched,
     isLiked,
     isInWatchlist,
+    isWatched,
     getRating
   } = useUserStateContext();
 
   const tvShowId = Number(id);
   const isTVShowLiked = isLiked(tvShowId);
   const isTVShowInWatchlist = isInWatchlist(tvShowId);
+  const isTVShowWatched = isWatched(tvShowId);
   const userRating = getRating(tvShowId);
 
   useEffect(() => {
@@ -249,12 +252,21 @@ const TVShowDetail = () => {
 
             <Button 
               variant="outline" 
+              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
+                isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''
+              }`}
+              onClick={() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv')}
+            >
+              <Eye className={`h-4 w-4 ${isTVShowWatched ? 'fill-current' : ''}`} />
+            </Button>
+
+            <Button 
+              variant="outline" 
               className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
               onClick={handleShare}
             >
               <Share className="h-4 w-4" />
             </Button>
-
           </div>
         </div>
 
