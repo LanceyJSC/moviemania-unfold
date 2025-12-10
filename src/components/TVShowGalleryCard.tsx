@@ -120,12 +120,19 @@ export const TVShowGalleryCard = ({
 
   const hasReviews = seasonReviews.length > 0 || episodeReviews.length > 0;
 
+  // Handle poster URL - might be full URL or just path
+  const getPosterUrl = (posterPath: string | null) => {
+    if (!posterPath) return null;
+    if (posterPath.startsWith('http')) return posterPath;
+    return `${IMAGE_BASE}${posterPath}`;
+  };
+
   return (
     <Card className="p-4">
       <div className="flex gap-4">
         <Link to={`/tv/${tvId}`}>
           {poster ? (
-            <img src={`${IMAGE_BASE}${poster}`} alt={title} className="w-16 h-24 object-cover rounded" />
+            <img src={getPosterUrl(poster) || ''} alt={title} className="w-16 h-24 object-cover rounded" />
           ) : (
             <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
               <Tv className="h-6 w-6 text-muted-foreground" />
