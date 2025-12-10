@@ -42,6 +42,7 @@ const SeasonDetail = () => {
   const [tvShow, setTVShow] = useState<TMDBTVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [watchedEpisodes, setWatchedEpisodes] = useState<Set<string>>(new Set());
+  const [episodeRatings, setEpisodeRatings] = useState<Record<string, number>>({});
   const [showLogModal, setShowLogModal] = useState(false);
   const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
   const { user } = useAuth();
@@ -68,7 +69,7 @@ const SeasonDetail = () => {
     loadSeasonDetails();
   }, [id, seasonNumber]);
 
-  // Track which episodes are watched from diary
+  // Track which episodes are watched and their ratings from diary
   useEffect(() => {
     if (!id || !seasonNumber) return;
     
@@ -76,12 +77,19 @@ const SeasonDetail = () => {
     const seasonNum = Number(seasonNumber);
     
     const watched = new Set<string>();
+    const ratings: Record<string, number> = {};
+    
     tvDiary.forEach(entry => {
       if (entry.tv_id === tvId && entry.season_number === seasonNum && entry.episode_number) {
-        watched.add(`${seasonNum}-${entry.episode_number}`);
+        const key = `${seasonNum}-${entry.episode_number}`;
+        watched.add(key);
+        if (entry.rating) {
+          ratings[key] = entry.rating;
+        }
       }
     });
     setWatchedEpisodes(watched);
+    setEpisodeRatings(ratings);
   }, [id, seasonNumber, tvDiary]);
 
   const isEpisodeWatched = (episodeNumber: number) => {
@@ -130,6 +138,66 @@ const SeasonDetail = () => {
   const handleLogEpisode = (episode: Episode) => {
     setSelectedEpisode(episode);
     setShowLogModal(true);
+  };
+
+  const handleRateEpisode = async (episode: Episode, rating: number) => {
+    if (!user || !tvShow || !season) return;
+
+    const key = `${season.season_number}-${episode.episode_number}`;
+    const currentRating = episodeRatings[key];
+    
+    // If clicking the same rating, remove it
+    const newRating = currentRating === rating ? null : rating;
+
+    // Check if entry exists
+    const { data: existingEntry } = await supabase
+      .from('tv_diary')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('tv_id', Number(id))
+      .eq('season_number', season.season_number)
+      .eq('episode_number', episode.episode_number)
+      .maybeSingle();
+
+    if (existingEntry) {
+      // Update existing entry
+      await supabase
+        .from('tv_diary')
+        .update({ rating: newRating })
+        .eq('id', existingEntry.id);
+    } else {
+      // Create new entry with rating
+      await supabase
+        .from('tv_diary')
+        .insert({
+          user_id: user.id,
+          tv_id: Number(id),
+          tv_title: tvShow.name,
+          tv_poster: tvShow.poster_path,
+          season_number: season.season_number,
+          episode_number: episode.episode_number,
+          runtime: episode.runtime || 45,
+          rating: newRating,
+          watched_date: new Date().toISOString().split('T')[0]
+        });
+      
+      // Also mark as watched
+      setWatchedEpisodes(prev => new Set(prev).add(key));
+    }
+
+    // Update local state
+    setEpisodeRatings(prev => {
+      if (newRating === null) {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      }
+      return { ...prev, [key]: newRating };
+    });
+  };
+
+  const getEpisodeRating = (episodeNumber: number) => {
+    return episodeRatings[`${seasonNumber}-${episodeNumber}`] || 0;
   };
 
   if (isLoading) {
@@ -328,29 +396,56 @@ const SeasonDetail = () => {
 
                     {/* Episode Action Buttons */}
                     {user && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant={watched ? "default" : "outline"}
-                          className={`text-xs h-8 ${
-                            watched 
-                              ? 'bg-cinema-gold hover:bg-cinema-gold/90 text-cinema-black' 
-                              : 'hover:border-cinema-gold hover:text-cinema-gold'
-                          }`}
-                          onClick={() => handleMarkEpisodeWatched(episode)}
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          {watched ? 'Watched' : 'Mark Watched'}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-xs h-8 hover:border-cinema-red hover:text-cinema-red"
-                          onClick={() => handleLogEpisode(episode)}
-                        >
-                          <BookOpen className="h-3 w-3 mr-1" />
-                          Log
-                        </Button>
+                      <div className="flex flex-col gap-2">
+                        {/* Rating Stars */}
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground mr-1">Rate:</span>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => handleRateEpisode(episode, star)}
+                              className="p-0.5 transition-transform hover:scale-110"
+                            >
+                              <Star 
+                                className={`h-4 w-4 transition-colors ${
+                                  star <= getEpisodeRating(episode.episode_number)
+                                    ? 'fill-cinema-gold text-cinema-gold'
+                                    : 'text-muted-foreground hover:text-cinema-gold'
+                                }`}
+                              />
+                            </button>
+                          ))}
+                          {getEpisodeRating(episode.episode_number) > 0 && (
+                            <span className="text-xs text-cinema-gold ml-1">
+                              {getEpisodeRating(episode.episode_number)}/5
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant={watched ? "default" : "outline"}
+                            className={`text-xs h-8 ${
+                              watched 
+                                ? 'bg-cinema-gold hover:bg-cinema-gold/90 text-cinema-black' 
+                                : 'hover:border-cinema-gold hover:text-cinema-gold'
+                            }`}
+                            onClick={() => handleMarkEpisodeWatched(episode)}
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            {watched ? 'Watched' : 'Mark Watched'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-8 hover:border-cinema-red hover:text-cinema-red"
+                            onClick={() => handleLogEpisode(episode)}
+                          >
+                            <BookOpen className="h-3 w-3 mr-1" />
+                            Log
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
