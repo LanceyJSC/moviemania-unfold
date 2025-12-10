@@ -535,22 +535,17 @@ const Gallery = () => {
                         poster={item.movie_poster}
                         userRating={item.rating}
                         onDelete={async () => {
-                          if (item.source === 'rating') {
-                            await supabase
-                              .from('user_ratings')
-                              .delete()
-                              .eq('id', item.id);
-                            const { data } = await supabase
-                              .from('user_ratings')
-                              .select('*')
-                              .eq('user_id', user!.id)
-                              .order('created_at', { ascending: false });
-                            setRatedMovies(data || []);
-                            refetchUserState();
-                          } else {
-                            await deleteTVDiaryEntry.mutateAsync(item.id);
-                            await refetchUserState();
-                          }
+                          // Delete all related data for this TV show
+                          await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                          await supabase.from('tv_diary').delete().eq('tv_id', item.movie_id).eq('user_id', user!.id);
+                          await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                          const { data } = await supabase
+                            .from('user_ratings')
+                            .select('*')
+                            .eq('user_id', user!.id)
+                            .order('created_at', { ascending: false });
+                          setRatedMovies(data || []);
+                          await refetchUserState();
                         }}
                       >
                         <div className="flex items-center gap-1">
@@ -570,22 +565,17 @@ const Gallery = () => {
                       mediaType="movie"
                       userRating={item.rating}
                       onDelete={async () => {
-                        if (item.source === 'rating') {
-                          await supabase
-                            .from('user_ratings')
-                            .delete()
-                            .eq('id', item.id);
-                          const { data } = await supabase
-                            .from('user_ratings')
-                            .select('*')
-                            .eq('user_id', user!.id)
-                            .order('created_at', { ascending: false });
-                          setRatedMovies(data || []);
-                          refetchUserState();
-                        } else {
-                          await deleteMovieDiaryEntry.mutateAsync(item.id);
-                          await refetchUserState();
-                        }
+                        // Delete all related data for this movie
+                        await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                        await supabase.from('movie_diary').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                        await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                        const { data } = await supabase
+                          .from('user_ratings')
+                          .select('*')
+                          .eq('user_id', user!.id)
+                          .order('created_at', { ascending: false });
+                        setRatedMovies(data || []);
+                        await refetchUserState();
                       }}
                     >
                       <div className="flex items-center gap-1">
@@ -626,7 +616,16 @@ const Gallery = () => {
                         title={title}
                         poster={poster}
                         userRating={entry.rating}
-                        onDelete={async () => { await deleteTVDiaryEntry.mutateAsync(entry.id); await refetchUserState(); }}
+                        onDelete={async () => {
+                          // Delete all related data for this TV show
+                          const tvId = (entry as any).tv_id;
+                          await supabase.from('user_ratings').delete().eq('movie_id', tvId).eq('user_id', user!.id);
+                          await supabase.from('tv_diary').delete().eq('tv_id', tvId).eq('user_id', user!.id);
+                          await supabase.from('watchlist').delete().eq('movie_id', tvId).eq('user_id', user!.id);
+                          const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
+                          setRatedMovies(data || []);
+                          await refetchUserState();
+                        }}
                       >
                         <p className="text-sm text-muted-foreground">
                           {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
@@ -652,7 +651,16 @@ const Gallery = () => {
                       poster={poster}
                       mediaType="movie"
                       userRating={entry.rating}
-                      onDelete={async () => { await deleteMovieDiaryEntry.mutateAsync(entry.id); await refetchUserState(); }}
+                      onDelete={async () => {
+                        // Delete all related data for this movie
+                        const movieId = (entry as any).movie_id;
+                        await supabase.from('user_ratings').delete().eq('movie_id', movieId).eq('user_id', user!.id);
+                        await supabase.from('movie_diary').delete().eq('movie_id', movieId).eq('user_id', user!.id);
+                        await supabase.from('watchlist').delete().eq('movie_id', movieId).eq('user_id', user!.id);
+                        const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
+                        setRatedMovies(data || []);
+                        await refetchUserState();
+                      }}
                     >
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
