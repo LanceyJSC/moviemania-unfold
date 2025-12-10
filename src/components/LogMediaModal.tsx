@@ -50,7 +50,7 @@ export const LogMediaModal = ({
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState<number>(initialRating);
   const [isSpoiler, setIsSpoiler] = useState(false);
-  const [shareAsReview, setShareAsReview] = useState(false);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [runtime, setRuntime] = useState<number | null>(null);
 
@@ -166,8 +166,8 @@ export const LogMediaModal = ({
         .eq('user_id', user.id)
         .eq('movie_id', mediaId);
 
-      // If sharing as review and has notes, also save to user_reviews
-      if (shareAsReview && notes.trim()) {
+      // Save to user_reviews if notes are provided (for public reviews)
+      if (notes.trim()) {
         const { error: reviewError } = await supabase
           .from('user_reviews')
           .upsert({
@@ -194,6 +194,13 @@ export const LogMediaModal = ({
             metadata: { rating, media_type: mediaType }
           });
         }
+      } else {
+        // If notes are cleared/empty, remove the review
+        await supabase
+          .from('user_reviews')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', mediaId);
       }
 
       // Log activity for diary entry
@@ -211,6 +218,7 @@ export const LogMediaModal = ({
 
       // Invalidate queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['average-user-rating', mediaId, mediaType] });
+      queryClient.invalidateQueries({ queryKey: ['community-reviews', mediaId] });
       await refetchUserState();
 
       resetForm();
@@ -228,7 +236,6 @@ export const LogMediaModal = ({
     setNotes('');
     setRating(0);
     setIsSpoiler(false);
-    setShareAsReview(false);
     setRuntime(null);
   };
 
@@ -326,18 +333,11 @@ export const LogMediaModal = ({
             </label>
           </div>
 
-          {/* Share as Review Toggle - only for movies */}
-          {mediaType === 'movie' && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="shareReview"
-                checked={shareAsReview}
-                onCheckedChange={(checked) => setShareAsReview(checked === true)}
-              />
-              <label htmlFor="shareReview" className="text-sm cursor-pointer">
-                Share as a public review
-              </label>
-            </div>
+          {/* Info about public reviews */}
+          {notes.trim() && (
+            <p className="text-xs text-muted-foreground">
+              Your review will be visible to other users in the Community Reviews section.
+            </p>
           )}
         </div>
 
