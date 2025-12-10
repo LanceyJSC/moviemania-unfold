@@ -194,15 +194,32 @@ const Gallery = () => {
   };
 
   const getCombinedDiary = () => {
-    const movies = movieDiary.map(entry => ({ ...entry, type: 'movie' as const }));
-    const tv = tvDiary.map(entry => ({ ...entry, type: 'tv' as const }));
+    // Only include entries that have notes (actual diary content)
+    const movies = movieDiary
+      .filter(entry => entry.notes && entry.notes.trim().length > 0)
+      .map(entry => ({ ...entry, type: 'movie' as const }));
+    const tv = tvDiary
+      .filter(entry => entry.notes && entry.notes.trim().length > 0)
+      .map(entry => ({ ...entry, type: 'tv' as const }));
     
     let combined = [...movies, ...tv];
     
     if (mediaFilter === 'movies') combined = movies;
     if (mediaFilter === 'tv') combined = tv;
     
-    return combined.sort((a, b) =>
+    // Deduplicate by movie_id/tv_id keeping the most recent entry
+    const uniqueMap = new Map<string, typeof combined[0]>();
+    combined.forEach(entry => {
+      const key = entry.type === 'movie' 
+        ? `movie-${(entry as any).movie_id}` 
+        : `tv-${(entry as any).tv_id}`;
+      const existing = uniqueMap.get(key);
+      if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
+        uniqueMap.set(key, entry);
+      }
+    });
+    
+    return Array.from(uniqueMap.values()).sort((a, b) =>
       new Date(b.watched_date).getTime() - new Date(a.watched_date).getTime()
     );
   };
