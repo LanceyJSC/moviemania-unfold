@@ -180,8 +180,20 @@ const SeasonDetail = () => {
 
     const key = `${season.season_number}-${episode.episode_number}`;
     
+    // Check if entry already exists
+    const { data: existingEntry } = await supabase
+      .from('tv_diary')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('tv_id', Number(id))
+      .eq('season_number', season.season_number)
+      .eq('episode_number', episode.episode_number)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
     if (watchedEpisodes.has(key)) {
-      // Remove from watched - delete from tv_diary
+      // Remove from watched - delete ALL entries for this episode
       await supabase
         .from('tv_diary')
         .delete()
@@ -195,8 +207,13 @@ const SeasonDetail = () => {
         newSet.delete(key);
         return newSet;
       });
-    } else {
-      // Add to watched
+      setEpisodeRatings(prev => {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      });
+    } else if (!existingEntry) {
+      // Only add if no entry exists
       await supabase
         .from('tv_diary')
         .insert({
@@ -212,6 +229,8 @@ const SeasonDetail = () => {
       
       setWatchedEpisodes(prev => new Set(prev).add(key));
     }
+    
+    refetchTVDiary();
   };
 
   const handleLogEpisode = (episode: Episode) => {
