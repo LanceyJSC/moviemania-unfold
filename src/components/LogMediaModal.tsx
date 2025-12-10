@@ -124,7 +124,8 @@ export const LogMediaModal = ({
           movie_title: mediaTitle,
           movie_poster: mediaPoster,
           rating: rating > 0 ? rating : null,
-          media_type: mediaType
+          media_type: mediaType,
+          is_public: true
         }, {
           onConflict: 'user_id,movie_id'
         });

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface UserState {
   likedMovies: number[];
@@ -49,6 +50,7 @@ export const useUserStateContext = () => {
 
 export const UserStateProvider = ({ children }: { children: ReactNode }) => {
   const { user, session } = useAuth();
+  const queryClient = useQueryClient();
   const [userState, setUserState] = useState<UserState>(defaultUserState);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -327,7 +329,8 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
             movie_title: movieTitle,
             movie_poster: moviePoster,
             rating: rating,
-            media_type: mediaType
+            media_type: mediaType,
+            is_public: true
           }, { onConflict: 'user_id,movie_id' });
 
         // Remove from watchlist since it's now watched/rated
@@ -343,6 +346,9 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
           watchedItems: prev.watchedItems.includes(movieId) ? prev.watchedItems : [...prev.watchedItems, movieId],
           watchlist: prev.watchlist.filter(id => id !== movieId)
         }));
+        
+        // Invalidate the average rating query so it updates immediately
+        queryClient.invalidateQueries({ queryKey: ['average-user-rating', movieId, mediaType] });
         
         await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating, media_type: mediaType });
       }
@@ -383,7 +389,8 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
             movie_title: movieTitle,
             movie_poster: moviePoster,
             rating: null,
-            media_type: mediaType
+            media_type: mediaType,
+            is_public: true
           }, { onConflict: 'user_id,movie_id' });
         
         // Also remove from watchlist if it's there
