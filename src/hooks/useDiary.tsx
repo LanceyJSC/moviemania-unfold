@@ -167,6 +167,15 @@ export const useDiary = () => {
     queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
   };
 
+  const refetchMovieDiary = () => {
+    queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
+  };
+
+  const refetchAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
+    queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
+  };
+
   return {
     movieDiary: movieDiaryQuery.data || [],
     tvDiary: tvDiaryQuery.data || [],
@@ -178,5 +187,7 @@ export const useDiary = () => {
     deleteMovieDiaryEntry,
     deleteTVDiaryEntry,
     refetchTVDiary,
+    refetchMovieDiary,
+    refetchAll,
   };
 };
