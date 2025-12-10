@@ -101,33 +101,53 @@ export const useUserStats = () => {
       // Create sets to track unique watched items
       const watchedMovieIds = new Set<number>();
       const watchedTvIds = new Set<number>();
+      
+      // Track which items have runtime from diary
+      const movieRuntimeMap = new Map<number, number>();
+      const tvRuntimeMap = new Map<number, number>();
 
-      // Add diary entries to watched sets
-      movieDiary?.forEach(entry => watchedMovieIds.add(entry.movie_id));
-      tvDiary?.forEach(entry => watchedTvIds.add(entry.tv_id));
+      // Add diary entries to watched sets and runtime maps
+      movieDiary?.forEach(entry => {
+        watchedMovieIds.add(entry.movie_id);
+        movieRuntimeMap.set(entry.movie_id, entry.runtime || 120);
+      });
+      tvDiary?.forEach(entry => {
+        watchedTvIds.add(entry.tv_id);
+        tvRuntimeMap.set(entry.tv_id, entry.runtime || 45);
+      });
 
-      // Add user_ratings entries to watched sets
+      // Add user_ratings entries to watched sets (with estimated runtime if not in diary)
       userRatings?.forEach(entry => {
         if (entry.media_type === 'tv') {
           watchedTvIds.add(entry.movie_id);
+          // If not already in diary, add estimated runtime
+          if (!tvRuntimeMap.has(entry.movie_id)) {
+            tvRuntimeMap.set(entry.movie_id, 45); // Default 45 min per episode
+          }
         } else {
           watchedMovieIds.add(entry.movie_id);
+          // If not already in diary, add estimated runtime
+          if (!movieRuntimeMap.has(entry.movie_id)) {
+            movieRuntimeMap.set(entry.movie_id, 120); // Default 2 hours per movie
+          }
         }
       });
 
       const movieCount = watchedMovieIds.size;
       const tvCount = watchedTvIds.size;
 
-      // Calculate actual movie hours from runtime (in minutes)
-      const movieMinutes = movieDiary?.reduce((sum, entry) => {
-        return sum + (entry.runtime || 120);
-      }, 0) || 0;
+      // Calculate total movie hours from all watched movies
+      let movieMinutes = 0;
+      movieRuntimeMap.forEach(runtime => {
+        movieMinutes += runtime;
+      });
       const movieHours = Math.round(movieMinutes / 60);
 
-      // Calculate actual TV hours from runtime (in minutes per episode)
-      const tvMinutes = tvDiary?.reduce((sum, entry) => {
-        return sum + (entry.runtime || 45);
-      }, 0) || 0;
+      // Calculate total TV hours from all watched TV
+      let tvMinutes = 0;
+      tvRuntimeMap.forEach(runtime => {
+        tvMinutes += runtime;
+      });
       const tvHours = Math.round(tvMinutes / 60);
 
       // Calculate average rating from all sources (combine diary and user_ratings, deduplicate)
