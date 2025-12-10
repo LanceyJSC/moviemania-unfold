@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen, Eye } from "lucide-react";
+import { Play, Heart, Plus, Share, Loader2, MoreHorizontal, BookOpen, Eye, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
 import { UserReviews } from "@/components/UserReviews";
 import { CommunityReviews } from "@/components/CommunityReviews";
 import { LogMediaModal } from "@/components/LogMediaModal";
+import { UserAverageRating } from "@/components/UserAverageRating";
+import { RatingInput } from "@/components/RatingInput";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -178,8 +180,8 @@ const MovieDetail = () => {
 
         {/* Movie Info positioned to the right of poster - Responsive spacing */}
         <div className="absolute bottom-6 left-32 right-4 z-30 iphone-65:left-36 iphone-67:left-40">
-          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2">
-            <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">★ {movie.vote_average.toFixed(1)}</span>
+          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2 flex-wrap gap-y-1">
+            <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">TMDB {movie.vote_average.toFixed(1)}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">{releaseYear}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">{runtime}</span>
           </div>
@@ -191,6 +193,19 @@ const MovieDetail = () => {
           <p className="text-white/70 mb-3 text-xs iphone-65:text-sm">
             {genres}
           </p>
+        </div>
+      </div>
+
+      {/* Ratings Section */}
+      <div className="container mx-auto px-4 mt-4 relative z-30">
+        <div className="flex items-center justify-center gap-6 py-3 bg-card/50 rounded-lg border border-border">
+          <div className="flex items-center gap-1.5">
+            <span className="text-cinema-gold font-semibold">★</span>
+            <span className="text-sm font-medium">TMDB</span>
+            <span className="text-foreground font-bold">{movie.vote_average.toFixed(1)}</span>
+          </div>
+          <div className="h-6 w-px bg-border" />
+          <UserAverageRating mediaId={movieId} mediaType="movie" />
         </div>
       </div>
 
@@ -285,19 +300,16 @@ const MovieDetail = () => {
         </div>
 
         {/* Rating - marks as watched */}
-        <div className="flex items-center justify-center space-x-2 mb-6">
-          <span className="text-foreground text-sm">Your Rating:</span>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => setRating(movieId, star === userRating ? 0 : star, title, movie.poster_path)}
-              className="p-2 touch-target"
-            >
-              <Star 
-                className={`h-5 w-5 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}
-              />
-            </button>
-          ))}
+        <div className="mb-6">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-foreground text-sm">Your Rating (1-10):</span>
+            <RatingInput
+              value={userRating}
+              onChange={(rating) => setRating(movieId, rating, title, movie.poster_path)}
+              max={10}
+              size="md"
+            />
+          </div>
         </div>
 
         {/* Director and Producer */}

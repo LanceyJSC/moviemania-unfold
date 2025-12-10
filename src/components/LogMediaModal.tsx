@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Star, Loader2, Film, Tv } from 'lucide-react';
+import { CalendarIcon, Loader2, Film, Tv } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { useDiary } from '@/hooks/useDiary';
 import { useUserStats } from '@/hooks/useUserStats';
 import { tmdbService } from '@/lib/tmdb';
+import { RatingInput } from '@/components/RatingInput';
 
 interface LogMediaModalProps {
   isOpen: boolean;
@@ -263,26 +264,13 @@ export const LogMediaModal = ({
 
           {/* Rating */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Rating (optional)</label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(rating === star ? 0 : star)}
-                  className="p-1 transition-transform hover:scale-110"
-                >
-                  <Star
-                    className={cn(
-                      "h-6 w-6 transition-colors",
-                      star <= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-muted-foreground"
-                    )}
-                  />
-                </button>
-              ))}
-            </div>
+            <label className="text-sm font-medium">Rating (1-10, optional)</label>
+            <RatingInput
+              value={rating}
+              onChange={setRating}
+              max={10}
+              size="sm"
+            />
           </div>
 
           {/* Notes */}

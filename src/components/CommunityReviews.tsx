@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Star, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -123,18 +123,9 @@ export const CommunityReviews = ({ movieId }: CommunityReviewsProps) => {
                         {review.profile?.username || review.profile?.full_name || 'Anonymous'}
                       </Link>
                       {review.rating && (
-                        <div className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-3.5 w-3.5 ${
-                                star <= review.rating!
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-muted-foreground'
-                              }`}
-                            />
-                          ))}
-                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold font-semibold text-xs">
+                          {review.rating}/10
+                        </span>
                       )}
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(review.created_at), 'MMM d, yyyy')}

@@ -95,16 +95,11 @@ export const GalleryMediaCard = ({
               </div>
             )}
 
-            {/* User Rating */}
+            {/* User Rating - now 1-10 */}
             {userRating && userRating > 0 && (
-              <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`h-3 w-3 ${star <= userRating ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
-                  />
-                ))}
-              </div>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 rounded text-primary font-semibold text-xs">
+                {userRating}/10
+              </span>
             )}
           </div>
 

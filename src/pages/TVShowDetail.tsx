@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen, Eye } from "lucide-react";
+import { Play, Heart, Plus, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen, Eye, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
@@ -14,6 +14,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
 import { LogMediaModal } from "@/components/LogMediaModal";
+import { UserAverageRating } from "@/components/UserAverageRating";
+import { RatingInput } from "@/components/RatingInput";
 
 const TVShowDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -171,8 +173,8 @@ const TVShowDetail = () => {
             </div>
           )}
           
-          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2 flex-wrap">
-            <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">★ {tvShow.vote_average.toFixed(1)}</span>
+          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2 flex-wrap gap-y-1">
+            <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">TMDB {tvShow.vote_average.toFixed(1)}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">{releaseYear}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">TV Series</span>
             {tvShow.number_of_seasons && (
@@ -189,6 +191,19 @@ const TVShowDetail = () => {
           <p className="text-white/70 mb-3 text-xs iphone-65:text-sm">
             {genres}
           </p>
+        </div>
+      </div>
+
+      {/* Ratings Section */}
+      <div className="container mx-auto px-4 mt-4 relative z-30">
+        <div className="flex items-center justify-center gap-6 py-3 bg-card/50 rounded-lg border border-border">
+          <div className="flex items-center gap-1.5">
+            <span className="text-cinema-gold font-semibold">★</span>
+            <span className="text-sm font-medium">TMDB</span>
+            <span className="text-foreground font-bold">{tvShow.vote_average.toFixed(1)}</span>
+          </div>
+          <div className="h-6 w-px bg-border" />
+          <UserAverageRating mediaId={tvShowId} mediaType="tv" />
         </div>
       </div>
 
@@ -283,19 +298,16 @@ const TVShowDetail = () => {
         </div>
 
         {/* Rating - marks as watched */}
-        <div className="flex items-center justify-center space-x-2 mb-6">
-          <span className="text-foreground text-sm">Your Rating:</span>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => setRating(tvShowId, star === userRating ? 0 : star, tvShow.name, posterUrl, 'tv')}
-              className="p-2 touch-target"
-            >
-              <Star 
-                className={`h-5 w-5 ${star <= userRating ? 'text-cinema-gold fill-current' : 'text-muted-foreground'}`}
-              />
-            </button>
-          ))}
+        <div className="mb-6">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-foreground text-sm">Your Rating (1-10):</span>
+            <RatingInput
+              value={userRating}
+              onChange={(rating) => setRating(tvShowId, rating, tvShow.name, posterUrl, 'tv')}
+              max={10}
+              size="md"
+            />
+          </div>
         </div>
 
         {/* Creator */}
