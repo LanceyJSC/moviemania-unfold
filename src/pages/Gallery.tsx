@@ -24,6 +24,7 @@ import { TVShowGalleryCard } from '@/components/TVShowGalleryCard';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
@@ -32,6 +33,7 @@ type MediaFilter = 'all' | 'movies' | 'tv';
 const Gallery = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { items, loading: itemsLoading, removeItem, addItem } = useEnhancedWatchlist();
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
   const { stats, recalculateStats } = useUserStats();
@@ -545,6 +547,8 @@ const Gallery = () => {
                         onDelete={async () => {
                           // Delete all related data for this TV show
                           await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                          await supabase.from('ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                          await supabase.from('user_reviews').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                           await supabase.from('tv_diary').delete().eq('tv_id', item.movie_id).eq('user_id', user!.id);
                           await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                           await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
@@ -554,6 +558,7 @@ const Gallery = () => {
                             .eq('user_id', user!.id)
                             .order('created_at', { ascending: false });
                           setRatedMovies(data || []);
+                          queryClient.invalidateQueries({ queryKey: ['average-user-rating', item.movie_id] });
                           refetchDiary();
                           await refetchUserState();
                         }}
@@ -577,6 +582,8 @@ const Gallery = () => {
                       onDelete={async () => {
                         // Delete all related data for this movie
                         await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                        await supabase.from('ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                        await supabase.from('user_reviews').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                         await supabase.from('movie_diary').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                         await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                         await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
@@ -586,6 +593,7 @@ const Gallery = () => {
                           .eq('user_id', user!.id)
                           .order('created_at', { ascending: false });
                         setRatedMovies(data || []);
+                        queryClient.invalidateQueries({ queryKey: ['average-user-rating', item.movie_id] });
                         refetchDiary();
                         await refetchUserState();
                       }}
@@ -632,11 +640,14 @@ const Gallery = () => {
                           // Delete all related data for this TV show
                           const tvId = (entry as any).tv_id;
                           await supabase.from('user_ratings').delete().eq('movie_id', tvId).eq('user_id', user!.id);
+                          await supabase.from('ratings').delete().eq('movie_id', tvId).eq('user_id', user!.id);
+                          await supabase.from('user_reviews').delete().eq('movie_id', tvId).eq('user_id', user!.id);
                           await supabase.from('tv_diary').delete().eq('tv_id', tvId).eq('user_id', user!.id);
                           await supabase.from('watchlist').delete().eq('movie_id', tvId).eq('user_id', user!.id);
                           await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', tvId).eq('user_id', user!.id);
                           const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
                           setRatedMovies(data || []);
+                          queryClient.invalidateQueries({ queryKey: ['average-user-rating', tvId] });
                           refetchDiary();
                           await refetchUserState();
                         }}
@@ -669,11 +680,14 @@ const Gallery = () => {
                         // Delete all related data for this movie
                         const movieId = (entry as any).movie_id;
                         await supabase.from('user_ratings').delete().eq('movie_id', movieId).eq('user_id', user!.id);
+                        await supabase.from('ratings').delete().eq('movie_id', movieId).eq('user_id', user!.id);
+                        await supabase.from('user_reviews').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         await supabase.from('movie_diary').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         await supabase.from('watchlist').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
                         setRatedMovies(data || []);
+                        queryClient.invalidateQueries({ queryKey: ['average-user-rating', movieId] });
                         refetchDiary();
                         await refetchUserState();
                       }}
