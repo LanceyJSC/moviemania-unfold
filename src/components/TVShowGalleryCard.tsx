@@ -54,6 +54,39 @@ export const TVShowGalleryCard = ({
   const [seasonReviews, setSeasonReviews] = useState<SeasonReview[]>([]);
   const [episodeReviews, setEpisodeReviews] = useState<EpisodeReview[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [seasonCount, setSeasonCount] = useState(0);
+  const [episodeCount, setEpisodeCount] = useState(0);
+
+  // Load counts on mount
+  useEffect(() => {
+    const loadCounts = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('tv_diary')
+        .select('season_number, episode_number')
+        .eq('user_id', user.id)
+        .eq('tv_id', tvId);
+
+      if (data) {
+        const uniqueSeasons = new Set<number>();
+        let episodes = 0;
+
+        data.forEach(entry => {
+          if (entry.season_number && !entry.episode_number) {
+            uniqueSeasons.add(entry.season_number);
+          } else if (entry.episode_number) {
+            episodes++;
+          }
+        });
+
+        setSeasonCount(uniqueSeasons.size);
+        setEpisodeCount(episodes);
+      }
+    };
+    
+    loadCounts();
+  }, [user, tvId]);
 
   useEffect(() => {
     const fetchTmdbRating = async () => {
@@ -204,7 +237,16 @@ export const TVShowGalleryCard = ({
             )}
           </div>
 
-          {children}
+          {(seasonCount > 0 || episodeCount > 0) && (
+            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+              {seasonCount > 0 && (
+                <span>{seasonCount} {seasonCount === 1 ? 'Season' : 'Seasons'}</span>
+              )}
+              {episodeCount > 0 && (
+                <span>{episodeCount} {episodeCount === 1 ? 'Episode' : 'Episodes'}</span>
+              )}
+            </div>
+          )}
 
           <Button
             variant="ghost"
