@@ -403,6 +403,24 @@ const Gallery = () => {
               <div className="space-y-3">
                 {getUnwatchedItems().map(item => {
                   const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
+                  
+                  if (itemMediaType === 'tv') {
+                    return (
+                      <TVShowGalleryCard
+                        key={item.id}
+                        id={item.id}
+                        tvId={item.movie_id}
+                        title={item.movie_title}
+                        poster={item.movie_poster}
+                        onDelete={() => removeItem(item.id)}
+                      >
+                        <p className="text-sm text-muted-foreground">
+                          Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
+                        </p>
+                      </TVShowGalleryCard>
+                    );
+                  }
+                  
                   return (
                     <GalleryMediaCard
                       key={item.id}
@@ -410,7 +428,7 @@ const Gallery = () => {
                       movieId={item.movie_id}
                       title={item.movie_title}
                       poster={item.movie_poster}
-                      mediaType={itemMediaType}
+                      mediaType="movie"
                       onDelete={() => removeItem(item.id)}
                     >
                       <p className="text-sm text-muted-foreground">
@@ -437,6 +455,25 @@ const Gallery = () => {
               <div className="space-y-3">
                 {getFilteredFavorites().map(item => {
                   const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
+                  
+                  if (itemMediaType === 'tv') {
+                    return (
+                      <TVShowGalleryCard
+                        key={item.id}
+                        id={item.id}
+                        tvId={item.movie_id}
+                        title={item.movie_title}
+                        poster={item.movie_poster}
+                        onDelete={() => removeFavorite(item.movie_id)}
+                      >
+                        <div className="flex items-center gap-1">
+                          <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
+                          <span className="text-sm text-muted-foreground">Favorited</span>
+                        </div>
+                      </TVShowGalleryCard>
+                    );
+                  }
+                  
                   return (
                     <GalleryMediaCard
                       key={item.id}
@@ -444,7 +481,7 @@ const Gallery = () => {
                       movieId={item.movie_id}
                       title={item.movie_title}
                       poster={item.movie_poster}
-                      mediaType={itemMediaType}
+                      mediaType="movie"
                       onDelete={() => removeFavorite(item.movie_id)}
                     >
                       <div className="flex items-center gap-1">
@@ -560,7 +597,32 @@ const Gallery = () => {
                   const id = isMovie ? (entry as any).movie_id : (entry as any).tv_id;
                   const title = isMovie ? (entry as any).movie_title : (entry as any).tv_title;
                   const poster = isMovie ? (entry as any).movie_poster : (entry as any).tv_poster;
-                  const mediaType = isMovie ? 'movie' : 'tv';
+                  
+                  if (!isMovie) {
+                    return (
+                      <TVShowGalleryCard
+                        key={entry.id}
+                        id={entry.id}
+                        tvId={id}
+                        title={title}
+                        poster={poster}
+                        userRating={entry.rating}
+                        onDelete={() => deleteTVDiaryEntry.mutate(entry.id)}
+                      >
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
+                        </p>
+                        {((entry as any).season_number || (entry as any).episode_number) && (
+                          <p className="text-xs text-muted-foreground">
+                            S{(entry as any).season_number || '?'} E{(entry as any).episode_number || '?'}
+                          </p>
+                        )}
+                        {entry.notes && (
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{entry.notes}</p>
+                        )}
+                      </TVShowGalleryCard>
+                    );
+                  }
                   
                   return (
                     <GalleryMediaCard
@@ -569,24 +631,13 @@ const Gallery = () => {
                       movieId={id}
                       title={title}
                       poster={poster}
-                      mediaType={mediaType as 'movie' | 'tv'}
+                      mediaType="movie"
                       userRating={entry.rating}
-                      onDelete={() => {
-                        if (isMovie) {
-                          deleteMovieDiaryEntry.mutate(entry.id);
-                        } else {
-                          deleteTVDiaryEntry.mutate(entry.id);
-                        }
-                      }}
+                      onDelete={() => deleteMovieDiaryEntry.mutate(entry.id)}
                     >
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
                       </p>
-                      {!isMovie && ((entry as any).season_number || (entry as any).episode_number) && (
-                        <p className="text-xs text-muted-foreground">
-                          S{(entry as any).season_number || '?'} E{(entry as any).episode_number || '?'}
-                        </p>
-                      )}
                       {entry.notes && (
                         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{entry.notes}</p>
                       )}
