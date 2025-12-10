@@ -180,10 +180,15 @@ const MovieDetail = () => {
 
         {/* Movie Info positioned to the right of poster - Responsive spacing */}
         <div className="absolute bottom-6 left-32 right-4 z-30 iphone-65:left-36 iphone-67:left-40">
-          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2 flex-wrap gap-y-1">
+          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-1 flex-wrap gap-y-1">
             <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">TMDB {movie.vote_average.toFixed(1)}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">{releaseYear}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">{runtime}</span>
+          </div>
+
+          {/* User Average Rating - underneath TMDB */}
+          <div className="mb-2">
+            <UserAverageRating mediaId={movieId} mediaType="movie" />
           </div>
 
           <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg iphone-65:text-xl leading-tight">
@@ -193,19 +198,6 @@ const MovieDetail = () => {
           <p className="text-white/70 mb-3 text-xs iphone-65:text-sm">
             {genres}
           </p>
-        </div>
-      </div>
-
-      {/* Ratings Section */}
-      <div className="container mx-auto px-4 mt-4 relative z-30">
-        <div className="flex items-center justify-center gap-6 py-3 bg-card/50 rounded-lg border border-border">
-          <div className="flex items-center gap-1.5">
-            <span className="text-cinema-gold font-semibold">★</span>
-            <span className="text-sm font-medium">TMDB</span>
-            <span className="text-foreground font-bold">{movie.vote_average.toFixed(1)}</span>
-          </div>
-          <div className="h-6 w-px bg-border" />
-          <UserAverageRating mediaId={movieId} mediaType="movie" />
         </div>
       </div>
 
