@@ -3,6 +3,17 @@ import { Link } from 'react-router-dom';
 import { Film, Tv, Star, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { tmdbService } from '@/lib/tmdb';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
@@ -100,14 +111,40 @@ export const GalleryMediaCard = ({
           {/* Additional content slot */}
           {children}
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={onDelete}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete "{title}"?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete all data for this {mediaType === 'tv' ? 'TV show' : 'movie'} including:
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Ratings and reviews</li>
+                  <li>Diary entries and notes</li>
+                  <li>Watchlist and favorites status</li>
+                </ul>
+                <p className="mt-2 font-medium">This action cannot be undone.</p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete All Data
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Card>
   );
