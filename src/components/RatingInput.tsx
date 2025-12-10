@@ -33,7 +33,7 @@ export const RatingInput = ({
             'rounded-md font-semibold transition-all duration-200',
             sizeClasses[size],
             'flex items-center justify-center',
-            score <= value
+            score === value
               ? 'bg-cinema-gold text-cinema-black'
               : 'bg-muted text-muted-foreground hover:bg-muted/80',
             disabled && 'opacity-50 cursor-not-allowed'
