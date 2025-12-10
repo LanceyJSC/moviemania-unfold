@@ -8,13 +8,15 @@ export interface UserState {
   watchlist: number[];
   ratings: Record<number, number>;
   currentlyWatching: number[];
+  watchedItems: number[];
 }
 
 const defaultUserState: UserState = {
   likedMovies: [],
   watchlist: [],
   ratings: {},
-  currentlyWatching: []
+  currentlyWatching: [],
+  watchedItems: []
 };
 
 export type MediaType = 'movie' | 'tv';
@@ -26,9 +28,11 @@ interface UserStateContextType {
   toggleWatchlist: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
   setRating: (movieId: number, rating: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
   toggleCurrentlyWatching: (movieId: number, movieTitle: string, moviePoster?: string) => Promise<void>;
+  markAsWatched: (movieId: number, movieTitle: string, moviePoster?: string, mediaType?: MediaType) => Promise<void>;
   isLiked: (movieId: number) => boolean;
   isInWatchlist: (movieId: number) => boolean;
   isCurrentlyWatching: (movieId: number) => boolean;
+  isWatched: (movieId: number) => boolean;
   getRating: (movieId: number) => number;
   refetch: () => Promise<void>;
 }
@@ -76,6 +80,11 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         .select('movie_id, rating')
         .eq('user_id', user.id);
 
+      const { data: userRatingsData } = await supabase
+        .from('user_ratings')
+        .select('movie_id')
+        .eq('user_id', user.id);
+
       const likedMovies = watchlistData
         ?.filter(item => item.list_type === 'liked')
         .map(item => item.movie_id) || [];
@@ -91,11 +100,14 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         return acc;
       }, {} as Record<number, number>) || {};
 
+      const watchedItems = userRatingsData?.map(item => item.movie_id) || [];
+
       setUserState({
         likedMovies,
         watchlist,
         currentlyWatching,
-        ratings
+        ratings,
+        watchedItems
       });
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -323,6 +335,53 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const markAsWatched = async (movieId: number, movieTitle: string, moviePoster?: string, mediaType: MediaType = 'movie') => {
+    if (!user) {
+      toast.error('Please sign in to mark as watched');
+      return;
+    }
+
+    const isCurrentlyWatched = userState.watchedItems.includes(movieId);
+    
+    try {
+      if (isCurrentlyWatched) {
+        // Remove from watched
+        await supabase
+          .from('user_ratings')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', movieId);
+        
+        setUserState(prev => ({
+          ...prev,
+          watchedItems: prev.watchedItems.filter(id => id !== movieId)
+        }));
+      } else {
+        // Add to watched (with rating 0 to indicate watched but not rated)
+        await supabase
+          .from('user_ratings')
+          .upsert({
+            user_id: user.id,
+            movie_id: movieId,
+            movie_title: movieTitle,
+            movie_poster: moviePoster,
+            rating: 0,
+            media_type: mediaType
+          }, { onConflict: 'user_id,movie_id' });
+        
+        setUserState(prev => ({
+          ...prev,
+          watchedItems: [...prev.watchedItems, movieId]
+        }));
+        
+        await logActivity('watched', { id: movieId, title: movieTitle, poster: moviePoster }, { media_type: mediaType });
+      }
+    } catch (error) {
+      console.error('Error marking as watched:', error);
+      toast.error('Failed to update watched status');
+    }
+  };
+
   const value: UserStateContextType = {
     userState,
     isLoading,
@@ -330,9 +389,11 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
     toggleWatchlist,
     setRating,
     toggleCurrentlyWatching,
+    markAsWatched,
     isLiked: (movieId: number) => userState.likedMovies.includes(movieId),
     isInWatchlist: (movieId: number) => userState.watchlist.includes(movieId),
     isCurrentlyWatching: (movieId: number) => userState.currentlyWatching.includes(movieId),
+    isWatched: (movieId: number) => userState.watchedItems.includes(movieId),
     getRating: (movieId: number) => userState.ratings[movieId] || 0,
     refetch: loadUserData
   };

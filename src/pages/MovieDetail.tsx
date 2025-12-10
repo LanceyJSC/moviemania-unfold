@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen } from "lucide-react";
+import { Play, Heart, Plus, Star, Share, Loader2, MoreHorizontal, BookOpen, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
@@ -31,14 +31,17 @@ const MovieDetail = () => {
     toggleLike,
     toggleWatchlist,
     setRating,
+    markAsWatched,
     isLiked,
     isInWatchlist,
+    isWatched,
     getRating
   } = useUserStateContext();
 
   const movieId = Number(id);
   const isMovieLiked = isLiked(movieId);
   const isMovieInWatchlist = isInWatchlist(movieId);
+  const isMovieWatched = isWatched(movieId);
   const userRating = getRating(movieId);
 
   useEffect(() => {
@@ -247,6 +250,16 @@ const MovieDetail = () => {
               onClick={() => toggleWatchlist(movieId, title, posterUrl)}
             >
               <Plus className="h-4 w-4" />
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
+                isMovieWatched ? 'bg-green-600 border-green-600 text-white' : ''
+              }`}
+              onClick={() => markAsWatched(movieId, title, posterUrl)}
+            >
+              <Eye className={`h-4 w-4 ${isMovieWatched ? 'fill-current' : ''}`} />
             </Button>
 
             <Button 
