@@ -311,6 +311,9 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
             watchedItems: prev.watchedItems.filter(id => id !== movieId)
           };
         });
+        
+        // Invalidate the average rating query so it updates immediately when cleared
+        queryClient.invalidateQueries({ queryKey: ['average-user-rating', movieId, mediaType] });
       } else {
         await supabase
           .from('ratings')
