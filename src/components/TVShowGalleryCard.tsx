@@ -65,12 +65,12 @@ export const TVShowGalleryCard = ({
     
     setIsLoading(true);
     try {
+      // Load ALL diary entries for this TV show (not just rated ones)
       const { data } = await supabase
         .from('tv_diary')
         .select('season_number, episode_number, rating, notes')
         .eq('user_id', user.id)
-        .eq('tv_id', tvId)
-        .not('rating', 'is', null);
+        .eq('tv_id', tvId);
 
       if (data) {
         // Separate season-level (episode_number is null) from episode-level entries
@@ -199,7 +199,7 @@ export const TVShowGalleryCard = ({
 
       {/* Expanded section with season/episode reviews */}
       {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-border">
+        <div className="mt-4 pt-4 border-t border-border bg-background rounded-b-lg">
           {isLoading ? (
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
@@ -209,17 +209,17 @@ export const TVShowGalleryCard = ({
               {/* Season Reviews */}
               {seasonReviews.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-2">Season Reviews</h4>
+                  <h4 className="text-sm font-semibold text-foreground mb-2">Seasons</h4>
                   <div className="space-y-2">
                     {seasonReviews.map((review) => (
                       <Link 
                         key={`season-${review.season_number}`}
                         to={`/tv/${tvId}/season/${review.season_number}`}
-                        className="flex items-center justify-between p-2 bg-card/50 rounded hover:bg-card transition-colors"
+                        className="flex items-center justify-between p-2 bg-card rounded hover:bg-accent transition-colors border border-border"
                       >
                         <span className="text-sm text-foreground">Season {review.season_number}</span>
-                        <div className="flex items-center gap-1">
-                          {review.rating && (
+                        <div className="flex items-center gap-2">
+                          {review.rating ? (
                             <div className="flex items-center gap-0.5">
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
@@ -228,6 +228,8 @@ export const TVShowGalleryCard = ({
                                 />
                               ))}
                             </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Logged</span>
                           )}
                         </div>
                       </Link>
@@ -239,19 +241,19 @@ export const TVShowGalleryCard = ({
               {/* Episode Reviews */}
               {episodeReviews.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-2">Episode Reviews</h4>
+                  <h4 className="text-sm font-semibold text-foreground mb-2">Episodes</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {episodeReviews.map((review) => (
                       <Link 
                         key={`ep-${review.season_number}-${review.episode_number}`}
                         to={`/tv/${tvId}/season/${review.season_number}`}
-                        className="flex items-center justify-between p-2 bg-card/50 rounded hover:bg-card transition-colors"
+                        className="flex items-center justify-between p-2 bg-card rounded hover:bg-accent transition-colors border border-border"
                       >
                         <span className="text-sm text-foreground">
                           S{review.season_number} E{review.episode_number}
                         </span>
-                        <div className="flex items-center gap-1">
-                          {review.rating && (
+                        <div className="flex items-center gap-2">
+                          {review.rating ? (
                             <div className="flex items-center gap-0.5">
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
@@ -260,6 +262,8 @@ export const TVShowGalleryCard = ({
                                 />
                               ))}
                             </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Watched</span>
                           )}
                         </div>
                       </Link>
@@ -270,7 +274,7 @@ export const TVShowGalleryCard = ({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
-              No season or episode reviews yet
+              No season or episode entries yet
             </p>
           )}
         </div>
