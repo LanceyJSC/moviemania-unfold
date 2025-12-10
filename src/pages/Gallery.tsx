@@ -548,8 +548,8 @@ const Gallery = () => {
                             setRatedMovies(data || []);
                             refetchUserState();
                           } else {
-                            deleteTVDiaryEntry.mutate(item.id);
-                            refetchUserState();
+                            await deleteTVDiaryEntry.mutateAsync(item.id);
+                            await refetchUserState();
                           }
                         }}
                       >
@@ -583,8 +583,8 @@ const Gallery = () => {
                           setRatedMovies(data || []);
                           refetchUserState();
                         } else {
-                          deleteMovieDiaryEntry.mutate(item.id);
-                          refetchUserState();
+                          await deleteMovieDiaryEntry.mutateAsync(item.id);
+                          await refetchUserState();
                         }
                       }}
                     >
@@ -626,7 +626,7 @@ const Gallery = () => {
                         title={title}
                         poster={poster}
                         userRating={entry.rating}
-                        onDelete={() => { deleteTVDiaryEntry.mutate(entry.id); refetchUserState(); }}
+                        onDelete={async () => { await deleteTVDiaryEntry.mutateAsync(entry.id); await refetchUserState(); }}
                       >
                         <p className="text-sm text-muted-foreground">
                           {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
@@ -652,7 +652,7 @@ const Gallery = () => {
                       poster={poster}
                       mediaType="movie"
                       userRating={entry.rating}
-                      onDelete={() => { deleteMovieDiaryEntry.mutate(entry.id); refetchUserState(); }}
+                      onDelete={async () => { await deleteMovieDiaryEntry.mutateAsync(entry.id); await refetchUserState(); }}
                     >
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
