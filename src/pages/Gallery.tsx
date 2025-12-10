@@ -429,7 +429,7 @@ const Gallery = () => {
                         tvId={item.movie_id}
                         title={item.movie_title}
                         poster={item.movie_poster}
-                        onDelete={() => removeItem(item.id)}
+                        onDelete={async () => { await removeItem(item.id); refetchUserState(); }}
                       >
                         <p className="text-sm text-muted-foreground">
                           Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
@@ -446,7 +446,7 @@ const Gallery = () => {
                       title={item.movie_title}
                       poster={item.movie_poster}
                       mediaType="movie"
-                      onDelete={() => removeItem(item.id)}
+                      onDelete={async () => { await removeItem(item.id); refetchUserState(); }}
                     >
                       <p className="text-sm text-muted-foreground">
                         Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
@@ -481,7 +481,7 @@ const Gallery = () => {
                         tvId={item.movie_id}
                         title={item.movie_title}
                         poster={item.movie_poster}
-                        onDelete={() => removeFavorite(item.movie_id)}
+                        onDelete={async () => { await removeFavorite(item.movie_id); refetchUserState(); }}
                       >
                         <div className="flex items-center gap-1">
                           <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
@@ -499,7 +499,7 @@ const Gallery = () => {
                       title={item.movie_title}
                       poster={item.movie_poster}
                       mediaType="movie"
-                      onDelete={() => removeFavorite(item.movie_id)}
+                      onDelete={async () => { await removeFavorite(item.movie_id); refetchUserState(); }}
                     >
                       <div className="flex items-center gap-1">
                         <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
@@ -549,6 +549,7 @@ const Gallery = () => {
                             refetchUserState();
                           } else {
                             deleteTVDiaryEntry.mutate(item.id);
+                            refetchUserState();
                           }
                         }}
                       >
@@ -583,6 +584,7 @@ const Gallery = () => {
                           refetchUserState();
                         } else {
                           deleteMovieDiaryEntry.mutate(item.id);
+                          refetchUserState();
                         }
                       }}
                     >
@@ -624,7 +626,7 @@ const Gallery = () => {
                         title={title}
                         poster={poster}
                         userRating={entry.rating}
-                        onDelete={() => deleteTVDiaryEntry.mutate(entry.id)}
+                        onDelete={() => { deleteTVDiaryEntry.mutate(entry.id); refetchUserState(); }}
                       >
                         <p className="text-sm text-muted-foreground">
                           {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
@@ -650,7 +652,7 @@ const Gallery = () => {
                       poster={poster}
                       mediaType="movie"
                       userRating={entry.rating}
-                      onDelete={() => deleteMovieDiaryEntry.mutate(entry.id)}
+                      onDelete={() => { deleteMovieDiaryEntry.mutate(entry.id); refetchUserState(); }}
                     >
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
