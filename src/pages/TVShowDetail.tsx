@@ -173,13 +173,18 @@ const TVShowDetail = () => {
             </div>
           )}
           
-          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-2 flex-wrap gap-y-1">
+          <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-1 flex-wrap gap-y-1">
             <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">TMDB {tvShow.vote_average.toFixed(1)}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">{releaseYear}</span>
             <span className="text-white/80 text-xs iphone-65:text-sm">TV Series</span>
             {tvShow.number_of_seasons && (
               <span className="text-white/80 text-xs iphone-65:text-sm">{tvShow.number_of_seasons} Season{tvShow.number_of_seasons > 1 ? 's' : ''}</span>
             )}
+          </div>
+
+          {/* User Average Rating - underneath TMDB */}
+          <div className="mb-2">
+            <UserAverageRating mediaId={tvShowId} mediaType="tv" />
           </div>
 
           {!logoUrl && (
@@ -191,19 +196,6 @@ const TVShowDetail = () => {
           <p className="text-white/70 mb-3 text-xs iphone-65:text-sm">
             {genres}
           </p>
-        </div>
-      </div>
-
-      {/* Ratings Section */}
-      <div className="container mx-auto px-4 mt-4 relative z-30">
-        <div className="flex items-center justify-center gap-6 py-3 bg-card/50 rounded-lg border border-border">
-          <div className="flex items-center gap-1.5">
-            <span className="text-cinema-gold font-semibold">★</span>
-            <span className="text-sm font-medium">TMDB</span>
-            <span className="text-foreground font-bold">{tvShow.vote_average.toFixed(1)}</span>
-          </div>
-          <div className="h-6 w-px bg-border" />
-          <UserAverageRating mediaId={tvShowId} mediaType="tv" />
         </div>
       </div>
 

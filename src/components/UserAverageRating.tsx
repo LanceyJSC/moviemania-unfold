@@ -1,4 +1,4 @@
-import { Star, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { useAverageUserRating } from '@/hooks/useAverageUserRating';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -13,25 +13,25 @@ export const UserAverageRating = ({ mediaId, mediaType }: UserAverageRatingProps
   if (isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <Skeleton className="h-5 w-20" />
+        <Skeleton className="h-4 w-16 bg-white/20" />
       </div>
     );
   }
 
   if (average === null || count === 0) {
     return (
-      <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-        <Users className="h-4 w-4" />
+      <div className="flex items-center gap-1.5 text-white/60 text-xs">
+        <Users className="h-3.5 w-3.5" />
         <span>No user ratings yet</span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-1.5">
-      <Users className="h-4 w-4 text-primary" />
+    <div className="flex items-center gap-1.5 text-xs">
+      <Users className="h-3.5 w-3.5 text-primary" />
       <span className="text-primary font-semibold">{average.toFixed(1)}</span>
-      <span className="text-muted-foreground text-sm">({count} {count === 1 ? 'rating' : 'ratings'})</span>
+      <span className="text-white/60">({count} {count === 1 ? 'rating' : 'ratings'})</span>
     </div>
   );
 };
