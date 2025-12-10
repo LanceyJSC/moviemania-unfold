@@ -102,6 +102,10 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
 
       const watchedItems = userRatingsData?.map(item => item.movie_id) || [];
 
+      console.log('[UserStateContext] loadUserData - likedMovies:', likedMovies);
+      console.log('[UserStateContext] loadUserData - watchlist:', watchlist);
+      console.log('[UserStateContext] loadUserData - watchlistData raw:', watchlistData);
+
       setUserState({
         likedMovies,
         watchlist,
