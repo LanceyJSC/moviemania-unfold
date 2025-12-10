@@ -30,13 +30,13 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
   const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleLike(tvShow.id, tvShow.title, tvShow.poster);
+    await toggleLike(tvShow.id, tvShow.title, tvShow.poster, 'tv');
   };
 
   const handleWatchlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster);
+    await toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster, 'tv');
   };
 
   const handleImageError = () => {
@@ -108,7 +108,7 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
               onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                toggleLike(tvShow.id, tvShow.title, tvShow.poster);
+                toggleLike(tvShow.id, tvShow.title, tvShow.poster, 'tv');
               }}
             >
               <Heart 
@@ -127,7 +127,7 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
               onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster);
+                toggleWatchlist(tvShow.id, tvShow.title, tvShow.poster, 'tv');
               }}
             >
               <Plus 

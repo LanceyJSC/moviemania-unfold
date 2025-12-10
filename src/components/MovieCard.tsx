@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useUserStateContext } from "@/contexts/UserStateContext";
-import { useEnhancedWatchlist } from "@/hooks/useEnhancedWatchlist";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
@@ -21,12 +20,11 @@ interface MovieCardProps {
 }
 
 export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
-  const { toggleLike, isLiked } = useUserStateContext();
-  const { addItem, items } = useEnhancedWatchlist();
+  const { toggleLike, toggleWatchlist, isLiked, isInWatchlist } = useUserStateContext();
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
 
-  const isInEnhancedWatchlist = items.some(item => item.movie_id === movie.id);
+  const inWatchlist = isInWatchlist(movie.id);
 
   const handleLikeClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,13 +35,7 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
   const handleWatchlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (!isInEnhancedWatchlist) {
-      await addItem(movie.id, movie.title, movie.poster, {
-        priority: 'medium',
-        moodTags: []
-      });
-    }
+    await toggleWatchlist(movie.id, movie.title, movie.poster);
   };
 
   const handleImageError = () => {
@@ -134,17 +126,12 @@ export const MovieCard = ({ movie, variant = "carousel" }: MovieCardProps) => {
               onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!isInEnhancedWatchlist) {
-                  addItem(movie.id, movie.title, movie.poster, {
-                    priority: 'medium',
-                    moodTags: []
-                  });
-                }
+                toggleWatchlist(movie.id, movie.title, movie.poster);
               }}
             >
               <Plus 
                 className={`h-5 w-5 ${
-                  isInEnhancedWatchlist 
+                  inWatchlist 
                     ? 'text-cinema-gold' 
                     : 'text-foreground'
                 }`} 
