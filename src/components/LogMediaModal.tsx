@@ -138,6 +138,27 @@ export const LogMediaModal = ({
         console.error('Error saving to watched:', ratingError);
       }
 
+      // Also update the ratings table which is used for displaying user rating on main page
+      if (rating > 0) {
+        await supabase
+          .from('ratings')
+          .upsert({
+            user_id: user.id,
+            movie_id: mediaId,
+            movie_title: mediaTitle,
+            rating: rating
+          }, {
+            onConflict: 'user_id,movie_id'
+          });
+      } else {
+        // If rating is 0/cleared, remove from ratings table
+        await supabase
+          .from('ratings')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('movie_id', mediaId);
+      }
+
       // Remove from watchlist since it's now watched
       await supabase
         .from('enhanced_watchlist_items')
