@@ -35,8 +35,7 @@ const Gallery = () => {
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
   const { stats, recalculateStats } = useUserStats();
   const { movieDiary, tvDiary, isLoading: diaryLoading, deleteMovieDiaryEntry, deleteTVDiaryEntry } = useDiary();
-  const { setRating, userState } = useUserStateContext();
-  
+  const { setRating, userState, refetch: refetchUserState } = useUserStateContext();
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
@@ -479,9 +478,21 @@ const Gallery = () => {
                     poster={item.movie_poster}
                     mediaType={(item.media_type || 'movie') as 'movie' | 'tv'}
                     userRating={item.rating}
-                    onDelete={() => {
-                      if (item.source === 'ratings') {
-                        setRating(item.movie_id, 0, item.movie_title, item.movie_poster || undefined, item.media_type as 'movie' | 'tv');
+                    onDelete={async () => {
+                      if (item.source === 'rating') {
+                        // Delete from user_ratings table directly
+                        await supabase
+                          .from('user_ratings')
+                          .delete()
+                          .eq('id', item.id);
+                        // Refresh the rated movies list
+                        const { data } = await supabase
+                          .from('user_ratings')
+                          .select('*')
+                          .eq('user_id', user!.id)
+                          .order('created_at', { ascending: false });
+                        setRatedMovies(data || []);
+                        refetchUserState();
                       } else {
                         if (item.media_type === 'tv') {
                           deleteTVDiaryEntry.mutate(item.id);
