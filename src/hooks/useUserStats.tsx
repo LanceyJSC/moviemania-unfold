@@ -86,10 +86,10 @@ export const useUserStats = () => {
         .select('movie_id, runtime, rating')
         .eq('user_id', user.id);
 
-      // Get TV diary entries with runtime
+      // Get TV diary entries with runtime - each entry is an episode
       const { data: tvDiary } = await supabase
         .from('tv_diary')
-        .select('tv_id, runtime, rating')
+        .select('tv_id, runtime, rating, season_number, episode_number')
         .eq('user_id', user.id);
 
       // Get user_ratings (includes watched items without diary entries)
@@ -100,41 +100,44 @@ export const useUserStats = () => {
 
       // Create sets to track unique watched items
       const watchedMovieIds = new Set<number>();
-      const watchedTvIds = new Set<number>();
+      const watchedTvShowIds = new Set<number>(); // Unique TV shows
       
       // Track which items have runtime from diary
       const movieRuntimeMap = new Map<number, number>();
-      const tvRuntimeMap = new Map<number, number>();
 
       // Add diary entries to watched sets and runtime maps
       movieDiary?.forEach(entry => {
         watchedMovieIds.add(entry.movie_id);
         movieRuntimeMap.set(entry.movie_id, entry.runtime || 120);
       });
+      
+      // For TV: count unique shows AND total episode runtime
+      let tvEpisodeMinutes = 0;
       tvDiary?.forEach(entry => {
-        watchedTvIds.add(entry.tv_id);
-        tvRuntimeMap.set(entry.tv_id, entry.runtime || 45);
+        watchedTvShowIds.add(entry.tv_id); // Track unique shows
+        tvEpisodeMinutes += entry.runtime || 45; // Sum up all episode runtimes
       });
 
       // Add user_ratings entries to watched sets (with estimated runtime if not in diary)
       userRatings?.forEach(entry => {
         if (entry.media_type === 'tv') {
-          watchedTvIds.add(entry.movie_id);
-          // If not already in diary, add estimated runtime
-          if (!tvRuntimeMap.has(entry.movie_id)) {
-            tvRuntimeMap.set(entry.movie_id, 45); // Default 45 min per episode
+          watchedTvShowIds.add(entry.movie_id);
+          // If no episodes logged for this show, estimate 1 episode
+          const hasEpisodes = tvDiary?.some(d => d.tv_id === entry.movie_id);
+          if (!hasEpisodes) {
+            tvEpisodeMinutes += 45; // Default 45 min for 1 episode
           }
         } else {
           watchedMovieIds.add(entry.movie_id);
-          // If not already in diary, add estimated runtime
           if (!movieRuntimeMap.has(entry.movie_id)) {
-            movieRuntimeMap.set(entry.movie_id, 120); // Default 2 hours per movie
+            movieRuntimeMap.set(entry.movie_id, 120);
           }
         }
       });
 
       const movieCount = watchedMovieIds.size;
-      const tvCount = watchedTvIds.size;
+      const tvCount = watchedTvShowIds.size;
+      const tvEpisodeCount = tvDiary?.length || 0;
 
       // Calculate total movie hours from all watched movies
       let movieMinutes = 0;
@@ -143,12 +146,8 @@ export const useUserStats = () => {
       });
       const movieHours = Math.round(movieMinutes / 60);
 
-      // Calculate total TV hours from all watched TV
-      let tvMinutes = 0;
-      tvRuntimeMap.forEach(runtime => {
-        tvMinutes += runtime;
-      });
-      const tvHours = Math.round(tvMinutes / 60);
+      // TV hours are calculated from actual episode runtimes
+      const tvHours = Math.round(tvEpisodeMinutes / 60);
 
       // Calculate average rating from all sources (combine diary and user_ratings, deduplicate)
       const ratingMap = new Map<string, number>();
