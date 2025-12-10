@@ -13,6 +13,7 @@ export interface MovieDiaryEntry {
   notes: string | null;
   rating: number | null;
   runtime?: number | null;
+  is_public?: boolean;
   created_at: string;
 }
 
@@ -28,6 +29,7 @@ export interface TVDiaryEntry {
   notes: string | null;
   rating: number | null;
   runtime?: number | null;
+  is_public?: boolean;
   created_at: string;
 }
 

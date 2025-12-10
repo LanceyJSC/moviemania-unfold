@@ -46,6 +46,7 @@ export const LogMediaModal = ({
   const [rating, setRating] = useState<number>(initialRating);
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [shareAsReview, setShareAsReview] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [runtime, setRuntime] = useState<number | null>(null);
 
@@ -98,7 +99,8 @@ export const LogMediaModal = ({
           watched_date: format(watchedDate, 'yyyy-MM-dd'),
           rating: rating > 0 ? rating : null,
           notes: notes || null,
-          runtime: runtime
+          runtime: runtime,
+          is_public: isPublic
         });
       } else {
         await addTVDiaryEntry.mutateAsync({
@@ -110,7 +112,8 @@ export const LogMediaModal = ({
           notes: notes || null,
           season_number: seasonNumber || null,
           episode_number: episodeNumber || null,
-          runtime: runtime
+          runtime: runtime,
+          is_public: isPublic
         });
       }
 
@@ -123,7 +126,8 @@ export const LogMediaModal = ({
           movie_title: mediaTitle,
           movie_poster: mediaPoster,
           rating: rating > 0 ? rating : null,
-          media_type: mediaType
+          media_type: mediaType,
+          is_public: isPublic
         }, {
           onConflict: 'user_id,movie_id'
         });
@@ -198,6 +202,7 @@ export const LogMediaModal = ({
     setRating(0);
     setIsSpoiler(false);
     setShareAsReview(false);
+    setIsPublic(false);
     setRuntime(null);
   };
 
@@ -321,6 +326,18 @@ export const LogMediaModal = ({
               </label>
             </div>
           )}
+
+          {/* Make Public Toggle */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="isPublic"
+              checked={isPublic}
+              onCheckedChange={(checked) => setIsPublic(checked === true)}
+            />
+            <label htmlFor="isPublic" className="text-sm cursor-pointer">
+              Show on my public profile
+            </label>
+          </div>
         </div>
 
         {/* Actions */}
