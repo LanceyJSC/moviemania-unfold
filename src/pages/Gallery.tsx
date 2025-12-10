@@ -44,12 +44,12 @@ const Gallery = () => {
   const [ratedLoading, setRatedLoading] = useState(true);
   const [mediaFilter, setMediaFilter] = useState<MediaFilter>('all');
 
-  // Recalculate stats on mount
+  // Recalculate stats on mount and when diary/ratings data changes
   useEffect(() => {
     if (user) {
       recalculateStats();
     }
-  }, [user]);
+  }, [user, movieDiary.length, tvDiary.length, ratedMovies.length]);
 
   // Load rated movies (watched) - also refresh when watchedItems changes
   useEffect(() => {
