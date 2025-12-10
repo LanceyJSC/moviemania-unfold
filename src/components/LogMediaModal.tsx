@@ -15,6 +15,8 @@ import { useDiary } from '@/hooks/useDiary';
 import { useUserStats } from '@/hooks/useUserStats';
 import { tmdbService } from '@/lib/tmdb';
 import { RatingInput } from '@/components/RatingInput';
+import { useQueryClient } from '@tanstack/react-query';
+import { useUserStateContext } from '@/contexts/UserStateContext';
 
 interface LogMediaModalProps {
   isOpen: boolean;
@@ -42,6 +44,8 @@ export const LogMediaModal = ({
   const { user } = useAuth();
   const { addMovieDiaryEntry, addTVDiaryEntry } = useDiary();
   const { recalculateStats } = useUserStats();
+  const queryClient = useQueryClient();
+  const { refetch: refetchUserState } = useUserStateContext();
   const [watchedDate, setWatchedDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState<number>(initialRating);
@@ -183,6 +187,10 @@ export const LogMediaModal = ({
 
       // Recalculate stats after logging
       await recalculateStats();
+
+      // Invalidate queries to update the UI
+      queryClient.invalidateQueries({ queryKey: ['average-user-rating', mediaId, mediaType] });
+      await refetchUserState();
 
       resetForm();
       onClose();
