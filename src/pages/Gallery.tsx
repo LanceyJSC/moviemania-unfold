@@ -35,7 +35,7 @@ const Gallery = () => {
   const { items, loading: itemsLoading, removeItem, addItem } = useEnhancedWatchlist();
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
   const { stats, recalculateStats } = useUserStats();
-  const { movieDiary, tvDiary, isLoading: diaryLoading, deleteMovieDiaryEntry, deleteTVDiaryEntry } = useDiary();
+  const { movieDiary, tvDiary, isLoading: diaryLoading, deleteMovieDiaryEntry, deleteTVDiaryEntry, refetchAll: refetchDiary } = useDiary();
   const { setRating, userState, refetch: refetchUserState } = useUserStateContext();
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -193,32 +193,27 @@ const Gallery = () => {
     return items;
   };
 
-  // Diary shows the same items as Watched, but focuses on entries with notes
-  // Still shows all items so users can see their collection, but highlights those with diary notes
+  // Diary shows ONLY entries that have notes/reviews written
   const getCombinedDiary = () => {
     // Create a map to deduplicate by movie_id/tv_id, preferring entries with notes
     const diaryMap = new Map<string, any>();
     
-    // Add movie diary entries
-    movieDiary.forEach(entry => {
+    // Add movie diary entries that have notes
+    movieDiary.filter(entry => entry.notes && entry.notes.trim()).forEach(entry => {
       const key = `movie-${entry.movie_id}`;
       const existing = diaryMap.get(key);
-      // Prefer entries with notes, or most recent
-      if (!existing || 
-          (entry.notes && !existing.notes) || 
-          new Date(entry.watched_date) > new Date(existing.watched_date)) {
+      // Prefer most recent entry with notes
+      if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
         diaryMap.set(key, { ...entry, type: 'movie' as const });
       }
     });
     
-    // Add TV diary entries (group by show, not by episode)
+    // Add TV diary entries that have notes (group by show)
     const tvShowMap = new Map<number, any>();
-    tvDiary.forEach(entry => {
+    tvDiary.filter(entry => entry.notes && entry.notes.trim()).forEach(entry => {
       const existing = tvShowMap.get(entry.tv_id);
-      // Keep the entry with notes or the most recent one
-      if (!existing || 
-          (entry.notes && !existing.notes) || 
-          new Date(entry.watched_date) > new Date(existing.watched_date)) {
+      // Keep the most recent entry with notes
+      if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
         tvShowMap.set(entry.tv_id, { ...entry, type: 'tv' as const });
       }
     });
@@ -559,6 +554,7 @@ const Gallery = () => {
                             .eq('user_id', user!.id)
                             .order('created_at', { ascending: false });
                           setRatedMovies(data || []);
+                          refetchDiary();
                           await refetchUserState();
                         }}
                       >
@@ -590,6 +586,7 @@ const Gallery = () => {
                           .eq('user_id', user!.id)
                           .order('created_at', { ascending: false });
                         setRatedMovies(data || []);
+                        refetchDiary();
                         await refetchUserState();
                       }}
                     >
@@ -640,6 +637,7 @@ const Gallery = () => {
                           await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', tvId).eq('user_id', user!.id);
                           const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
                           setRatedMovies(data || []);
+                          refetchDiary();
                           await refetchUserState();
                         }}
                       >
@@ -676,6 +674,7 @@ const Gallery = () => {
                         await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
                         setRatedMovies(data || []);
+                        refetchDiary();
                         await refetchUserState();
                       }}
                     >
