@@ -8,8 +8,6 @@ interface UserStats {
   user_id: string;
   total_movies_watched: number;
   total_tv_shows_watched: number;
-  total_tv_seasons_watched: number;
-  total_tv_episodes_watched: number;
   total_hours_watched: number;
   total_tv_hours_watched: number;
   total_ratings: number;
@@ -61,12 +59,7 @@ export const useUserStats = () => {
         existingStats = newStats;
       }
 
-      // Add computed fields that aren't in DB (calculated by recalculateStats)
-      setStats({
-        ...existingStats,
-        total_tv_seasons_watched: 0,
-        total_tv_episodes_watched: 0
-      } as UserStats);
+      setStats(existingStats);
     } catch (error) {
       console.error('Error fetching user stats:', error);
     } finally {
@@ -108,8 +101,6 @@ export const useUserStats = () => {
       // Create sets to track unique watched items
       const watchedMovieIds = new Set<number>();
       const watchedTvShowIds = new Set<number>(); // Unique TV shows
-      const watchedTvSeasons = new Set<string>(); // Unique season keys (tv_id-season)
-      const watchedTvEpisodes = new Set<string>(); // Unique episode keys (tv_id-season-episode)
       
       // Track which items have runtime from diary
       const movieRuntimeMap = new Map<number, number>();
@@ -120,16 +111,10 @@ export const useUserStats = () => {
         movieRuntimeMap.set(entry.movie_id, entry.runtime || 120);
       });
       
-      // For TV: count unique shows, seasons, episodes AND total episode runtime
+      // For TV: count unique shows AND total episode runtime
       let tvEpisodeMinutes = 0;
       tvDiary?.forEach(entry => {
         watchedTvShowIds.add(entry.tv_id); // Track unique shows
-        if (entry.season_number !== null) {
-          watchedTvSeasons.add(`${entry.tv_id}-${entry.season_number}`);
-        }
-        if (entry.season_number !== null && entry.episode_number !== null) {
-          watchedTvEpisodes.add(`${entry.tv_id}-${entry.season_number}-${entry.episode_number}`);
-        }
         tvEpisodeMinutes += entry.runtime || 45; // Sum up all episode runtimes
       });
 
@@ -152,8 +137,7 @@ export const useUserStats = () => {
 
       const movieCount = watchedMovieIds.size;
       const tvCount = watchedTvShowIds.size;
-      const tvSeasonCount = watchedTvSeasons.size;
-      const tvEpisodeCount = watchedTvEpisodes.size;
+      const tvEpisodeCount = tvDiary?.length || 0;
 
       // Calculate total movie hours from all watched movies
       let movieMinutes = 0;
@@ -196,8 +180,6 @@ export const useUserStats = () => {
       const updates = {
         total_movies_watched: movieCount,
         total_tv_shows_watched: tvCount,
-        total_tv_seasons_watched: tvSeasonCount,
-        total_tv_episodes_watched: tvEpisodeCount,
         total_hours_watched: movieHours,
         total_tv_hours_watched: tvHours,
         total_ratings: allRatings.length,

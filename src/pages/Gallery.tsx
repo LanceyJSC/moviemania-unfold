@@ -308,16 +308,9 @@ const Gallery = () => {
               <Card className="p-3 text-center">
                 <div className="flex items-center justify-center gap-1">
                   <Tv className="h-4 w-4 text-primary" />
-                  <span className="text-xl font-bold text-foreground">{stats?.total_tv_seasons_watched || 0}</span>
+                  <span className="text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">Seasons Watched</div>
-              </Card>
-              <Card className="p-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Eye className="h-4 w-4 text-cinema-gold" />
-                  <span className="text-xl font-bold text-foreground">{stats?.total_tv_episodes_watched || 0}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">Episodes Watched</div>
+                <div className="text-xs text-muted-foreground">TV Shows Watched</div>
               </Card>
               <Card className="p-3 text-center">
                 <div className="text-xl font-bold text-foreground">{stats?.total_tv_hours_watched || 0}h</div>
@@ -326,6 +319,13 @@ const Gallery = () => {
               <Card className="p-3 text-center">
                 <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
                 <div className="text-xs text-muted-foreground">Avg Rating</div>
+              </Card>
+              <Card className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">Level</div>
               </Card>
             </>
           )}
