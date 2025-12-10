@@ -327,11 +327,11 @@ const MovieDetail = () => {
         {/* Fun Facts Carousel - Only show for movies */}
         {!isTV && <FunFacts movie={movie as Movie} />}
         
-        {/* Community Reviews Section */}
-        <CommunityReviews movieId={movie.id} />
-        
         {/* TMDB Reviews Section */}
         <UserReviews movieId={movie.id} isTV={isTV} />
+        
+        {/* Community Reviews Section */}
+        <CommunityReviews movieId={movie.id} />
       </div>
 
       {/* Additional Content */}

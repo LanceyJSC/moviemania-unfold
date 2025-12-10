@@ -4,6 +4,7 @@ import { Play, Heart, Plus, Share, Loader2, MoreHorizontal, ChevronRight, BookOp
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
+import { CommunityReviews } from "@/components/CommunityReviews";
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
@@ -356,8 +357,11 @@ const TVShowDetail = () => {
           </div>
         )}
         
-        {/* User Reviews Section */}
+        {/* TMDB Reviews Section */}
         <UserReviews movieId={tvShow.id} isTV={true} />
+        
+        {/* Community Reviews Section */}
+        <CommunityReviews movieId={tvShow.id} />
       </div>
 
       {/* Additional Content */}
