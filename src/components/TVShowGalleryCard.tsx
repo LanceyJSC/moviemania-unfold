@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Film, Tv, Star, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Tv, Star, Trash2, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { tmdbService } from '@/lib/tmdb';
@@ -23,6 +23,7 @@ interface SeasonReview {
   season_number: number;
   rating: number | null;
   notes: string | null;
+  watched_date: string | null;
 }
 
 interface EpisodeReview {
@@ -30,6 +31,11 @@ interface EpisodeReview {
   episode_number: number;
   rating: number | null;
   notes: string | null;
+  watched_date: string | null;
+}
+
+interface SeriesRating {
+  rating: number | null;
 }
 
 export const TVShowGalleryCard = ({
@@ -44,6 +50,7 @@ export const TVShowGalleryCard = ({
   const { user } = useAuth();
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [seriesRating, setSeriesRating] = useState<number | null>(null);
   const [seasonReviews, setSeasonReviews] = useState<SeasonReview[]>([]);
   const [episodeReviews, setEpisodeReviews] = useState<EpisodeReview[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -65,15 +72,27 @@ export const TVShowGalleryCard = ({
     
     setIsLoading(true);
     try {
-      // Load ALL diary entries for this TV show (not just rated ones)
+      // Load series-level rating from user_ratings
+      const { data: ratingData } = await supabase
+        .from('user_ratings')
+        .select('rating')
+        .eq('user_id', user.id)
+        .eq('movie_id', tvId)
+        .eq('media_type', 'tv')
+        .maybeSingle();
+      
+      if (ratingData) {
+        setSeriesRating(ratingData.rating);
+      }
+
+      // Load ALL diary entries for this TV show
       const { data } = await supabase
         .from('tv_diary')
-        .select('season_number, episode_number, rating, notes')
+        .select('season_number, episode_number, rating, notes, watched_date')
         .eq('user_id', user.id)
         .eq('tv_id', tvId);
 
       if (data) {
-        // Separate season-level (episode_number is null) from episode-level entries
         const seasons: SeasonReview[] = [];
         const episodes: EpisodeReview[] = [];
 
@@ -82,19 +101,20 @@ export const TVShowGalleryCard = ({
             seasons.push({
               season_number: entry.season_number,
               rating: entry.rating,
-              notes: entry.notes
+              notes: entry.notes,
+              watched_date: entry.watched_date
             });
           } else if (entry.season_number && entry.episode_number) {
             episodes.push({
               season_number: entry.season_number,
               episode_number: entry.episode_number,
               rating: entry.rating,
-              notes: entry.notes
+              notes: entry.notes,
+              watched_date: entry.watched_date
             });
           }
         });
 
-        // Sort by season/episode number
         seasons.sort((a, b) => a.season_number - b.season_number);
         episodes.sort((a, b) => {
           if (a.season_number !== b.season_number) return a.season_number - b.season_number;
@@ -118,13 +138,30 @@ export const TVShowGalleryCard = ({
     setIsExpanded(!isExpanded);
   };
 
-  const hasReviews = seasonReviews.length > 0 || episodeReviews.length > 0;
+  const hasContent = seriesRating || seasonReviews.length > 0 || episodeReviews.length > 0;
 
-  // Handle poster URL - might be full URL or just path
   const getPosterUrl = (posterPath: string | null) => {
     if (!posterPath) return null;
     if (posterPath.startsWith('http')) return posterPath;
     return `${IMAGE_BASE}${posterPath}`;
+  };
+
+  const renderStars = (rating: number, size: string = 'h-3 w-3') => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`${size} ${star <= rating ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -140,7 +177,6 @@ export const TVShowGalleryCard = ({
           )}
         </Link>
         <div className="flex-1 min-w-0">
-          {/* Title with media type icon */}
           <div className="flex items-center gap-2">
             <Tv className="h-4 w-4 text-primary shrink-0" />
             <Link to={`/tv/${tvId}`} className="font-semibold hover:underline line-clamp-1">
@@ -148,9 +184,7 @@ export const TVShowGalleryCard = ({
             </Link>
           </div>
 
-          {/* Ratings row */}
           <div className="flex items-center gap-4 mt-1">
-            {/* TMDB Rating */}
             {tmdbRating !== null && (
               <div className="flex items-center gap-1">
                 <Star className="h-3.5 w-3.5 fill-cinema-gold text-cinema-gold" />
@@ -158,7 +192,6 @@ export const TVShowGalleryCard = ({
               </div>
             )}
 
-            {/* User Rating (series level) */}
             {userRating && userRating > 0 && (
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -171,10 +204,8 @@ export const TVShowGalleryCard = ({
             )}
           </div>
 
-          {/* Additional content slot */}
           {children}
 
-          {/* Expand button for season/episode reviews */}
           <Button
             variant="ghost"
             size="sm"
@@ -184,12 +215,12 @@ export const TVShowGalleryCard = ({
             {isExpanded ? (
               <>
                 <ChevronUp className="h-3 w-3 mr-1" />
-                Hide reviews
+                Hide details
               </>
             ) : (
               <>
                 <ChevronDown className="h-3 w-3 mr-1" />
-                Show season & episode reviews
+                Show ratings & reviews
               </>
             )}
           </Button>
@@ -204,42 +235,61 @@ export const TVShowGalleryCard = ({
         </Button>
       </div>
 
-      {/* Expanded section with season/episode reviews */}
       {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-border bg-background rounded-b-lg">
+        <div className="mt-4 pt-4 border-t border-border bg-card rounded-b-lg">
           {isLoading ? (
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
             </div>
-          ) : hasReviews ? (
+          ) : hasContent ? (
             <div className="space-y-4">
+              {/* Series Rating */}
+              {(seriesRating || userRating) && (
+                <div className="p-3 bg-background rounded border border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-foreground">Series Rating</span>
+                    {(seriesRating || userRating) ? (
+                      renderStars(seriesRating || userRating || 0, 'h-4 w-4')
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not rated</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Season Reviews */}
               {seasonReviews.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-2">Seasons</h4>
+                  <h4 className="text-sm font-semibold text-foreground mb-2">Season Ratings</h4>
                   <div className="space-y-2">
                     {seasonReviews.map((review) => (
-                      <Link 
+                      <div 
                         key={`season-${review.season_number}`}
-                        to={`/tv/${tvId}/season/${review.season_number}`}
-                        className="flex items-center justify-between p-2 bg-card rounded hover:bg-accent transition-colors border border-border"
+                        className="p-3 bg-background rounded border border-border"
                       >
-                        <span className="text-sm text-foreground">Season {review.season_number}</span>
-                        <div className="flex items-center gap-2">
+                        <Link 
+                          to={`/tv/${tvId}/season/${review.season_number}`}
+                          className="flex items-center justify-between hover:text-primary transition-colors"
+                        >
+                          <span className="text-sm font-medium text-foreground">Season {review.season_number}</span>
                           {review.rating ? (
-                            <div className="flex items-center gap-0.5">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  className={`h-3 w-3 ${star <= review.rating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
-                                />
-                              ))}
-                            </div>
+                            renderStars(review.rating)
                           ) : (
                             <span className="text-xs text-muted-foreground">Logged</span>
                           )}
-                        </div>
-                      </Link>
+                        </Link>
+                        {review.watched_date && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Watched: {formatDate(review.watched_date)}
+                          </p>
+                        )}
+                        {review.notes && (
+                          <div className="mt-2 flex items-start gap-2">
+                            <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+                            <p className="text-xs text-muted-foreground line-clamp-2">{review.notes}</p>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -248,32 +298,38 @@ export const TVShowGalleryCard = ({
               {/* Episode Reviews */}
               {episodeReviews.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-2">Episodes</h4>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <h4 className="text-sm font-semibold text-foreground mb-2">Episode Ratings</h4>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
                     {episodeReviews.map((review) => (
-                      <Link 
+                      <div 
                         key={`ep-${review.season_number}-${review.episode_number}`}
-                        to={`/tv/${tvId}/season/${review.season_number}`}
-                        className="flex items-center justify-between p-2 bg-card rounded hover:bg-accent transition-colors border border-border"
+                        className="p-3 bg-background rounded border border-border"
                       >
-                        <span className="text-sm text-foreground">
-                          S{review.season_number} E{review.episode_number}
-                        </span>
-                        <div className="flex items-center gap-2">
+                        <Link 
+                          to={`/tv/${tvId}/season/${review.season_number}`}
+                          className="flex items-center justify-between hover:text-primary transition-colors"
+                        >
+                          <span className="text-sm font-medium text-foreground">
+                            S{review.season_number} E{review.episode_number}
+                          </span>
                           {review.rating ? (
-                            <div className="flex items-center gap-0.5">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  className={`h-3 w-3 ${star <= review.rating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
-                                />
-                              ))}
-                            </div>
+                            renderStars(review.rating)
                           ) : (
                             <span className="text-xs text-muted-foreground">Watched</span>
                           )}
-                        </div>
-                      </Link>
+                        </Link>
+                        {review.watched_date && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Watched: {formatDate(review.watched_date)}
+                          </p>
+                        )}
+                        {review.notes && (
+                          <div className="mt-2 flex items-start gap-2">
+                            <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+                            <p className="text-xs text-muted-foreground line-clamp-2">{review.notes}</p>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -281,7 +337,7 @@ export const TVShowGalleryCard = ({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
-              No season or episode entries yet
+              No ratings or reviews yet
             </p>
           )}
         </div>
