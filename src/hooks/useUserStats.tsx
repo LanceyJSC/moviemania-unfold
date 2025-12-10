@@ -83,38 +83,77 @@ export const useUserStats = () => {
       // Get movie diary entries with runtime
       const { data: movieDiary } = await supabase
         .from('movie_diary')
-        .select('runtime, rating')
+        .select('movie_id, runtime, rating')
         .eq('user_id', user.id);
 
       // Get TV diary entries with runtime
       const { data: tvDiary } = await supabase
         .from('tv_diary')
-        .select('runtime, rating')
+        .select('tv_id, runtime, rating')
         .eq('user_id', user.id);
 
-      const movieCount = movieDiary?.length || 0;
-      const tvCount = tvDiary?.length || 0;
+      // Get user_ratings (includes watched items without diary entries)
+      const { data: userRatings } = await supabase
+        .from('user_ratings')
+        .select('movie_id, rating, media_type')
+        .eq('user_id', user.id);
+
+      // Create sets to track unique watched items
+      const watchedMovieIds = new Set<number>();
+      const watchedTvIds = new Set<number>();
+
+      // Add diary entries to watched sets
+      movieDiary?.forEach(entry => watchedMovieIds.add(entry.movie_id));
+      tvDiary?.forEach(entry => watchedTvIds.add(entry.tv_id));
+
+      // Add user_ratings entries to watched sets
+      userRatings?.forEach(entry => {
+        if (entry.media_type === 'tv') {
+          watchedTvIds.add(entry.movie_id);
+        } else {
+          watchedMovieIds.add(entry.movie_id);
+        }
+      });
+
+      const movieCount = watchedMovieIds.size;
+      const tvCount = watchedTvIds.size;
 
       // Calculate actual movie hours from runtime (in minutes)
       const movieMinutes = movieDiary?.reduce((sum, entry) => {
-        // Use stored runtime, fallback to 120 min if not available
         return sum + (entry.runtime || 120);
       }, 0) || 0;
       const movieHours = Math.round(movieMinutes / 60);
 
       // Calculate actual TV hours from runtime (in minutes per episode)
       const tvMinutes = tvDiary?.reduce((sum, entry) => {
-        // Use stored runtime, fallback to 45 min if not available
         return sum + (entry.runtime || 45);
       }, 0) || 0;
       const tvHours = Math.round(tvMinutes / 60);
 
-      // Calculate average rating from all sources
-      const allRatings = [
-        ...(movieDiary?.map(r => r.rating).filter(r => r !== null) || []),
-        ...(tvDiary?.map(r => r.rating).filter(r => r !== null) || [])
-      ] as number[];
+      // Calculate average rating from all sources (combine diary and user_ratings, deduplicate)
+      const ratingMap = new Map<string, number>();
+      
+      // Add diary ratings (keyed by movie_id + type)
+      movieDiary?.forEach(entry => {
+        if (entry.rating !== null) {
+          ratingMap.set(`movie-${entry.movie_id}`, entry.rating);
+        }
+      });
+      tvDiary?.forEach(entry => {
+        if (entry.rating !== null) {
+          ratingMap.set(`tv-${entry.tv_id}`, entry.rating);
+        }
+      });
+      
+      // Add/override with user_ratings (these are more recent)
+      userRatings?.forEach(entry => {
+        if (entry.rating !== null) {
+          const key = `${entry.media_type || 'movie'}-${entry.movie_id}`;
+          ratingMap.set(key, entry.rating);
+        }
+      });
 
+      const allRatings = Array.from(ratingMap.values());
       const avgRating = allRatings.length > 0 
         ? allRatings.reduce((a, b) => a + b, 0) / allRatings.length 
         : 0;
