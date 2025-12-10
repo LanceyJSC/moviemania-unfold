@@ -191,16 +191,12 @@ export const TVShowGalleryCard = ({
     return `${IMAGE_BASE}${posterPath}`;
   };
 
-  const renderStars = (rating: number, size: string = 'h-3 w-3') => {
+  const renderRating = (rating: number, size: 'sm' | 'md' = 'sm') => {
+    const sizeClasses = size === 'sm' ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-1';
     return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`${size} ${star <= rating ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground'}`}
-          />
-        ))}
-      </div>
+      <span className={`inline-flex items-center bg-cinema-gold/20 rounded text-cinema-gold font-semibold ${sizeClasses}`}>
+        {rating}/10
+      </span>
     );
   };
 
@@ -238,14 +234,9 @@ export const TVShowGalleryCard = ({
             )}
 
             {userRating && userRating > 0 && (
-              <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`h-3 w-3 ${star <= userRating ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
-                  />
-                ))}
-              </div>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 rounded text-primary font-semibold text-xs">
+                {userRating}/10
+              </span>
             )}
           </div>
 
@@ -330,7 +321,7 @@ export const TVShowGalleryCard = ({
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-foreground">Series Rating</span>
                     {(seriesRating || userRating) ? (
-                      renderStars(seriesRating || userRating || 0, 'h-4 w-4')
+                      renderRating(seriesRating || userRating || 0, 'md')
                     ) : (
                       <span className="text-xs text-muted-foreground">Not rated</span>
                     )}
@@ -354,7 +345,7 @@ export const TVShowGalleryCard = ({
                         >
                           <span className="text-sm font-medium text-foreground">Season {review.season_number}</span>
                           {review.rating ? (
-                            renderStars(review.rating)
+                            renderRating(review.rating)
                           ) : (
                             <span className="text-xs text-muted-foreground">Logged</span>
                           )}
@@ -394,7 +385,7 @@ export const TVShowGalleryCard = ({
                             S{review.season_number} E{review.episode_number}
                           </span>
                           {review.rating ? (
-                            renderStars(review.rating)
+                            renderRating(review.rating)
                           ) : (
                             <span className="text-xs text-muted-foreground">Watched</span>
                           )}
