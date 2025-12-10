@@ -552,6 +552,7 @@ const Gallery = () => {
                           await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                           await supabase.from('tv_diary').delete().eq('tv_id', item.movie_id).eq('user_id', user!.id);
                           await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                          await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                           const { data } = await supabase
                             .from('user_ratings')
                             .select('*')
@@ -582,6 +583,7 @@ const Gallery = () => {
                         await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                         await supabase.from('movie_diary').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                         await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
+                        await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
                         const { data } = await supabase
                           .from('user_ratings')
                           .select('*')
@@ -635,6 +637,7 @@ const Gallery = () => {
                           await supabase.from('user_ratings').delete().eq('movie_id', tvId).eq('user_id', user!.id);
                           await supabase.from('tv_diary').delete().eq('tv_id', tvId).eq('user_id', user!.id);
                           await supabase.from('watchlist').delete().eq('movie_id', tvId).eq('user_id', user!.id);
+                          await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', tvId).eq('user_id', user!.id);
                           const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
                           setRatedMovies(data || []);
                           await refetchUserState();
@@ -670,6 +673,7 @@ const Gallery = () => {
                         await supabase.from('user_ratings').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         await supabase.from('movie_diary').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         await supabase.from('watchlist').delete().eq('movie_id', movieId).eq('user_id', user!.id);
+                        await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', movieId).eq('user_id', user!.id);
                         const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
                         setRatedMovies(data || []);
                         await refetchUserState();
