@@ -73,9 +73,10 @@ export const TVShowGalleryCard = ({
         let episodes = 0;
 
         data.forEach(entry => {
-          if (entry.season_number && !entry.episode_number) {
+          if (entry.season_number) {
             uniqueSeasons.add(entry.season_number);
-          } else if (entry.episode_number) {
+          }
+          if (entry.episode_number) {
             episodes++;
           }
         });
