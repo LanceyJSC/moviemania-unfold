@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Film, Star, List, Heart, Eye, Bookmark } from "lucide-react";
+import { Film, Star, List, Heart, Eye, Bookmark, MessageSquare } from "lucide-react";
 import { FollowButton } from "@/components/FollowButton";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,6 +66,17 @@ interface WatchlistItem {
   media_type: string;
 }
 
+interface ReviewItem {
+  id: string;
+  movie_id: number;
+  movie_title: string;
+  movie_poster: string | null;
+  rating: number | null;
+  review_text: string | null;
+  is_spoiler: boolean;
+  created_at: string;
+}
+
 const UserProfile = () => {
   const { username } = useParams<{ username: string }>();
   const { user: currentUser } = useAuth();
@@ -75,6 +86,7 @@ const UserProfile = () => {
   const [watched, setWatched] = useState<WatchedItem[]>([]);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [watchlistItems, setWatchlistItems] = useState<WatchlistItem[]>([]);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("activity");
 
@@ -153,6 +165,16 @@ const UserProfile = () => {
         .limit(24);
 
       setWatchlistItems(watchlistData || []);
+
+      // Fetch public reviews
+      const { data: reviewsData } = await supabase
+        .from('user_reviews')
+        .select('*')
+        .eq('user_id', profileData.id)
+        .order('created_at', { ascending: false })
+        .limit(24);
+
+      setReviews(reviewsData || []);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -274,6 +296,10 @@ const UserProfile = () => {
               <Bookmark className="h-4 w-4" />
               Watchlist
             </TabsTrigger>
+            <TabsTrigger value="reviews" className="flex items-center gap-1">
+              <MessageSquare className="h-4 w-4" />
+              Reviews
+            </TabsTrigger>
             <TabsTrigger value="diary" className="flex items-center gap-1">
               <Film className="h-4 w-4" />
               Diary
@@ -366,6 +392,55 @@ const UserProfile = () => {
                         className="w-full aspect-[2/3] object-cover rounded-lg"
                       />
                     </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="reviews">
+            {reviews.length === 0 ? (
+              <Card className="p-8 text-center">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No reviews yet</p>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <Link key={review.id} to={`/movie/${review.movie_id}`}>
+                    <Card className="p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex gap-3">
+                        <img
+                          src={review.movie_poster 
+                            ? tmdbService.getPosterUrl(review.movie_poster, 'w300')
+                            : '/placeholder.svg'
+                          }
+                          alt={review.movie_title}
+                          className="w-12 h-18 object-cover rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium text-foreground truncate">{review.movie_title}</h3>
+                            {review.rating && (
+                              <div className="flex items-center gap-0.5 shrink-0">
+                                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                                <span className="text-xs font-medium">{review.rating}</span>
+                              </div>
+                            )}
+                          </div>
+                          {review.is_spoiler ? (
+                            <p className="text-sm text-muted-foreground italic mt-1">Contains spoilers</p>
+                          ) : (
+                            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                              {review.review_text}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {new Date(review.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
                   </Link>
                 ))}
               </div>
