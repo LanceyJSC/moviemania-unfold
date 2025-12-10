@@ -35,7 +35,7 @@ const Gallery = () => {
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
   const { stats, recalculateStats } = useUserStats();
   const { movieDiary, tvDiary, isLoading: diaryLoading, deleteMovieDiaryEntry, deleteTVDiaryEntry } = useDiary();
-  const { setRating } = useUserStateContext();
+  const { setRating, userState } = useUserStateContext();
   
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -51,7 +51,7 @@ const Gallery = () => {
     }
   }, [user]);
 
-  // Load rated movies (watched)
+  // Load rated movies (watched) - also refresh when watchedItems changes
   useEffect(() => {
     const loadRatedMovies = async () => {
       if (!user) {
@@ -73,7 +73,7 @@ const Gallery = () => {
       }
     };
     loadRatedMovies();
-  }, [user]);
+  }, [user, userState.watchedItems]);
 
   if (!user) {
     return (
