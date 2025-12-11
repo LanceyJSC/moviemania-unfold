@@ -32,14 +32,15 @@ export const Navigation = () => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-cinema-black border-t border-border" 
-      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border" 
+      style={{ 
+        paddingBottom: 'max(env(safe-area-inset-bottom), 8px)',
+        backgroundColor: '#000000'
+      }}
     >
       <div 
         className="grid py-2"
-        style={{ 
-          gridTemplateColumns: `repeat(${navItems.length}, 1fr)`,
-        }}
+        style={{ gridTemplateColumns: `repeat(${navItems.length}, 1fr)` }}
       >
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -49,12 +50,12 @@ export const Navigation = () => {
             <Link 
               key={item.path} 
               to={item.path}
-              className={`flex flex-col items-center justify-center py-2 ${
+              className={`flex flex-col items-center justify-center py-2 min-w-0 ${
                 isActive ? 'text-cinema-red' : 'text-white/70'
               }`}
             >
-              <Icon className="h-5 w-5 mb-1" />
-              <span className="text-[10px] font-medium">
+              <Icon className="h-5 w-5 mb-1 flex-shrink-0" />
+              <span className="text-[10px] font-medium text-center whitespace-nowrap">
                 {item.label}
               </span>
             </Link>
