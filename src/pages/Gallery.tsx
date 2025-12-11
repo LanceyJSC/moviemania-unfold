@@ -48,10 +48,10 @@ const Gallery = () => {
 
   // Recalculate stats on mount and when diary/ratings data changes
   useEffect(() => {
-    if (user) {
+    if (user && !diaryLoading && !ratedLoading) {
       recalculateStats();
     }
-  }, [user, movieDiary.length, tvDiary.length, ratedMovies.length]);
+  }, [user, movieDiary.length, tvDiary.length, ratedMovies.length, diaryLoading, ratedLoading]);
 
   // Load rated movies (watched) - also refresh when watchedItems changes or diary updates
   useEffect(() => {
