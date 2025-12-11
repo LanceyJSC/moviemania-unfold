@@ -87,32 +87,32 @@ export const MovieStats = ({ hideTitle = false }: { hideTitle?: boolean }) => {
   }
 
   return (
-    <div className="bg-background rounded-2xl p-8 mb-12">
+    <div className="bg-background rounded-2xl py-6 px-4 mb-12">
       {!hideTitle && (
-        <div className="text-center mb-8">
-          <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
+        <div className="text-center mb-4">
+          <h2 className="font-cinematic text-2xl text-foreground tracking-wide mb-2">
             DISCOVER THE NUMBERS
           </h2>
-          <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
+          <div className="w-12 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
       )}
       
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="flex justify-between items-center gap-2">
         {statItems.map((item, index) => {
           const Icon = item.icon;
           return (
-            <div key={index} className="text-center">
-              <div className="bg-cinema-red/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <div key={index} className="flex flex-col items-center flex-1">
+              <div className="bg-cinema-red/20 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-2">
                 {isLoading ? (
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cinema-red"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cinema-red"></div>
                 ) : (
-                  <Icon className="h-8 w-8 text-cinema-red" />
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-cinema-red" />
                 )}
               </div>
-              <div className="text-2xl font-bold text-foreground mb-2">
+              <div className="text-lg sm:text-xl font-bold text-foreground">
                 {isLoading ? '-' : item.value}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs text-muted-foreground text-center">
                 {item.label}
               </div>
             </div>
