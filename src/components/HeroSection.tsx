@@ -1,8 +1,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Play, Info, RefreshCw, AlertCircle } from "lucide-react";
+import { Play, Info, RefreshCw, AlertCircle, Star, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -39,28 +40,25 @@ export const HeroSection = () => {
       console.log('Trending movies loaded:', trending.results?.length || 0);
       
       if (trending.results && trending.results.length > 0) {
-        // Get the first 5 movies with backdrop images
         const moviesWithBackdrops = trending.results
           .filter(movie => movie.backdrop_path)
           .slice(0, 5);
         console.log('Movies with backdrops:', moviesWithBackdrops.length);
         
-        // Get full movie details including videos for each movie
         const movieDetailsPromises = moviesWithBackdrops.map(async (movie) => {
           try {
             return await tmdbService.getMovieDetails(movie.id, fresh);
           } catch (detailError) {
             console.error('Failed to load movie details for:', movie.id, detailError);
-            return movie; // Return basic movie data if details fail
+            return movie;
           }
         });
         
         const movieDetails = await Promise.all(movieDetailsPromises);
         console.log('Movie details loaded:', movieDetails.length);
         
-        setHeroMovies(movieDetails.filter(Boolean)); // Filter out any null results
+        setHeroMovies(movieDetails.filter(Boolean));
         
-        // Extract trailer keys for all movies
         const trailerKeysArray = movieDetails.map(movie => {
           const trailer = movie?.videos?.results.find(
             video => video.type === 'Trailer' && video.site === 'YouTube'
@@ -69,12 +67,10 @@ export const HeroSection = () => {
         });
         setTrailerKeys(trailerKeysArray);
         
-        // Reset to first movie if we have new data
         if (fresh) {
           setCurrentIndex(0);
         }
         
-        // Update last refreshed timestamp
         setLastUpdated(new Date());
         console.log('🎬 Hero Section: Content refreshed at', new Date().toLocaleTimeString());
       } else {
@@ -89,7 +85,6 @@ export const HeroSection = () => {
     }
   };
 
-  // Start rotation interval
   const startRotation = () => {
     if (rotationIntervalRef.current) {
       clearInterval(rotationIntervalRef.current);
@@ -101,10 +96,9 @@ export const HeroSection = () => {
           prevIndex >= heroMovies.length - 1 ? 0 : prevIndex + 1
         );
       }
-    }, 6000); // 6 seconds per slide
+    }, 6000);
   };
 
-  // Stop rotation interval
   const stopRotation = () => {
     if (rotationIntervalRef.current) {
       clearInterval(rotationIntervalRef.current);
@@ -123,7 +117,6 @@ export const HeroSection = () => {
     };
   }, []);
 
-  // Start rotation when we have movies
   useEffect(() => {
     if (heroMovies.length > 1 && !error) {
       startRotation();
@@ -132,13 +125,12 @@ export const HeroSection = () => {
     return () => stopRotation();
   }, [heroMovies.length, isPaused, error]);
 
-  // Periodic refresh every 20 minutes to match other components
   useEffect(() => {
     if (!error) {
       refreshIntervalRef.current = setInterval(() => {
         console.log('🎬 Hero Section: Auto-refreshing trending movies...');
         loadHeroMovies(true);
-      }, 1200000); // 20 minutes (same as FreshPicks and LatestTrailers)
+      }, 1200000);
     }
 
     return () => {
@@ -148,12 +140,10 @@ export const HeroSection = () => {
     };
   }, [error]);
 
-  // Add visibility change listener to refresh when user returns
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && lastUpdated) {
         const timeSinceUpdate = Date.now() - lastUpdated.getTime();
-        // Refresh if it's been more than 15 minutes since last update
         if (timeSinceUpdate > 900000) {
           console.log('🎬 Hero Section: Refreshing on visibility change');
           loadHeroMovies(true);
@@ -165,18 +155,15 @@ export const HeroSection = () => {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [lastUpdated]);
 
-  // Manual refresh function
   const handleManualRefresh = () => {
     console.log('🎬 Hero Section: Manual refresh triggered');
     setError(null);
     loadHeroMovies(true);
   };
 
-  // Navigation functions
   const goToSlide = (index: number) => {
     if (index >= 0 && index < heroMovies.length) {
       setCurrentIndex(index);
-      // Restart rotation after manual navigation
       if (heroMovies.length > 1) {
         startRotation();
       }
@@ -208,9 +195,9 @@ export const HeroSection = () => {
       <div 
         className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black"
         style={{ 
-          height: '50vh',
-          minHeight: '400px',
-          maxHeight: '600px'
+          height: 'clamp(350px, 45vh, 500px)',
+          minHeight: '350px',
+          maxHeight: '500px'
         }}
       >
         <div className="relative z-10 flex flex-col justify-center items-center h-full px-6 text-center">
@@ -234,7 +221,6 @@ export const HeroSection = () => {
     );
   }
 
-  // Always show the hero section, even when loading
   const heroMovie = heroMovies[currentIndex];
   const heroBackdrop = heroMovie ? tmdbService.getBackdropUrl(heroMovie.backdrop_path, 'original') : null;
   const currentTrailerKey = trailerKeys[currentIndex];
@@ -242,48 +228,30 @@ export const HeroSection = () => {
   return (
     <>
       <div 
-        className="relative text-foreground overflow-hidden"
+        className="relative text-foreground overflow-hidden group"
         style={{ 
-          height: 'clamp(350px, 45vh, 500px)', // iPhone-optimized height
-          minHeight: '350px', // Smaller for iPhone screens
-          maxHeight: '500px'  // More compact for mobile
+          height: 'clamp(350px, 45vh, 500px)',
+          minHeight: '350px',
+          maxHeight: '500px'
         }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Hero Background - iPhone optimized with smooth transitions */}
+        {/* Hero Background */}
         <div 
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out overflow-hidden"
           style={{ 
             backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))',
             backgroundColor: 'hsl(var(--background))'
           }}
-        >
-          {/* Base overlays for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/20 to-background/60" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/10" />
-          
-          {/* Bottom gradient blend - Creates smooth transition to page background */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none" />
-        </div>
-
-        {/* iOS-style safe area top spacing */}
-        <div 
-          className="absolute top-0 left-0 right-0 z-20 px-6"
-          style={{ 
-            paddingTop: 'max(env(safe-area-inset-top), 16px)',
-            marginTop: '8px'
-          }}
-        >
-          <div>
-            <h1 className="font-cinematic text-2xl sm:text-3xl tracking-wide text-foreground">
-              CINE<span className="text-cinema-red">SCOPE</span>
-            </h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Discover Movies Like Never Before
-            </p>
-          </div>
-        </div>
+        />
+        
+        {/* Gradient Overlays - matching FeaturedHero */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        
+        {/* Bottom gradient blend */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
 
         {/* Navigation arrows for desktop */}
         {heroMovies.length > 1 && !isMobile && (
@@ -311,63 +279,92 @@ export const HeroSection = () => {
           </>
         )}
 
-        {/* Hero Content - Mobile-first layout */}
-        <div className="relative z-10 flex flex-col justify-end h-full px-6 pb-8">
+        {/* Hero Content - matching FeaturedHero layout */}
+        <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 pb-6 sm:pb-8">
           {isLoading ? (
-            <div className="animate-pulse space-y-3">
+            <div className="max-w-2xl animate-pulse space-y-3">
+              <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
               <div className="h-8 bg-muted/60 rounded-lg w-3/4"></div>
+              <div className="flex gap-3">
+                <div className="h-4 bg-muted/40 rounded w-16"></div>
+                <div className="h-4 bg-muted/40 rounded w-16"></div>
+              </div>
               <div className="space-y-2">
                 <div className="h-4 bg-muted/40 rounded w-full"></div>
                 <div className="h-4 bg-muted/40 rounded w-5/6"></div>
-                <div className="h-4 bg-muted/40 rounded w-4/6"></div>
               </div>
               <div className="flex gap-3 pt-2">
                 <div className="h-12 bg-muted/60 rounded-xl w-32"></div>
-                <div className="h-12 bg-muted/40 rounded-xl w-24"></div>
+                <div className="h-12 bg-muted/40 rounded-xl w-28"></div>
               </div>
             </div>
           ) : heroMovie ? (
-            <div className="space-y-4 transition-all duration-500 ease-in-out">
-              <div>
-                <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
-                  {heroMovie.title}
-                </h2>
-                <p className="text-sm sm:text-base text-foreground/90 line-clamp-3 leading-relaxed">
-                  {heroMovie.overview}
-                </p>
+            <div className="max-w-2xl transition-all duration-500 ease-in-out">
+              {/* Badge */}
+              <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
+                Featured Movie
+                {isRefreshing && <span className="ml-2 text-xs">Updating...</span>}
+              </Badge>
+              
+              {/* Title */}
+              <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight">
+                {heroMovie.title}
+              </h1>
+              
+              {/* Meta Info */}
+              <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
+                {heroMovie.release_date && (
+                  <div className="flex items-center space-x-1 text-white/80">
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="text-xs sm:text-sm">{new Date(heroMovie.release_date).getFullYear()}</span>
+                  </div>
+                )}
+                {heroMovie.vote_average && (
+                  <div className="flex items-center space-x-1 text-white/80">
+                    <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-cinema-gold text-cinema-gold" />
+                    <span className="text-xs sm:text-sm">{heroMovie.vote_average.toFixed(1)}/10</span>
+                  </div>
+                )}
               </div>
               
-              <div className="flex gap-3 pt-2">
+              {/* Overview */}
+              <p className="text-white/90 text-sm sm:text-base leading-relaxed mb-4 line-clamp-2 sm:line-clamp-3">
+                {heroMovie.overview}
+              </p>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3">
                 {currentTrailerKey ? (
                   <Button 
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium touch-target"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium"
                     onClick={handleWatchNow}
                   >
                     <Play className="mr-2 h-4 w-4" />
-                    Watch Trailer
+                    <span className="hidden xs:inline">Watch Trailer</span>
+                    <span className="xs:hidden">Trailer</span>
                   </Button>
                 ) : (
                   <Link to={`/movie/${heroMovie.id}`}>
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium touch-target">
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium">
                       <Play className="mr-2 h-4 w-4" />
-                      Watch Now
+                      <span className="hidden xs:inline">Watch Trailer</span>
+                      <span className="xs:hidden">Trailer</span>
                     </Button>
                   </Link>
                 )}
                 <Link to={`/movie/${heroMovie.id}`}>
                   <Button 
                     variant="outline" 
-                    className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 touch-target"
+                    className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 sm:px-6"
                   >
                     <Info className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">More Info</span>
-                    <span className="sm:hidden">Info</span>
+                    More Info
                   </Button>
                 </Link>
               </div>
             </div>
           ) : (
-            <div className="text-center space-y-4">
+            <div className="max-w-2xl text-center space-y-4">
               <div>
                 <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
                   Welcome to Your Movie Universe
@@ -402,7 +399,7 @@ export const HeroSection = () => {
           )}
         </div>
 
-        {/* Loading indicator for refresh with last updated info */}
+        {/* Loading indicator for refresh */}
         {isRefreshing && (
           <div className="absolute top-16 right-6 z-30">
             <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-foreground flex items-center gap-2">
@@ -411,9 +408,7 @@ export const HeroSection = () => {
             </div>
           </div>
         )}
-
       </div>
-
     </>
   );
 };
