@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
-import { Play, Star, Film, Video } from "lucide-react";
+import { Play, Star, Film, Video, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const TRAILER_CATEGORIES = [
   { id: 'popular', label: 'Popular' },
@@ -26,6 +26,7 @@ export const LatestTrailers = () => {
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const { setTrailerKey, setMovieTitle, setIsTrailerOpen } = useTrailerContext();
+  const navigate = useNavigate();
 
   const fetchTrailers = async (forceFresh: boolean = true) => {
     try {
@@ -33,7 +34,8 @@ export const LatestTrailers = () => {
       console.log(`Fetching FRESH trailers for category: ${activeCategory} - Force fresh: ${forceFresh}`);
       const response = await tmdbService.getLatestTrailers(activeCategory, forceFresh);
       console.log(`Received ${response.results.length} fresh items for ${activeCategory}`);
-      setItems(response.results);
+      // Get 12 items for 2 rows
+      setItems(response.results.slice(0, 12));
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching trailers:', error);
@@ -91,6 +93,10 @@ export const LatestTrailers = () => {
     }
   };
 
+  const handleSeeMore = () => {
+    navigate('/movies');
+  };
+
   const getItemTitle = (item: MediaItem) => {
     return 'title' in item ? item.title : item.name;
   };
@@ -145,74 +151,86 @@ export const LatestTrailers = () => {
           </div>
         </div>
 
-        {/* Trailers Grid */}
+        {/* Trailers Grid - 2 rows */}
         {loading ? (
-          <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg" />
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
         ) : (
-          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer flex-shrink-0 w-32 h-48 rounded-lg"
-                onClick={() => handlePlayTrailer(item)}
-              >
-                <div className="w-full h-full relative">
-                  <img
-                    src={tmdbService.getPosterUrl(item.poster_path, 'w500')}
-                    alt={getItemTitle(item)}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 rounded-lg"
-                    loading="lazy"
-                  />
-                  
-                  {/* gradient overlays, play button, item info */}
-                  <div className="absolute inset-0 rounded-lg">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent rounded-lg" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent rounded-lg" />
-                  </div>
-                  
-                  <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 rounded-lg">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent rounded-lg" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent rounded-lg" />
-                  </div>
-                  
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
-                    <div className="flex flex-col items-center space-y-2">
-                      <Button
-                        size="lg"
-                        className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground p-4"
-                      >
-                        <Play className="h-6 w-6 fill-current" />
-                      </Button>
-                      <span className="text-white font-medium text-sm text-center px-2">
-                        Watch Trailer
-                      </span>
+          <>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer aspect-[2/3] rounded-lg"
+                  onClick={() => handlePlayTrailer(item)}
+                >
+                  <div className="w-full h-full relative">
+                    <img
+                      src={tmdbService.getPosterUrl(item.poster_path, 'w500')}
+                      alt={getItemTitle(item)}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 rounded-lg"
+                      loading="lazy"
+                    />
+                    
+                    {/* gradient overlays, play button, item info */}
+                    <div className="absolute inset-0 rounded-lg">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent rounded-lg" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent rounded-lg" />
                     </div>
-                  </div>
-                  
-                  {item.vote_average > 0 && (
-                    <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-cinema-gold fill-current" />
-                      <span className="text-foreground font-semibold text-xs">{item.vote_average.toFixed(1)}</span>
+                    
+                    <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 rounded-lg">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent rounded-lg" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent rounded-lg" />
                     </div>
-                  )}
-                  
-                  <div className="absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
-                    <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
-                      {getItemTitle(item)}
-                    </h3>
-                    <div className="flex items-center justify-between text-muted-foreground text-xs">
-                      <span>{getItemYear(item)}</span>
-                      <span className="truncate ml-2">Trailer</span>
+                    
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
+                      <div className="flex flex-col items-center space-y-2">
+                        <Button
+                          size="lg"
+                          className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground p-4"
+                        >
+                          <Play className="h-6 w-6 fill-current" />
+                        </Button>
+                        <span className="text-white font-medium text-sm text-center px-2">
+                          Watch Trailer
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {item.vote_average > 0 && (
+                      <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+                        <Star className="h-3 w-3 text-cinema-gold fill-current" />
+                        <span className="text-foreground font-semibold text-xs">{item.vote_average.toFixed(1)}</span>
+                      </div>
+                    )}
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                      <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
+                        {getItemTitle(item)}
+                      </h3>
+                      <div className="flex items-center justify-between text-muted-foreground text-xs">
+                        <span>{getItemYear(item)}</span>
+                        <span className="truncate ml-2">Trailer</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="ghost"
+                onClick={handleSeeMore}
+                className="flex items-center gap-2 text-primary hover:text-primary/80 hover:bg-primary/10"
+              >
+                See More
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </>
         )}
       </div>
     </div>

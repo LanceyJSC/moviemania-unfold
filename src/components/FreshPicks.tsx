@@ -97,7 +97,7 @@ export const FreshPicks = () => {
             </h2>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
             {Array.from({ length: 12 }).map((_, index) => (
               <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
             ))}
@@ -126,7 +126,7 @@ export const FreshPicks = () => {
         
         {content.length > 0 ? (
           <>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {content.map((item) => {
                 const isMovie = 'title' in item;
                 return (
