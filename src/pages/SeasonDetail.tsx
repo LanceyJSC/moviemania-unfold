@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
+import { RatingInput } from "@/components/RatingInput";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -451,30 +452,20 @@ const SeasonDetail = () => {
       {user && (
         <div className="container mx-auto px-4 mb-6">
           <div className="bg-card/50 rounded-lg p-4 border border-border/50">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3">
               <div>
                 <h3 className="font-semibold text-foreground">Rate this Season</h3>
                 <p className="text-xs text-muted-foreground">Your overall rating for {season.name}</p>
               </div>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRateSeason(star)}
-                    className="p-1 transition-transform hover:scale-110"
-                  >
-                    <Star 
-                      className={`h-6 w-6 transition-colors ${
-                        star <= seasonRating
-                          ? 'fill-cinema-gold text-cinema-gold'
-                          : 'text-muted-foreground hover:text-cinema-gold'
-                      }`}
-                    />
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <RatingInput 
+                  value={seasonRating} 
+                  onChange={handleRateSeason}
+                  size="sm"
+                />
                 {seasonRating > 0 && (
-                  <span className="text-sm text-cinema-gold ml-2 font-medium">
-                    {seasonRating}/5
+                  <span className="text-sm text-cinema-gold font-medium">
+                    {seasonRating}/10
                   </span>
                 )}
               </div>
@@ -560,27 +551,17 @@ const SeasonDetail = () => {
                     {/* Episode Action Buttons */}
                     {user && (
                       <div className="flex flex-col gap-2">
-                        {/* Rating Stars */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground mr-1">Rate:</span>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              onClick={() => handleRateEpisode(episode, star)}
-                              className="p-0.5 transition-transform hover:scale-110"
-                            >
-                              <Star 
-                                className={`h-4 w-4 transition-colors ${
-                                  star <= getEpisodeRating(episode.episode_number)
-                                    ? 'fill-cinema-gold text-cinema-gold'
-                                    : 'text-muted-foreground hover:text-cinema-gold'
-                                }`}
-                              />
-                            </button>
-                          ))}
+                        {/* Rating 1-10 */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs text-muted-foreground">Rate:</span>
+                          <RatingInput 
+                            value={getEpisodeRating(episode.episode_number)} 
+                            onChange={(rating) => handleRateEpisode(episode, rating)}
+                            size="sm"
+                          />
                           {getEpisodeRating(episode.episode_number) > 0 && (
-                            <span className="text-xs text-cinema-gold ml-1">
-                              {getEpisodeRating(episode.episode_number)}/5
+                            <span className="text-xs text-cinema-gold">
+                              {getEpisodeRating(episode.episode_number)}/10
                             </span>
                           )}
                         </div>
