@@ -358,7 +358,7 @@ export const TVShowCollectionCard = ({
           ) : (
             <div className="space-y-2">
               {/* Show Rating - Collapsible */}
-              <Collapsible defaultOpen={!!(seriesRating || userRating || seriesNotes)}>
+              <Collapsible defaultOpen={false}>
                 <CollapsibleTrigger className="w-full p-3 bg-background rounded border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -391,7 +391,7 @@ export const TVShowCollectionCard = ({
 
               {/* Seasons - Collapsible */}
               {(seasonReviews.length > 0 || episodeReviews.length > 0) && (
-                <Collapsible defaultOpen={true}>
+                <Collapsible defaultOpen={false}>
                   <CollapsibleTrigger className="w-full p-3 bg-background rounded border border-border hover:bg-muted/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -420,7 +420,7 @@ export const TVShowCollectionCard = ({
                         const seasonEpisodes = episodeReviews.filter(r => r.season_number === seasonNum);
                         
                         return (
-                          <Collapsible key={`season-${seasonNum}`} defaultOpen={seasonEpisodes.length > 0}>
+                          <Collapsible key={`season-${seasonNum}`} defaultOpen={false}>
                             <div className="ml-2 border-l-2 border-border pl-3">
                               <CollapsibleTrigger className="w-full p-2 bg-muted/30 rounded border border-border/50 hover:bg-muted/50 transition-colors">
                                 <div className="flex items-center justify-between">
