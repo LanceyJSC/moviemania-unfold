@@ -1,10 +1,10 @@
 
 
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 import { TrailerProvider } from "@/contexts/TrailerContext";
 import { UserStateProvider } from "@/contexts/UserStateContext";
 import { GlobalTrailerModal } from "@/components/GlobalTrailerModal";
@@ -55,44 +55,46 @@ const App = () => {
         <TooltipProvider>
           <ErrorBoundary>
             <AuthProvider>
-              <ErrorBoundary>
-                <UserStateProvider>
-                  <TrailerProvider>
-        
-                    <GlobalTrailerModal />
-                    <BrowserRouter>
-                      <ScrollToTop />
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/search" element={<Search />} />
-                        <Route path="/movies" element={<Movies />} />
-                        <Route path="/tv-shows" element={<TVShows />} />
-                        <Route path="/genres" element={<Genres />} />
-                        <Route path="/movie/:id" element={<MovieDetail />} />
-                        <Route path="/tv/:id" element={<TVShowDetail />} />
-                        <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
-                        <Route path="/actor/:id" element={<ActorDetail />} />
-                        <Route path="/category/:category" element={<CategoryPage />} />
-                        <Route path="/gallery" element={<Gallery />} />
-                        <Route path="/local" element={<Local />} />
-                        <Route path="/cinemas" element={<Cinemas />} />
-                        <Route path="/cinema/:id" element={<CinemaDetail />} />
-                        <Route path="/notifications" element={<Notifications />} />
-                        <Route path="/recommendations" element={<Recommendations />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/members" element={<Members />} />
-                        <Route path="/user/:username" element={<UserProfile />} />
-                        <Route path="/lists" element={<Lists />} />
-                        <Route path="/lists/:id" element={<ListDetail />} />
-                        <Route path="/activity" element={<Activity />} />
-                        <Route path="/auth" element={<Auth />} />
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </BrowserRouter>
-                  </TrailerProvider>
-                </UserStateProvider>
-              </ErrorBoundary>
+              <ProfileProvider>
+                <ErrorBoundary>
+                  <UserStateProvider>
+                    <TrailerProvider>
+          
+                      <GlobalTrailerModal />
+                      <BrowserRouter>
+                        <ScrollToTop />
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/search" element={<Search />} />
+                          <Route path="/movies" element={<Movies />} />
+                          <Route path="/tv-shows" element={<TVShows />} />
+                          <Route path="/genres" element={<Genres />} />
+                          <Route path="/movie/:id" element={<MovieDetail />} />
+                          <Route path="/tv/:id" element={<TVShowDetail />} />
+                          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
+                          <Route path="/actor/:id" element={<ActorDetail />} />
+                          <Route path="/category/:category" element={<CategoryPage />} />
+                          <Route path="/gallery" element={<Gallery />} />
+                          <Route path="/local" element={<Local />} />
+                          <Route path="/cinemas" element={<Cinemas />} />
+                          <Route path="/cinema/:id" element={<CinemaDetail />} />
+                          <Route path="/notifications" element={<Notifications />} />
+                          <Route path="/recommendations" element={<Recommendations />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/members" element={<Members />} />
+                          <Route path="/user/:username" element={<UserProfile />} />
+                          <Route path="/lists" element={<Lists />} />
+                          <Route path="/lists/:id" element={<ListDetail />} />
+                          <Route path="/activity" element={<Activity />} />
+                          <Route path="/auth" element={<Auth />} />
+                          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </BrowserRouter>
+                    </TrailerProvider>
+                  </UserStateProvider>
+                </ErrorBoundary>
+              </ProfileProvider>
             </AuthProvider>
           </ErrorBoundary>
         </TooltipProvider>
@@ -102,3 +104,4 @@ const App = () => {
 };
 
 export default App;
+
