@@ -43,13 +43,14 @@ export const useDiary = () => {
         .from('movie_diary')
         .select('*')
         .eq('user_id', user.id)
-        .order('watched_date', { ascending: false });
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data as MovieDiaryEntry[];
     },
     enabled: !!user?.id,
-    staleTime: 0, // Always refetch to get latest data
-    refetchOnMount: 'always',
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const tvDiaryQuery = useQuery({
@@ -60,13 +61,14 @@ export const useDiary = () => {
         .from('tv_diary')
         .select('*')
         .eq('user_id', user.id)
-        .order('watched_date', { ascending: false });
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data as TVDiaryEntry[];
     },
     enabled: !!user?.id,
-    staleTime: 0, // Always refetch to get latest data
-    refetchOnMount: 'always',
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const addMovieDiaryEntry = useMutation({
