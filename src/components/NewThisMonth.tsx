@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
-import { Calendar, TrendingUp, ArrowRight } from "lucide-react";
+import { Calendar, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
-import { useNavigate } from "react-router-dom";
 
 type MediaItem = Movie | TVShow;
 
 export const NewThisMonth = () => {
   const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const loadNewContent = async (fresh: boolean = false) => {
     try {
@@ -42,28 +41,25 @@ export const NewThisMonth = () => {
       let allContent: MediaItem[] = [...recentMovies, ...recentTVShows];
       
       // If we don't have enough recent content, add popular content
-      if (allContent.length < 12) {
+      if (allContent.length < 24) {
         const additionalMovies = moviesResponse.results
-          .filter(movie => movie.poster_path && !recentMovies.includes(movie))
-          .slice(0, 6);
+          .filter(movie => movie.poster_path && !recentMovies.includes(movie));
         const additionalTVShows = tvShowsResponse.results
-          .filter(show => show.poster_path && !recentTVShows.includes(show))
-          .slice(0, 6);
+          .filter(show => show.poster_path && !recentTVShows.includes(show));
         
         allContent = [...allContent, ...additionalMovies, ...additionalTVShows];
       }
       
-      // Shuffle and limit to 12 items (2 rows of 6)
+      // Shuffle and store all items
       const shuffled = allContent.sort(() => Math.random() - 0.5);
-      setContent(shuffled.slice(0, 12));
+      setContent(shuffled.slice(0, 24));
     } catch (error) {
       console.error('Failed to load new content:', error);
       try {
-        // Fallback to trending movies
         const fallbackResponse = await tmdbService.getTrendingMovies('week', fresh);
         const moviesWithPosters = fallbackResponse.results
           .filter(movie => movie.poster_path)
-          .slice(0, 12);
+          .slice(0, 24);
         setContent(moviesWithPosters);
       } catch (fallbackError) {
         console.error('Fallback also failed:', fallbackError);
@@ -77,18 +73,14 @@ export const NewThisMonth = () => {
     loadNewContent();
   }, []);
 
-  // Periodic refresh every hour to stay updated with TMDB
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       loadNewContent(true);
-    }, 3600000); // 1 hour in milliseconds
-
+    }, 3600000);
     return () => clearInterval(refreshInterval);
   }, []);
 
-  const handleSeeMore = () => {
-    navigate('/movies');
-  };
+  const displayedContent = isExpanded ? content : content.slice(0, 12);
 
   if (isLoading) {
     return (
@@ -127,10 +119,10 @@ export const NewThisMonth = () => {
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
       
-      {content.length > 0 ? (
+      {displayedContent.length > 0 ? (
         <>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {content.map((item) => {
+            {displayedContent.map((item) => {
               const isMovie = 'title' in item;
               return (
                 <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
@@ -149,16 +141,18 @@ export const NewThisMonth = () => {
               );
             })}
           </div>
-          <div className="flex justify-center mt-6">
-            <Button
-              variant="ghost"
-              onClick={handleSeeMore}
-              className="flex items-center gap-2 text-cinema-gold hover:text-cinema-gold/80 hover:bg-cinema-gold/10"
-            >
-              See More
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
+          {content.length > 12 && (
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="ghost"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center gap-2 text-cinema-gold hover:text-cinema-gold/80 hover:bg-cinema-gold/10"
+              >
+                {isExpanded ? 'Show Less' : 'See More'}
+                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </Button>
+            </div>
+          )}
         </>
       ) : (
         <div className="text-center text-muted-foreground">
