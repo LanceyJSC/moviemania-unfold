@@ -52,9 +52,13 @@ const Auth = () => {
     try {
       const { error } = await signUp(email, password, username);
       if (error) {
-        toast.error(error.message);
+        if (error.message.includes('already registered')) {
+          toast.error('An account with this email already exists. Please sign in instead.');
+        } else {
+          toast.error(error.message);
+        }
       } else {
-        toast.success('Account created! Please check your email to verify your account.');
+        navigate('/');
       }
     } catch (error) {
       toast.error('An unexpected error occurred');
