@@ -109,14 +109,9 @@ export const LatestTrailers = () => {
             </h2>
             <Video className="h-8 w-8 text-primary" />
           </div>
-          <p className="text-muted-foreground mb-2">
-            Watch the newest trailers across all categories - Live updates every 20 minutes
+          <p className="text-muted-foreground mb-4">
+            Watch the newest trailers across all categories
           </p>
-          {lastUpdated && (
-            <p className="text-xs text-muted-foreground mb-4">
-              Last updated: {lastUpdated.toLocaleTimeString()}
-            </p>
-          )}
           <div className="w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
 
