@@ -27,7 +27,11 @@ export const MobileHeader = ({ title, showBack = true }: MobileHeaderProps) => {
             variant="ghost"
             size="sm"
             onClick={handleBack}
-            className="mr-3 p-2 hover:bg-cinema-charcoal/50 touch-target"
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleBack();
+            }}
+            className="mr-3 p-2 hover:bg-cinema-charcoal/50 touch-manipulation min-h-[44px] min-w-[44px]"
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </Button>
