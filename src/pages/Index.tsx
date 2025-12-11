@@ -58,39 +58,29 @@ const Index = () => {
         </ErrorBoundary>
 
         {/* Content Sections - Mobile-optimized spacing */}
-        <div className="py-6 space-y-8 pb-32">
+        <div className="px-4 py-6 space-y-8 pb-32">
           {/* Quick Stats - More compact on mobile */}
-          <div className="px-4">
-            <ErrorBoundary>
-              <MovieStats />
-            </ErrorBoundary>
-          </div>
+          <ErrorBoundary>
+            <MovieStats />
+          </ErrorBoundary>
           
           {/* Genre Navigation - Horizontal scroll on mobile */}
-          <div className="px-4">
-            <ErrorBoundary>
-              <QuickGenres />
-            </ErrorBoundary>
-          </div>
+          <ErrorBoundary>
+            <QuickGenres />
+          </ErrorBoundary>
 
-          {/* Dynamic Content Sections - Full width for horizontal scroll */}
-          <div className="px-4">
-            <ErrorBoundary>
-              <NewThisMonth />
-            </ErrorBoundary>
-          </div>
+          {/* Dynamic Content Sections - Optimized for mobile */}
+          <ErrorBoundary>
+            <NewThisMonth />
+          </ErrorBoundary>
           
-          <div className="px-4">
-            <ErrorBoundary>
-              <FreshPicks />
-            </ErrorBoundary>
-          </div>
+          <ErrorBoundary>
+            <FreshPicks />
+          </ErrorBoundary>
           
-          <div className="px-4">
-            <ErrorBoundary>
-              <LatestTrailers />
-            </ErrorBoundary>
-          </div>
+          <ErrorBoundary>
+            <LatestTrailers />
+          </ErrorBoundary>
         </div>
 
         {/* iOS-style Tab Bar */}

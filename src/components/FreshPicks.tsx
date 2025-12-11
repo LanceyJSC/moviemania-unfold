@@ -103,7 +103,7 @@ export const FreshPicks = () => {
 
   return (
     <div className="mb-12 pt-4">
-      <div className="bg-background rounded-2xl py-8">
+      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Sparkles className="h-8 w-8 text-cinema-red" />
@@ -119,26 +119,24 @@ export const FreshPicks = () => {
         </div>
         
         {content.length > 0 ? (
-          <div className="overflow-x-auto scrollbar-hide pb-4" style={{ overflowX: 'auto' }}>
-            <div className="flex space-x-3 w-max">
-              {content.map((item) => {
-                const isMovie = 'title' in item;
-                return (
-                  <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0">
-                    {isMovie ? (
-                      <MovieCard 
-                        movie={tmdbService.formatMovieForCard(item as Movie)} 
-                      />
-                    ) : (
-                      <TVShowCard 
-                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+           <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
+             {content.map((item) => {
+               const isMovie = 'title' in item;
+               return (
+                 <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0">
+                   {isMovie ? (
+                     <MovieCard 
+                       movie={tmdbService.formatMovieForCard(item as Movie)} 
+                     />
+                   ) : (
+                     <TVShowCard 
+                       tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                     />
+                   )}
+                 </div>
+               );
+             })}
+           </div>
         ) : (
           <div className="text-center text-muted-foreground">
             Loading fresh picks from TMDB...

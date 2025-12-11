@@ -102,7 +102,7 @@ export const LatestTrailers = () => {
 
   return (
     <div className="mb-12 pt-4">
-      <div className="bg-background rounded-2xl py-8">
+      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Film className="h-8 w-8 text-primary" />
@@ -153,8 +153,7 @@ export const LatestTrailers = () => {
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto scrollbar-hide pb-4" style={{ overflowX: 'auto' }}>
-            <div className="flex space-x-3 w-max">
+          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
             {items.map((item) => (
               <div
                 key={item.id}
@@ -213,7 +212,6 @@ export const LatestTrailers = () => {
                 </div>
               </div>
             ))}
-            </div>
           </div>
         )}
       </div>

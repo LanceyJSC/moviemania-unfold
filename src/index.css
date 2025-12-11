@@ -153,54 +153,14 @@
     scroll-behavior: smooth;
   }
 
-  /* Horizontal scroll container for carousels */
+  /* Hide scrollbars on carousels */
   .scrollbar-hide {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    overflow-x: scroll !important;
-    cursor: grab;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
-  .scrollbar-hide:active {
-    cursor: grabbing;
-  }
-  
-  /* Hide scrollbars on mobile/touch devices */
-  @media (max-width: 768px) {
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
-    }
-  }
-  
-  /* Show styled scrollbar on desktop */
-  @media (min-width: 769px) {
-    .scrollbar-hide {
-      scrollbar-width: thin;
-      scrollbar-color: hsl(var(--primary) / 0.5) hsl(var(--muted));
-    }
-    
-    .scrollbar-hide::-webkit-scrollbar {
-      height: 8px;
-    }
-    
-    .scrollbar-hide::-webkit-scrollbar-track {
-      background: hsl(var(--muted));
-      border-radius: 4px;
-    }
-    
-    .scrollbar-hide::-webkit-scrollbar-thumb {
-      background: hsl(var(--primary) / 0.5);
-      border-radius: 4px;
-    }
-    
-    .scrollbar-hide::-webkit-scrollbar-thumb:hover {
-      background: hsl(var(--primary));
-    }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   /* Achievement confetti animation */
