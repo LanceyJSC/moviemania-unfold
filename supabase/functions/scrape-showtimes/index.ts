@@ -1,10 +1,24 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Allowed origins for CORS - restrict to your application domains
+const ALLOWED_ORIGINS = [
+  'https://lovable.dev',
+  'https://rlwfnqvqvfbitmqrwqzy.lovableproject.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.some(allowed => 
+    origin === allowed || origin.endsWith('.lovableproject.com') || origin.endsWith('.lovable.dev')
+  ) ? origin : '';
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 interface Cinema {
   id: string;
@@ -23,8 +37,23 @@ interface ScrapedShowtime {
 }
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Check if origin is allowed
+  if (!corsHeaders['Access-Control-Allow-Origin']) {
+    console.warn('Rejected request from unauthorized origin:', origin);
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized origin', showtimes: [] }),
+      {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   try {
@@ -38,8 +67,9 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in scrape-showtimes function:', error);
+    // Return generic error message to client, log detailed error server-side
     return new Response(
-      JSON.stringify({ error: error.message, showtimes: [] }), 
+      JSON.stringify({ error: 'Failed to fetch showtimes. Please try again later.', showtimes: [] }), 
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
