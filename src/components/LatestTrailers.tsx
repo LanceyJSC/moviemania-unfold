@@ -153,7 +153,8 @@ export const LatestTrailers = () => {
             ))}
           </div>
         ) : (
-          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
+          <div className="overflow-x-auto scrollbar-hide pb-4" style={{ overflowX: 'auto' }}>
+            <div className="flex space-x-3 w-max">
             {items.map((item) => (
               <div
                 key={item.id}
@@ -212,6 +213,7 @@ export const LatestTrailers = () => {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         )}
       </div>
