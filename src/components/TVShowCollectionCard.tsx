@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Tv, Star, Trash2, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { Tv, Star, Trash2, ChevronDown, ChevronUp, BookOpen, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -351,36 +356,59 @@ export const TVShowCollectionCard = ({
               <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Series/Show Rating - Always show this section */}
-              <div className="p-3 bg-background rounded border border-border">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-foreground">Show Rating</span>
-                  {(seriesRating || userRating) ? (
-                    renderRating(seriesRating || userRating || 0, 'md')
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Not rated</span>
-                  )}
-                </div>
-                {seriesWatchedDate && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Watched: {formatDate(seriesWatchedDate)}
-                  </p>
-                )}
-                {seriesNotes && (
-                  <div className="mt-2 flex items-start gap-2">
-                    <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-                    <p className="text-xs text-muted-foreground">{seriesNotes}</p>
+            <div className="space-y-2">
+              {/* Show Rating - Collapsible */}
+              <Collapsible defaultOpen={!!(seriesRating || userRating || seriesNotes)}>
+                <CollapsibleTrigger className="w-full p-3 bg-background rounded border border-border hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                      <span className="text-sm font-semibold text-foreground">Show Rating</span>
+                    </div>
+                    {(seriesRating || userRating) ? (
+                      renderRating(seriesRating || userRating || 0, 'md')
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not rated</span>
+                    )}
                   </div>
-                )}
-              </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="px-3 pb-3 pt-2 bg-background rounded-b border-x border-b border-border -mt-1">
+                  {seriesWatchedDate && (
+                    <p className="text-xs text-muted-foreground">
+                      Watched: {formatDate(seriesWatchedDate)}
+                    </p>
+                  )}
+                  {seriesNotes ? (
+                    <div className="mt-2 flex items-start gap-2">
+                      <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground">{seriesNotes}</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No notes for this show yet.</p>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
 
-              {/* Season Reviews with Episodes nested underneath */}
+              {/* Seasons - Collapsible */}
               {(seasonReviews.length > 0 || episodeReviews.length > 0) && (
-                <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-2">Season Ratings</h4>
-                  <div className="space-y-3">
-                    {/* Get unique seasons from both season reviews and episode reviews */}
+                <Collapsible defaultOpen={true}>
+                  <CollapsibleTrigger className="w-full p-3 bg-background rounded border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                        <span className="text-sm font-semibold text-foreground">Seasons</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {(() => {
+                          const allSeasons = new Set<number>();
+                          seasonReviews.forEach(r => allSeasons.add(r.season_number));
+                          episodeReviews.forEach(r => allSeasons.add(r.season_number));
+                          return `${allSeasons.size} logged`;
+                        })()}
+                      </span>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 pt-2">
                     {(() => {
                       const allSeasons = new Set<number>();
                       seasonReviews.forEach(r => allSeasons.add(r.season_number));
@@ -392,69 +420,84 @@ export const TVShowCollectionCard = ({
                         const seasonEpisodes = episodeReviews.filter(r => r.season_number === seasonNum);
                         
                         return (
-                          <div key={`season-${seasonNum}`} className="space-y-2">
-                            {/* Season Header */}
-                            <div className="p-3 bg-background rounded border border-border">
-                              <Link 
-                                to={`/tv/${tvId}/season/${seasonNum}`}
-                                className="flex items-center justify-between hover:text-primary transition-colors"
-                              >
-                                <span className="text-sm font-medium text-foreground">Season {seasonNum}</span>
-                                {seasonReview?.rating ? (
-                                  renderRating(seasonReview.rating)
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">{seasonEpisodes.length > 0 ? `${seasonEpisodes.length} ep` : 'Logged'}</span>
-                                )}
-                              </Link>
-                              {seasonReview?.watched_date && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Watched: {formatDate(seasonReview.watched_date)}
-                                </p>
-                              )}
-                              {seasonReview?.notes && (
-                                <div className="mt-2 flex items-start gap-2">
-                                  <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-                                  <p className="text-xs text-muted-foreground line-clamp-2">{seasonReview.notes}</p>
+                          <Collapsible key={`season-${seasonNum}`} defaultOpen={seasonEpisodes.length > 0}>
+                            <div className="ml-2 border-l-2 border-border pl-3">
+                              <CollapsibleTrigger className="w-full p-2 bg-muted/30 rounded border border-border/50 hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    {seasonEpisodes.length > 0 && (
+                                      <ChevronRight className="h-3 w-3 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                                    )}
+                                    <Link 
+                                      to={`/tv/${tvId}/season/${seasonNum}`}
+                                      className="text-sm font-medium text-foreground hover:text-primary"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      Season {seasonNum}
+                                    </Link>
+                                  </div>
+                                  {seasonReview?.rating ? (
+                                    renderRating(seasonReview.rating)
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">
+                                      {seasonEpisodes.length > 0 ? `${seasonEpisodes.length} ep` : 'Logged'}
+                                    </span>
+                                  )}
+                                </div>
+                              </CollapsibleTrigger>
+                              
+                              {/* Season details and notes */}
+                              {(seasonReview?.watched_date || seasonReview?.notes) && (
+                                <div className="px-2 py-1 text-xs text-muted-foreground">
+                                  {seasonReview?.watched_date && (
+                                    <p>Watched: {formatDate(seasonReview.watched_date)}</p>
+                                  )}
+                                  {seasonReview?.notes && (
+                                    <div className="mt-1 flex items-start gap-1">
+                                      <BookOpen className="h-3 w-3 mt-0.5 shrink-0" />
+                                      <p className="line-clamp-2">{seasonReview.notes}</p>
+                                    </div>
+                                  )}
                                 </div>
                               )}
-                            </div>
-                            
-                            {/* Episodes nested under this season */}
-                            {seasonEpisodes.length > 0 && (
-                              <div className="ml-4 space-y-1">
-                                {seasonEpisodes.map((ep) => (
-                                  <div 
-                                    key={`ep-${ep.season_number}-${ep.episode_number}`}
-                                    className="p-2 bg-muted/50 rounded border border-border/50"
-                                  >
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-xs font-medium text-foreground">
-                                        E{ep.episode_number}
-                                      </span>
-                                      {ep.rating ? (
-                                        renderRating(ep.rating)
-                                      ) : (
-                                        <span className="text-xs text-muted-foreground">Watched</span>
+                              
+                              {/* Episodes nested under this season */}
+                              {seasonEpisodes.length > 0 && (
+                                <CollapsibleContent className="space-y-1 pt-1 ml-2">
+                                  {seasonEpisodes.map((ep) => (
+                                    <div 
+                                      key={`ep-${ep.season_number}-${ep.episode_number}`}
+                                      className="p-2 bg-muted/20 rounded border border-border/30"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-xs font-medium text-foreground">
+                                          Episode {ep.episode_number}
+                                        </span>
+                                        {ep.rating ? (
+                                          renderRating(ep.rating)
+                                        ) : (
+                                          <span className="text-xs text-muted-foreground">Watched</span>
+                                        )}
+                                      </div>
+                                      {ep.watched_date && (
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                          Watched: {formatDate(ep.watched_date)}
+                                        </p>
+                                      )}
+                                      {ep.notes && (
+                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{ep.notes}</p>
                                       )}
                                     </div>
-                                    {ep.watched_date && (
-                                      <p className="text-xs text-muted-foreground mt-0.5">
-                                        Watched: {formatDate(ep.watched_date)}
-                                      </p>
-                                    )}
-                                    {ep.notes && (
-                                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{ep.notes}</p>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                                  ))}
+                                </CollapsibleContent>
+                              )}
+                            </div>
+                          </Collapsible>
                         );
                       });
                     })()}
-                  </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
             </div>
           )}
