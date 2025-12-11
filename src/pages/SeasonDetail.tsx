@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, Clock, Star, Play, Eye, BookOpen, Heart, Check } from "lucide-react";
+import { Calendar, Clock, Star, Play, Eye, BookOpen, Heart, Check, ChevronDown, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
+import { EpisodeCommunityReviews, useEpisodeReviewCount } from "@/components/EpisodeCommunityReviews";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,6 +38,43 @@ interface Season {
     backdrops: { file_path: string; vote_average: number }[];
   };
 }
+
+// Collapsible component for episode reviews
+const EpisodeReviewsCollapsible = ({ 
+  tvId, 
+  seasonNumber, 
+  episodeNumber 
+}: { 
+  tvId: number; 
+  seasonNumber: number; 
+  episodeNumber: number;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: reviewCount } = useEpisodeReviewCount(tvId, seasonNumber, episodeNumber);
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-3">
+      <CollapsibleTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
+        >
+          <MessageCircle className="h-3 w-3 mr-1" />
+          Reviews ({reviewCount || 0})
+          <ChevronDown className={`h-3 w-3 ml-1 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-2 rounded-lg bg-muted/30 border border-border/30">
+        <EpisodeCommunityReviews 
+          tvId={tvId} 
+          seasonNumber={seasonNumber} 
+          episodeNumber={episodeNumber} 
+        />
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
 
 const SeasonDetail = () => {
   const { id, seasonNumber } = useParams<{ id: string; seasonNumber: string }>();
@@ -591,6 +630,13 @@ const SeasonDetail = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Community Reviews Collapsible */}
+                    <EpisodeReviewsCollapsible 
+                      tvId={Number(id)} 
+                      seasonNumber={Number(seasonNumber)} 
+                      episodeNumber={episode.episode_number} 
+                    />
                   </div>
                 </div>
               </div>
