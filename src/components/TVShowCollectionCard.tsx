@@ -180,30 +180,58 @@ export const TVShowCollectionCard = ({
         .eq('tv_id', tvId);
 
       if (data) {
-        const seasons: SeasonReview[] = [];
-        const episodes: EpisodeReview[] = [];
+        // Deduplicate seasons by season_number, merging data
+        const seasonMap = new Map<number, SeasonReview>();
+        // Deduplicate episodes by season_number + episode_number, merging data
+        const episodeMap = new Map<string, EpisodeReview>();
 
         data.forEach(entry => {
           if (entry.season_number && !entry.episode_number) {
-            seasons.push({
-              season_number: entry.season_number,
-              rating: entry.rating,
-              notes: entry.notes,
-              watched_date: entry.watched_date
-            });
+            // Season-level entry
+            const existing = seasonMap.get(entry.season_number);
+            if (existing) {
+              // Merge: prefer rating if exists, combine notes
+              seasonMap.set(entry.season_number, {
+                season_number: entry.season_number,
+                rating: existing.rating || entry.rating,
+                notes: existing.notes || entry.notes,
+                watched_date: existing.watched_date || entry.watched_date
+              });
+            } else {
+              seasonMap.set(entry.season_number, {
+                season_number: entry.season_number,
+                rating: entry.rating,
+                notes: entry.notes,
+                watched_date: entry.watched_date
+              });
+            }
           } else if (entry.season_number && entry.episode_number) {
-            episodes.push({
-              season_number: entry.season_number,
-              episode_number: entry.episode_number,
-              rating: entry.rating,
-              notes: entry.notes,
-              watched_date: entry.watched_date
-            });
+            // Episode-level entry
+            const key = `${entry.season_number}-${entry.episode_number}`;
+            const existing = episodeMap.get(key);
+            if (existing) {
+              // Merge: prefer rating if exists, combine notes
+              episodeMap.set(key, {
+                season_number: entry.season_number,
+                episode_number: entry.episode_number,
+                rating: existing.rating || entry.rating,
+                notes: existing.notes || entry.notes,
+                watched_date: existing.watched_date || entry.watched_date
+              });
+            } else {
+              episodeMap.set(key, {
+                season_number: entry.season_number,
+                episode_number: entry.episode_number,
+                rating: entry.rating,
+                notes: entry.notes,
+                watched_date: entry.watched_date
+              });
+            }
           }
         });
 
-        seasons.sort((a, b) => a.season_number - b.season_number);
-        episodes.sort((a, b) => {
+        const seasons = Array.from(seasonMap.values()).sort((a, b) => a.season_number - b.season_number);
+        const episodes = Array.from(episodeMap.values()).sort((a, b) => {
           if (a.season_number !== b.season_number) return a.season_number - b.season_number;
           return a.episode_number - b.episode_number;
         });
