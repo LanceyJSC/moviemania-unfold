@@ -44,12 +44,15 @@ export const EpisodeCommunityReviews = ({
         .eq('episode_number', episodeNumber)
         .eq('is_public', true)
         .not('notes', 'is', null)
+        .neq('notes', '')
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching episode reviews:', error);
         return [];
       }
+
+      console.log('Episode reviews found:', data?.length, 'for', tvId, seasonNumber, episodeNumber);
 
       // Fetch profiles for each review
       const reviewsWithProfiles: EpisodeReview[] = await Promise.all(
@@ -144,21 +147,23 @@ export const useEpisodeReviewCount = (
   return useQuery({
     queryKey: ['episode-review-count', tvId, seasonNumber, episodeNumber],
     queryFn: async () => {
-      const { count, error } = await supabase
+      const { data, count, error } = await supabase
         .from('tv_diary')
-        .select('id', { count: 'exact', head: true })
+        .select('id', { count: 'exact' })
         .eq('tv_id', tvId)
         .eq('season_number', seasonNumber)
         .eq('episode_number', episodeNumber)
         .eq('is_public', true)
-        .not('notes', 'is', null);
+        .not('notes', 'is', null)
+        .neq('notes', '');
 
       if (error) {
         console.error('Error fetching episode review count:', error);
         return 0;
       }
 
-      return count || 0;
+      console.log('Episode review count:', data?.length, 'for', tvId, seasonNumber, episodeNumber);
+      return data?.length || 0;
     }
   });
 };
