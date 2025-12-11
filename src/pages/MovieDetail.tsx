@@ -276,19 +276,15 @@ const MovieDetail = () => {
             >
               <Share className="h-4 w-4" />
             </Button>
-          </div>
-        </div>
 
-        {/* Log Button */}
-        <div className="mb-6">
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => setShowLogModal(true)}
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            Log Movie
-          </Button>
+            <Button 
+              variant="outline" 
+              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
+              onClick={() => setShowLogModal(true)}
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Rating - marks as watched */}
