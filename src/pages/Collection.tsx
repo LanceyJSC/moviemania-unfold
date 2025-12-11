@@ -690,7 +690,10 @@ const Collection = () => {
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
                       </p>
                       {entry.notes && (
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{entry.notes}</p>
+                        <div className="flex items-start gap-1 mt-1">
+                          <BookOpen className="h-3 w-3 mt-0.5 shrink-0 text-primary" />
+                          <p className="text-sm text-muted-foreground line-clamp-2"><span className="text-primary font-medium">Review:</span> {entry.notes}</p>
+                        </div>
                       )}
                     </CollectionMediaCard>
                   );

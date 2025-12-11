@@ -408,11 +408,11 @@ export const TVShowCollectionCard = ({
                   )}
                   {seriesNotes ? (
                     <div className="mt-2 flex items-start gap-2">
-                      <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-                      <p className="text-xs text-muted-foreground">{seriesNotes}</p>
+                      <BookOpen className="h-3 w-3 text-primary mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="text-primary font-medium">Review:</span> {seriesNotes}</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground">No notes for this show yet.</p>
+                    <p className="text-xs text-muted-foreground">No review for this show yet.</p>
                   )}
                 </CollapsibleContent>
               </Collapsible>
@@ -482,8 +482,8 @@ export const TVShowCollectionCard = ({
                                   )}
                                   {seasonReview?.notes && (
                                     <div className="mt-1 flex items-start gap-1">
-                                      <BookOpen className="h-3 w-3 mt-0.5 shrink-0" />
-                                      <p className="line-clamp-2">{seasonReview.notes}</p>
+                                      <BookOpen className="h-3 w-3 mt-0.5 shrink-0 text-primary" />
+                                      <p className="line-clamp-2"><span className="text-primary font-medium">Review:</span> {seasonReview.notes}</p>
                                     </div>
                                   )}
                                 </div>
@@ -513,7 +513,10 @@ export const TVShowCollectionCard = ({
                                         </p>
                                       )}
                                       {ep.notes && (
-                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{ep.notes}</p>
+                                        <div className="text-xs text-muted-foreground mt-1 flex items-start gap-1">
+                                          <BookOpen className="h-3 w-3 mt-0.5 shrink-0 text-primary" />
+                                          <p className="line-clamp-1"><span className="text-primary font-medium">Review:</span> {ep.notes}</p>
+                                        </div>
                                       )}
                                     </div>
                                   ))}
