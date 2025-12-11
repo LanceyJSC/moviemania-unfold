@@ -11,6 +11,13 @@ import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
 import { LogMediaModal } from '@/components/LogMediaModal';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -186,54 +193,33 @@ const MyReviews = () => {
           </Card>
         </div>
 
-        {/* Filters */}
-        <div className="mb-4">
-          <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-            <Filter className="h-3 w-3" /> Filter
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { value: 'all', label: 'All' },
-              { value: 'rated', label: 'With Rating' },
-              { value: 'unrated', label: 'No Rating' },
-            ].map((option) => (
-              <Button
-                key={option.value}
-                size="sm"
-                variant={filterBy === option.value ? 'default' : 'outline'}
-                onClick={() => setFilterBy(option.value as FilterOption)}
-                className="text-xs"
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Sort */}
-        <div className="mb-6">
-          <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-            <ArrowUpDown className="h-3 w-3" /> Sort
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { value: 'recent', label: 'Recent' },
-              { value: 'oldest', label: 'Oldest' },
-              { value: 'highest', label: 'Highest' },
-              { value: 'lowest', label: 'Lowest' },
-              { value: 'title', label: 'A-Z' },
-            ].map((option) => (
-              <Button
-                key={option.value}
-                size="sm"
-                variant={sortBy === option.value ? 'default' : 'outline'}
-                onClick={() => setSortBy(option.value as SortOption)}
-                className="text-xs"
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
+        {/* Filters and Sort */}
+        <div className="flex gap-2 mb-6">
+          <Select value={filterBy} onValueChange={(v) => setFilterBy(v as FilterOption)}>
+            <SelectTrigger className="w-[140px]">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reviews</SelectItem>
+              <SelectItem value="rated">With Rating</SelectItem>
+              <SelectItem value="unrated">No Rating</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+            <SelectTrigger className="w-[140px]">
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="highest">Highest Rated</SelectItem>
+              <SelectItem value="lowest">Lowest Rated</SelectItem>
+              <SelectItem value="title">Title A-Z</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Reviews List */}

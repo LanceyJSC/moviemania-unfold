@@ -5,6 +5,13 @@ import { AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, Heart, MessageCircl
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -135,26 +142,20 @@ export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsPro
           Community Reviews {reviews?.length ? `(${reviews.length})` : ''}
         </h3>
         
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
           {reviews && reviews.length > 1 && (
-            <div className="flex gap-1 flex-wrap">
-              {[
-                { value: 'recent', label: 'Recent' },
-                { value: 'oldest', label: 'Oldest' },
-                { value: 'highest', label: 'Top' },
-                { value: 'lowest', label: 'Low' },
-              ].map((option) => (
-                <Button
-                  key={option.value}
-                  size="sm"
-                  variant={sortBy === option.value ? 'default' : 'ghost'}
-                  onClick={() => setSortBy(option.value as SortOption)}
-                  className="h-7 px-2 text-xs"
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+              <SelectTrigger className="w-[130px] h-8 text-xs">
+                <ArrowUpDown className="h-3 w-3 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="highest">Highest Rated</SelectItem>
+                <SelectItem value="lowest">Lowest Rated</SelectItem>
+              </SelectContent>
+            </Select>
           )}
           
           {onWriteReview && (

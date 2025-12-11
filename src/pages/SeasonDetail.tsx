@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, Clock, Star, Play, Eye, BookOpen, Heart, Check, MessageCircle } from "lucide-react";
+import { Calendar, Clock, Star, Play, Eye, BookOpen, Heart, Check, ChevronDown, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,8 +38,8 @@ interface Season {
   };
 }
 
-// Link component for episode reviews - navigates to dedicated page
-const EpisodeReviewsLink = ({ 
+// Collapsible component for episode reviews - uses data from tvDiary context
+const EpisodeReviewsCollapsible = ({ 
   tvId, 
   seasonNumber, 
   episodeNumber,
@@ -49,29 +50,64 @@ const EpisodeReviewsLink = ({
   episodeNumber: number;
   tvDiary: any[];
 }) => {
-  // Count reviews for this specific episode that have notes
-  const reviewCount = tvDiary.filter(entry => 
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // Filter diary entries for this specific episode that have notes
+  const episodeReviews = tvDiary.filter(entry => 
     entry.tv_id === tvId && 
     entry.season_number === seasonNumber && 
     entry.episode_number === episodeNumber && 
     entry.notes && 
     entry.notes.trim() !== ''
-  ).length;
+  );
 
   return (
-    <Link 
-      to={`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}/reviews`}
-      className="mt-3 inline-block"
-    >
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
-      >
-        <MessageCircle className="h-3 w-3 mr-1" />
-        Reviews ({reviewCount})
-      </Button>
-    </Link>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-3">
+      <CollapsibleTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
+        >
+          <MessageCircle className="h-3 w-3 mr-1" />
+          Reviews ({episodeReviews.length})
+          <ChevronDown className={`h-3 w-3 ml-1 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-2 rounded-lg bg-muted/30 border border-border/30">
+        {episodeReviews.length > 0 ? (
+          <div className="py-2 px-4 space-y-3">
+            {episodeReviews.map((review) => (
+              <div 
+                key={review.id} 
+                className="flex gap-3 p-3 bg-background/50 rounded-lg border border-border/30"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    {review.rating && (
+                      <div className="flex items-center gap-1 text-cinema-gold text-xs">
+                        <Star className="h-3 w-3 fill-current" />
+                        <span>{review.rating}/10</span>
+                      </div>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(review.watched_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {review.notes}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-3 px-4 text-sm text-muted-foreground">
+            No reviews yet for this episode.
+          </div>
+        )}
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
@@ -630,8 +666,8 @@ const SeasonDetail = () => {
                       </div>
                     )}
 
-                    {/* Reviews Link */}
-                    <EpisodeReviewsLink 
+                    {/* Community Reviews Collapsible */}
+                    <EpisodeReviewsCollapsible 
                       tvId={Number(id)} 
                       seasonNumber={Number(seasonNumber)} 
                       episodeNumber={episode.episode_number}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { X, Filter } from "lucide-react";
@@ -102,19 +103,18 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
       {/* Sort By */}
       <div className="mb-6">
         <label className="text-sm font-medium text-foreground mb-2 block">Sort By</label>
-        <div className="flex flex-wrap gap-2">
-          {SORT_OPTIONS.map(option => (
-            <Button
-              key={option.value}
-              size="sm"
-              variant={filters.sortBy === option.value ? 'default' : 'outline'}
-              onClick={() => updateFilters({ sortBy: option.value })}
-              className="text-xs"
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
+        <Select value={filters.sortBy} onValueChange={(value) => updateFilters({ sortBy: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Genres */}

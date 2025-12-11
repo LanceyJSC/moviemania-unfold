@@ -3,7 +3,7 @@ import { useState } from "react";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface FilterState {
@@ -118,24 +118,18 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
         {/* Sort By */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-foreground">Sort By</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {SORT_OPTIONS.map((option) => (
-              <Button
-                key={option.value}
-                variant={filters.sortBy === option.value ? "default" : "outline"}
-                onClick={() => updateFilters({ sortBy: option.value })}
-                className={cn(
-                  "h-12 text-xs font-medium transition-all duration-200 active:scale-95 rounded-2xl",
-                  "touch-target focus-ring",
-                  filters.sortBy === option.value
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card/60 border-border/50 hover:bg-card/80"
-                )}
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
+          <Select value={filters.sortBy} onValueChange={(value) => updateFilters({ sortBy: value })}>
+            <SelectTrigger className="h-14 bg-card/60 border-border/50 rounded-2xl text-base">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Genres - Mobile Grid */}
