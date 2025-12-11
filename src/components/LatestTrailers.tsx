@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { Play, Star, Film, Video, ArrowRight } from "lucide-react";
+import { Play, Star, Film, Video, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
 
 const TRAILER_CATEGORIES = [
   { id: 'popular', label: 'Popular' },
@@ -17,7 +16,6 @@ const TRAILER_CATEGORIES = [
 type TrailerCategory = typeof TRAILER_CATEGORIES[number]['id'];
 type MediaItem = Movie | TVShow;
 
-// High priority refresh - every 20 minutes for trailer content
 const TRAILERS_REFRESH_INTERVAL = 20 * 60 * 1000;
 
 export const LatestTrailers = () => {
@@ -25,8 +23,8 @@ export const LatestTrailers = () => {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { setTrailerKey, setMovieTitle, setIsTrailerOpen } = useTrailerContext();
-  const navigate = useNavigate();
 
   const fetchTrailers = async (forceFresh: boolean = true) => {
     try {
@@ -34,8 +32,7 @@ export const LatestTrailers = () => {
       console.log(`Fetching FRESH trailers for category: ${activeCategory} - Force fresh: ${forceFresh}`);
       const response = await tmdbService.getLatestTrailers(activeCategory, forceFresh);
       console.log(`Received ${response.results.length} fresh items for ${activeCategory}`);
-      // Get 12 items for 2 rows
-      setItems(response.results.slice(0, 12));
+      setItems(response.results.slice(0, 24));
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching trailers:', error);
@@ -45,21 +42,19 @@ export const LatestTrailers = () => {
   };
 
   useEffect(() => {
+    setIsExpanded(false);
     fetchTrailers(true);
   }, [activeCategory]);
 
-  // High priority refresh every 20 minutes for Latest Trailers
   useEffect(() => {
     console.log(`Setting up trailers auto-refresh for ${activeCategory} every 20 minutes`);
     const refreshInterval = setInterval(() => {
       console.log(`Auto-refreshing trailers for ${activeCategory} - Priority content update`);
       fetchTrailers(true);
     }, TRAILERS_REFRESH_INTERVAL);
-
     return () => clearInterval(refreshInterval);
   }, [activeCategory]);
 
-  // Refresh when app regains focus
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -67,7 +62,6 @@ export const LatestTrailers = () => {
         fetchTrailers(true);
       }
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [activeCategory]);
@@ -93,10 +87,6 @@ export const LatestTrailers = () => {
     }
   };
 
-  const handleSeeMore = () => {
-    navigate('/movies');
-  };
-
   const getItemTitle = (item: MediaItem) => {
     return 'title' in item ? item.title : item.name;
   };
@@ -105,6 +95,8 @@ export const LatestTrailers = () => {
     const date = 'release_date' in item ? item.release_date : item.first_air_date;
     return date ? new Date(date).getFullYear() : 'TBA';
   };
+
+  const displayedItems = isExpanded ? items : items.slice(0, 12);
 
   return (
     <div className="mb-12 pt-4">
@@ -128,7 +120,7 @@ export const LatestTrailers = () => {
           <div className="w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
 
-        {/* Mobile-First Category Tabs - Single Line */}
+        {/* Mobile-First Category Tabs */}
         <div className="mb-6">
           <div className="flex justify-between space-x-1 sm:space-x-2 max-w-2xl mx-auto">
             {TRAILER_CATEGORIES.map((category) => (
@@ -151,7 +143,7 @@ export const LatestTrailers = () => {
           </div>
         </div>
 
-        {/* Trailers Grid - 2 rows */}
+        {/* Trailers Grid */}
         {loading ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
             {[...Array(12)].map((_, i) => (
@@ -161,7 +153,7 @@ export const LatestTrailers = () => {
         ) : (
           <>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-              {items.map((item) => (
+              {displayedItems.map((item) => (
                 <div
                   key={item.id}
                   className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer aspect-[2/3] rounded-lg"
@@ -175,7 +167,6 @@ export const LatestTrailers = () => {
                       loading="lazy"
                     />
                     
-                    {/* gradient overlays, play button, item info */}
                     <div className="absolute inset-0 rounded-lg">
                       <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent rounded-lg" />
                       <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent rounded-lg" />
@@ -220,16 +211,18 @@ export const LatestTrailers = () => {
                 </div>
               ))}
             </div>
-            <div className="flex justify-center mt-6">
-              <Button
-                variant="ghost"
-                onClick={handleSeeMore}
-                className="flex items-center gap-2 text-primary hover:text-primary/80 hover:bg-primary/10"
-              >
-                See More
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+            {items.length > 12 && (
+              <div className="flex justify-center mt-6">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="flex items-center gap-2 text-primary hover:text-primary/80 hover:bg-primary/10"
+                >
+                  {isExpanded ? 'Show Less' : 'See More'}
+                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>

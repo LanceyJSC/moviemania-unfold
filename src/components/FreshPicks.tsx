@@ -1,50 +1,45 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Clock, ArrowRight } from "lucide-react";
+import { Sparkles, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
-import { useNavigate } from "react-router-dom";
 
 type MediaItem = Movie | TVShow;
 
-// High priority refresh - every 20 minutes for trending content
 const FRESH_PICKS_REFRESH_INTERVAL = 20 * 60 * 1000;
 
 export const FreshPicks = () => {
   const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const navigate = useNavigate();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const loadFreshPicks = async (forceFresh: boolean = true) => {
     try {
       console.log('Loading Fresh Picks with FORCE FRESH data');
-      // Always force fresh data for Fresh Picks - this is the most critical content
       const [trendingMovies, trendingTV] = await Promise.all([
         tmdbService.getTrendingMovies('week', forceFresh),
         tmdbService.getTrendingTVShows('week', forceFresh)
       ]);
       
-      // Combine and shuffle movies and TV shows - get 6 of each for 2 rows
+      // Get more items for expanded view
       const allContent: MediaItem[] = [
-        ...trendingMovies.results.filter(item => item.poster_path).slice(0, 6),
-        ...trendingTV.results.filter(item => item.poster_path).slice(0, 6)
+        ...trendingMovies.results.filter(item => item.poster_path).slice(0, 12),
+        ...trendingTV.results.filter(item => item.poster_path).slice(0, 12)
       ];
       
-      // Shuffle the combined array
       const shuffled = allContent.sort(() => Math.random() - 0.5);
-      setContent(shuffled.slice(0, 12));
+      setContent(shuffled.slice(0, 24));
       setLastUpdated(new Date());
       console.log('Fresh Picks loaded successfully with latest TMDB data');
     } catch (error) {
       console.error('Failed to load fresh picks:', error);
       try {
-        // Fallback to popular movies only
         const fallbackResponse = await tmdbService.getPopularMovies(1, forceFresh);
         const moviesWithPosters = fallbackResponse.results
           .filter(movie => movie.poster_path)
-          .slice(0, 12);
+          .slice(0, 24);
         setContent(moviesWithPosters);
         setLastUpdated(new Date());
       } catch (fallbackError) {
@@ -59,18 +54,15 @@ export const FreshPicks = () => {
     loadFreshPicks(true);
   }, []);
 
-  // High priority refresh every 20 minutes for Fresh Picks
   useEffect(() => {
     console.log('Setting up Fresh Picks auto-refresh every 20 minutes');
     const refreshInterval = setInterval(() => {
       console.log('Auto-refreshing Fresh Picks - Priority content update');
       loadFreshPicks(true);
     }, FRESH_PICKS_REFRESH_INTERVAL);
-
     return () => clearInterval(refreshInterval);
   }, []);
 
-  // Refresh when app regains focus
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -78,14 +70,11 @@ export const FreshPicks = () => {
         loadFreshPicks(true);
       }
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const handleSeeMore = () => {
-    navigate('/movies');
-  };
+  const displayedContent = isExpanded ? content : content.slice(0, 12);
 
   if (isLoading) {
     return (
@@ -124,10 +113,10 @@ export const FreshPicks = () => {
           <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
         </div>
         
-        {content.length > 0 ? (
+        {displayedContent.length > 0 ? (
           <>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-              {content.map((item) => {
+              {displayedContent.map((item) => {
                 const isMovie = 'title' in item;
                 return (
                   <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
@@ -146,16 +135,18 @@ export const FreshPicks = () => {
                 );
               })}
             </div>
-            <div className="flex justify-center mt-6">
-              <Button
-                variant="ghost"
-                onClick={handleSeeMore}
-                className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
-              >
-                See More
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+            {content.length > 12 && (
+              <div className="flex justify-center mt-6">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
+                >
+                  {isExpanded ? 'Show Less' : 'See More'}
+                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </div>
+            )}
           </>
         ) : (
           <div className="text-center text-muted-foreground">
