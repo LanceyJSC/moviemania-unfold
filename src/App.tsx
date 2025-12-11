@@ -23,9 +23,6 @@ import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Genres from "./pages/Genres";
-import Cinemas from "./pages/Cinemas";
-import CinemaDetail from "./pages/CinemaDetail";
-import Local from "./pages/Local";
 import Notifications from "./pages/Notifications";
 import { Recommendations } from "./pages/Recommendations";
 import Members from "./pages/Members";
@@ -75,9 +72,6 @@ const App = () => {
                           <Route path="/actor/:id" element={<ActorDetail />} />
                           <Route path="/category/:category" element={<CategoryPage />} />
                           <Route path="/gallery" element={<Gallery />} />
-                          <Route path="/local" element={<Local />} />
-                          <Route path="/cinemas" element={<Cinemas />} />
-                          <Route path="/cinema/:id" element={<CinemaDetail />} />
                           <Route path="/notifications" element={<Notifications />} />
                           <Route path="/recommendations" element={<Recommendations />} />
                           <Route path="/profile" element={<Profile />} />

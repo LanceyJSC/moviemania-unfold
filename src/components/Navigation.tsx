@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, User, LogIn, Film, Tv, MapPin, LayoutGrid } from "lucide-react";
+import { Home, Search, User, LogIn, Film, Tv, LayoutGrid } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileContext } from "@/contexts/ProfileContext";
 
@@ -26,7 +26,6 @@ export const Navigation = () => {
     { path: "/movies", icon: Film, label: "Movies" },
     { path: "/tv-shows", icon: Tv, label: "TV" },
     { path: "/search", icon: Search, label: "Search" },
-    { path: "/local", icon: MapPin, label: "Local" },
     { path: "/auth", icon: LogIn, label: "Sign In" }
   ];
 
