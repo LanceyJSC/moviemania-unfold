@@ -329,80 +329,84 @@ export const TVShowCollectionCard = ({
                 </div>
               )}
 
-              {/* Season Reviews */}
-              {seasonReviews.length > 0 && (
+              {/* Season Reviews with Episodes nested underneath */}
+              {(seasonReviews.length > 0 || episodeReviews.length > 0) && (
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-2">Season Ratings</h4>
-                  <div className="space-y-2">
-                    {seasonReviews.map((review) => (
-                      <div 
-                        key={`season-${review.season_number}`}
-                        className="p-3 bg-background rounded border border-border"
-                      >
-                        <Link 
-                          to={`/tv/${tvId}/season/${review.season_number}`}
-                          className="flex items-center justify-between hover:text-primary transition-colors"
-                        >
-                          <span className="text-sm font-medium text-foreground">Season {review.season_number}</span>
-                          {review.rating ? (
-                            renderRating(review.rating)
-                          ) : (
-                            <span className="text-xs text-muted-foreground">Logged</span>
-                          )}
-                        </Link>
-                        {review.watched_date && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Watched: {formatDate(review.watched_date)}
-                          </p>
-                        )}
-                        {review.notes && (
-                          <div className="mt-2 flex items-start gap-2">
-                            <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-                            <p className="text-xs text-muted-foreground line-clamp-2">{review.notes}</p>
+                  <div className="space-y-3">
+                    {/* Get unique seasons from both season reviews and episode reviews */}
+                    {(() => {
+                      const allSeasons = new Set<number>();
+                      seasonReviews.forEach(r => allSeasons.add(r.season_number));
+                      episodeReviews.forEach(r => allSeasons.add(r.season_number));
+                      const sortedSeasons = Array.from(allSeasons).sort((a, b) => a - b);
+                      
+                      return sortedSeasons.map((seasonNum) => {
+                        const seasonReview = seasonReviews.find(r => r.season_number === seasonNum);
+                        const seasonEpisodes = episodeReviews.filter(r => r.season_number === seasonNum);
+                        
+                        return (
+                          <div key={`season-${seasonNum}`} className="space-y-2">
+                            {/* Season Header */}
+                            <div className="p-3 bg-background rounded border border-border">
+                              <Link 
+                                to={`/tv/${tvId}/season/${seasonNum}`}
+                                className="flex items-center justify-between hover:text-primary transition-colors"
+                              >
+                                <span className="text-sm font-medium text-foreground">Season {seasonNum}</span>
+                                {seasonReview?.rating ? (
+                                  renderRating(seasonReview.rating)
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">{seasonEpisodes.length > 0 ? `${seasonEpisodes.length} ep` : 'Logged'}</span>
+                                )}
+                              </Link>
+                              {seasonReview?.watched_date && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Watched: {formatDate(seasonReview.watched_date)}
+                                </p>
+                              )}
+                              {seasonReview?.notes && (
+                                <div className="mt-2 flex items-start gap-2">
+                                  <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+                                  <p className="text-xs text-muted-foreground line-clamp-2">{seasonReview.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Episodes nested under this season */}
+                            {seasonEpisodes.length > 0 && (
+                              <div className="ml-4 space-y-1">
+                                {seasonEpisodes.map((ep) => (
+                                  <div 
+                                    key={`ep-${ep.season_number}-${ep.episode_number}`}
+                                    className="p-2 bg-muted/50 rounded border border-border/50"
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-medium text-foreground">
+                                        E{ep.episode_number}
+                                      </span>
+                                      {ep.rating ? (
+                                        renderRating(ep.rating)
+                                      ) : (
+                                        <span className="text-xs text-muted-foreground">Watched</span>
+                                      )}
+                                    </div>
+                                    {ep.watched_date && (
+                                      <p className="text-xs text-muted-foreground mt-0.5">
+                                        Watched: {formatDate(ep.watched_date)}
+                                      </p>
+                                    )}
+                                    {ep.notes && (
+                                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{ep.notes}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Episode Reviews */}
-              {episodeReviews.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-2">Episode Ratings</h4>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {episodeReviews.map((review) => (
-                      <div 
-                        key={`ep-${review.season_number}-${review.episode_number}`}
-                        className="p-3 bg-background rounded border border-border"
-                      >
-                        <Link 
-                          to={`/tv/${tvId}/season/${review.season_number}`}
-                          className="flex items-center justify-between hover:text-primary transition-colors"
-                        >
-                          <span className="text-sm font-medium text-foreground">
-                            S{review.season_number} E{review.episode_number}
-                          </span>
-                          {review.rating ? (
-                            renderRating(review.rating)
-                          ) : (
-                            <span className="text-xs text-muted-foreground">Watched</span>
-                          )}
-                        </Link>
-                        {review.watched_date && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Watched: {formatDate(review.watched_date)}
-                          </p>
-                        )}
-                        {review.notes && (
-                          <div className="mt-2 flex items-start gap-2">
-                            <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-                            <p className="text-xs text-muted-foreground line-clamp-2">{review.notes}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
               )}
