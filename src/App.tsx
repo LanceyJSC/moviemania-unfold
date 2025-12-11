@@ -30,6 +30,7 @@ import UserProfile from "./pages/UserProfile";
 import Lists from "./pages/Lists";
 import ListDetail from "./pages/ListDetail";
 import Activity from "./pages/Activity";
+import MyReviews from "./pages/MyReviews";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -80,6 +81,7 @@ const App = () => {
                           <Route path="/lists" element={<Lists />} />
                           <Route path="/lists/:id" element={<ListDetail />} />
                           <Route path="/activity" element={<Activity />} />
+                          <Route path="/my-reviews" element={<MyReviews />} />
                           <Route path="/auth" element={<Auth />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />

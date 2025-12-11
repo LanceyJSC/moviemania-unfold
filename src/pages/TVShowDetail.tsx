@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Loader2, MoreHorizontal, ChevronRight, BookOpen, Eye, Users } from "lucide-react";
+import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
@@ -15,8 +15,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
 import { LogMediaModal } from "@/components/LogMediaModal";
-import { UserAverageRating } from "@/components/UserAverageRating";
+import { RatingComparisonCard } from "@/components/RatingComparisonCard";
+import { SeasonProgressCard } from "@/components/SeasonProgressCard";
 import { RatingInput } from "@/components/RatingInput";
+import { useDiary } from "@/hooks/useDiary";
 
 const TVShowDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,12 +39,27 @@ const TVShowDetail = () => {
     isWatched,
     getRating
   } = useUserStateContext();
+  const { tvDiary, refetchTVDiary } = useDiary();
 
   const tvShowId = Number(id);
   const isTVShowLiked = isLiked(tvShowId);
   const isTVShowInWatchlist = isInWatchlist(tvShowId);
   const isTVShowWatched = isWatched(tvShowId);
   const userRating = getRating(tvShowId);
+
+  // Calculate watched episodes per season from diary
+  const getWatchedEpisodesForSeason = (seasonNumber: number) => {
+    return tvDiary.filter(
+      entry => entry.tv_id === tvShowId && entry.season_number === seasonNumber && entry.episode_number
+    ).length;
+  };
+
+  const getSeasonRating = (seasonNumber: number) => {
+    const seasonEntry = tvDiary.find(
+      entry => entry.tv_id === tvShowId && entry.season_number === seasonNumber && !entry.episode_number
+    );
+    return seasonEntry?.rating || null;
+  };
 
   useEffect(() => {
     const loadDetails = async () => {
@@ -168,11 +185,6 @@ const TVShowDetail = () => {
             )}
           </div>
 
-          {/* User Average Rating - underneath TMDB */}
-          <div className="mb-2">
-            <UserAverageRating mediaId={tvShowId} mediaType="tv" />
-          </div>
-
           {!logoUrl && (
             <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg iphone-65:text-xl leading-tight">
               {tvShow.name}
@@ -264,18 +276,16 @@ const TVShowDetail = () => {
           </div>
         </div>
 
-        {/* Rating - marks as watched */}
-        <div className="mb-6">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-foreground text-sm">Your Rating (1-10):</span>
-            <RatingInput
-              value={userRating}
-              onChange={(rating) => setRating(tvShowId, rating, tvShow.name, posterUrl, 'tv')}
-              max={10}
-              size="md"
-            />
-          </div>
-        </div>
+        {/* Rating Comparison Card */}
+        <RatingComparisonCard
+          mediaId={tvShowId}
+          mediaType="tv"
+          tmdbRating={tvShow.vote_average}
+          userRating={userRating}
+          onRatingChange={(rating) => setRating(tvShowId, rating, tvShow.name, posterUrl, 'tv')}
+          mediaTitle={tvShow.name}
+          mediaPoster={tvShow.poster_path}
+        />
 
         {/* Creator */}
         {creator && (
