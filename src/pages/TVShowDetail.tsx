@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Heart, Plus, Share, Loader2, MoreHorizontal, ChevronRight, BookOpen, Eye, Users } from "lucide-react";
+import { Play, Heart, Plus, Loader2, MoreHorizontal, ChevronRight, BookOpen, Eye, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { UserReviews } from "@/components/UserReviews";
@@ -69,21 +69,6 @@ const TVShowDetail = () => {
     loadDetails();
   }, [id]);
 
-  const handleShare = async () => {
-    if (navigator.share && tvShow) {
-      try {
-        await navigator.share({
-          title: tvShow.name,
-          text: `Check out ${tvShow.name} on CineScope!`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        navigator.clipboard.writeText(window.location.href);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
-  };
 
   const handleWatchTrailer = () => {
     if (trailerKey) {
@@ -268,13 +253,6 @@ const TVShowDetail = () => {
               <Eye className={`h-4 w-4 ${isTVShowWatched ? 'fill-current' : ''}`} />
             </Button>
 
-            <Button 
-              variant="outline" 
-              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
-              onClick={handleShare}
-            >
-              <Share className="h-4 w-4" />
-            </Button>
 
             <Button 
               variant="outline" 
