@@ -106,7 +106,7 @@ export const NewThisMonth = () => {
 
   return (
     <div className="mb-12 pt-4">
-      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
+      <div className="bg-background rounded-2xl py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Calendar className="h-8 w-8 text-cinema-gold" />
