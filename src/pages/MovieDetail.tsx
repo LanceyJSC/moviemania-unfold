@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
 import { UserReviews } from "@/components/UserReviews";
-import { CommunityReviews } from "@/components/CommunityReviews";
 import { LogMediaModal } from "@/components/LogMediaModal";
-import { UserAverageRating } from "@/components/UserAverageRating";
+import { CommunityReviews } from "@/components/CommunityReviews";
+import { RatingComparisonCard } from "@/components/RatingComparisonCard";
 import { RatingInput } from "@/components/RatingInput";
 
 import { ActorCard } from "@/components/ActorCard";
@@ -171,11 +171,6 @@ const MovieDetail = () => {
             <span className="text-white/80 text-xs iphone-65:text-sm">{runtime}</span>
           </div>
 
-          {/* User Average Rating - underneath TMDB */}
-          <div className="mb-2">
-            <UserAverageRating mediaId={movieId} mediaType="movie" />
-          </div>
-
           <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg iphone-65:text-xl leading-tight">
             {title}
           </h1>
@@ -264,18 +259,16 @@ const MovieDetail = () => {
           </div>
         </div>
 
-        {/* Rating - marks as watched */}
-        <div className="mb-6">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-foreground text-sm">Your Rating (1-10):</span>
-            <RatingInput
-              value={userRating}
-              onChange={(rating) => setRating(movieId, rating, title, movie.poster_path)}
-              max={10}
-              size="md"
-            />
-          </div>
-        </div>
+        {/* Rating Comparison Card */}
+        <RatingComparisonCard
+          mediaId={movieId}
+          mediaType="movie"
+          tmdbRating={movie.vote_average}
+          userRating={userRating}
+          onRatingChange={(rating) => setRating(movieId, rating, title, movie.poster_path)}
+          mediaTitle={title}
+          mediaPoster={movie.poster_path}
+        />
 
         {/* Director and Producer */}
         {(director || producer) && (
@@ -304,7 +297,7 @@ const MovieDetail = () => {
         <UserReviews movieId={movie.id} isTV={isTV} />
         
         {/* Community Reviews Section */}
-        <CommunityReviews movieId={movie.id} />
+        <CommunityReviews movieId={movie.id} onWriteReview={() => setShowLogModal(true)} />
       </div>
 
       {/* Additional Content */}
