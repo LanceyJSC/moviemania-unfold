@@ -153,14 +153,43 @@
     scroll-behavior: smooth;
   }
 
-  /* Hide scrollbars on carousels */
+  /* Hide scrollbars on mobile carousels, show on desktop */
   .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
   
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  /* Only hide scrollbars on mobile/touch devices */
+  @media (max-width: 768px) {
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  
+  /* Show styled scrollbar on desktop */
+  @media (min-width: 769px) {
+    .scrollbar-hide::-webkit-scrollbar {
+      height: 8px;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar-track {
+      background: hsl(var(--muted));
+      border-radius: 4px;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar-thumb {
+      background: hsl(var(--primary) / 0.5);
+      border-radius: 4px;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar-thumb:hover {
+      background: hsl(var(--primary));
+    }
   }
 
   /* Achievement confetti animation */
