@@ -18,7 +18,7 @@ export const Navigation = () => {
     { path: "/", icon: Home, label: "Home" },
     { path: "/movies", icon: Film, label: "Movies" },
     { path: "/tv-shows", icon: Tv, label: "TV" },
-    { path: "/gallery", icon: LayoutGrid, label: "Gallery" },
+    { path: "/collection", icon: LayoutGrid, label: "Collection" },
     { path: "/search", icon: Search, label: "Search" },
     { path: "/profile", icon: User, label: profileLabel }
   ] : [

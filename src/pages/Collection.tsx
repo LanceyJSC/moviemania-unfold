@@ -19,8 +19,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
-import { GalleryMediaCard } from '@/components/GalleryMediaCard';
-import { TVShowGalleryCard } from '@/components/TVShowGalleryCard';
+import { CollectionMediaCard } from '@/components/CollectionMediaCard';
+import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -30,7 +30,7 @@ const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
 type MediaFilter = 'all' | 'movies' | 'tv';
 
-const Gallery = () => {
+const Collection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -87,11 +87,11 @@ const Gallery = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <MobileHeader title="Gallery" />
+        <MobileHeader title="Collection" />
         <Navigation />
         <div className="container mx-auto px-4 py-20 text-center">
           <Film className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="text-2xl font-bold mb-2">Your Gallery</h1>
+          <h1 className="text-2xl font-bold mb-2">Your Collection</h1>
           <p className="text-muted-foreground mb-4">Sign in to track your movies and TV shows</p>
           <Button onClick={() => navigate('/auth')}>Sign In</Button>
         </div>
@@ -243,7 +243,7 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <MobileHeader title="Gallery" />
+      <MobileHeader title="Collection" />
       <Navigation />
       
       <div className="container mx-auto px-4 py-6">
@@ -335,7 +335,7 @@ const Gallery = () => {
 
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-bold">My Gallery</h1>
+            <h1 className="text-xl font-bold">My Collection</h1>
             <p className="text-muted-foreground text-xs">Your personal collection</p>
           </div>
         </div>
@@ -438,7 +438,7 @@ const Gallery = () => {
                   
                   if (itemMediaType === 'tv') {
                     return (
-                      <TVShowGalleryCard
+                      <TVShowCollectionCard
                         key={item.id}
                         id={item.id}
                         tvId={item.movie_id}
@@ -449,12 +449,12 @@ const Gallery = () => {
                         <p className="text-sm text-muted-foreground">
                           Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
                         </p>
-                      </TVShowGalleryCard>
+                      </TVShowCollectionCard>
                     );
                   }
                   
                   return (
-                    <GalleryMediaCard
+                    <CollectionMediaCard
                       key={item.id}
                       id={item.id}
                       movieId={item.movie_id}
@@ -466,7 +466,7 @@ const Gallery = () => {
                       <p className="text-sm text-muted-foreground">
                         Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
                       </p>
-                    </GalleryMediaCard>
+                    </CollectionMediaCard>
                   );
                 })}
               </div>
@@ -490,7 +490,7 @@ const Gallery = () => {
                   
                   if (itemMediaType === 'tv') {
                     return (
-                      <TVShowGalleryCard
+                      <TVShowCollectionCard
                         key={item.id}
                         id={item.id}
                         tvId={item.movie_id}
@@ -502,12 +502,12 @@ const Gallery = () => {
                           <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
                           <span className="text-sm text-muted-foreground">Favorited</span>
                         </div>
-                      </TVShowGalleryCard>
+                      </TVShowCollectionCard>
                     );
                   }
                   
                   return (
-                    <GalleryMediaCard
+                    <CollectionMediaCard
                       key={item.id}
                       id={item.id}
                       movieId={item.movie_id}
@@ -520,7 +520,7 @@ const Gallery = () => {
                         <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
                         <span className="text-sm text-muted-foreground">Favorited</span>
                       </div>
-                    </GalleryMediaCard>
+                    </CollectionMediaCard>
                   );
                 })}
               </div>
@@ -542,7 +542,7 @@ const Gallery = () => {
                 {getWatchedItems().map(item => {
                   if (item.media_type === 'tv') {
                     return (
-                      <TVShowGalleryCard
+                      <TVShowCollectionCard
                         key={`${item.source}-${item.id}`}
                         id={item.id}
                         tvId={item.movie_id}
@@ -572,11 +572,11 @@ const Gallery = () => {
                           <Eye className="h-4 w-4 text-cinema-gold" />
                           <span className="text-sm text-muted-foreground">Watched</span>
                         </div>
-                      </TVShowGalleryCard>
+                      </TVShowCollectionCard>
                     );
                   }
                   return (
-                    <GalleryMediaCard
+                    <CollectionMediaCard
                       key={`${item.source}-${item.id}`}
                       id={item.id}
                       movieId={item.movie_id}
@@ -607,7 +607,7 @@ const Gallery = () => {
                         <Eye className="h-4 w-4 text-cinema-gold" />
                         <span className="text-sm text-muted-foreground">Watched</span>
                       </div>
-                    </GalleryMediaCard>
+                    </CollectionMediaCard>
                   );
                 })}
               </div>
@@ -634,7 +634,7 @@ const Gallery = () => {
                   
                   if (!isMovie) {
                     return (
-                      <TVShowGalleryCard
+                      <TVShowCollectionCard
                         key={entry.id}
                         id={entry.id}
                         tvId={id}
@@ -668,12 +668,12 @@ const Gallery = () => {
                         {entry.notes && (
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{entry.notes}</p>
                         )}
-                      </TVShowGalleryCard>
+                      </TVShowCollectionCard>
                     );
                   }
                   
                   return (
-                    <GalleryMediaCard
+                    <CollectionMediaCard
                       key={entry.id}
                       id={entry.id}
                       movieId={id}
@@ -703,7 +703,7 @@ const Gallery = () => {
                       {entry.notes && (
                         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{entry.notes}</p>
                       )}
-                    </GalleryMediaCard>
+                    </CollectionMediaCard>
                   );
                 })}
               </div>
@@ -721,4 +721,4 @@ const Gallery = () => {
   );
 };
 
-export default Gallery;
+export default Collection;

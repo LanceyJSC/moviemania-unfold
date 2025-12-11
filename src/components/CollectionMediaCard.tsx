@@ -18,7 +18,7 @@ import { tmdbService } from '@/lib/tmdb';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
-interface GalleryMediaCardProps {
+interface CollectionMediaCardProps {
   id: string;
   movieId: number;
   title: string;
@@ -29,7 +29,7 @@ interface GalleryMediaCardProps {
   children?: React.ReactNode;
 }
 
-export const GalleryMediaCard = ({
+export const CollectionMediaCard = ({
   id,
   movieId,
   title,
@@ -38,7 +38,7 @@ export const GalleryMediaCard = ({
   userRating,
   onDelete,
   children
-}: GalleryMediaCardProps) => {
+}: CollectionMediaCardProps) => {
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
 
   useEffect(() => {

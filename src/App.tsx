@@ -18,7 +18,7 @@ import TVShowDetail from "./pages/TVShowDetail";
 import SeasonDetail from "./pages/SeasonDetail";
 import ActorDetail from "./pages/ActorDetail";
 import CategoryPage from "./pages/CategoryPage";
-import Gallery from "./pages/Gallery";
+import Collection from "./pages/Collection";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -72,7 +72,7 @@ const App = () => {
                           <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
                           <Route path="/actor/:id" element={<ActorDetail />} />
                           <Route path="/category/:category" element={<CategoryPage />} />
-                          <Route path="/gallery" element={<Gallery />} />
+                          <Route path="/collection" element={<Collection />} />
                           <Route path="/notifications" element={<Notifications />} />
                           <Route path="/recommendations" element={<Recommendations />} />
                           <Route path="/profile" element={<Profile />} />

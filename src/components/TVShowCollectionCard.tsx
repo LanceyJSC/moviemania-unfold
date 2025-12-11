@@ -20,7 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
-interface TVShowGalleryCardProps {
+interface TVShowCollectionCardProps {
   id: string;
   tvId: number;
   title: string;
@@ -49,7 +49,7 @@ interface SeriesRating {
   rating: number | null;
 }
 
-export const TVShowGalleryCard = ({
+export const TVShowCollectionCard = ({
   id,
   tvId,
   title,
@@ -57,7 +57,7 @@ export const TVShowGalleryCard = ({
   userRating,
   onDelete,
   children
-}: TVShowGalleryCardProps) => {
+}: TVShowCollectionCardProps) => {
   const { user } = useAuth();
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
