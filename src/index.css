@@ -153,13 +153,19 @@
     scroll-behavior: smooth;
   }
 
-  /* Hide scrollbars on mobile carousels, show on desktop */
+  /* Horizontal scroll container for carousels */
   .scrollbar-hide {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    overflow-x: scroll !important;
+    cursor: grab;
   }
   
-  /* Only hide scrollbars on mobile/touch devices */
+  .scrollbar-hide:active {
+    cursor: grabbing;
+  }
+  
+  /* Hide scrollbars on mobile/touch devices */
   @media (max-width: 768px) {
     .scrollbar-hide {
       -ms-overflow-style: none;
@@ -173,6 +179,11 @@
   
   /* Show styled scrollbar on desktop */
   @media (min-width: 769px) {
+    .scrollbar-hide {
+      scrollbar-width: thin;
+      scrollbar-color: hsl(var(--primary) / 0.5) hsl(var(--muted));
+    }
+    
     .scrollbar-hide::-webkit-scrollbar {
       height: 8px;
     }
