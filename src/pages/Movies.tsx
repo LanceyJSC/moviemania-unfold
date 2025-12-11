@@ -48,7 +48,7 @@ const Movies = () => {
           <MediaSearch type="movie" />
 
           {/* Genres */}
-          <QuickGenres />
+          <QuickGenres mediaType="movie" />
 
           {/* Mobile-First Filter Buttons - Single Line */}
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4 px-4 md:px-6">
