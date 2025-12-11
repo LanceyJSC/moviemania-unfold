@@ -48,7 +48,7 @@ const TVShows = () => {
           <MediaSearch type="tv" />
 
           {/* Genres */}
-          <QuickGenres />
+          <QuickGenres mediaType="tv" />
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4 px-4 md:px-6">
             <div className="flex justify-between space-x-1 sm:space-x-2">
               {filterButtons.map((filter) => {
