@@ -140,20 +140,12 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className={`font-cinematic text-foreground tracking-wide ${
-            isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
-          }`}>
-            {title}
-          </h2>
-          {lastUpdated && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Updated {lastUpdated.toLocaleTimeString()}
-            </p>
-          )}
-        </div>
+      <div>
+        <h2 className={`font-cinematic text-foreground tracking-wide ${
+          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
+        }`}>
+          {title}
+        </h2>
       </div>
 
       {/* Movies Grid - Optimized for iPhone 3-across */}

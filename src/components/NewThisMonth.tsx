@@ -96,7 +96,7 @@ export const NewThisMonth = () => {
             <TrendingUp className="h-8 w-8 text-cinema-gold" />
           </div>
           <p className="text-muted-foreground mb-4">
-            Recent movies & TV shows from {currentMonth} - Updated hourly
+            Recent movies & TV shows from {currentMonth}
           </p>
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
