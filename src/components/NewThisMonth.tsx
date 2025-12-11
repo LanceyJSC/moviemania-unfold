@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { Calendar, TrendingUp } from "lucide-react";
+import { Calendar, TrendingUp, ArrowRight } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
+import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
+import { useNavigate } from "react-router-dom";
 
 type MediaItem = Movie | TVShow;
 
 export const NewThisMonth = () => {
   const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   const loadNewContent = async (fresh: boolean = false) => {
     try {
@@ -39,20 +42,20 @@ export const NewThisMonth = () => {
       let allContent: MediaItem[] = [...recentMovies, ...recentTVShows];
       
       // If we don't have enough recent content, add popular content
-      if (allContent.length < 8) {
+      if (allContent.length < 12) {
         const additionalMovies = moviesResponse.results
           .filter(movie => movie.poster_path && !recentMovies.includes(movie))
-          .slice(0, 4);
+          .slice(0, 6);
         const additionalTVShows = tvShowsResponse.results
           .filter(show => show.poster_path && !recentTVShows.includes(show))
-          .slice(0, 4);
+          .slice(0, 6);
         
         allContent = [...allContent, ...additionalMovies, ...additionalTVShows];
       }
       
-      // Shuffle and limit to 8 items
+      // Shuffle and limit to 12 items (2 rows of 6)
       const shuffled = allContent.sort(() => Math.random() - 0.5);
-      setContent(shuffled.slice(0, 8));
+      setContent(shuffled.slice(0, 12));
     } catch (error) {
       console.error('Failed to load new content:', error);
       try {
@@ -60,7 +63,7 @@ export const NewThisMonth = () => {
         const fallbackResponse = await tmdbService.getTrendingMovies('week', fresh);
         const moviesWithPosters = fallbackResponse.results
           .filter(movie => movie.poster_path)
-          .slice(0, 8);
+          .slice(0, 12);
         setContent(moviesWithPosters);
       } catch (fallbackError) {
         console.error('Fallback also failed:', fallbackError);
@@ -83,6 +86,9 @@ export const NewThisMonth = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
+  const handleSeeMore = () => {
+    navigate('/category/now_playing');
+  };
 
   if (isLoading) {
     return (
@@ -93,9 +99,9 @@ export const NewThisMonth = () => {
           </h2>
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
-        <div className="flex space-x-3 overflow-hidden">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="flex-shrink-0 w-30 h-45 bg-muted animate-pulse rounded-lg"></div>
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -122,24 +128,36 @@ export const NewThisMonth = () => {
         </div>
       
       {content.length > 0 ? (
-        <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
-          {content.map((item) => {
-            const isMovie = 'title' in item;
-            return (
-              <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0">
-                {isMovie ? (
-                  <MovieCard 
-                    movie={tmdbService.formatMovieForCard(item as Movie)} 
-                  />
-                ) : (
-                  <TVShowCard 
-                    tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            {content.map((item) => {
+              const isMovie = 'title' in item;
+              return (
+                <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
+                  {isMovie ? (
+                    <MovieCard 
+                      movie={tmdbService.formatMovieForCard(item as Movie)} 
+                    />
+                  ) : (
+                    <TVShowCard 
+                      tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-center mt-6">
+            <Button
+              variant="ghost"
+              onClick={handleSeeMore}
+              className="flex items-center gap-2 text-cinema-gold hover:text-cinema-gold/80 hover:bg-cinema-gold/10"
+            >
+              See More
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </>
       ) : (
         <div className="text-center text-muted-foreground">
           No new releases found for this month

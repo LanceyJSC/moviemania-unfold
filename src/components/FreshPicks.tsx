@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from "react";
-import { Sparkles, Clock } from "lucide-react";
+import { Sparkles, Clock, ArrowRight } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
+import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
+import { useNavigate } from "react-router-dom";
 
 type MediaItem = Movie | TVShow;
 
@@ -14,6 +15,7 @@ export const FreshPicks = () => {
   const [content, setContent] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const navigate = useNavigate();
 
   const loadFreshPicks = async (forceFresh: boolean = true) => {
     try {
@@ -24,15 +26,15 @@ export const FreshPicks = () => {
         tmdbService.getTrendingTVShows('week', forceFresh)
       ]);
       
-      // Combine and shuffle movies and TV shows
+      // Combine and shuffle movies and TV shows - get 6 of each for 2 rows
       const allContent: MediaItem[] = [
-        ...trendingMovies.results.filter(item => item.poster_path).slice(0, 4),
-        ...trendingTV.results.filter(item => item.poster_path).slice(0, 4)
+        ...trendingMovies.results.filter(item => item.poster_path).slice(0, 6),
+        ...trendingTV.results.filter(item => item.poster_path).slice(0, 6)
       ];
       
       // Shuffle the combined array
       const shuffled = allContent.sort(() => Math.random() - 0.5);
-      setContent(shuffled.slice(0, 8));
+      setContent(shuffled.slice(0, 12));
       setLastUpdated(new Date());
       console.log('Fresh Picks loaded successfully with latest TMDB data');
     } catch (error) {
@@ -42,7 +44,7 @@ export const FreshPicks = () => {
         const fallbackResponse = await tmdbService.getPopularMovies(1, forceFresh);
         const moviesWithPosters = fallbackResponse.results
           .filter(movie => movie.poster_path)
-          .slice(0, 8);
+          .slice(0, 12);
         setContent(moviesWithPosters);
         setLastUpdated(new Date());
       } catch (fallbackError) {
@@ -81,6 +83,10 @@ export const FreshPicks = () => {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
+  const handleSeeMore = () => {
+    navigate('/category/trending');
+  };
+
   if (isLoading) {
     return (
       <div className="mb-12">
@@ -91,10 +97,10 @@ export const FreshPicks = () => {
             </h2>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
-            <div className="flex space-x-3 overflow-hidden">
-             {Array.from({ length: 6 }).map((_, index) => (
-               <div key={index} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg"></div>
-             ))}
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -119,24 +125,36 @@ export const FreshPicks = () => {
         </div>
         
         {content.length > 0 ? (
-           <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
-             {content.map((item) => {
-               const isMovie = 'title' in item;
-               return (
-                 <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0">
-                   {isMovie ? (
-                     <MovieCard 
-                       movie={tmdbService.formatMovieForCard(item as Movie)} 
-                     />
-                   ) : (
-                     <TVShowCard 
-                       tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
-                     />
-                   )}
-                 </div>
-               );
-             })}
-           </div>
+          <>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              {content.map((item) => {
+                const isMovie = 'title' in item;
+                return (
+                  <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
+                    {isMovie ? (
+                      <MovieCard 
+                        movie={tmdbService.formatMovieForCard(item as Movie)} 
+                      />
+                    ) : (
+                      <TVShowCard 
+                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="ghost"
+                onClick={handleSeeMore}
+                className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
+              >
+                See More
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </>
         ) : (
           <div className="text-center text-muted-foreground">
             Loading fresh picks from TMDB...
