@@ -48,6 +48,8 @@ export const useDiary = () => {
       return data as MovieDiaryEntry[];
     },
     enabled: !!user?.id,
+    staleTime: 0, // Always refetch to get latest data
+    refetchOnMount: 'always',
   });
 
   const tvDiaryQuery = useQuery({
@@ -63,6 +65,8 @@ export const useDiary = () => {
       return data as TVDiaryEntry[];
     },
     enabled: !!user?.id,
+    staleTime: 0, // Always refetch to get latest data
+    refetchOnMount: 'always',
   });
 
   const addMovieDiaryEntry = useMutation({

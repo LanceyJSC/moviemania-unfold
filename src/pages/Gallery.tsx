@@ -53,7 +53,7 @@ const Gallery = () => {
     }
   }, [user, movieDiary.length, tvDiary.length, ratedMovies.length]);
 
-  // Load rated movies (watched) - also refresh when watchedItems changes
+  // Load rated movies (watched) - also refresh when watchedItems changes or diary updates
   useEffect(() => {
     const loadRatedMovies = async () => {
       if (!user) {
@@ -75,7 +75,14 @@ const Gallery = () => {
       }
     };
     loadRatedMovies();
-  }, [user, userState.watchedItems]);
+  }, [user, userState.watchedItems, movieDiary.length, tvDiary.length]);
+
+  // Refetch diary data on component mount
+  useEffect(() => {
+    if (user) {
+      refetchDiary();
+    }
+  }, [user]);
 
   if (!user) {
     return (
