@@ -62,6 +62,7 @@ export const TVShowCollectionCard = ({
 }: TVShowCollectionCardProps) => {
   const { user } = useAuth();
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
+  const [showTitle, setShowTitle] = useState(title);
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [seriesRating, setSeriesRating] = useState<number | null>(null);
   const [seasonReviews, setSeasonReviews] = useState<SeasonReview[]>([]);
@@ -69,6 +70,8 @@ export const TVShowCollectionCard = ({
   const [isLoading, setIsLoading] = useState(false);
   const [seasonCount, setSeasonCount] = useState(0);
   const [episodeCount, setEpisodeCount] = useState(0);
+  const [seriesNotes, setSeriesNotes] = useState<string | null>(null);
+  const [seriesWatchedDate, setSeriesWatchedDate] = useState<string | null>(null);
 
   // Load counts on mount
   useEffect(() => {
@@ -103,15 +106,19 @@ export const TVShowCollectionCard = ({
   }, [user, tvId]);
 
   useEffect(() => {
-    const fetchTmdbRating = async () => {
+    const fetchTmdbData = async () => {
       try {
         const details = await tmdbService.getTVShowDetails(tvId);
         setTmdbRating(details.vote_average);
+        // Use TMDB title to ensure we show the actual show name, not episode-specific title
+        if (details.name) {
+          setShowTitle(details.name);
+        }
       } catch (error) {
-        console.error('Failed to fetch TMDB rating:', error);
+        console.error('Failed to fetch TMDB data:', error);
       }
     };
-    fetchTmdbRating();
+    fetchTmdbData();
   }, [tvId]);
 
   // Auto-load reviews if defaultExpanded is true
@@ -139,7 +146,28 @@ export const TVShowCollectionCard = ({
         setSeriesRating(ratingData.rating);
       }
 
-      // Load ALL diary entries for this TV show
+      // Load series-level diary entry (no season/episode number)
+      const { data: seriesDiaryData } = await supabase
+        .from('tv_diary')
+        .select('notes, watched_date, rating')
+        .eq('user_id', user.id)
+        .eq('tv_id', tvId)
+        .is('season_number', null)
+        .is('episode_number', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (seriesDiaryData) {
+        setSeriesNotes(seriesDiaryData.notes);
+        setSeriesWatchedDate(seriesDiaryData.watched_date);
+        // If no rating from user_ratings, use diary rating
+        if (!ratingData?.rating && seriesDiaryData.rating) {
+          setSeriesRating(seriesDiaryData.rating);
+        }
+      }
+
+      // Load ALL diary entries for this TV show (seasons and episodes)
       const { data } = await supabase
         .from('tv_diary')
         .select('season_number, episode_number, rating, notes, watched_date')
@@ -230,7 +258,7 @@ export const TVShowCollectionCard = ({
           <div className="flex items-center gap-2">
             <Tv className="h-4 w-4 text-primary shrink-0" />
             <Link to={`/tv/${tvId}`} className="font-semibold hover:underline line-clamp-1">
-              {title}
+              {showTitle}
             </Link>
           </div>
 
@@ -291,7 +319,7 @@ export const TVShowCollectionCard = ({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete "{title}"?</AlertDialogTitle>
+              <AlertDialogTitle>Delete "{showTitle}"?</AlertDialogTitle>
               <AlertDialogDescription>
                 This will permanently delete all data for this TV show including:
                 <ul className="list-disc list-inside mt-2 space-y-1">
@@ -322,21 +350,30 @@ export const TVShowCollectionCard = ({
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
             </div>
-          ) : (seasonReviews.length > 0 || episodeReviews.length > 0 || seriesRating || userRating) ? (
+          ) : (
             <div className="space-y-4">
-              {/* Series Rating */}
-              {(seriesRating || userRating) && (
-                <div className="p-3 bg-background rounded border border-border">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-foreground">Show Rating</span>
-                    {(seriesRating || userRating) ? (
-                      renderRating(seriesRating || userRating || 0, 'md')
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Not rated</span>
-                    )}
-                  </div>
+              {/* Series/Show Rating - Always show this section */}
+              <div className="p-3 bg-background rounded border border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">Show Rating</span>
+                  {(seriesRating || userRating) ? (
+                    renderRating(seriesRating || userRating || 0, 'md')
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Not rated</span>
+                  )}
                 </div>
-              )}
+                {seriesWatchedDate && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Watched: {formatDate(seriesWatchedDate)}
+                  </p>
+                )}
+                {seriesNotes && (
+                  <div className="mt-2 flex items-start gap-2">
+                    <BookOpen className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground">{seriesNotes}</p>
+                  </div>
+                )}
+              </div>
 
               {/* Season Reviews with Episodes nested underneath */}
               {(seasonReviews.length > 0 || episodeReviews.length > 0) && (
@@ -420,10 +457,6 @@ export const TVShowCollectionCard = ({
                 </div>
               )}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No ratings or reviews yet
-            </p>
           )}
         </div>
       )}
