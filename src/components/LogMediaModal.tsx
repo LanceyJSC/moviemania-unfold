@@ -134,6 +134,17 @@ export const LogMediaModal = ({
           episode_number: episodeNumber || null,
           runtime: runtime
         });
+
+        // Set is_public to true if notes are provided (for community reviews)
+        if (notes.trim()) {
+          await supabase
+            .from('tv_diary')
+            .update({ is_public: true })
+            .eq('user_id', user.id)
+            .eq('tv_id', mediaId)
+            .eq('season_number', seasonNumber || null)
+            .eq('episode_number', episodeNumber || null);
+        }
       }
 
       // Always add to user_ratings (marks as "Watched") - rating can be null
@@ -239,6 +250,11 @@ export const LogMediaModal = ({
       queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
       queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
       queryClient.invalidateQueries({ queryKey: ['user-ratings'] });
+      // Invalidate episode community reviews if this is a TV episode
+      if (mediaType === 'tv' && seasonNumber && episodeNumber) {
+        queryClient.invalidateQueries({ queryKey: ['episode-community-reviews', mediaId, seasonNumber, episodeNumber] });
+        queryClient.invalidateQueries({ queryKey: ['episode-review-count', mediaId, seasonNumber, episodeNumber] });
+      }
       await refetchUserState();
 
       resetForm();
