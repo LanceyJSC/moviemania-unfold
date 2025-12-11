@@ -9,8 +9,10 @@ export const Navigation = () => {
   const { user } = useAuth();
   const { profile } = useProfileContext();
   
-  // Get stable profile label - use cached profile from context
-  const profileLabel = profile?.username || "Profile";
+  // Get stable profile label - use cached profile from context, truncate if too long
+  const profileLabel = profile?.username 
+    ? (profile.username.length > 8 ? profile.username.slice(0, 8) : profile.username)
+    : "Profile";
   
   const navItems = user ? [
     { path: "/", icon: Home, label: "Home" },
@@ -29,9 +31,16 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-cinema-black/95 border-t border-border backdrop-blur-sm" 
-         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
-      <div className="grid grid-cols-6 py-2 px-1">
+    <nav 
+      className="fixed bottom-0 left-0 right-0 z-50 bg-cinema-black border-t border-border" 
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}
+    >
+      <div 
+        className="grid py-2"
+        style={{ 
+          gridTemplateColumns: `repeat(${navItems.length}, 1fr)`,
+        }}
+      >
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -40,12 +49,12 @@ export const Navigation = () => {
             <Link 
               key={item.path} 
               to={item.path}
-              className={`flex flex-col items-center justify-center gap-1 py-2 ${
-                isActive ? 'text-cinema-red' : 'text-white/80'
+              className={`flex flex-col items-center justify-center py-2 ${
+                isActive ? 'text-cinema-red' : 'text-white/70'
               }`}
             >
-              <Icon className="h-5 w-5 flex-shrink-0" />
-              <span className="text-[10px] font-medium leading-none text-center truncate w-full px-1">
+              <Icon className="h-5 w-5 mb-1" />
+              <span className="text-[10px] font-medium">
                 {item.label}
               </span>
             </Link>
