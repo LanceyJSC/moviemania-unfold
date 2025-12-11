@@ -5,6 +5,7 @@ import { Navigation } from "@/components/Navigation";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { MediaSearch } from "@/components/MediaSearch";
+import { QuickGenres } from "@/components/QuickGenres";
 
 const TVShows = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -42,13 +43,12 @@ const TVShows = () => {
       {/* Content container */}
       <div className="relative">
         {/* Content */}
-        <div className="container mx-auto px-4 md:px-6 py-8 space-y-8 pb-32">
+        <div className="container mx-auto px-4 md:px-6 py-6 space-y-6 pb-32">
           {/* Search Bar */}
-          <div className="px-4 md:px-6">
-            <MediaSearch type="tv" />
-          </div>
+          <MediaSearch type="tv" />
 
-          {/* Filter Buttons - Single Line Mobile Optimized */}
+          {/* Genres */}
+          <QuickGenres />
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4 px-4 md:px-6">
             <div className="flex justify-between space-x-1 sm:space-x-2">
               {filterButtons.map((filter) => {
