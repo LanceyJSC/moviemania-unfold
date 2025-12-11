@@ -98,6 +98,36 @@ const Collection = () => {
     );
   }
 
+  // Helper function to delete all data for a movie/TV show
+  const deleteAllMediaData = async (mediaId: number, mediaType: 'movie' | 'tv') => {
+    if (!user) return;
+    
+    // Delete from all related tables
+    await Promise.all([
+      supabase.from('user_ratings').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+      supabase.from('ratings').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+      supabase.from('user_reviews').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+      supabase.from('watchlist').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+      supabase.from('enhanced_watchlist_items').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+      supabase.from('activity_feed').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+      mediaType === 'tv' 
+        ? supabase.from('tv_diary').delete().eq('tv_id', mediaId).eq('user_id', user.id)
+        : supabase.from('movie_diary').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+    ]);
+    
+    // Refresh data
+    const { data } = await supabase
+      .from('user_ratings')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    setRatedMovies(data || []);
+    queryClient.invalidateQueries({ queryKey: ['average-user-rating', mediaId] });
+    refetchDiary();
+    await refetchUserState();
+    await recalculateStats();
+  };
+
   const handleMovieSearch = async () => {
     if (!movieSearchTerm.trim()) {
       toast.error('Please enter a movie title');
@@ -549,24 +579,7 @@ const Collection = () => {
                         title={item.movie_title}
                         poster={item.movie_poster}
                         userRating={item.rating}
-                        onDelete={async () => {
-                          // Delete all related data for this TV show
-                          await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                          await supabase.from('ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                          await supabase.from('user_reviews').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                          await supabase.from('tv_diary').delete().eq('tv_id', item.movie_id).eq('user_id', user!.id);
-                          await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                          await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                          const { data } = await supabase
-                            .from('user_ratings')
-                            .select('*')
-                            .eq('user_id', user!.id)
-                            .order('created_at', { ascending: false });
-                          setRatedMovies(data || []);
-                          queryClient.invalidateQueries({ queryKey: ['average-user-rating', item.movie_id] });
-                          refetchDiary();
-                          await refetchUserState();
-                        }}
+                        onDelete={() => deleteAllMediaData(item.movie_id, 'tv')}
                       >
                         <div className="flex items-center gap-1">
                           <Eye className="h-4 w-4 text-cinema-gold" />
@@ -584,24 +597,7 @@ const Collection = () => {
                       poster={item.movie_poster}
                       mediaType="movie"
                       userRating={item.rating}
-                      onDelete={async () => {
-                        // Delete all related data for this movie
-                        await supabase.from('user_ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                        await supabase.from('ratings').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                        await supabase.from('user_reviews').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                        await supabase.from('movie_diary').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                        await supabase.from('watchlist').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                        await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', item.movie_id).eq('user_id', user!.id);
-                        const { data } = await supabase
-                          .from('user_ratings')
-                          .select('*')
-                          .eq('user_id', user!.id)
-                          .order('created_at', { ascending: false });
-                        setRatedMovies(data || []);
-                        queryClient.invalidateQueries({ queryKey: ['average-user-rating', item.movie_id] });
-                        refetchDiary();
-                        await refetchUserState();
-                      }}
+                      onDelete={() => deleteAllMediaData(item.movie_id, 'movie')}
                     >
                       <div className="flex items-center gap-1">
                         <Eye className="h-4 w-4 text-cinema-gold" />
@@ -642,21 +638,7 @@ const Collection = () => {
                           poster={poster}
                           userRating={entry.rating}
                           defaultExpanded={true}
-                          onDelete={async () => {
-                            // Delete all related data for this TV show
-                            const tvId = (entry as any).tv_id;
-                            await supabase.from('user_ratings').delete().eq('movie_id', tvId).eq('user_id', user!.id);
-                            await supabase.from('ratings').delete().eq('movie_id', tvId).eq('user_id', user!.id);
-                            await supabase.from('user_reviews').delete().eq('movie_id', tvId).eq('user_id', user!.id);
-                            await supabase.from('tv_diary').delete().eq('tv_id', tvId).eq('user_id', user!.id);
-                            await supabase.from('watchlist').delete().eq('movie_id', tvId).eq('user_id', user!.id);
-                            await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', tvId).eq('user_id', user!.id);
-                            const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
-                            setRatedMovies(data || []);
-                            queryClient.invalidateQueries({ queryKey: ['average-user-rating', tvId] });
-                            refetchDiary();
-                            await refetchUserState();
-                          }}
+                          onDelete={() => deleteAllMediaData((entry as any).tv_id, 'tv')}
                         />
                       );
                   }
@@ -670,21 +652,7 @@ const Collection = () => {
                       poster={poster}
                       mediaType="movie"
                       userRating={entry.rating}
-                      onDelete={async () => {
-                        // Delete all related data for this movie
-                        const movieId = (entry as any).movie_id;
-                        await supabase.from('user_ratings').delete().eq('movie_id', movieId).eq('user_id', user!.id);
-                        await supabase.from('ratings').delete().eq('movie_id', movieId).eq('user_id', user!.id);
-                        await supabase.from('user_reviews').delete().eq('movie_id', movieId).eq('user_id', user!.id);
-                        await supabase.from('movie_diary').delete().eq('movie_id', movieId).eq('user_id', user!.id);
-                        await supabase.from('watchlist').delete().eq('movie_id', movieId).eq('user_id', user!.id);
-                        await supabase.from('enhanced_watchlist_items').delete().eq('movie_id', movieId).eq('user_id', user!.id);
-                        const { data } = await supabase.from('user_ratings').select('*').eq('user_id', user!.id).order('created_at', { ascending: false });
-                        setRatedMovies(data || []);
-                        queryClient.invalidateQueries({ queryKey: ['average-user-rating', movieId] });
-                        refetchDiary();
-                        await refetchUserState();
-                      }}
+                      onDelete={() => deleteAllMediaData((entry as any).movie_id, 'movie')}
                     >
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
