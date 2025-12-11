@@ -1,9 +1,9 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const MOVIE_GENRES = [
   { id: 28, name: "Action", emoji: "💥", color: "bg-red-500/20 text-red-400" },
@@ -48,23 +48,8 @@ const TV_GENRES = [
 
 export default function Genres() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Get media type from URL, default to "movies"
-  const typeFromUrl = searchParams.get("type");
-  const initialTab = typeFromUrl === "tv" ? "tv" : "movies";
-  const [activeTab, setActiveTab] = useState<"movies" | "tv">(initialTab);
-
-  // Update tab when URL changes
-  useEffect(() => {
-    const type = searchParams.get("type");
-    if (type === "tv") {
-      setActiveTab("tv");
-    } else if (type === "movie") {
-      setActiveTab("movies");
-    }
-  }, [searchParams]);
+  const [activeTab, setActiveTab] = useState<"movies" | "tv">("movies");
 
   const currentGenres = activeTab === "movies" ? MOVIE_GENRES : TV_GENRES;
   const filteredGenres = currentGenres.filter(genre =>
