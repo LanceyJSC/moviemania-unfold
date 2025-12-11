@@ -74,19 +74,49 @@ export const useDiary = () => {
   const addMovieDiaryEntry = useMutation({
     mutationFn: async (entry: Omit<MovieDiaryEntry, 'id' | 'user_id' | 'created_at'>) => {
       if (!user?.id) throw new Error('Not authenticated');
-      const { data, error } = await supabase
+      
+      // Check if entry already exists for this movie
+      const { data: existing } = await supabase
         .from('movie_diary')
-        .insert({ ...entry, user_id: user.id })
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('movie_id', entry.movie_id)
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing entry
+        const { data, error } = await supabase
+          .from('movie_diary')
+          .update({
+            watched_date: entry.watched_date,
+            rating: entry.rating,
+            notes: entry.notes,
+            runtime: entry.runtime,
+            movie_poster: entry.movie_poster,
+            movie_title: entry.movie_title
+          })
+          .eq('id', existing.id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new entry
+        const { data, error } = await supabase
+          .from('movie_diary')
+          .insert({ ...entry, user_id: user.id })
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
     },
     onError: (error) => {
-      toast.error('Failed to add to diary');
+      toast.error('Failed to save diary entry');
       console.error(error);
     },
   });
@@ -94,19 +124,63 @@ export const useDiary = () => {
   const addTVDiaryEntry = useMutation({
     mutationFn: async (entry: Omit<TVDiaryEntry, 'id' | 'user_id' | 'created_at'>) => {
       if (!user?.id) throw new Error('Not authenticated');
-      const { data, error } = await supabase
+      
+      // Build query to check for existing entry
+      let query = supabase
         .from('tv_diary')
-        .insert({ ...entry, user_id: user.id })
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('tv_id', entry.tv_id);
+      
+      // Handle null season/episode numbers
+      if (entry.season_number === null) {
+        query = query.is('season_number', null);
+      } else {
+        query = query.eq('season_number', entry.season_number);
+      }
+      
+      if (entry.episode_number === null) {
+        query = query.is('episode_number', null);
+      } else {
+        query = query.eq('episode_number', entry.episode_number);
+      }
+
+      const { data: existing } = await query.maybeSingle();
+
+      if (existing) {
+        // Update existing entry
+        const { data, error } = await supabase
+          .from('tv_diary')
+          .update({
+            watched_date: entry.watched_date,
+            rating: entry.rating,
+            notes: entry.notes,
+            runtime: entry.runtime,
+            tv_poster: entry.tv_poster,
+            tv_title: entry.tv_title
+          })
+          .eq('id', existing.id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new entry
+        const { data, error } = await supabase
+          .from('tv_diary')
+          .insert({ ...entry, user_id: user.id })
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
     },
     onError: (error) => {
-      toast.error('Failed to add to diary');
+      toast.error('Failed to save diary entry');
       console.error(error);
     },
   });
