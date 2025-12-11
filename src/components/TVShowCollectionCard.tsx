@@ -28,6 +28,7 @@ interface TVShowCollectionCardProps {
   userRating?: number | null;
   onDelete: () => void;
   children?: React.ReactNode;
+  defaultExpanded?: boolean;
 }
 
 interface SeasonReview {
@@ -56,11 +57,12 @@ export const TVShowCollectionCard = ({
   poster,
   userRating,
   onDelete,
-  children
+  children,
+  defaultExpanded = false
 }: TVShowCollectionCardProps) => {
   const { user } = useAuth();
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [seriesRating, setSeriesRating] = useState<number | null>(null);
   const [seasonReviews, setSeasonReviews] = useState<SeasonReview[]>([]);
   const [episodeReviews, setEpisodeReviews] = useState<EpisodeReview[]>([]);
@@ -111,6 +113,13 @@ export const TVShowCollectionCard = ({
     };
     fetchTmdbRating();
   }, [tvId]);
+
+  // Auto-load reviews if defaultExpanded is true
+  useEffect(() => {
+    if (defaultExpanded && user) {
+      loadReviews();
+    }
+  }, [defaultExpanded, user, tvId]);
 
   const loadReviews = async () => {
     if (!user) return;
