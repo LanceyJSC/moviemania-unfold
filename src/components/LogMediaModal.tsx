@@ -233,9 +233,12 @@ export const LogMediaModal = ({
       // Recalculate stats after logging
       await recalculateStats();
 
-      // Invalidate queries to update the UI
+      // Invalidate all relevant queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['average-user-rating', mediaId, mediaType] });
       queryClient.invalidateQueries({ queryKey: ['community-reviews', mediaId] });
+      queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
+      queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
+      queryClient.invalidateQueries({ queryKey: ['user-ratings'] });
       await refetchUserState();
 
       resetForm();
