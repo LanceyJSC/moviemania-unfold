@@ -309,34 +309,17 @@ const TVShowDetail = () => {
               {tvShow.seasons
                 .filter(season => season.season_number > 0)
                 .map((season) => (
-                <Link 
-                  key={season.id} 
-                  to={`/tv/${tvShow.id}/season/${season.season_number}`}
-                  className="group"
-                >
-                  <div className="flex items-center gap-4 p-4 bg-card/50 rounded-lg border border-border hover:border-cinema-red transition-all duration-200 hover:bg-card/70">
-                    <img 
-                      src={tmdbService.getPosterUrl(season.poster_path, 'w300')}
-                      alt={season.name}
-                      className="w-16 h-24 rounded object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-foreground group-hover:text-cinema-red transition-colors">
-                        {season.name}
-                      </h3>
-                      <p className="text-muted-foreground text-sm">
-                        {season.episode_count} episode{season.episode_count !== 1 ? 's' : ''}
-                      </p>
-                      {season.air_date && (
-                        <p className="text-muted-foreground text-xs">
-                          {new Date(season.air_date).getFullYear()}
-                        </p>
-                      )}
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-cinema-red transition-colors" />
-                  </div>
-                </Link>
-              ))}
+                  <SeasonProgressCard
+                    key={season.id}
+                    tvShowId={tvShow.id}
+                    tvShowName={tvShow.name}
+                    tvShowPoster={tvShow.poster_path}
+                    season={season}
+                    watchedEpisodes={getWatchedEpisodesForSeason(season.season_number)}
+                    seasonRating={getSeasonRating(season.season_number)}
+                    onProgressUpdate={refetchTVDiary}
+                  />
+                ))}
             </div>
           </div>
         )}
