@@ -87,7 +87,7 @@ export const NewThisMonth = () => {
   }, []);
 
   const handleSeeMore = () => {
-    navigate('/category/now_playing');
+    navigate('/movies');
   };
 
   if (isLoading) {
@@ -136,11 +136,13 @@ export const NewThisMonth = () => {
                 <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
                   {isMovie ? (
                     <MovieCard 
-                      movie={tmdbService.formatMovieForCard(item as Movie)} 
+                      movie={tmdbService.formatMovieForCard(item as Movie)}
+                      variant="grid"
                     />
                   ) : (
                     <TVShowCard 
-                      tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                      tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
+                      variant="grid"
                     />
                   )}
                 </div>

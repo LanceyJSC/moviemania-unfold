@@ -84,7 +84,7 @@ export const FreshPicks = () => {
   }, []);
 
   const handleSeeMore = () => {
-    navigate('/category/trending');
+    navigate('/movies');
   };
 
   if (isLoading) {
@@ -133,11 +133,13 @@ export const FreshPicks = () => {
                   <div key={`fresh-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
                     {isMovie ? (
                       <MovieCard 
-                        movie={tmdbService.formatMovieForCard(item as Movie)} 
+                        movie={tmdbService.formatMovieForCard(item as Movie)}
+                        variant="grid"
                       />
                     ) : (
                       <TVShowCard 
-                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
+                        variant="grid"
                       />
                     )}
                   </div>
