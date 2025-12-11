@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Film, Tv, Star, Clock, Heart, Eye, 
-  Plus, Search, Trash2, Trophy, BookOpen
+  Plus, Search, Trash2, Trophy, BookOpen, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
@@ -45,6 +45,8 @@ const Collection = () => {
   const [ratedMovies, setRatedMovies] = useState<any[]>([]);
   const [ratedLoading, setRatedLoading] = useState(true);
   const [mediaFilter, setMediaFilter] = useState<MediaFilter>('all');
+  const [userReviews, setUserReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   // Recalculate stats on mount and when diary/ratings data changes
   useEffect(() => {
@@ -82,6 +84,31 @@ const Collection = () => {
     if (user) {
       refetchDiary();
     }
+  }, [user]);
+
+  // Load user reviews
+  useEffect(() => {
+    const loadUserReviews = async () => {
+      if (!user) {
+        setReviewsLoading(false);
+        return;
+      }
+      setReviewsLoading(true);
+      try {
+        const { data } = await supabase
+          .from('user_reviews')
+          .select('*')
+          .eq('user_id', user.id)
+          .not('review_text', 'is', null)
+          .order('created_at', { ascending: false });
+        setUserReviews(data || []);
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+    loadUserReviews();
   }, [user]);
 
   if (!user) {
@@ -239,7 +266,19 @@ const Collection = () => {
     );
   };
 
-  const isLoading = itemsLoading || favoritesLoading || ratedLoading || diaryLoading;
+  // Get filtered reviews
+  const getFilteredReviews = () => {
+    let reviews = userReviews.filter(r => r.review_text && r.review_text.trim());
+    if (mediaFilter === 'movies') reviews = reviews.filter(r => r.media_type !== 'tv');
+    if (mediaFilter === 'tv') reviews = reviews.filter(r => r.media_type === 'tv');
+    return reviews;
+  };
+
+  const getMovieReviews = () => userReviews.filter(r => r.review_text && r.review_text.trim() && r.media_type !== 'tv');
+  const getTVReviews = () => userReviews.filter(r => r.review_text && r.review_text.trim() && r.media_type === 'tv');
+
+  const isLoading = itemsLoading || favoritesLoading || ratedLoading || diaryLoading || reviewsLoading;
+
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -371,7 +410,7 @@ const Collection = () => {
         </div>
 
         <Tabs defaultValue="watchlist" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="watchlist" className="flex items-center gap-1 text-xs sm:text-sm">
               <Clock className="w-4 h-4" />
               <span className="hidden sm:inline">Watchlist</span>
@@ -386,6 +425,11 @@ const Collection = () => {
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">Watched</span>
               <Badge variant="secondary" className="ml-1 text-xs">{getWatchedItems().length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="flex items-center gap-1 text-xs sm:text-sm">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Reviews</span>
+              <Badge variant="secondary" className="ml-1 text-xs">{getFilteredReviews().length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="diary" className="flex items-center gap-1 text-xs sm:text-sm">
               <BookOpen className="w-4 h-4" />
@@ -616,6 +660,119 @@ const Collection = () => {
                 <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No watched {mediaFilter === 'all' ? 'items' : mediaFilter} yet</p>
                 <p className="text-sm text-muted-foreground mt-2">Rate movies/shows using the ⭐ rating to mark them as watched!</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Reviews Tab - Separated by Movie/TV */}
+          <TabsContent value="reviews" className="space-y-4">
+            {reviewsLoading ? (
+              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
+            ) : getFilteredReviews().length > 0 ? (
+              <div className="space-y-6">
+                {/* Movie Reviews Section */}
+                {(mediaFilter === 'all' || mediaFilter === 'movies') && getMovieReviews().length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Film className="h-4 w-4 text-cinema-red" />
+                      <h3 className="font-semibold text-foreground">Movie Reviews</h3>
+                      <Badge variant="secondary" className="text-xs">{getMovieReviews().length}</Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {getMovieReviews().map(review => (
+                        <Card key={review.id} className="p-4">
+                          <div className="flex gap-4">
+                            <Link to={`/movie/${review.movie_id}`}>
+                              {review.movie_poster ? (
+                                <img 
+                                  src={`${IMAGE_BASE}${review.movie_poster}`} 
+                                  alt={review.movie_title} 
+                                  className="w-16 h-24 object-cover rounded" 
+                                />
+                              ) : (
+                                <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
+                                  <Film className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                              )}
+                            </Link>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <Film className="h-4 w-4 text-cinema-red shrink-0" />
+                                <Link to={`/movie/${review.movie_id}`} className="font-semibold hover:underline line-clamp-1">
+                                  {review.movie_title}
+                                </Link>
+                              </div>
+                              {review.rating && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 rounded text-primary font-semibold text-xs mt-1">
+                                  {review.rating}/10
+                                </span>
+                              )}
+                              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{review.review_text}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {format(new Date(review.created_at), 'MMM d, yyyy')}
+                              </p>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* TV Reviews Section */}
+                {(mediaFilter === 'all' || mediaFilter === 'tv') && getTVReviews().length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Tv className="h-4 w-4 text-primary" />
+                      <h3 className="font-semibold text-foreground">TV Show Reviews</h3>
+                      <Badge variant="secondary" className="text-xs">{getTVReviews().length}</Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {getTVReviews().map(review => (
+                        <Card key={review.id} className="p-4">
+                          <div className="flex gap-4">
+                            <Link to={`/tv/${review.movie_id}`}>
+                              {review.movie_poster ? (
+                                <img 
+                                  src={`${IMAGE_BASE}${review.movie_poster}`} 
+                                  alt={review.movie_title} 
+                                  className="w-16 h-24 object-cover rounded" 
+                                />
+                              ) : (
+                                <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
+                                  <Tv className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                              )}
+                            </Link>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <Tv className="h-4 w-4 text-primary shrink-0" />
+                                <Link to={`/tv/${review.movie_id}`} className="font-semibold hover:underline line-clamp-1">
+                                  {review.movie_title}
+                                </Link>
+                              </div>
+                              {review.rating && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/20 rounded text-primary font-semibold text-xs mt-1">
+                                  {review.rating}/10
+                                </span>
+                              )}
+                              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{review.review_text}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {format(new Date(review.created_at), 'MMM d, yyyy')}
+                              </p>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No reviews yet</p>
+                <p className="text-sm text-muted-foreground mt-2">Log movies/TV shows with notes to see your reviews here!</p>
               </Card>
             )}
           </TabsContent>
