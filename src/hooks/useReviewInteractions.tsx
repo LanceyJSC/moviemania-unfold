@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
+import { commentSchema, validateInput } from '@/lib/validation';
 interface ReviewLike {
   id: string;
   user_id: string;
@@ -132,7 +132,16 @@ export const useReviewInteractions = (reviewId?: string) => {
       return;
     }
 
-    if (!content.trim()) return;
+    // Validate comment content
+    const validation = validateInput(commentSchema, content.trim());
+    if (!validation.success) {
+      toast({
+        title: "Invalid comment",
+        description: validation.error || "Please check your input",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -140,7 +149,7 @@ export const useReviewInteractions = (reviewId?: string) => {
         .insert({
           user_id: user.id,
           review_id: reviewId,
-          content: content.trim()
+          content: validation.data
         })
         .select('*')
         .single();

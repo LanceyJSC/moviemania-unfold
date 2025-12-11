@@ -17,6 +17,7 @@ import { tmdbService } from '@/lib/tmdb';
 import { RatingInput } from '@/components/RatingInput';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUserStateContext } from '@/contexts/UserStateContext';
+import { diaryNotesSchema, ratingSchema, sanitizeString, validateInput } from '@/lib/validation';
 
 interface LogMediaModalProps {
   isOpen: boolean;
@@ -91,6 +92,22 @@ export const LogMediaModal = ({
       toast.error('Please sign in to log');
       return;
     }
+
+    // Validate notes
+    const notesValidation = validateInput(diaryNotesSchema, notes.trim() || null);
+    if (!notesValidation.success && notesValidation.error) {
+      toast.error(notesValidation.error);
+      return;
+    }
+
+    // Validate rating
+    const ratingValidation = validateInput(ratingSchema, rating);
+    if (!ratingValidation.success && ratingValidation.error) {
+      toast.error(ratingValidation.error);
+      return;
+    }
+
+    const sanitizedNotes = sanitizeString(notes, 5000);
 
     setIsSubmitting(true);
 

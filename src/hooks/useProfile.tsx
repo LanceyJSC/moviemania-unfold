@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
+import { profileUpdateSchema, validateInput } from '@/lib/validation';
 interface Profile {
   id: string;
   username: string;
@@ -53,14 +53,25 @@ export const useProfile = () => {
     try {
       if (!user) return;
 
+      // Validate profile updates
+      const validation = validateInput(profileUpdateSchema, updates);
+      if (!validation.success) {
+        toast({
+          title: "Invalid profile data",
+          description: validation.error || "Please check your input",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(validation.data)
         .eq('id', user.id);
 
       if (error) throw error;
 
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
+      setProfile(prev => prev ? { ...prev, ...validation.data } : null);
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
