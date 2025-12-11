@@ -1,9 +1,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Play, Info, RefreshCw, AlertCircle, Star, Calendar } from "lucide-react";
+import { Play, Info, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { tmdbService, Movie } from "@/lib/tmdb";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -300,32 +299,10 @@ export const HeroSection = () => {
             </div>
           ) : heroMovie ? (
             <div className="max-w-2xl transition-all duration-500 ease-in-out">
-              {/* Badge */}
-              <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
-                Featured Movie
-                {isRefreshing && <span className="ml-2 text-xs">Updating...</span>}
-              </Badge>
-              
               {/* Title */}
-              <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight">
+              <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight uppercase">
                 {heroMovie.title}
               </h1>
-              
-              {/* Meta Info */}
-              <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
-                {heroMovie.release_date && (
-                  <div className="flex items-center space-x-1 text-white/80">
-                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="text-xs sm:text-sm">{new Date(heroMovie.release_date).getFullYear()}</span>
-                  </div>
-                )}
-                {heroMovie.vote_average && (
-                  <div className="flex items-center space-x-1 text-white/80">
-                    <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-cinema-gold text-cinema-gold" />
-                    <span className="text-xs sm:text-sm">{heroMovie.vote_average.toFixed(1)}/10</span>
-                  </div>
-                )}
-              </div>
               
               {/* Overview */}
               <p className="text-white/90 text-sm sm:text-base leading-relaxed mb-4 line-clamp-2 sm:line-clamp-3">
