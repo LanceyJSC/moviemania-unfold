@@ -393,14 +393,11 @@ export const TVShowCollectionCard = ({
                       <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" />
                       <span className="text-sm font-semibold text-foreground">Show Rating</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">Rating:</span>
-                      {(seriesRating || userRating) ? (
-                        renderRating(seriesRating || userRating || 0, 'md')
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Not rated</span>
-                      )}
-                    </div>
+                    {(seriesRating || userRating) ? (
+                      renderRating(seriesRating || userRating || 0, 'md')
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not rated</span>
+                    )}
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="px-3 pb-3 pt-2 bg-background rounded-b border-x border-b border-border -mt-1">
@@ -467,16 +464,13 @@ export const TVShowCollectionCard = ({
                                       Season {seasonNum}
                                     </Link>
                                   </div>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-xs text-muted-foreground">Rating:</span>
-                                    {seasonReview?.rating ? (
-                                      renderRating(seasonReview.rating)
-                                    ) : (
-                                      <span className="text-xs text-muted-foreground">
-                                        {seasonEpisodes.length > 0 ? `Not rated (${seasonEpisodes.length} ep)` : 'Not rated'}
-                                      </span>
-                                    )}
-                                  </div>
+                                  {seasonReview?.rating ? (
+                                    renderRating(seasonReview.rating)
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">
+                                      {seasonEpisodes.length > 0 ? `${seasonEpisodes.length} ep` : 'Logged'}
+                                    </span>
+                                  )}
                                 </div>
                               </CollapsibleTrigger>
                               
@@ -507,14 +501,11 @@ export const TVShowCollectionCard = ({
                                         <span className="text-xs font-medium text-foreground">
                                           Episode {ep.episode_number}
                                         </span>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-xs text-muted-foreground">Rating:</span>
-                                          {ep.rating ? (
-                                            renderRating(ep.rating)
-                                          ) : (
-                                            <span className="text-xs text-muted-foreground">Not rated</span>
-                                          )}
-                                        </div>
+                                        {ep.rating ? (
+                                          renderRating(ep.rating)
+                                        ) : (
+                                          <span className="text-xs text-muted-foreground">Watched</span>
+                                        )}
                                       </div>
                                       {ep.watched_date && (
                                         <p className="text-xs text-muted-foreground mt-0.5">
