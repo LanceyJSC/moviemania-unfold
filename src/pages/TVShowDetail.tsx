@@ -39,7 +39,7 @@ const TVShowDetail = () => {
     isWatched,
     getRating
   } = useUserStateContext();
-  const { tvDiary, refetchTVDiary } = useDiary();
+  const { tvDiary, refetchTVDiary, isLoading: isDiaryLoading } = useDiary();
 
   const tvShowId = Number(id);
   const isTVShowLiked = isLiked(tvShowId);
@@ -47,11 +47,17 @@ const TVShowDetail = () => {
   const isTVShowWatched = isWatched(tvShowId);
   const userRating = getRating(tvShowId);
 
+  // Refetch diary on mount to ensure fresh data
+  useEffect(() => {
+    refetchTVDiary();
+  }, [id]);
+
   // Calculate watched episodes per season from diary
   const getWatchedEpisodesForSeason = (seasonNumber: number) => {
-    return tvDiary.filter(
-      entry => entry.tv_id === tvShowId && entry.season_number === seasonNumber && entry.episode_number
+    const count = tvDiary.filter(
+      entry => entry.tv_id === tvShowId && entry.season_number === seasonNumber && entry.episode_number !== null
     ).length;
+    return count;
   };
 
   const getSeasonRating = (seasonNumber: number) => {
