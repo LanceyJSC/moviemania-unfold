@@ -176,7 +176,7 @@ const Gallery = () => {
       }
     });
     
-    // Add TV diary entries (if not already rated)
+    // Add TV diary entries ONLY if not already rated at series level (don't override series ratings with episode ratings)
     tvDiary.forEach(entry => {
       if (!watchedMap.has(entry.tv_id)) {
         watchedMap.set(entry.tv_id, {
@@ -184,14 +184,12 @@ const Gallery = () => {
           movie_id: entry.tv_id,
           movie_title: entry.tv_title,
           movie_poster: entry.tv_poster,
-          rating: entry.rating,
+          rating: null, // Don't use episode/season rating as series rating
           media_type: 'tv',
           source: 'diary'
         });
-      } else if (entry.rating && entry.rating > (watchedMap.get(entry.tv_id)?.rating || 0)) {
-        const existing = watchedMap.get(entry.tv_id);
-        watchedMap.set(entry.tv_id, { ...existing, rating: entry.rating });
       }
+      // Removed: override logic that was incorrectly showing episode ratings as series ratings
     });
     
     let items = Array.from(watchedMap.values());
