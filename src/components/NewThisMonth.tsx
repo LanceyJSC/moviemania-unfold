@@ -14,49 +14,31 @@ export const NewThisMonth = () => {
 
   const loadNewContent = async (fresh: boolean = false) => {
     try {
-      const now = new Date();
-      const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
-      
-      // Get both movies and TV shows
+      // Get movies and TV shows released THIS MONTH using proper TMDB discover endpoints
       const [moviesResponse, tvShowsResponse] = await Promise.all([
-        tmdbService.getPopularMovies(1, fresh),
-        tmdbService.getPopularTVShows(1, fresh)
+        tmdbService.getThisMonthMovies(fresh),
+        tmdbService.getThisMonthTVShows(fresh)
       ]);
       
-      // Filter recent releases for movies
-      const recentMovies = moviesResponse.results.filter(movie => {
-        if (!movie.poster_path || !movie.release_date) return false;
-        const releaseDate = new Date(movie.release_date);
-        return releaseDate >= twoMonthsAgo && releaseDate <= now;
-      });
-      
-      // Filter recent releases for TV shows
-      const recentTVShows = tvShowsResponse.results.filter(show => {
-        if (!show.poster_path || !show.first_air_date) return false;
-        const releaseDate = new Date(show.first_air_date);
-        return releaseDate >= twoMonthsAgo && releaseDate <= now;
-      });
+      // Filter for items with posters
+      const recentMovies = moviesResponse.results.filter(movie => movie.poster_path);
+      const recentTVShows = tvShowsResponse.results.filter(show => show.poster_path);
 
-      // Combine recent content
-      let allContent: MediaItem[] = [...recentMovies, ...recentTVShows];
+      // Combine and interleave movies and TV shows
+      const allContent: MediaItem[] = [];
+      const maxLength = Math.max(recentMovies.length, recentTVShows.length);
       
-      // If we don't have enough recent content, add popular content
-      if (allContent.length < 24) {
-        const additionalMovies = moviesResponse.results
-          .filter(movie => movie.poster_path && !recentMovies.includes(movie));
-        const additionalTVShows = tvShowsResponse.results
-          .filter(show => show.poster_path && !recentTVShows.includes(show));
-        
-        allContent = [...allContent, ...additionalMovies, ...additionalTVShows];
+      for (let i = 0; i < maxLength && allContent.length < 24; i++) {
+        if (i < recentMovies.length) allContent.push(recentMovies[i]);
+        if (i < recentTVShows.length) allContent.push(recentTVShows[i]);
       }
       
-      // Shuffle and store all items
-      const shuffled = allContent.sort(() => Math.random() - 0.5);
-      setContent(shuffled.slice(0, 24));
+      setContent(allContent.slice(0, 24));
     } catch (error) {
       console.error('Failed to load new content:', error);
       try {
-        const fallbackResponse = await tmdbService.getTrendingMovies('week', fresh);
+        // Fallback to now playing movies
+        const fallbackResponse = await tmdbService.getNowPlayingMovies(1, fresh);
         const moviesWithPosters = fallbackResponse.results
           .filter(movie => movie.poster_path)
           .slice(0, 24);

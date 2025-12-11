@@ -279,18 +279,30 @@ class TMDBService {
     return this.fetchFromTMDB(`/discover/movie?${queryString}`);
   }
 
-  async getThisMonthMovies(): Promise<TMDBResponse<Movie>> {
+  async getThisMonthMovies(fresh: boolean = false): Promise<TMDBResponse<Movie>> {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     
-    return this.discoverMovies({
-      releaseDate: {
-        gte: firstDay.toISOString().split('T')[0],
-        lte: lastDay.toISOString().split('T')[0]
-      },
-      sortBy: 'release_date.desc'
-    });
+    const params = new URLSearchParams();
+    params.append('release_date.gte', firstDay.toISOString().split('T')[0]);
+    params.append('release_date.lte', lastDay.toISOString().split('T')[0]);
+    params.append('sort_by', 'popularity.desc');
+    
+    return this.fetchFromTMDB(`/discover/movie?${params.toString()}`, fresh);
+  }
+
+  async getThisMonthTVShows(fresh: boolean = false): Promise<TMDBResponse<TVShow>> {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    const params = new URLSearchParams();
+    params.append('first_air_date.gte', firstDay.toISOString().split('T')[0]);
+    params.append('first_air_date.lte', lastDay.toISOString().split('T')[0]);
+    params.append('sort_by', 'popularity.desc');
+    
+    return this.fetchFromTMDB(`/discover/tv?${params.toString()}`, fresh);
   }
 
   async getThisWeekMovies(): Promise<TMDBResponse<Movie>> {
