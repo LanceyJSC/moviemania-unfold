@@ -319,7 +319,7 @@ export const TVShowGalleryCard = ({
               {(seriesRating || userRating) && (
                 <div className="p-3 bg-background rounded border border-border">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-foreground">Series Rating</span>
+                    <span className="text-sm font-semibold text-foreground">Show Rating</span>
                     {(seriesRating || userRating) ? (
                       renderRating(seriesRating || userRating || 0, 'md')
                     ) : (
