@@ -107,8 +107,8 @@ const SeasonDetail = () => {
   const handleRateSeason = async (rating: number) => {
     if (!user || !tvShow || !season) return;
 
-    const currentRating = seasonRating;
-    const newRating = currentRating === rating ? null : rating;
+    // RatingInput passes 0 when clearing (clicking same rating)
+    const newRating = rating === 0 ? null : rating;
 
     // Check if season-level entry exists (episode_number is null)
     const { data: existingEntry } = await supabase
@@ -258,10 +258,9 @@ const SeasonDetail = () => {
     if (!user || !tvShow || !season) return;
 
     const key = `${season.season_number}-${episode.episode_number}`;
-    const currentRating = episodeRatings[key];
     
-    // If clicking the same rating, remove it
-    const newRating = currentRating === rating ? null : rating;
+    // RatingInput passes 0 when clearing (clicking same rating)
+    const newRating = rating === 0 ? null : rating;
 
     // Check if entry exists
     const { data: existingEntry } = await supabase
