@@ -42,12 +42,14 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const isMobile = useIsMobile();
 
-  // Use React Query for caching - staleTime prevents refetch on mount
+  // Use React Query for caching - 24 hour cache for TMDB data
   const { data, isLoading } = useQuery({
     queryKey: ['movies', category, 1],
     queryFn: () => fetchMovies(category, 1),
-    staleTime: 5 * 60 * 1000, // 5 minutes - won't refetch if data is fresh
-    gcTime: 30 * 60 * 1000, // 30 minutes cache
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   // Reset pagination when category changes
