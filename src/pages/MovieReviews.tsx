@@ -182,15 +182,16 @@ const MovieReviews = () => {
     );
   }
 
-  const backdropUrl = tmdbService.getBackdropUrl(movie.backdrop_path, 'w1280');
+  const backdropUrl = tmdbService.getBackdropUrl(movie.backdrop_path, 'original');
+  const posterUrl = tmdbService.getPosterUrl(movie.poster_path, 'w500');
   const sortedCommunityReviews = getSortedReviews();
 
   return (
     <div className="min-h-screen bg-background pb-32">
       <MobileHeader title="Reviews" />
       
-      {/* Hero Section */}
-      <div className="relative overflow-hidden h-[25vh] rounded-b-2xl">
+      {/* Hero Section - Matching MovieDetail */}
+      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
@@ -198,14 +199,27 @@ const MovieReviews = () => {
             backgroundColor: 'hsl(var(--background))'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/60 via-cinema-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/50 via-transparent to-transparent" />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
-        <div className="absolute bottom-6 left-4 right-4 z-30">
-          <h1 className="font-cinematic text-white tracking-wide text-xl leading-tight">
+        <div className="absolute bottom-6 left-4 z-30">
+          <img 
+            src={posterUrl} 
+            alt={movie.title}
+            className="w-24 h-36 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
+          />
+        </div>
+
+        <div className="absolute bottom-6 left-32 right-4 z-30">
+          <div className="flex items-center space-x-2 mb-1 flex-wrap gap-y-1">
+            <span className="text-cinema-gold font-semibold text-xs">TMDB {movie.vote_average.toFixed(1)}</span>
+            <span className="text-white/80 text-xs">{movie.runtime ? `${movie.runtime} min` : 'Movie'}</span>
+          </div>
+
+          <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg leading-tight">
             Reviews for {movie.title}
           </h1>
         </div>
