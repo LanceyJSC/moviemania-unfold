@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
@@ -19,9 +19,12 @@ import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
+import { useAuth } from "@/hooks/useAuth";
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [movie, setMovie] = useState<Movie | TVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
@@ -45,6 +48,15 @@ const MovieDetail = () => {
   const isMovieInWatchlist = isInWatchlist(movieId);
   const isMovieWatched = isWatched(movieId);
   const userRating = getRating(movieId);
+
+  // Helper to check auth before actions
+  const requireAuth = (action: () => void) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    action();
+  };
 
   useEffect(() => {
     const loadDetails = async () => {
@@ -224,7 +236,7 @@ const MovieDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
               }`}
-              onClick={() => toggleLike(movieId, title, posterUrl)}
+              onClick={() => requireAuth(() => toggleLike(movieId, title, posterUrl))}
             >
               <Heart className={`h-4 w-4 ${isMovieLiked ? 'fill-current' : ''}`} />
             </Button>
@@ -234,7 +246,7 @@ const MovieDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
               }`}
-              onClick={() => toggleWatchlist(movieId, title, posterUrl)}
+              onClick={() => requireAuth(() => toggleWatchlist(movieId, title, posterUrl))}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -244,7 +256,7 @@ const MovieDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isMovieWatched ? 'bg-green-600 border-green-600 text-white' : ''
               }`}
-              onClick={() => markAsWatched(movieId, title, posterUrl)}
+              onClick={() => requireAuth(() => markAsWatched(movieId, title, posterUrl))}
             >
               <Eye className={`h-4 w-4 ${isMovieWatched ? 'fill-current' : ''}`} />
             </Button>
@@ -252,7 +264,7 @@ const MovieDetail = () => {
             <Button 
               variant="outline" 
               className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
-              onClick={() => setShowLogModal(true)}
+              onClick={() => requireAuth(() => setShowLogModal(true))}
             >
               <BookOpen className="h-4 w-4" />
             </Button>
@@ -265,7 +277,7 @@ const MovieDetail = () => {
           mediaType="movie"
           tmdbRating={movie.vote_average}
           userRating={userRating}
-          onRatingChange={(rating) => setRating(movieId, rating, title, movie.poster_path)}
+          onRatingChange={(rating) => requireAuth(() => setRating(movieId, rating, title, movie.poster_path))}
           mediaTitle={title}
           mediaPoster={movie.poster_path}
         />
