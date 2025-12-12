@@ -69,11 +69,8 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     }
   }, [data]);
 
-  // Combine initial data with additional loaded pages, removing duplicates
-  const allShows = [...(data?.results || []), ...additionalShows];
-  const tvShows = allShows.filter((show, index, self) => 
-    index === self.findIndex(s => s.id === show.id)
-  );
+  // Combine initial data with additional loaded pages
+  const tvShows = [...(data?.results || []), ...additionalShows];
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore || isLoading) return;
