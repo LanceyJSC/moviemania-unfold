@@ -36,44 +36,46 @@ const fetchMovies = async (category: string, page: number) => {
 };
 
 export const MovieGrid = ({ title, category }: MovieGridProps) => {
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [additionalMovies, setAdditionalMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const loadingMoreRef = useRef(false);
   const isMobile = useIsMobile();
 
   // Use React Query for caching - staleTime prevents refetch on mount
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['movies', category, 1],
     queryFn: () => fetchMovies(category, 1),
     staleTime: 5 * 60 * 1000, // 5 minutes - won't refetch if data is fresh
     gcTime: 30 * 60 * 1000, // 30 minutes cache
   });
 
-  // Set initial movies from query
+  // Reset pagination when category changes
   useEffect(() => {
-    if (data?.results) {
-      setMovies(data.results);
+    setPage(1);
+    setAdditionalMovies([]);
+    setHasMore(true);
+  }, [category]);
+
+  // Update hasMore when initial data loads
+  useEffect(() => {
+    if (data) {
       setHasMore(1 < data.total_pages);
-      setPage(1);
     }
   }, [data]);
 
-  // Reset when category changes
-  useEffect(() => {
-    setPage(1);
-    setMovies([]);
-  }, [category]);
+  // Combine initial data with additional loaded pages
+  const movies = [...(data?.results || []), ...additionalMovies];
 
   const loadMore = async () => {
-    if (loadingMoreRef.current || !hasMore) return;
+    if (loadingMoreRef.current || !hasMore || isLoading) return;
     
     loadingMoreRef.current = true;
     const nextPage = page + 1;
     
     try {
       const response = await fetchMovies(category, nextPage);
-      setMovies(prev => [...prev, ...response.results]);
+      setAdditionalMovies(prev => [...prev, ...response.results]);
       setHasMore(nextPage < response.total_pages);
       setPage(nextPage);
     } catch (error) {
@@ -130,7 +132,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
       </div>
 
       {/* Loading more indicator */}
-      {(isFetching || loadingMoreRef.current) && movies.length > 0 && (
+      {loadingMoreRef.current && movies.length > 0 && (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cinema-red"></div>
         </div>
