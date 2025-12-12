@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, ChevronRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MovieCarousel } from "@/components/MovieCarousel";
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
@@ -15,7 +14,8 @@ import { SynopsisModal } from "@/components/SynopsisModal";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
 import { SeasonProgressCard } from "@/components/SeasonProgressCard";
-import { RatingInput } from "@/components/RatingInput";
+import { WatchProviders } from "@/components/WatchProviders";
+import { SimilarContent } from "@/components/SimilarContent";
 import { useDiary } from "@/hooks/useDiary";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -328,6 +328,11 @@ const TVShowDetail = () => {
           mediaPoster={tvShow.poster_path}
         />
 
+        {/* Where to Watch */}
+        <div className="mb-6">
+          <WatchProviders mediaId={tvShowId} mediaType="tv" />
+        </div>
+
         {/* Creator */}
         {creator && (
           <div className="mb-6 text-center">
@@ -396,10 +401,11 @@ const TVShowDetail = () => {
           </div>
         )}
         
-        {/* Recommendations */}
-        <MovieCarousel 
-          title="YOU MIGHT ALSO LIKE" 
-          category="popular"
+        {/* Similar TV Shows */}
+        <SimilarContent 
+          mediaId={tvShowId} 
+          mediaType="tv" 
+          title="SIMILAR SHOWS"
         />
       </div>
 

@@ -2,19 +2,18 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
-import { UserReviews } from "@/components/UserReviews";
 import { LogMediaModal } from "@/components/LogMediaModal";
-import { CommunityReviews } from "@/components/CommunityReviews";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
-import { RatingInput } from "@/components/RatingInput";
+import { WatchProviders } from "@/components/WatchProviders";
+import { SimilarContent } from "@/components/SimilarContent";
+import { MovieCollectionBanner } from "@/components/MovieCollectionBanner";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
-import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
+import { tmdbService, Movie, TVShow, MovieWithCollection } from "@/lib/tmdb";
 import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrewCard } from "@/components/CrewCard";
@@ -25,7 +24,7 @@ const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [movie, setMovie] = useState<Movie | TVShow | null>(null);
+  const [movie, setMovie] = useState<MovieWithCollection | TVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showSynopsis, setShowSynopsis] = useState(false);
@@ -70,7 +69,8 @@ const MovieDetail = () => {
         if (isTV) {
           movieData = await tmdbService.getTVShowDetails(Number(id));
         } else {
-          movieData = await tmdbService.getMovieDetails(Number(id));
+          // Use the enhanced method that includes collection info
+          movieData = await tmdbService.getMovieDetailsWithCollection(Number(id));
         }
         setMovie(movieData);
         
@@ -135,6 +135,9 @@ const MovieDetail = () => {
   const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : 'TBA';
   const runtime = isTV ? 'TV Series' : ((movie as Movie).runtime ? `${(movie as Movie).runtime} min` : 'Unknown');
   const genres = movie.genres?.map(g => g.name).join(', ') || 'Unknown';
+  
+  // Get collection info for movies
+  const collectionInfo = !isTV ? (movie as MovieWithCollection).belongs_to_collection : null;
   
   // Fixed cast and crew data access
   const cast = movie.credits?.cast?.slice(0, 8) || [];
@@ -298,6 +301,19 @@ const MovieDetail = () => {
           mediaPoster={movie.poster_path}
         />
 
+        {/* Where to Watch */}
+        <div className="mb-6">
+          <WatchProviders mediaId={movieId} mediaType="movie" />
+        </div>
+
+        {/* Movie Collection Banner */}
+        {collectionInfo && (
+          <MovieCollectionBanner 
+            collectionId={collectionInfo.id} 
+            currentMovieId={movieId}
+          />
+        )}
+
         {/* Director and Producer */}
         {(director || producer) && (
           <div className="mb-6 text-center">
@@ -352,11 +368,11 @@ const MovieDetail = () => {
           </div>
         )}
         
-        
-        {/* Recommendations */}
-        <MovieCarousel 
-          title="YOU MIGHT ALSO LIKE" 
-          category="popular"
+        {/* Similar Movies */}
+        <SimilarContent 
+          mediaId={movieId} 
+          mediaType="movie" 
+          title="SIMILAR MOVIES"
         />
       </div>
 

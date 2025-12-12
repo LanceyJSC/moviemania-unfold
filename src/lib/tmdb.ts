@@ -452,6 +452,110 @@ class TMDBService {
     return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`, fresh);
   }
 
+  // Watch Providers (Where to Watch)
+  async getMovieWatchProviders(movieId: number, region: string = 'US'): Promise<WatchProvidersResponse> {
+    return this.fetchFromTMDB(`/movie/${movieId}/watch/providers`);
+  }
+
+  async getTVWatchProviders(tvId: number, region: string = 'US'): Promise<WatchProvidersResponse> {
+    return this.fetchFromTMDB(`/tv/${tvId}/watch/providers`);
+  }
+
+  // Similar Movies/TV Shows
+  async getSimilarMovies(movieId: number, page: number = 1): Promise<TMDBResponse<Movie>> {
+    return this.fetchFromTMDB(`/movie/${movieId}/similar?page=${page}`);
+  }
+
+  async getSimilarTVShows(tvId: number, page: number = 1): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/tv/${tvId}/similar?page=${page}`);
+  }
+
+  // Movie Recommendations (TMDB's algorithm)
+  async getMovieRecommendations(movieId: number, page: number = 1): Promise<TMDBResponse<Movie>> {
+    return this.fetchFromTMDB(`/movie/${movieId}/recommendations?page=${page}`);
+  }
+
+  async getTVRecommendations(tvId: number, page: number = 1): Promise<TMDBResponse<TVShow>> {
+    return this.fetchFromTMDB(`/tv/${tvId}/recommendations?page=${page}`);
+  }
+
+  // Movie Collections (Franchises)
+  async getMovieCollection(collectionId: number): Promise<MovieCollection> {
+    return this.fetchFromTMDB(`/collection/${collectionId}`);
+  }
+
+  // Get movie details with collection info
+  async getMovieDetailsWithCollection(movieId: number): Promise<MovieWithCollection> {
+    return this.fetchFromTMDB(`/movie/${movieId}?append_to_response=credits,videos,belongs_to_collection`);
+  }
+
+  // Content Ratings
+  async getMovieReleaseDates(movieId: number): Promise<ReleaseDatesResponse> {
+    return this.fetchFromTMDB(`/movie/${movieId}/release_dates`);
+  }
+
+  async getTVContentRatings(tvId: number): Promise<ContentRatingsResponse> {
+    return this.fetchFromTMDB(`/tv/${tvId}/content_ratings`);
+  }
+
+}
+
+// Additional interfaces for new features
+export interface WatchProvider {
+  logo_path: string;
+  provider_id: number;
+  provider_name: string;
+  display_priority: number;
+}
+
+export interface WatchProvidersResult {
+  link?: string;
+  flatrate?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+  free?: WatchProvider[];
+}
+
+export interface WatchProvidersResponse {
+  id: number;
+  results: Record<string, WatchProvidersResult>;
+}
+
+export interface MovieCollection {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  parts: Movie[];
+}
+
+export interface MovieWithCollection extends Movie {
+  belongs_to_collection?: {
+    id: number;
+    name: string;
+    poster_path: string | null;
+    backdrop_path: string | null;
+  };
+}
+
+export interface ReleaseDatesResponse {
+  id: number;
+  results: Array<{
+    iso_3166_1: string;
+    release_dates: Array<{
+      certification: string;
+      type: number;
+      release_date: string;
+    }>;
+  }>;
+}
+
+export interface ContentRatingsResponse {
+  results: Array<{
+    iso_3166_1: string;
+    rating: string;
+  }>;
 }
 
 export const tmdbService = new TMDBService();
