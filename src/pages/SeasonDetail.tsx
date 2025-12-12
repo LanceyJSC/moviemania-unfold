@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, Clock, Star, Play, Eye, BookOpen, Heart, Check, ChevronDown, MessageCircle } from "lucide-react";
+import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,78 +37,6 @@ interface Season {
   };
 }
 
-// Collapsible component for episode reviews - uses data from tvDiary context
-const EpisodeReviewsCollapsible = ({ 
-  tvId, 
-  seasonNumber, 
-  episodeNumber,
-  tvDiary
-}: { 
-  tvId: number; 
-  seasonNumber: number; 
-  episodeNumber: number;
-  tvDiary: any[];
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  // Filter diary entries for this specific episode that have notes
-  const episodeReviews = tvDiary.filter(entry => 
-    entry.tv_id === tvId && 
-    entry.season_number === seasonNumber && 
-    entry.episode_number === episodeNumber && 
-    entry.notes && 
-    entry.notes.trim() !== ''
-  );
-
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-3">
-      <CollapsibleTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
-        >
-          <MessageCircle className="h-3 w-3 mr-1" />
-          Reviews ({episodeReviews.length})
-          <ChevronDown className={`h-3 w-3 ml-1 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="mt-2 rounded-lg bg-muted/30 border border-border/30">
-        {episodeReviews.length > 0 ? (
-          <div className="py-2 px-4 space-y-3">
-            {episodeReviews.map((review) => (
-              <div 
-                key={review.id} 
-                className="flex gap-3 p-3 bg-background/50 rounded-lg border border-border/30"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    {review.rating && (
-                      <div className="flex items-center gap-1 text-cinema-gold text-xs">
-                        <Star className="h-3 w-3 fill-current" />
-                        <span>{review.rating}/10</span>
-                      </div>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(review.watched_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {review.notes}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="py-3 px-4 text-sm text-muted-foreground">
-            No reviews yet for this episode.
-          </div>
-        )}
-      </CollapsibleContent>
-    </Collapsible>
-  );
-};
 
 const SeasonDetail = () => {
   const { id, seasonNumber } = useParams<{ id: string; seasonNumber: string }>();
@@ -666,13 +593,14 @@ const SeasonDetail = () => {
                       </div>
                     )}
 
-                    {/* Community Reviews Collapsible */}
-                    <EpisodeReviewsCollapsible 
-                      tvId={Number(id)} 
-                      seasonNumber={Number(seasonNumber)} 
-                      episodeNumber={episode.episode_number}
-                      tvDiary={tvDiary}
-                    />
+                    {/* Link to Episode Reviews Page */}
+                    <Link 
+                      to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}
+                      className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <MessageCircle className="h-3 w-3" />
+                      View Reviews →
+                    </Link>
                   </div>
                 </div>
               </div>
