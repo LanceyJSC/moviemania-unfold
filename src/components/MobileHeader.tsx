@@ -1,6 +1,4 @@
-
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 interface MobileHeaderProps {
@@ -23,18 +21,13 @@ export const MobileHeader = ({ title, showBack = true }: MobileHeaderProps) => {
     <header className="sticky top-0 z-50 bg-cinema-black/95 backdrop-blur-sm border-b border-border">
       <div className="flex items-center h-14 px-4">
         {showBack && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
+            type="button"
             onClick={handleBack}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              handleBack();
-            }}
-            className="mr-3 p-2 hover:bg-cinema-charcoal/50 touch-manipulation min-h-[44px] min-w-[44px]"
+            className="mr-3 p-2 hover:bg-cinema-charcoal/50 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md active:bg-cinema-charcoal/70"
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
-          </Button>
+          </button>
         )}
         <h1 className="font-cinematic text-lg text-foreground tracking-wide truncate">
           {title}
