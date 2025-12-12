@@ -99,10 +99,10 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     loadMoreRef.current = loadMore;
   }, [loadMore]);
 
-  // Intersection Observer for infinite scroll - much more performant than scroll events
+  // Intersection Observer for infinite scroll
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!sentinel || isLoading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -110,12 +110,15 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
           loadMoreRef.current();
         }
       },
-      { rootMargin: '500px' }
+      { 
+        rootMargin: '800px',
+        threshold: 0
+      }
     );
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, []);
+  }, [isLoading, hasMore]);
 
   return (
     <div className="space-y-6">
