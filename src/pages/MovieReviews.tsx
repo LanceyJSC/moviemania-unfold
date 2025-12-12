@@ -1,126 +1,126 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
-import { ReviewLikes } from "@/components/ReviewLikes";
-import { useQuery } from "@tanstack/react-query";
+import { LogMediaModal } from "@/components/LogMediaModal";
+import { tmdbService, Movie, Review } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { tmdbService } from "@/lib/tmdb";
+import { ReviewLikes } from "@/components/ReviewLikes";
 import { format } from "date-fns";
 
-interface ReviewWithProfile {
+interface CommunityReview {
   id: string;
   user_id: string;
-  movie_id: number;
-  movie_title: string;
   review_text: string | null;
   rating: number | null;
   is_spoiler: boolean | null;
   created_at: string;
-  profile?: {
+  profile: {
     username: string | null;
     avatar_url: string | null;
-  };
+    full_name: string | null;
+  } | null;
 }
 
-type SortOption = 'newest' | 'oldest' | 'highest' | 'lowest';
+type SortOption = 'recent' | 'oldest' | 'highest' | 'lowest';
 
 const MovieReviews = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
+  const [showSpoilers, setShowSpoilers] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<SortOption>('recent');
   const { user } = useAuth();
+
   const movieId = Number(id);
 
-  const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
-  const [revealedSpoilers, setRevealedSpoilers] = useState<Set<string>>(new Set());
+  // Fetch Movie details
+  useEffect(() => {
+    const loadMovie = async () => {
+      if (!id) return;
+      setIsLoading(true);
+      try {
+        const data = await tmdbService.getMovieDetails(movieId);
+        setMovie(data);
+      } catch (error) {
+        console.error('Failed to load movie:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadMovie();
+  }, [id, movieId]);
 
-  // Fetch movie details
-  const { data: movie, isLoading: movieLoading } = useQuery({
-    queryKey: ['movie-details', movieId],
-    queryFn: () => tmdbService.getMovieDetails(movieId),
+  // Fetch TMDB Reviews
+  const { data: tmdbReviews } = useQuery({
+    queryKey: ['movie-tmdb-reviews', movieId],
+    queryFn: async () => {
+      const response = await tmdbService.getMovieReviews(movieId);
+      return response.results;
+    },
+    enabled: !!movieId
   });
 
-  // Fetch community reviews
-  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+  // Fetch Community Reviews
+  const { data: communityReviews, refetch: refetchCommunityReviews } = useQuery({
     queryKey: ['community-reviews', movieId],
     queryFn: async () => {
-      const { data: reviewsData, error } = await supabase
+      const { data, error } = await supabase
         .from('user_reviews')
-        .select('*')
+        .select('id, user_id, review_text, rating, is_spoiler, created_at')
         .eq('movie_id', movieId)
-        .not('review_text', 'is', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Fetch profiles separately
-      const userIds = [...new Set(reviewsData?.map(r => r.user_id) || [])];
-      const { data: profilesData } = await supabase
+      const userIds = data.map((r) => r.user_id);
+      const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, username, avatar_url')
+        .select('id, username, avatar_url, full_name')
         .in('id', userIds);
 
-      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
-      return (reviewsData || []).map(review => ({
+      return data.map((review) => ({
         ...review,
-        profile: profilesMap.get(review.user_id) || null
-      })) as ReviewWithProfile[];
+        profile: profileMap.get(review.user_id) || null,
+      })) as CommunityReview[];
     },
-  });
-
-  // Fetch TMDB reviews
-  const { data: tmdbReviews = [] } = useQuery({
-    queryKey: ['tmdb-reviews', movieId],
-    queryFn: async () => {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieId}/reviews?api_key=4c78b0640f0c6a7d61cd4c8e90c0aa81`
-      );
-      const data = await response.json();
-      return data.results || [];
-    },
+    enabled: !!movieId
   });
 
   const toggleExpanded = (reviewId: string) => {
-    setExpandedReviews(prev => {
+    setExpandedReviews((prev) => {
       const next = new Set(prev);
-      if (next.has(reviewId)) {
-        next.delete(reviewId);
-      } else {
-        next.add(reviewId);
-      }
+      if (next.has(reviewId)) next.delete(reviewId);
+      else next.add(reviewId);
       return next;
     });
   };
 
   const revealSpoiler = (reviewId: string) => {
-    setRevealedSpoilers(prev => new Set([...prev, reviewId]));
+    setShowSpoilers((prev) => new Set(prev).add(reviewId));
   };
 
   const getSortedReviews = () => {
-    const sorted = [...reviews];
+    if (!communityReviews) return [];
     
-    switch (sortBy) {
-      case 'newest':
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      case 'oldest':
-        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
-      case 'highest':
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'lowest':
-        sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-        break;
-    }
-
-    // Move current user's review to top
+    const sorted = [...communityReviews];
+    
     if (user) {
       const userReviewIndex = sorted.findIndex(r => r.user_id === user.id);
       if (userReviewIndex > 0) {
@@ -128,130 +128,210 @@ const MovieReviews = () => {
         sorted.unshift(userReview);
       }
     }
-
-    return sorted;
+    
+    const startIndex = user && sorted[0]?.user_id === user.id ? 1 : 0;
+    const toSort = sorted.slice(startIndex);
+    
+    switch (sortBy) {
+      case 'recent':
+        toSort.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'oldest':
+        toSort.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'highest':
+        toSort.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'lowest':
+        toSort.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+        break;
+    }
+    
+    return [...sorted.slice(0, startIndex), ...toSort];
   };
 
-  if (movieLoading || reviewsLoading) {
+  const formatReviewContent = (content: string, maxLength: number = 300) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + '...';
+  };
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <MobileHeader title="Reviews" />
+        <MobileHeader title="Loading..." />
         <div className="flex items-center justify-center h-96">
-          <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cinema-red"></div>
         </div>
       </div>
     );
   }
 
-  const sortedReviews = getSortedReviews();
+  if (!movie) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MobileHeader title="Not Found" />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Movie not found</h1>
+            <Link to="/movies">
+              <Button>Back to Movies</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const backdropUrl = tmdbService.getBackdropUrl(movie.backdrop_path, 'w1280');
+  const sortedCommunityReviews = getSortedReviews();
 
   return (
     <div className="min-h-screen bg-background pb-32">
-      <MobileHeader title={`Reviews - ${movie?.title || 'Movie'}`} />
-
-      <div className="container mx-auto px-4 py-6">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          className="mb-4 -ml-2"
-          onClick={() => navigate(-1)}
+      <MobileHeader title="Reviews" />
+      
+      {/* Hero Section */}
+      <div className="relative overflow-hidden h-[25vh] rounded-b-2xl">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: `url(${backdropUrl})`,
+            backgroundColor: 'hsl(var(--background))'
+          }}
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/60 via-cinema-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/70 via-transparent to-transparent" />
+        </div>
 
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
+
+        <div className="absolute bottom-6 left-4 right-4 z-30">
+          <Link 
+            to={`/movie/${id}`}
+            className="inline-flex items-center gap-1 text-white/80 text-sm mb-2 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to {movie.title}
+          </Link>
+          
+          <h1 className="font-cinematic text-white tracking-wide text-xl leading-tight">
+            Reviews for {movie.title}
+          </h1>
+        </div>
+      </div>
+
+      <div className="px-4 py-6 space-y-6">
         {/* Community Reviews Section */}
-        <div className="mb-8">
+        <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-cinematic text-foreground tracking-wide">
-              COMMUNITY REVIEWS ({reviews.length})
+            <h2 className="text-lg font-semibold text-foreground">
+              Community Reviews
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                ({communityReviews?.length || 0})
+              </span>
             </h2>
-            {reviews.length > 0 && (
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="bg-card border border-border rounded px-2 py-1 text-sm text-foreground"
-              >
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="highest">Highest Rated</option>
-                <option value="lowest">Lowest Rated</option>
-              </select>
+            
+            {communityReviews && communityReviews.length > 1 && (
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                <SelectTrigger className="w-[130px] h-8 text-xs">
+                  <ArrowUpDown className="h-3 w-3 mr-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="highest">Highest Rated</SelectItem>
+                  <SelectItem value="lowest">Lowest Rated</SelectItem>
+                </SelectContent>
+              </Select>
             )}
           </div>
-
-          {sortedReviews.length === 0 ? (
-            <div className="bg-card/50 rounded-lg p-6 text-center border border-border">
-              <p className="text-muted-foreground mb-4">No user reviews yet. Be the first to review!</p>
-              <Button
-                onClick={() => navigate(`/movie/${movieId}`)}
-                className="bg-cinema-red hover:bg-cinema-red/90"
-              >
-                Write a Review
-              </Button>
-            </div>
-          ) : (
+          
+          {sortedCommunityReviews.length > 0 ? (
             <div className="space-y-4">
-              {sortedReviews.map((review) => {
+              {sortedCommunityReviews.map((review) => {
                 const isExpanded = expandedReviews.has(review.id);
-                const isSpoilerRevealed = revealedSpoilers.has(review.id);
-                const shouldTruncate = review.review_text && review.review_text.length > 300;
+                const isSpoilerVisible = showSpoilers.has(review.id);
+                const reviewText = review.review_text || '';
+                const isLong = reviewText.length > 300;
+                const isOwnReview = user?.id === review.user_id;
 
                 return (
-                  <div key={review.id} className="bg-card/50 rounded-lg p-4 border border-border">
+                  <div 
+                    key={review.id}
+                    className={`bg-card rounded-xl p-4 border ${isOwnReview ? 'border-primary/30 bg-primary/5' : 'border-border'}`}
+                  >
                     <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={review.profile?.avatar_url || ''} />
-                        <AvatarFallback className="bg-cinema-red/20 text-cinema-red">
-                          {review.profile?.username?.[0]?.toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
+                      <Link to={`/user/${review.profile?.username || review.user_id}`}>
+                        <Avatar className="h-10 w-10 flex-shrink-0">
+                          <AvatarImage src={review.profile?.avatar_url || undefined} />
+                          <AvatarFallback className="bg-muted">
+                            <User className="h-5 w-5 text-muted-foreground" />
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-foreground">
-                            {review.profile?.username || 'Anonymous'}
-                          </span>
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          <Link 
+                            to={`/user/${review.profile?.username || review.user_id}`}
+                            className="font-medium text-foreground hover:underline"
+                          >
+                            {review.profile?.username || review.profile?.full_name || 'Anonymous'}
+                          </Link>
+                          {isOwnReview && (
+                            <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">You</span>
+                          )}
                           {review.rating && (
-                            <span className="flex items-center gap-1 text-cinema-gold text-sm">
-                              <Star className="h-3 w-3 fill-current" />
-                              {review.rating}/10
-                            </span>
+                            <div className="flex items-center gap-1 text-cinema-gold text-sm">
+                              <Star className="h-3.5 w-3.5 fill-current" />
+                              <span>{review.rating}/10</span>
+                            </div>
                           )}
-                          {review.user_id === user?.id && (
-                            <span className="text-xs bg-cinema-red/20 text-cinema-red px-2 py-0.5 rounded">
-                              You
-                            </span>
-                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(review.created_at), 'MMM d, yyyy')}
+                          </span>
                         </div>
-                        <p className="text-muted-foreground text-xs mt-0.5">
-                          {format(new Date(review.created_at), 'MMM d, yyyy')}
-                        </p>
-
-                        <div className="mt-2">
-                          {review.is_spoiler && !isSpoilerRevealed ? (
-                            <button
-                              onClick={() => revealSpoiler(review.id)}
-                              className="text-cinema-red hover:text-cinema-red/80 text-sm"
-                            >
-                              ⚠️ Contains spoilers - Click to reveal
-                            </button>
-                          ) : (
-                            <>
-                              <p className={`text-foreground text-sm ${!isExpanded && shouldTruncate ? 'line-clamp-4' : ''}`}>
-                                {review.review_text}
-                              </p>
-                              {shouldTruncate && (
-                                <button
-                                  onClick={() => toggleExpanded(review.id)}
-                                  className="text-cinema-gold text-sm mt-1 hover:underline"
-                                >
-                                  {isExpanded ? 'Show less' : 'Read more'}
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </div>
-
+                        
+                        {review.is_spoiler && !isSpoilerVisible ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => revealSpoiler(review.id)}
+                            className="mt-2"
+                          >
+                            <AlertTriangle className="h-4 w-4 mr-1" />
+                            Show Spoiler
+                          </Button>
+                        ) : (
+                          <div>
+                            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                              {isLong && !isExpanded
+                                ? `${reviewText.slice(0, 300)}...`
+                                : reviewText}
+                            </p>
+                            {isLong && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleExpanded(review.id)}
+                                className="mt-1 h-auto p-0 text-muted-foreground hover:text-foreground"
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <ChevronUp className="h-4 w-4 mr-1" />
+                                    Show less
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="h-4 w-4 mr-1" />
+                                    Read more
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                        
                         <div className="mt-3">
                           <ReviewLikes reviewId={review.id} compact />
                         </div>
@@ -261,47 +341,71 @@ const MovieReviews = () => {
                 );
               })}
             </div>
+          ) : (
+            <div className="text-center py-8 bg-card rounded-xl border border-border">
+              <p className="text-muted-foreground text-sm mb-2">No community reviews yet.</p>
+              {user && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowLogModal(true)}
+                >
+                  Be the first to review
+                </Button>
+              )}
+            </div>
           )}
         </div>
 
         {/* TMDB Reviews Section */}
-        {tmdbReviews.length > 0 && (
+        {tmdbReviews && tmdbReviews.length > 0 && (
           <div>
-            <h2 className="text-xl font-cinematic text-foreground mb-4 tracking-wide">
-              TMDB REVIEWS ({tmdbReviews.length})
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              TMDB Reviews
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                ({tmdbReviews.length})
+              </span>
             </h2>
+            
             <div className="space-y-4">
-              {tmdbReviews.map((review: any) => (
-                <div key={review.id} className="bg-card/50 rounded-lg p-4 border border-border">
+              {tmdbReviews.map((review: Review) => (
+                <div 
+                  key={review.id}
+                  className="bg-card rounded-xl p-4 border border-border"
+                >
                   <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage 
-                        src={review.author_details?.avatar_path 
-                          ? (review.author_details.avatar_path.startsWith('/http') 
-                            ? review.author_details.avatar_path.slice(1) 
-                            : `https://image.tmdb.org/t/p/w45${review.author_details.avatar_path}`)
-                          : ''
-                        } 
-                      />
-                      <AvatarFallback className="bg-muted text-muted-foreground">
-                        {review.author?.[0]?.toUpperCase() || 'T'}
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      {review.author_details.avatar_path ? (
+                        <AvatarImage 
+                          src={
+                            review.author_details.avatar_path.startsWith('/https')
+                              ? review.author_details.avatar_path.slice(1)
+                              : tmdbService.getProfileUrl(review.author_details.avatar_path)
+                          } 
+                        />
+                      ) : null}
+                      <AvatarFallback className="bg-muted">
+                        <User className="h-5 w-5 text-muted-foreground" />
                       </AvatarFallback>
                     </Avatar>
+                    
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-foreground">{review.author}</span>
-                        {review.author_details?.rating && (
-                          <span className="flex items-center gap-1 text-cinema-gold text-sm">
-                            <Star className="h-3 w-3 fill-current" />
-                            {review.author_details.rating}/10
-                          </span>
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <span className="font-medium text-foreground">
+                          {review.author_details.username || review.author}
+                        </span>
+                        {review.author_details.rating && (
+                          <div className="flex items-center gap-1 text-cinema-gold text-sm">
+                            <Star className="h-3.5 w-3.5 fill-current" />
+                            <span>{review.author_details.rating}/10</span>
+                          </div>
                         )}
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(review.created_at), 'MMM d, yyyy')}
+                        </span>
                       </div>
-                      <p className="text-muted-foreground text-xs mt-0.5">
-                        {format(new Date(review.created_at), 'MMM d, yyyy')}
-                      </p>
-                      <p className="text-foreground text-sm mt-2 line-clamp-4">
-                        {review.content}
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {formatReviewContent(review.content)}
                       </p>
                     </div>
                   </div>
@@ -311,6 +415,21 @@ const MovieReviews = () => {
           </div>
         )}
       </div>
+
+      {/* Log Modal */}
+      {showLogModal && movie && (
+        <LogMediaModal
+          isOpen={showLogModal}
+          onClose={() => {
+            setShowLogModal(false);
+            refetchCommunityReviews();
+          }}
+          mediaId={movieId}
+          mediaTitle={movie.title}
+          mediaPoster={movie.poster_path}
+          mediaType="movie"
+        />
+      )}
 
       <Navigation />
     </div>
