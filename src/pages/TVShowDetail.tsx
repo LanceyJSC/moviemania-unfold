@@ -70,11 +70,21 @@ const TVShowDetail = () => {
     return count;
   };
 
+  // Calculate season rating as average of episode ratings
   const getSeasonRating = (seasonNumber: number) => {
-    const seasonEntry = tvDiary.find(
-      entry => entry.tv_id === tvShowId && entry.season_number === seasonNumber && !entry.episode_number
-    );
-    return seasonEntry?.rating || null;
+    const episodeRatings = tvDiary
+      .filter(entry => 
+        entry.tv_id === tvShowId && 
+        entry.season_number === seasonNumber && 
+        entry.episode_number !== null &&
+        entry.rating !== null
+      )
+      .map(entry => entry.rating as number);
+    
+    if (episodeRatings.length === 0) return null;
+    
+    const average = Math.round(episodeRatings.reduce((a, b) => a + b, 0) / episodeRatings.length);
+    return average;
   };
 
   useEffect(() => {
