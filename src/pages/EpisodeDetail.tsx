@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, Clock, Star, Eye, BookOpen, ArrowLeft, User } from "lucide-react";
+import { Calendar, Clock, Star, Eye, BookOpen, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -264,7 +264,7 @@ const EpisodeDetail = () => {
       <MobileHeader title={`S${seasonNum} E${episodeNum}`} />
       
       {/* Hero Section */}
-      <div className="relative overflow-hidden h-[35vh] rounded-b-2xl">
+      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
@@ -272,46 +272,43 @@ const EpisodeDetail = () => {
             backgroundColor: 'hsl(var(--background))'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/60 via-cinema-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/50 via-transparent to-transparent" />
         </div>
 
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
-        <div className="absolute bottom-6 left-4 right-4 z-30">
-          <Link 
-            to={`/tv/${id}/season/${seasonNumber}`}
-            className="inline-flex items-center gap-1 text-white/80 text-sm mb-2 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to {tvShow.name} - Season {seasonNum}
-          </Link>
-          
-          <h1 className="font-cinematic text-white mb-2 tracking-wide text-xl leading-tight">
-            {episode.name}
-          </h1>
-          
-          <div className="flex items-center gap-3 text-white/80 text-sm flex-wrap">
-            <span>S{seasonNum} E{episodeNum}</span>
+        <div className="absolute bottom-6 left-4 z-30">
+          {episode.still_path && (
+            <img 
+              src={tmdbService.getBackdropUrl(episode.still_path, 'w780')}
+              alt={episode.name}
+              className="w-28 h-16 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
+            />
+          )}
+        </div>
+
+        <div className={`absolute bottom-6 right-4 z-30 ${episode.still_path ? 'left-36' : 'left-4'}`}>
+          <div className="flex items-center space-x-2 mb-1 flex-wrap gap-y-1">
+            <span className="text-cinema-gold font-semibold text-xs">TMDB {episode.vote_average.toFixed(1)}</span>
+            <span className="text-white/80 text-xs">S{seasonNum} E{episodeNum}</span>
             {episode.air_date && (
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
+              <span className="text-white/80 text-xs">
                 {format(new Date(episode.air_date), 'MMM d, yyyy')}
               </span>
             )}
             {episode.runtime && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {episode.runtime}m
-              </span>
-            )}
-            {episode.vote_average > 0 && (
-              <span className="flex items-center gap-1 text-cinema-gold">
-                <Star className="h-3 w-3 fill-current" />
-                {episode.vote_average.toFixed(1)}
-              </span>
+              <span className="text-white/80 text-xs">{episode.runtime}m</span>
             )}
           </div>
+
+          <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg leading-tight">
+            {episode.name}
+          </h1>
+          
+          <p className="text-white/70 text-xs">
+            {tvShow.name} - Season {seasonNum}
+          </p>
         </div>
       </div>
 
