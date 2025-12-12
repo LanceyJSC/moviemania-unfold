@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
@@ -19,9 +19,12 @@ import { RatingComparisonCard } from "@/components/RatingComparisonCard";
 import { SeasonProgressCard } from "@/components/SeasonProgressCard";
 import { RatingInput } from "@/components/RatingInput";
 import { useDiary } from "@/hooks/useDiary";
+import { useAuth } from "@/hooks/useAuth";
 
 const TVShowDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [tvShow, setTVShow] = useState<TVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
@@ -46,6 +49,15 @@ const TVShowDetail = () => {
   const isTVShowInWatchlist = isInWatchlist(tvShowId);
   const isTVShowWatched = isWatched(tvShowId);
   const userRating = getRating(tvShowId);
+
+  // Helper to check auth before actions
+  const requireAuth = (action: () => void) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    action();
+  };
 
   // Refetch diary on mount to ensure fresh data
   useEffect(() => {
@@ -246,7 +258,7 @@ const TVShowDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
               }`}
-              onClick={() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv')}
+              onClick={() => requireAuth(() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv'))}
             >
               <Heart className={`h-4 w-4 ${isTVShowLiked ? 'fill-current' : ''}`} />
             </Button>
@@ -256,7 +268,7 @@ const TVShowDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
               }`}
-              onClick={() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv')}
+              onClick={() => requireAuth(() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv'))}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -266,7 +278,7 @@ const TVShowDetail = () => {
               className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
                 isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''
               }`}
-              onClick={() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv')}
+              onClick={() => requireAuth(() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv'))}
             >
               <Eye className={`h-4 w-4 ${isTVShowWatched ? 'fill-current' : ''}`} />
             </Button>
@@ -275,7 +287,7 @@ const TVShowDetail = () => {
             <Button 
               variant="outline" 
               className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
-              onClick={() => setShowLogModal(true)}
+              onClick={() => requireAuth(() => setShowLogModal(true))}
             >
               <BookOpen className="h-4 w-4" />
             </Button>
@@ -288,7 +300,7 @@ const TVShowDetail = () => {
           mediaType="tv"
           tmdbRating={tvShow.vote_average}
           userRating={userRating}
-          onRatingChange={(rating) => setRating(tvShowId, rating, tvShow.name, posterUrl, 'tv')}
+          onRatingChange={(rating) => requireAuth(() => setRating(tvShowId, rating, tvShow.name, posterUrl, 'tv'))}
           mediaTitle={tvShow.name}
           mediaPoster={tvShow.poster_path}
         />
