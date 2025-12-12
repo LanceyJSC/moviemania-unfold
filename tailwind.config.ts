@@ -22,6 +22,7 @@ export default {
 			}
 		},
 		screens: {
+			'xs': '375px',           // Small phones
 			'iphone-65': '414px',    // iPhone 6.5"
 			'iphone-67': '428px',    // iPhone 6.7"
 			'sm': '640px',

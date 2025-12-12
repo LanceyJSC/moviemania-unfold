@@ -89,13 +89,16 @@ export const HeroSection = () => {
       clearInterval(rotationIntervalRef.current);
     }
     
+    // Use a shorter interval on mobile for more responsive rotation
+    const interval = isMobile ? 5000 : 6000;
+    
     rotationIntervalRef.current = setInterval(() => {
-      if (!isPaused && heroMovies.length > 1) {
-        setCurrentIndex(prevIndex => 
-          prevIndex >= heroMovies.length - 1 ? 0 : prevIndex + 1
-        );
-      }
-    }, 6000);
+      setCurrentIndex(prevIndex => {
+        const newIndex = prevIndex >= heroMovies.length - 1 ? 0 : prevIndex + 1;
+        console.log('Hero rotation tick, new index:', newIndex);
+        return newIndex;
+      });
+    }, interval);
   };
 
   const stopRotation = () => {
@@ -118,6 +121,7 @@ export const HeroSection = () => {
 
   useEffect(() => {
     if (heroMovies.length > 1 && !error) {
+      console.log('Starting hero rotation, movies:', heroMovies.length, 'isPaused:', isPaused);
       startRotation();
     }
     
