@@ -463,24 +463,19 @@ class TMDBService {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       
-      // Fetch both movies and TV trailers
-      const [movieResponse, tvResponse] = await Promise.all([
-        fetch(`${supabaseUrl}/functions/v1/kinocheck-trailers?limit=15&category=movie`, {
-          headers: { 'Authorization': `Bearer ${supabaseKey}` }
-        }),
-        fetch(`${supabaseUrl}/functions/v1/kinocheck-trailers?limit=10&category=tv`, {
-          headers: { 'Authorization': `Bearer ${supabaseKey}` }
-        })
-      ]);
+      // Fetch all latest trailers from KinoCheck
+      const response = await fetch(`${supabaseUrl}/functions/v1/kinocheck-trailers?limit=30`, {
+        headers: { 'Authorization': `Bearer ${supabaseKey}` }
+      });
 
-      if (!movieResponse.ok || !tvResponse.ok) {
+      if (!response.ok) {
         throw new Error('KinoCheck API error');
       }
 
-      const movieData = await movieResponse.json();
-      const tvData = await tvResponse.json();
+      const data = await response.json();
+      const allTrailers = data.trailers || [];
       
-      const allTrailers = [...(movieData.trailers || movieData || []), ...(tvData.trailers || tvData || [])];
+      console.log('KinoCheck returned', allTrailers.length, 'trailers');
       
       // Map to store YouTube keys by TMDB ID
       const youtubeKeys = new Map<number, string>();
@@ -499,8 +494,8 @@ class TMDBService {
             youtubeKeys.set(tmdbId, trailer.youtube_video_id);
           }
 
-          // Fetch TMDB details
-          const isMovie = trailer.categories?.includes('movie') || !trailer.categories?.includes('tv');
+          // KinoCheck uses "movie" or "show" in type field
+          const isMovie = trailer.type === 'movie' || !trailer.type;
           if (isMovie) {
             const movieDetails = await this.getMovieDetails(tmdbId, false);
             if (movieDetails.poster_path) {
