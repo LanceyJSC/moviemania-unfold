@@ -73,6 +73,7 @@ const SeasonDetail = () => {
   }, [id, seasonNumber]);
 
   // Track which episodes are watched and their ratings from diary
+  // Season rating is automatically calculated from episode ratings average
   useEffect(() => {
     if (!id || !seasonNumber) return;
     
@@ -81,7 +82,7 @@ const SeasonDetail = () => {
     
     const watched = new Set<string>();
     const ratings: Record<string, number> = {};
-    let foundSeasonRating = 0;
+    const episodeRatingValues: number[] = [];
     
     tvDiary.forEach(entry => {
       if (entry.tv_id === tvId && entry.season_number === seasonNum) {
@@ -91,18 +92,22 @@ const SeasonDetail = () => {
           watched.add(key);
           if (entry.rating) {
             ratings[key] = entry.rating;
-          }
-        } else {
-          // Season-level entry (no episode number)
-          if (entry.rating) {
-            foundSeasonRating = entry.rating;
+            episodeRatingValues.push(entry.rating);
           }
         }
       }
     });
+    
     setWatchedEpisodes(watched);
     setEpisodeRatings(ratings);
-    setSeasonRating(foundSeasonRating);
+    
+    // Calculate average from episode ratings
+    if (episodeRatingValues.length > 0) {
+      const average = Math.round(episodeRatingValues.reduce((a, b) => a + b, 0) / episodeRatingValues.length);
+      setSeasonRating(average);
+    } else {
+      setSeasonRating(0);
+    }
   }, [id, seasonNumber, tvDiary]);
 
   const handleRateSeason = async (rating: number) => {
@@ -449,25 +454,29 @@ const SeasonDetail = () => {
         </div>
       )}
 
-      {/* Season Rating */}
+      {/* Season Rating - Auto-calculated from episode ratings */}
       {user && (
         <div className="container mx-auto px-4 mb-6">
           <div className="bg-card/50 rounded-lg p-4 border border-border/50">
             <div className="flex flex-col gap-3">
               <div>
-                <h3 className="font-semibold text-foreground">Rate this Season</h3>
-                <p className="text-xs text-muted-foreground">Your overall rating for {season.name}</p>
+                <h3 className="font-semibold text-foreground">Season Rating</h3>
+                <p className="text-xs text-muted-foreground">
+                  {Object.keys(episodeRatings).length > 0 
+                    ? `Average of ${Object.keys(episodeRatings).length} rated episode${Object.keys(episodeRatings).length !== 1 ? 's' : ''}`
+                    : 'Rate episodes to calculate season average'}
+                </p>
               </div>
               <div className="flex items-center gap-2">
-                <RatingInput 
-                  value={seasonRating} 
-                  onChange={handleRateSeason}
-                  size="sm"
-                />
-                {seasonRating > 0 && (
-                  <span className="text-sm text-cinema-gold font-medium">
-                    {seasonRating}/10
-                  </span>
+                {seasonRating > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <Star className="h-5 w-5 fill-cinema-gold text-cinema-gold" />
+                    <span className="text-lg text-cinema-gold font-medium">
+                      {seasonRating}/10
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">No ratings yet</span>
                 )}
               </div>
             </div>
