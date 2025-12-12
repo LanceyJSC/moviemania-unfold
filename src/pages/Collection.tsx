@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserStats } from '@/hooks/useUserStats';
-import { useDiary } from '@/hooks/useDiary';
+import { useDiary, MovieDiaryEntry, TVDiaryEntry } from '@/hooks/useDiary';
 import { useUserStateContext } from '@/contexts/UserStateContext';
 import { tmdbService, Movie } from '@/lib/tmdb';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
 import { CollectionMediaCard } from '@/components/CollectionMediaCard';
 import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
+import { LogMediaModal } from '@/components/LogMediaModal';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -45,6 +46,19 @@ const Collection = () => {
   const [ratedMovies, setRatedMovies] = useState<any[]>([]);
   const [ratedLoading, setRatedLoading] = useState(true);
   const [mediaFilter, setMediaFilter] = useState<MediaFilter>('all');
+  
+  // Edit diary entry state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<{
+    mediaId: number;
+    mediaTitle: string;
+    mediaPoster: string | null;
+    mediaType: 'movie' | 'tv';
+    initialRating: number;
+    initialNotes: string;
+    seasonNumber?: number;
+    episodeNumber?: number;
+  } | null>(null);
 
   // Recalculate stats on mount and when diary/ratings data changes
   useEffect(() => {
@@ -266,6 +280,39 @@ const Collection = () => {
     return items.sort((a, b) =>
       new Date(b.watched_date).getTime() - new Date(a.watched_date).getTime()
     );
+  };
+
+  // Handler to open edit modal for a diary entry
+  const handleEditDiaryEntry = (entry: any, type: 'movie' | 'tv') => {
+    if (type === 'movie') {
+      setEditingEntry({
+        mediaId: entry.movie_id,
+        mediaTitle: entry.movie_title,
+        mediaPoster: entry.movie_poster,
+        mediaType: 'movie',
+        initialRating: entry.rating || 0,
+        initialNotes: entry.notes || '',
+      });
+    } else {
+      setEditingEntry({
+        mediaId: entry.tv_id,
+        mediaTitle: entry.tv_title,
+        mediaPoster: entry.tv_poster,
+        mediaType: 'tv',
+        initialRating: entry.rating || 0,
+        initialNotes: entry.notes || '',
+        seasonNumber: entry.season_number,
+        episodeNumber: entry.episode_number,
+      });
+    }
+    setEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setEditModalOpen(false);
+    setEditingEntry(null);
+    refetchDiary();
+    refetchUserState();
   };
 
   const isLoading = itemsLoading || favoritesLoading || ratedLoading || diaryLoading;
@@ -639,6 +686,7 @@ const Collection = () => {
                           userRating={entry.rating}
                           defaultExpanded={true}
                           onDelete={() => deleteAllMediaData((entry as any).tv_id, 'tv')}
+                          onEdit={() => handleEditDiaryEntry(entry, 'tv')}
                         />
                       );
                   }
@@ -653,6 +701,7 @@ const Collection = () => {
                       mediaType="movie"
                       userRating={entry.rating}
                       onDelete={() => deleteAllMediaData((entry as any).movie_id, 'movie')}
+                      onEdit={() => handleEditDiaryEntry(entry, 'movie')}
                     >
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
@@ -677,6 +726,22 @@ const Collection = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Edit Diary Entry Modal */}
+      {editingEntry && (
+        <LogMediaModal
+          isOpen={editModalOpen}
+          onClose={handleEditModalClose}
+          mediaId={editingEntry.mediaId}
+          mediaTitle={editingEntry.mediaTitle}
+          mediaPoster={editingEntry.mediaPoster}
+          mediaType={editingEntry.mediaType}
+          seasonNumber={editingEntry.seasonNumber}
+          episodeNumber={editingEntry.episodeNumber}
+          initialRating={editingEntry.initialRating}
+          initialNotes={editingEntry.initialNotes}
+        />
+      )}
     </div>
   );
 };

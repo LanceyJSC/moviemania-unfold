@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Tv, Star, Trash2, ChevronDown, ChevronUp, BookOpen, ChevronRight } from 'lucide-react';
+import { Tv, Star, Trash2, ChevronDown, ChevronUp, BookOpen, ChevronRight, Pencil } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,6 +32,7 @@ interface TVShowCollectionCardProps {
   poster: string | null;
   userRating?: number | null;
   onDelete: () => void;
+  onEdit?: () => void;
   children?: React.ReactNode;
   defaultExpanded?: boolean;
 }
@@ -62,6 +63,7 @@ export const TVShowCollectionCard = ({
   poster,
   userRating,
   onDelete,
+  onEdit,
   children,
   defaultExpanded = false
 }: TVShowCollectionCardProps) => {
@@ -340,41 +342,53 @@ export const TVShowCollectionCard = ({
             )}
           </Button>
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
+        <div className="flex gap-1 shrink-0">
+          {onEdit && (
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={onEdit}
+              className="text-muted-foreground hover:text-foreground hover:bg-muted"
             >
-              <Trash2 className="h-4 w-4" />
+              <Pencil className="h-4 w-4" />
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete "{showTitle}"?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete all data for this TV show including:
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>All watched episodes and seasons</li>
-                  <li>All ratings and reviews</li>
-                  <li>Diary entries and notes</li>
-                  <li>Watchlist and favorites status</li>
-                </ul>
-                <p className="mt-2 font-medium">This action cannot be undone.</p>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={onDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                Delete All Data
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete "{showTitle}"?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all data for this TV show including:
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>All watched episodes and seasons</li>
+                    <li>All ratings and reviews</li>
+                    <li>Diary entries and notes</li>
+                    <li>Watchlist and favorites status</li>
+                  </ul>
+                  <p className="mt-2 font-medium">This action cannot be undone.</p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={onDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete All Data
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       {isExpanded && (

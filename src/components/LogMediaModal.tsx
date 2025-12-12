@@ -29,6 +29,7 @@ interface LogMediaModalProps {
   seasonNumber?: number;
   episodeNumber?: number;
   initialRating?: number;
+  initialNotes?: string;
 }
 
 export const LogMediaModal = ({
@@ -40,7 +41,8 @@ export const LogMediaModal = ({
   mediaType,
   seasonNumber,
   episodeNumber,
-  initialRating = 0
+  initialRating = 0,
+  initialNotes = ''
 }: LogMediaModalProps) => {
   const { user } = useAuth();
   const { addMovieDiaryEntry, addTVDiaryEntry } = useDiary();
@@ -48,19 +50,20 @@ export const LogMediaModal = ({
   const queryClient = useQueryClient();
   const { refetch: refetchUserState } = useUserStateContext();
   const [watchedDate, setWatchedDate] = useState<Date>(new Date());
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(initialNotes);
   const [rating, setRating] = useState<number>(initialRating);
   const [isSpoiler, setIsSpoiler] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [runtime, setRuntime] = useState<number | null>(null);
 
-  // Sync rating with initialRating when modal opens
+  // Sync rating and notes with initial values when modal opens
   useEffect(() => {
     if (isOpen) {
       setRating(initialRating);
+      setNotes(initialNotes);
     }
-  }, [isOpen, initialRating]);
+  }, [isOpen, initialRating, initialNotes]);
 
   // Fetch runtime when modal opens
   useEffect(() => {

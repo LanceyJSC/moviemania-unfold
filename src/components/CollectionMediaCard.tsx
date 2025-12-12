@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Film, Tv, Star, Trash2 } from 'lucide-react';
+import { Film, Tv, Star, Trash2, Pencil } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +26,7 @@ interface CollectionMediaCardProps {
   mediaType: 'movie' | 'tv';
   userRating?: number | null;
   onDelete: () => void;
+  onEdit?: () => void;
   children?: React.ReactNode;
 }
 
@@ -37,6 +38,7 @@ export const CollectionMediaCard = ({
   mediaType,
   userRating,
   onDelete,
+  onEdit,
   children
 }: CollectionMediaCardProps) => {
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
@@ -106,40 +108,52 @@ export const CollectionMediaCard = ({
           {/* Additional content slot */}
           {children}
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
+        <div className="flex gap-1 shrink-0">
+          {onEdit && (
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={onEdit}
+              className="text-muted-foreground hover:text-foreground hover:bg-muted"
             >
-              <Trash2 className="h-4 w-4" />
+              <Pencil className="h-4 w-4" />
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete "{title}"?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete all data for this {mediaType === 'tv' ? 'TV show' : 'movie'} including:
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Ratings and reviews</li>
-                  <li>Diary entries and notes</li>
-                  <li>Watchlist and favorites status</li>
-                </ul>
-                <p className="mt-2 font-medium">This action cannot be undone.</p>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={onDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                Delete All Data
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete "{title}"?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all data for this {mediaType === 'tv' ? 'TV show' : 'movie'} including:
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>Ratings and reviews</li>
+                    <li>Diary entries and notes</li>
+                    <li>Watchlist and favorites status</li>
+                  </ul>
+                  <p className="mt-2 font-medium">This action cannot be undone.</p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={onDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete All Data
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </Card>
   );
