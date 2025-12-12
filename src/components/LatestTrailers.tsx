@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Play, Star, Film, Video, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
@@ -16,24 +16,37 @@ const TRAILER_CATEGORIES = [
 type TrailerCategory = typeof TRAILER_CATEGORIES[number]['id'];
 type MediaItem = Movie | TVShow;
 
-const TRAILERS_REFRESH_INTERVAL = 20 * 60 * 1000;
+const TRAILERS_REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes for KinoCheck
 
 export const LatestTrailers = () => {
   const [activeCategory, setActiveCategory] = useState<TrailerCategory>('popular');
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const { setTrailerKey, setMovieTitle, setIsTrailerOpen } = useTrailerContext();
+  
+  // Store YouTube keys from KinoCheck
+  const youtubeKeysRef = useRef<Map<number, string>>(new Map());
 
   const fetchTrailers = async (forceFresh: boolean = true) => {
     try {
       setLoading(true);
-      console.log(`Fetching FRESH trailers for category: ${activeCategory} - Force fresh: ${forceFresh}`);
-      const response = await tmdbService.getLatestTrailers(activeCategory, forceFresh);
-      console.log(`Received ${response.results.length} fresh items for ${activeCategory}`);
-      setItems(response.results.slice(0, 24));
-      setLastUpdated(new Date());
+      
+      // Use KinoCheck for "Popular" category (cutting-edge trailers)
+      if (activeCategory === 'popular') {
+        console.log('Fetching cutting-edge trailers from KinoCheck API');
+        const { results, youtubeKeys } = await tmdbService.getKinoCheckLatestTrailers();
+        youtubeKeysRef.current = youtubeKeys;
+        console.log(`Received ${results.length} fresh trailers from KinoCheck`);
+        setItems(results.slice(0, 24));
+      } else {
+        // Use TMDB for other categories
+        console.log(`Fetching trailers from TMDB for category: ${activeCategory}`);
+        const response = await tmdbService.getLatestTrailers(activeCategory, forceFresh);
+        youtubeKeysRef.current = new Map();
+        console.log(`Received ${response.results.length} items from TMDB`);
+        setItems(response.results.slice(0, 24));
+      }
     } catch (error) {
       console.error('Error fetching trailers:', error);
     } finally {
@@ -47,9 +60,7 @@ export const LatestTrailers = () => {
   }, [activeCategory]);
 
   useEffect(() => {
-    console.log(`Setting up trailers auto-refresh for ${activeCategory} every 20 minutes`);
     const refreshInterval = setInterval(() => {
-      console.log(`Auto-refreshing trailers for ${activeCategory} - Priority content update`);
       fetchTrailers(true);
     }, TRAILERS_REFRESH_INTERVAL);
     return () => clearInterval(refreshInterval);
@@ -58,7 +69,6 @@ export const LatestTrailers = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log(`App regained focus - Refreshing trailers for ${activeCategory}`);
         fetchTrailers(true);
       }
     };
@@ -69,6 +79,17 @@ export const LatestTrailers = () => {
   const handlePlayTrailer = async (item: MediaItem) => {
     try {
       const isMovie = 'title' in item;
+      
+      // Check if we have a KinoCheck YouTube key first
+      const kinoCheckKey = youtubeKeysRef.current.get(item.id);
+      if (kinoCheckKey) {
+        setTrailerKey(kinoCheckKey);
+        setMovieTitle(isMovie ? item.title : item.name);
+        setIsTrailerOpen(true);
+        return;
+      }
+      
+      // Fallback to TMDB
       const details = isMovie 
         ? await tmdbService.getMovieDetails(item.id, true)
         : await tmdbService.getTVShowDetails(item.id, true);
