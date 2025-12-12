@@ -233,73 +233,78 @@ const TVShowDetail = () => {
 
       {/* Action Section */}
       <div className="container mx-auto px-4 py-6">
-        {/* Action Buttons */}
-        <div className="flex gap-3 mb-6">
+        {/* Watch Trailer Button */}
+        <div className="mb-4">
           {trailerKey ? (
             <Button 
-              className="flex-1 bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]"
+              className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]"
               onClick={handleWatchTrailer}
             >
               <Play className="mr-2 h-4 w-4" />
               Watch Trailer
             </Button>
           ) : (
-            <Button className="flex-1 bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]" disabled>
+            <Button className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]" disabled>
               <Play className="mr-2 h-4 w-4" />
               No Trailer
             </Button>
           )}
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
-                isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
-              }`}
-              onClick={() => requireAuth(() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv'))}
-            >
-              <Heart className={`h-4 w-4 ${isTVShowLiked ? 'fill-current' : ''}`} />
-            </Button>
+        </div>
 
-            <Button 
-              variant="outline" 
-              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
-                isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
-              }`}
-              onClick={() => requireAuth(() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv'))}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+        {/* Action Buttons with Labels */}
+        <div className="grid grid-cols-5 gap-2 mb-6">
+          <Button 
+            variant="outline" 
+            className={`flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card ${
+              isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
+            }`}
+            onClick={() => requireAuth(() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv'))}
+          >
+            <Heart className={`h-5 w-5 ${isTVShowLiked ? 'fill-current' : ''}`} />
+            <span className="text-xs">Like</span>
+          </Button>
 
-            <Button 
-              variant="outline" 
-              className={`border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px] ${
-                isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''
-              }`}
-              onClick={() => requireAuth(() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv'))}
-            >
-              <Eye className={`h-4 w-4 ${isTVShowWatched ? 'fill-current' : ''}`} />
-            </Button>
+          <Button 
+            variant="outline" 
+            className={`flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card ${
+              isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
+            }`}
+            onClick={() => requireAuth(() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv'))}
+          >
+            <Plus className="h-5 w-5" />
+            <span className="text-xs">Watchlist</span>
+          </Button>
 
+          <Button 
+            variant="outline" 
+            className={`flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card ${
+              isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''
+            }`}
+            onClick={() => requireAuth(() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv'))}
+          >
+            <Eye className={`h-5 w-5 ${isTVShowWatched ? 'fill-current' : ''}`} />
+            <span className="text-xs">Watched</span>
+          </Button>
 
-            <Button 
-              variant="outline" 
-              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
-              onClick={() => requireAuth(() => setShowLogModal(true))}
-            >
-              <BookOpen className="h-4 w-4" />
-            </Button>
+          <Button 
+            variant="outline" 
+            className="flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card"
+            onClick={() => requireAuth(() => setShowLogModal(true))}
+          >
+            <BookOpen className="h-5 w-5" />
+            <span className="text-xs">Log</span>
+          </Button>
 
-            <Button 
-              variant="outline" 
-              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
-              asChild
-            >
-              <Link to={`/tv/${tvShowId}/reviews`}>
-                <MessageCircle className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            className="flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card"
+            asChild
+          >
+            <Link to={`/tv/${tvShowId}/reviews`}>
+              <MessageCircle className="h-5 w-5" />
+              <span className="text-xs">Reviews</span>
+            </Link>
+          </Button>
         </div>
 
         {/* Rating Comparison Card */}
