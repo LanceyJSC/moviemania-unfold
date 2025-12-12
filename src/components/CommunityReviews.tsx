@@ -138,8 +138,11 @@ export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsPro
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          Community Reviews {reviews?.length ? `(${reviews.length})` : ''}
+        <h3 className="text-lg font-semibold text-foreground">
+          Community Reviews
+          <span className="text-sm font-normal text-muted-foreground ml-2">
+            ({reviews?.length || 0})
+          </span>
         </h3>
         
         <div className="flex items-center gap-2">
@@ -157,18 +160,22 @@ export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsPro
               </SelectContent>
             </Select>
           )}
-          
-          {onWriteReview && (
-            <Button size="sm" variant="outline" onClick={onWriteReview} className="h-8 text-xs">
-              <PenLine className="h-3 w-3 mr-1" />
-              Write Review
-            </Button>
-          )}
         </div>
       </div>
 
       {!sortedReviews.length ? (
-        <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
+        <div className="text-center py-8 bg-card rounded-xl border border-border">
+          <p className="text-muted-foreground text-sm mb-2">No community reviews yet.</p>
+          {onWriteReview && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onWriteReview}
+            >
+              Be the first to review
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="space-y-3">
           {sortedReviews.map((review) => {
@@ -179,17 +186,19 @@ export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsPro
             const isOwnReview = user?.id === review.user_id;
 
             return (
-              <Card key={review.id} className={isOwnReview ? 'border-primary/30 bg-primary/5' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex gap-3">
-                    <Link to={`/user/${review.user_id}`}>
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={review.profile?.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {review.profile?.username?.[0]?.toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
+              <div 
+                key={review.id} 
+                className={`bg-card rounded-xl p-4 border ${isOwnReview ? 'border-primary/30 bg-primary/5' : 'border-border'}`}
+              >
+                <div className="flex items-start gap-3">
+                  <Link to={`/user/${review.profile?.username || review.user_id}`}>
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      <AvatarImage src={review.profile?.avatar_url || undefined} />
+                      <AvatarFallback className="bg-muted">
+                        {review.profile?.username?.[0]?.toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Link 
@@ -257,8 +266,7 @@ export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsPro
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
             );
           })}
         </div>
