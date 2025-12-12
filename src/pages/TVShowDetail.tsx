@@ -342,11 +342,11 @@ const TVShowDetail = () => {
           </div>
         )}
         
-        {/* TMDB Reviews Section */}
-        <UserReviews movieId={tvShow.id} isTV={true} />
+        {/* Community Reviews Section - Show first */}
+        <CommunityReviews movieId={tvShow.id} onWriteReview={() => setShowLogModal(true)} />
         
-        {/* Community Reviews Section */}
-        <CommunityReviews movieId={tvShow.id} />
+        {/* TMDB Reviews Section - Show below */}
+        <UserReviews movieId={tvShow.id} isTV={true} />
       </div>
 
       {/* Additional Content */}
