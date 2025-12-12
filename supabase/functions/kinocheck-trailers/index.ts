@@ -12,11 +12,10 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const limit = url.searchParams.get('limit') || '20';
-    const category = url.searchParams.get('category') || 'movie';
+    const limit = url.searchParams.get('limit') || '25';
     
-    // KinoCheck API for latest trailers
-    const kinoCheckUrl = `https://api.kinocheck.com/trailers/latest?language=en&limit=${limit}&categories=${category}`;
+    // KinoCheck API - fetch latest trailers without category filter
+    const kinoCheckUrl = `https://api.kinocheck.com/trailers/latest?language=en&limit=${limit}`;
     
     console.log('Fetching from KinoCheck:', kinoCheckUrl);
     
@@ -32,9 +31,10 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('KinoCheck response:', JSON.stringify(data).slice(0, 500));
+    console.log('KinoCheck response count:', Array.isArray(data) ? data.length : 'not an array');
+    console.log('KinoCheck first item:', JSON.stringify(data[0] || {}).slice(0, 300));
 
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify({ trailers: data }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
