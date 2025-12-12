@@ -332,23 +332,22 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Latest Trailers - uses upcoming movies which have the newest trailers
+  // Enhanced Latest Trailers with stronger cache busting
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = true): Promise<TMDBResponse<Movie | TVShow>> {
     let movieEndpoint = '';
     let tvEndpoint = '';
     
     switch (category) {
       case 'popular':
-        // Upcoming movies have the newest trailers - matches TMDB's Latest Trailers
-        movieEndpoint = '/movie/upcoming';
-        tvEndpoint = '/tv/on_the_air';
+        movieEndpoint = '/trending/movie/day';
+        tvEndpoint = '/trending/tv/day';
         break;
       case 'streaming':
         movieEndpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
         tvEndpoint = '/discover/tv?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
         break;
       case 'on_tv':
-        movieEndpoint = '/movie/upcoming';
+        movieEndpoint = '/trending/movie/day';
         tvEndpoint = '/tv/airing_today';
         break;
       case 'for_rent':
@@ -361,31 +360,27 @@ class TMDBService {
         break;
     }
     
-    // Always fetch fresh data
+    // Always fetch fresh data for trailers - they change frequently
     const [movieResponse, tvResponse] = await Promise.all([
       this.fetchFromTMDB<TMDBResponse<Movie>>(movieEndpoint, true),
       this.fetchFromTMDB<TMDBResponse<TVShow>>(tvEndpoint, true)
     ]);
     
-    // Filter to only items with poster images
-    const moviesWithPosters = movieResponse.results.filter(m => m.poster_path);
-    const tvWithPosters = tvResponse.results.filter(t => t.poster_path);
-    
-    // Mix movies and TV shows
+    // Mix movies and TV shows alternating like TMDB
     const mixedResults: (Movie | TVShow)[] = [];
-    const maxItems = 24;
+    const maxItems = 20;
     let movieIndex = 0;
     let tvIndex = 0;
     
     for (let i = 0; i < maxItems; i++) {
-      if (i % 3 === 0 && tvIndex < tvWithPosters.length) {
-        mixedResults.push(tvWithPosters[tvIndex]);
+      if (i % 3 === 0 && tvIndex < tvResponse.results.length) {
+        mixedResults.push(tvResponse.results[tvIndex]);
         tvIndex++;
-      } else if (movieIndex < moviesWithPosters.length) {
-        mixedResults.push(moviesWithPosters[movieIndex]);
+      } else if (movieIndex < movieResponse.results.length) {
+        mixedResults.push(movieResponse.results[movieIndex]);
         movieIndex++;
-      } else if (tvIndex < tvWithPosters.length) {
-        mixedResults.push(tvWithPosters[tvIndex]);
+      } else if (tvIndex < tvResponse.results.length) {
+        mixedResults.push(tvResponse.results[tvIndex]);
         tvIndex++;
       } else {
         break;
@@ -457,69 +452,6 @@ class TMDBService {
     return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`, fresh);
   }
 
-  // KinoCheck API integration for cutting-edge latest trailers
-  async getKinoCheckLatestTrailers(): Promise<{ results: (Movie | TVShow)[]; youtubeKeys: Map<number, string> }> {
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      
-      // Fetch all latest trailers from KinoCheck
-      const response = await fetch(`${supabaseUrl}/functions/v1/kinocheck-trailers?limit=30`, {
-        headers: { 'Authorization': `Bearer ${supabaseKey}` }
-      });
-
-      if (!response.ok) {
-        throw new Error('KinoCheck API error');
-      }
-
-      const data = await response.json();
-      const allTrailers = data.trailers || [];
-      
-      console.log('KinoCheck returned', allTrailers.length, 'trailers');
-      
-      // Map to store YouTube keys by TMDB ID
-      const youtubeKeys = new Map<number, string>();
-      const results: (Movie | TVShow)[] = [];
-      const seenIds = new Set<number>();
-
-      // Fetch TMDB data for each trailer
-      for (const trailer of allTrailers.slice(0, 24)) {
-        const tmdbId = trailer.tmdb_id;
-        if (!tmdbId || seenIds.has(tmdbId)) continue;
-        seenIds.add(tmdbId);
-
-        try {
-          // Store YouTube key
-          if (trailer.youtube_video_id) {
-            youtubeKeys.set(tmdbId, trailer.youtube_video_id);
-          }
-
-          // KinoCheck uses "movie" or "show" in type field
-          const isMovie = trailer.type === 'movie' || !trailer.type;
-          if (isMovie) {
-            const movieDetails = await this.getMovieDetails(tmdbId, false);
-            if (movieDetails.poster_path) {
-              results.push(movieDetails);
-            }
-          } else {
-            const tvDetails = await this.getTVShowDetails(tmdbId, false);
-            if (tvDetails.poster_path) {
-              results.push(tvDetails);
-            }
-          }
-        } catch (error) {
-          console.log(`Could not fetch TMDB data for ID ${tmdbId}`, error);
-        }
-      }
-
-      return { results, youtubeKeys };
-    } catch (error) {
-      console.error('KinoCheck API error, falling back to TMDB:', error);
-      // Fallback to TMDB
-      const fallback = await this.getLatestTrailers('popular', true);
-      return { results: fallback.results, youtubeKeys: new Map() };
-    }
-  }
 }
 
 export const tmdbService = new TMDBService();
