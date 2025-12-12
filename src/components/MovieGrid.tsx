@@ -70,8 +70,11 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     }
   }, [data]);
 
-  // Combine initial data with additional loaded pages
-  const movies = [...(data?.results || []), ...additionalMovies];
+  // Combine initial data with additional loaded pages, removing duplicates
+  const allMovies = [...(data?.results || []), ...additionalMovies];
+  const movies = allMovies.filter((movie, index, self) => 
+    index === self.findIndex(m => m.id === movie.id)
+  );
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore || isLoading) return;
