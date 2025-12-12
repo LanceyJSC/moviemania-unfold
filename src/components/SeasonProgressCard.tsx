@@ -132,17 +132,19 @@ export const SeasonProgressCard = ({
             />
           </div>
           
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-sm">
-              {watchedEpisodes}/{totalEpisodes} episodes
-            </span>
-            
-            {seasonRating && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold font-semibold text-xs">
+          <span className="text-muted-foreground text-sm">
+            {watchedEpisodes}/{totalEpisodes} episodes
+          </span>
+          
+          {/* Season Rating */}
+          {seasonRating && seasonRating > 0 && (
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-xs text-muted-foreground">Season Rating:</span>
+              <span className="text-cinema-gold font-semibold text-sm">
                 {seasonRating}/10
               </span>
-            )}
-          </div>
+            </div>
+          )}
           
           {/* Year */}
           {season.air_date && (
