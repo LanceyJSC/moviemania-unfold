@@ -332,27 +332,38 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Enhanced Latest Trailers with stronger cache busting
+  // Enhanced Latest Trailers - fetch recently released content with trailers
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = true): Promise<TMDBResponse<Movie | TVShow>> {
+    const today = new Date();
+    const threeMonthsAgo = new Date(today);
+    threeMonthsAgo.setMonth(today.getMonth() - 3);
+    const oneMonthAhead = new Date(today);
+    oneMonthAhead.setMonth(today.getMonth() + 1);
+    
+    const dateFrom = threeMonthsAgo.toISOString().split('T')[0];
+    const dateTo = oneMonthAhead.toISOString().split('T')[0];
+    const todayStr = today.toISOString().split('T')[0];
+    
     let movieEndpoint = '';
     let tvEndpoint = '';
     
     switch (category) {
       case 'popular':
-        movieEndpoint = '/trending/movie/day';
-        tvEndpoint = '/trending/tv/day';
+        // Get recently released movies sorted by release date (newest first)
+        movieEndpoint = `/discover/movie?primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&sort_by=primary_release_date.desc&vote_count.gte=10`;
+        tvEndpoint = `/discover/tv?first_air_date.gte=${dateFrom}&first_air_date.lte=${dateTo}&sort_by=first_air_date.desc&vote_count.gte=10`;
         break;
       case 'streaming':
-        movieEndpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
-        tvEndpoint = '/discover/tv?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
+        movieEndpoint = `/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&primary_release_date.gte=${dateFrom}&sort_by=primary_release_date.desc`;
+        tvEndpoint = `/discover/tv?with_watch_providers=8|9|15|337|384|350&watch_region=US&first_air_date.gte=${dateFrom}&sort_by=first_air_date.desc`;
         break;
       case 'on_tv':
-        movieEndpoint = '/trending/movie/day';
         tvEndpoint = '/tv/airing_today';
+        movieEndpoint = `/discover/movie?primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&sort_by=primary_release_date.desc`;
         break;
       case 'for_rent':
-        movieEndpoint = '/discover/movie?with_watch_monetization_types=rent&watch_region=US&sort_by=popularity.desc';
-        tvEndpoint = '/discover/tv?with_watch_monetization_types=rent&watch_region=US&sort_by=popularity.desc';
+        movieEndpoint = `/discover/movie?with_watch_monetization_types=rent&watch_region=US&primary_release_date.gte=${dateFrom}&sort_by=primary_release_date.desc`;
+        tvEndpoint = `/discover/tv?with_watch_monetization_types=rent&watch_region=US&first_air_date.gte=${dateFrom}&sort_by=first_air_date.desc`;
         break;
       case 'in_theaters':
         movieEndpoint = '/movie/now_playing';
@@ -366,9 +377,9 @@ class TMDBService {
       this.fetchFromTMDB<TMDBResponse<TVShow>>(tvEndpoint, true)
     ]);
     
-    // Mix movies and TV shows alternating like TMDB
+    // Mix movies and TV shows alternating, prioritizing newest releases
     const mixedResults: (Movie | TVShow)[] = [];
-    const maxItems = 20;
+    const maxItems = 24;
     let movieIndex = 0;
     let tvIndex = 0;
     
