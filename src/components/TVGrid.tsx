@@ -35,44 +35,46 @@ const fetchTVShows = async (category: string, page: number) => {
 };
 
 export const TVGrid = ({ title, category }: TVGridProps) => {
-  const [tvShows, setTVShows] = useState<TVShow[]>([]);
+  const [additionalShows, setAdditionalShows] = useState<TVShow[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const loadingMoreRef = useRef(false);
   const isMobile = useIsMobile();
 
   // Use React Query for caching - staleTime prevents refetch on mount
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['tvshows', category, 1],
     queryFn: () => fetchTVShows(category, 1),
     staleTime: 5 * 60 * 1000, // 5 minutes - won't refetch if data is fresh
     gcTime: 30 * 60 * 1000, // 30 minutes cache
   });
 
-  // Set initial TV shows from query
+  // Reset pagination when category changes
   useEffect(() => {
-    if (data?.results) {
-      setTVShows(data.results);
+    setPage(1);
+    setAdditionalShows([]);
+    setHasMore(true);
+  }, [category]);
+
+  // Update hasMore when initial data loads
+  useEffect(() => {
+    if (data) {
       setHasMore(1 < data.total_pages);
-      setPage(1);
     }
   }, [data]);
 
-  // Reset when category changes
-  useEffect(() => {
-    setPage(1);
-    setTVShows([]);
-  }, [category]);
+  // Combine initial data with additional loaded pages
+  const tvShows = [...(data?.results || []), ...additionalShows];
 
   const loadMore = async () => {
-    if (loadingMoreRef.current || !hasMore) return;
+    if (loadingMoreRef.current || !hasMore || isLoading) return;
     
     loadingMoreRef.current = true;
     const nextPage = page + 1;
     
     try {
       const response = await fetchTVShows(category, nextPage);
-      setTVShows(prev => [...prev, ...response.results]);
+      setAdditionalShows(prev => [...prev, ...response.results]);
       setHasMore(nextPage < response.total_pages);
       setPage(nextPage);
     } catch (error) {
@@ -130,7 +132,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
       </div>
 
       {/* Loading more indicator */}
-      {(isFetching || loadingMoreRef.current) && tvShows.length > 0 && (
+      {loadingMoreRef.current && tvShows.length > 0 && (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cinema-red"></div>
         </div>
