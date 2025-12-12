@@ -111,11 +111,11 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   // Intersection Observer with debouncing
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!sentinel || isLoading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && loadMoreRef.current) {
+        if (entries[0].isIntersecting) {
           // Debounce the load call
           if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
@@ -125,7 +125,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
           }, 100);
         }
       },
-      { rootMargin: '200px', threshold: 0 }
+      { rootMargin: '400px', threshold: 0.1 }
     );
 
     observer.observe(sentinel);
@@ -135,7 +135,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, []);
+  }, [isLoading]);
 
   return (
     <div className="space-y-6">
@@ -167,8 +167,8 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
         )}
       </div>
 
-      {/* Sentinel element for Intersection Observer */}
-      <div ref={sentinelRef} className="h-1" />
+      {/* Sentinel element for Intersection Observer - must have height to be observable */}
+      <div ref={sentinelRef} className="h-10 w-full" />
 
       {/* Loading more indicator */}
       {isLoadingMore && (
