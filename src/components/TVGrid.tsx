@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { tmdbService } from "@/lib/tmdb";
 import { TVShow } from "@/lib/tmdb";
 import { TVShowCard } from "@/components/TVShowCard";
@@ -9,77 +10,79 @@ interface TVGridProps {
   category: "all" | "popular" | "airing_today" | "on_the_air" | "top_rated";
 }
 
+const fetchTVShows = async (category: string, page: number) => {
+  let response;
+  switch (category) {
+    case "all":
+      response = await tmdbService.getPopularTVShows(page, false);
+      break;
+    case "popular":
+      response = await tmdbService.getPopularTVShows(page, false);
+      break;
+    case "airing_today":
+      response = await tmdbService.getAiringTodayTVShows(page, false);
+      break;
+    case "on_the_air":
+      response = await tmdbService.getOnTheAirTVShows(page, false);
+      break;
+    case "top_rated":
+      response = await tmdbService.getTopRatedTVShows(page, false);
+      break;
+    default:
+      response = await tmdbService.getPopularTVShows(page, false);
+  }
+  return response;
+};
+
 export const TVGrid = ({ title, category }: TVGridProps) => {
   const [tvShows, setTVShows] = useState<TVShow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const loadingMoreRef = useRef(false);
   const isMobile = useIsMobile();
 
-  const loadTVShows = async (pageNum: number = 1, fresh: boolean = false) => {
-    try {
-      if (pageNum === 1) {
-        setIsLoading(true);
-      }
+  // Use React Query for caching - staleTime prevents refetch on mount
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['tvshows', category, 1],
+    queryFn: () => fetchTVShows(category, 1),
+    staleTime: 5 * 60 * 1000, // 5 minutes - won't refetch if data is fresh
+    gcTime: 30 * 60 * 1000, // 30 minutes cache
+  });
 
-      let response;
-      switch (category) {
-        case "all":
-          response = await tmdbService.getPopularTVShows(pageNum, fresh);
-          break;
-        case "popular":
-          response = await tmdbService.getPopularTVShows(pageNum, fresh);
-          break;
-        case "airing_today":
-          response = await tmdbService.getAiringTodayTVShows(pageNum, fresh);
-          break;
-        case "on_the_air":
-          response = await tmdbService.getOnTheAirTVShows(pageNum, fresh);
-          break;
-        case "top_rated":
-          response = await tmdbService.getTopRatedTVShows(pageNum, fresh);
-          break;
-        default:
-          response = await tmdbService.getPopularTVShows(pageNum, fresh);
-      }
-
-      if (pageNum === 1) {
-        setTVShows(response.results);
-      } else {
-        setTVShows(prev => [...prev, ...response.results]);
-      }
-      
-      setHasMore(pageNum < response.total_pages);
-    } catch (error) {
-      console.error(`Failed to load ${category} TV shows:`, error);
-    } finally {
-      setIsLoading(false);
+  // Set initial TV shows from query
+  useEffect(() => {
+    if (data?.results) {
+      setTVShows(data.results);
+      setHasMore(1 < data.total_pages);
+      setPage(1);
     }
-  };
+  }, [data]);
 
-  const loadMore = () => {
-    if (!isLoading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      loadTVShows(nextPage);
-    }
-  };
-
+  // Reset when category changes
   useEffect(() => {
     setPage(1);
-    loadTVShows(1);
+    setTVShows([]);
   }, [category]);
 
-  // Periodic refresh every hour to stay updated with TMDB
-  useEffect(() => {
-    const refreshInterval = setInterval(() => {
-      setPage(1);
-      loadTVShows(1, true);
-    }, 3600000); // 1 hour in milliseconds
+  const loadMore = async () => {
+    if (loadingMoreRef.current || !hasMore) return;
+    
+    loadingMoreRef.current = true;
+    const nextPage = page + 1;
+    
+    try {
+      const response = await fetchTVShows(category, nextPage);
+      setTVShows(prev => [...prev, ...response.results]);
+      setHasMore(nextPage < response.total_pages);
+      setPage(nextPage);
+    } catch (error) {
+      console.error(`Failed to load more ${category} TV shows:`, error);
+    } finally {
+      loadingMoreRef.current = false;
+    }
+  };
 
-    return () => clearInterval(refreshInterval);
-  }, [category]);
-
+  // Infinite scroll
   useEffect(() => {
     const handleScroll = () => {
       if (
@@ -92,7 +95,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [page, hasMore, isLoading]);
+  }, [page, hasMore]);
 
   return (
     <div className="space-y-6">
@@ -115,8 +118,8 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
             </div>
           ))
         ) : (
-          tvShows.map((tvShow, index) => (
-            <div key={tvShow.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+          tvShows.map((tvShow) => (
+            <div key={tvShow.id} className="animate-fade-in">
               <TVShowCard 
                 tvShow={tmdbService.formatTVShowForCard(tvShow)} 
                 variant="grid"
@@ -127,7 +130,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
       </div>
 
       {/* Loading more indicator */}
-      {isLoading && tvShows.length > 0 && (
+      {(isFetching || loadingMoreRef.current) && tvShows.length > 0 && (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cinema-red"></div>
         </div>
