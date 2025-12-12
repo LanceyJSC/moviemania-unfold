@@ -8,7 +8,7 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
-import { tmdbService, TVShow as TMDBTVShow, Review } from "@/lib/tmdb";
+import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDiary } from "@/hooks/useDiary";
@@ -58,16 +58,6 @@ const EpisodeDetail = () => {
   const tvId = Number(id);
   const seasonNum = Number(seasonNumber);
   const episodeNum = Number(episodeNumber);
-
-  // Fetch TMDB Reviews for the TV Show (not episode-specific)
-  const { data: tmdbReviews } = useQuery({
-    queryKey: ['tv-reviews', tvId],
-    queryFn: async () => {
-      const response = await tmdbService.getTVShowReviews(tvId);
-      return response.results;
-    },
-    enabled: !!tvId
-  });
 
   // Fetch Community Reviews for this specific episode
   const { data: communityReviews, refetch: refetchCommunityReviews } = useQuery({
@@ -223,10 +213,6 @@ const EpisodeDetail = () => {
     refetchTVDiary();
   };
 
-  const formatReviewContent = (content: string, maxLength: number = 300) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + '...';
-  };
 
   if (isLoading) {
     return (
@@ -426,64 +412,6 @@ const EpisodeDetail = () => {
             </div>
           )}
         </div>
-
-        {/* TMDB Show Reviews Section */}
-        {tmdbReviews && tmdbReviews.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Show Reviews
-              <span className="text-sm font-normal text-muted-foreground ml-2">
-                (from TMDB)
-              </span>
-            </h2>
-            
-            <div className="space-y-4">
-              {tmdbReviews.slice(0, 3).map((review: Review) => (
-                <div 
-                  key={review.id}
-                  className="bg-card rounded-xl p-4 border border-border"
-                >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10 flex-shrink-0">
-                      {review.author_details.avatar_path ? (
-                        <AvatarImage 
-                          src={
-                            review.author_details.avatar_path.startsWith('/https')
-                              ? review.author_details.avatar_path.slice(1)
-                              : tmdbService.getProfileUrl(review.author_details.avatar_path)
-                          } 
-                        />
-                      ) : null}
-                      <AvatarFallback className="bg-muted">
-                        <User className="h-5 w-5 text-muted-foreground" />
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <span className="font-medium text-foreground">
-                          {review.author_details.username || review.author}
-                        </span>
-                        {review.author_details.rating && (
-                          <div className="flex items-center gap-1 text-cinema-gold text-sm">
-                            <Star className="h-3.5 w-3.5 fill-current" />
-                            <span>{review.author_details.rating}/10</span>
-                          </div>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(review.created_at), 'MMM d, yyyy')}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {formatReviewContent(review.content)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Log Modal */}
