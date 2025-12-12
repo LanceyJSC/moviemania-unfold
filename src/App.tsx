@@ -70,12 +70,12 @@ const App = () => {
                           <Route path="/movies" element={<Movies />} />
                           <Route path="/tv-shows" element={<TVShows />} />
                           <Route path="/genres" element={<Genres />} />
-                          <Route path="/movie/:id" element={<MovieDetail />} />
-                          <Route path="/tv/:id" element={<TVShowDetail />} />
-                          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
-                          <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
-                          <Route path="/tv/:id/reviews" element={<TVShowReviews />} />
                           <Route path="/movie/:id/reviews" element={<MovieReviews />} />
+                          <Route path="/movie/:id" element={<MovieDetail />} />
+                          <Route path="/tv/:id/reviews" element={<TVShowReviews />} />
+                          <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
+                          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
+                          <Route path="/tv/:id" element={<TVShowDetail />} />
                           <Route path="/actor/:id" element={<ActorDetail />} />
                           <Route path="/category/:category" element={<CategoryPage />} />
                           <Route path="/collection" element={<Collection />} />
