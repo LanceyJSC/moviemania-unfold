@@ -70,8 +70,11 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     }
   }, [data]);
 
-  // Combine initial data with additional loaded pages
-  const movies = [...(data?.results || []), ...additionalMovies];
+  // Combine initial data with additional loaded pages, deduplicate by ID
+  const allMovies = [...(data?.results || []), ...additionalMovies];
+  const movies = allMovies.filter((movie, index, self) => 
+    index === self.findIndex(m => m.id === movie.id)
+  );
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore || isLoading) return;
@@ -133,8 +136,8 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
             </div>
           ))
         ) : (
-          movies.map((movie) => (
-            <div key={movie.id}>
+          movies.map((movie, index) => (
+            <div key={`${movie.id}-${index}`}>
               <MovieCard 
                 movie={tmdbService.formatMovieForCard(movie)} 
                 variant="grid"

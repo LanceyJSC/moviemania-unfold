@@ -69,8 +69,11 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     }
   }, [data]);
 
-  // Combine initial data with additional loaded pages
-  const tvShows = [...(data?.results || []), ...additionalShows];
+  // Combine initial data with additional loaded pages, deduplicate by ID
+  const allShows = [...(data?.results || []), ...additionalShows];
+  const tvShows = allShows.filter((show, index, self) => 
+    index === self.findIndex(s => s.id === show.id)
+  );
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore || isLoading) return;
@@ -133,8 +136,8 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
             </div>
           ))
         ) : (
-          tvShows.map((tvShow) => (
-            <div key={tvShow.id}>
+          tvShows.map((tvShow, index) => (
+            <div key={`${tvShow.id}-${index}`}>
               <TVShowCard 
                 tvShow={tmdbService.formatTVShowForCard(tvShow)} 
                 variant="grid"
