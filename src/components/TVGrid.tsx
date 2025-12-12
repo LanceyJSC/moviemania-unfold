@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { tmdbService } from "@/lib/tmdb";
 import { TVShow } from "@/lib/tmdb";
@@ -40,13 +40,17 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Refs for Intersection Observer
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<() => void>();
 
   // Use React Query for caching - 24 hour cache for TMDB data
   const { data, isLoading } = useQuery({
     queryKey: ['tvshows', category, 1],
     queryFn: () => fetchTVShows(category, 1),
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours
-    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -86,20 +90,28 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     }
   }, [category, page, hasMore, isLoading, isLoadingMore]);
 
-  // Infinite scroll
+  // Keep ref updated with latest loadMore
   useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop
-        >= document.documentElement.offsetHeight - 1000
-      ) {
-        loadMore();
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    loadMoreRef.current = loadMore;
   }, [loadMore]);
+
+  // Intersection Observer for infinite scroll - much more performant than scroll events
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && loadMoreRef.current) {
+          loadMoreRef.current();
+        }
+      },
+      { rootMargin: '500px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -115,15 +127,14 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
       {/* TV Shows Grid - Optimized for iPhone 3-across */}
       <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
         {isLoading && tvShows.length === 0 ? (
-          // Loading skeleton
           Array.from({ length: 15 }).map((_, index) => (
-            <div key={index} className="animate-fade-in">
+            <div key={index}>
               <div className="bg-muted animate-pulse rounded-lg aspect-[2/3] w-full"></div>
             </div>
           ))
         ) : (
           tvShows.map((tvShow) => (
-            <div key={tvShow.id} className="animate-fade-in">
+            <div key={tvShow.id}>
               <TVShowCard 
                 tvShow={tmdbService.formatTVShowForCard(tvShow)} 
                 variant="grid"
@@ -132,6 +143,9 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
           ))
         )}
       </div>
+
+      {/* Sentinel element for Intersection Observer */}
+      <div ref={sentinelRef} className="h-1" />
 
       {/* Loading more indicator */}
       {isLoadingMore && (
