@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, ChevronRight } from "lucide-react";
+import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, ChevronRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
-import { UserReviews } from "@/components/UserReviews";
-import { CommunityReviews } from "@/components/CommunityReviews";
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
@@ -342,11 +340,19 @@ const TVShowDetail = () => {
           </div>
         )}
         
-        {/* Community Reviews Section - Show first */}
-        <CommunityReviews movieId={tvShow.id} onWriteReview={() => setShowLogModal(true)} />
-        
-        {/* TMDB Reviews Section - Show below */}
-        <UserReviews movieId={tvShow.id} isTV={true} />
+        {/* Reviews Button */}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="hover:border-foreground hover:text-foreground"
+            asChild
+          >
+            <Link to={`/tv/${tvShow.id}/reviews`}>
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Reviews
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Additional Content */}

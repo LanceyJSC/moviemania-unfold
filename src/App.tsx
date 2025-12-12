@@ -17,6 +17,7 @@ import TVShows from "./pages/TVShows";
 import TVShowDetail from "./pages/TVShowDetail";
 import SeasonDetail from "./pages/SeasonDetail";
 import EpisodeDetail from "./pages/EpisodeDetail";
+import TVShowReviews from "./pages/TVShowReviews";
 import ActorDetail from "./pages/ActorDetail";
 import CategoryPage from "./pages/CategoryPage";
 import Collection from "./pages/Collection";
@@ -72,6 +73,7 @@ const App = () => {
                           <Route path="/tv/:id" element={<TVShowDetail />} />
                           <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
                           <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
+                          <Route path="/tv/:id/reviews" element={<TVShowReviews />} />
                           <Route path="/actor/:id" element={<ActorDetail />} />
                           <Route path="/category/:category" element={<CategoryPage />} />
                           <Route path="/collection" element={<Collection />} />
