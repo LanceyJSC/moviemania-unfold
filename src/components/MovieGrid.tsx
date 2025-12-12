@@ -42,9 +42,11 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const isMobile = useIsMobile();
   
-  // Refs for Intersection Observer
+  // Refs for Intersection Observer and loading lock
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<() => void>();
+  const isLoadingRef = useRef(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use React Query for caching - 24 hour cache for TMDB data
   const { data, isLoading } = useQuery({
@@ -77,8 +79,10 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   );
 
   const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore || isLoading) return;
+    // Use ref-based lock to prevent race conditions
+    if (isLoadingRef.current || !hasMore || isLoading) return;
     
+    isLoadingRef.current = true;
     setIsLoadingMore(true);
     const nextPage = page + 1;
     
@@ -91,15 +95,19 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
       console.error(`Failed to load more ${category} movies:`, error);
     } finally {
       setIsLoadingMore(false);
+      // Add small delay before allowing next load
+      setTimeout(() => {
+        isLoadingRef.current = false;
+      }, 300);
     }
-  }, [category, page, hasMore, isLoading, isLoadingMore]);
+  }, [category, page, hasMore, isLoading]);
 
   // Keep ref updated with latest loadMore
   useEffect(() => {
     loadMoreRef.current = loadMore;
   }, [loadMore]);
 
-  // Intersection Observer for infinite scroll - much more performant than scroll events
+  // Intersection Observer with debouncing
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
@@ -107,14 +115,25 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && loadMoreRef.current) {
-          loadMoreRef.current();
+          // Debounce the load call
+          if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+          }
+          debounceTimerRef.current = setTimeout(() => {
+            loadMoreRef.current?.();
+          }, 100);
         }
       },
-      { rootMargin: '500px' }
+      { rootMargin: '200px', threshold: 0 }
     );
 
     observer.observe(sentinel);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
   return (
