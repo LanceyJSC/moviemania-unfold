@@ -73,7 +73,7 @@ export const NewThisMonth = () => {
           </h2>
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
           {Array.from({ length: 12 }).map((_, index) => (
             <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
           ))}
@@ -103,7 +103,7 @@ export const NewThisMonth = () => {
       
       {displayedContent.length > 0 ? (
         <>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
             {displayedContent.map((item) => {
               const isMovie = 'title' in item;
               return (
