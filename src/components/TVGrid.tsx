@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { tmdbService } from "@/lib/tmdb";
 import { TVShow } from "@/lib/tmdb";
@@ -38,7 +38,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
   const [additionalShows, setAdditionalShows] = useState<TVShow[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const loadingMoreRef = useRef(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const isMobile = useIsMobile();
 
   // Use React Query for caching - staleTime prevents refetch on mount
@@ -66,10 +66,10 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
   // Combine initial data with additional loaded pages
   const tvShows = [...(data?.results || []), ...additionalShows];
 
-  const loadMore = async () => {
-    if (loadingMoreRef.current || !hasMore || isLoading) return;
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || isLoading) return;
     
-    loadingMoreRef.current = true;
+    setIsLoadingMore(true);
     const nextPage = page + 1;
     
     try {
@@ -80,9 +80,9 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     } catch (error) {
       console.error(`Failed to load more ${category} TV shows:`, error);
     } finally {
-      loadingMoreRef.current = false;
+      setIsLoadingMore(false);
     }
-  };
+  }, [category, page, hasMore, isLoading, isLoadingMore]);
 
   // Infinite scroll
   useEffect(() => {
@@ -97,7 +97,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [page, hasMore]);
+  }, [loadMore]);
 
   return (
     <div className="space-y-6">
@@ -132,7 +132,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
       </div>
 
       {/* Loading more indicator */}
-      {loadingMoreRef.current && tvShows.length > 0 && (
+      {isLoadingMore && (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cinema-red"></div>
         </div>
