@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
+import { Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -205,14 +205,6 @@ const TVShowReviews = () => {
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
         <div className="absolute bottom-6 left-4 right-4 z-30">
-          <Link 
-            to={`/tv/${id}`}
-            className="inline-flex items-center gap-1 text-white/80 text-sm mb-2 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to {tvShow.name}
-          </Link>
-          
           <h1 className="font-cinematic text-white tracking-wide text-xl leading-tight">
             Reviews for {tvShow.name}
           </h1>
