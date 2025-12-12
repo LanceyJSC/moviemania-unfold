@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Eye, Check, Loader2 } from 'lucide-react';
+import { ChevronRight, Eye, Check, Loader2, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { tmdbService } from '@/lib/tmdb';
@@ -37,10 +37,12 @@ export const SeasonProgressCard = ({
 }: SeasonProgressCardProps) => {
   const { user } = useAuth();
   const [isMarkingAll, setIsMarkingAll] = useState(false);
+  const [isUnmarkingAll, setIsUnmarkingAll] = useState(false);
   
   const totalEpisodes = season.episode_count;
   const progress = totalEpisodes > 0 ? (watchedEpisodes / totalEpisodes) * 100 : 0;
   const isComplete = watchedEpisodes >= totalEpisodes;
+  const hasAnyWatched = watchedEpisodes > 0;
 
   const handleMarkAllWatched = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -89,6 +91,31 @@ export const SeasonProgressCard = ({
       console.error('Failed to mark all watched:', error);
     } finally {
       setIsMarkingAll(false);
+    }
+  };
+
+  const handleUnmarkAllWatched = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user || isUnmarkingAll) return;
+    
+    setIsUnmarkingAll(true);
+    try {
+      // Delete all episode entries for this season
+      await supabase
+        .from('tv_diary')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('tv_id', tvShowId)
+        .eq('season_number', season.season_number)
+        .not('episode_number', 'is', null);
+      
+      onProgressUpdate?.();
+    } catch (error) {
+      console.error('Failed to unmark all watched:', error);
+    } finally {
+      setIsUnmarkingAll(false);
     }
   };
 
@@ -153,22 +180,42 @@ export const SeasonProgressCard = ({
             </p>
           )}
           
-          {/* Mark All Watched Button */}
-          {user && !isComplete && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="mt-2 text-xs h-7 hover:bg-cinema-gold hover:text-cinema-black hover:border-cinema-gold"
-              onClick={handleMarkAllWatched}
-              disabled={isMarkingAll}
-            >
-              {isMarkingAll ? (
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              ) : (
-                <Eye className="h-3 w-3 mr-1" />
+          {/* Mark All / Unmark All Watched Buttons */}
+          {user && (
+            <div className="flex gap-2 mt-2">
+              {!isComplete && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs h-7 hover:bg-cinema-gold hover:text-cinema-black hover:border-cinema-gold"
+                  onClick={handleMarkAllWatched}
+                  disabled={isMarkingAll || isUnmarkingAll}
+                >
+                  {isMarkingAll ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : (
+                    <Eye className="h-3 w-3 mr-1" />
+                  )}
+                  Mark All Watched
+                </Button>
               )}
-              Mark All Watched
-            </Button>
+              {hasAnyWatched && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs h-7 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
+                  onClick={handleUnmarkAllWatched}
+                  disabled={isMarkingAll || isUnmarkingAll}
+                >
+                  {isUnmarkingAll ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : (
+                    <EyeOff className="h-3 w-3 mr-1" />
+                  )}
+                  Unmark All
+                </Button>
+              )}
+            </div>
           )}
         </div>
         
