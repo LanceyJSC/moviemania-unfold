@@ -112,7 +112,7 @@ const Collection = () => {
     );
   }
 
-  // Helper function to delete all data for a movie/TV show
+  // Helper function to delete all data for a movie/TV show (used for Watched tab)
   const deleteAllMediaData = async (mediaId: number, mediaType: 'movie' | 'tv') => {
     if (!user) return;
     
@@ -140,6 +140,22 @@ const Collection = () => {
     refetchDiary();
     await refetchUserState();
     await recalculateStats();
+  };
+
+  // Helper function to delete ONLY diary notes/review (keeps watched status)
+  const deleteDiaryEntry = async (mediaId: number, mediaType: 'movie' | 'tv') => {
+    if (!user) return;
+    
+    // Only delete diary entry and user review, keep watched status (user_ratings)
+    await Promise.all([
+      supabase.from('user_reviews').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+      mediaType === 'tv' 
+        ? supabase.from('tv_diary').delete().eq('tv_id', mediaId).eq('user_id', user.id)
+        : supabase.from('movie_diary').delete().eq('movie_id', mediaId).eq('user_id', user.id),
+    ]);
+    
+    queryClient.invalidateQueries({ queryKey: ['community-reviews', mediaId] });
+    refetchDiary();
   };
 
   const handleMovieSearch = async () => {
@@ -685,7 +701,7 @@ const Collection = () => {
                           poster={poster}
                           userRating={entry.rating}
                           defaultExpanded={true}
-                          onDelete={() => deleteAllMediaData((entry as any).tv_id, 'tv')}
+                          onDelete={() => deleteDiaryEntry((entry as any).tv_id, 'tv')}
                           onEdit={() => handleEditDiaryEntry(entry, 'tv')}
                         />
                       );
@@ -700,7 +716,7 @@ const Collection = () => {
                       poster={poster}
                       mediaType="movie"
                       userRating={entry.rating}
-                      onDelete={() => deleteAllMediaData((entry as any).movie_id, 'movie')}
+                      onDelete={() => deleteDiaryEntry((entry as any).movie_id, 'movie')}
                       onEdit={() => handleEditDiaryEntry(entry, 'movie')}
                     >
                       <p className="text-sm text-muted-foreground">
