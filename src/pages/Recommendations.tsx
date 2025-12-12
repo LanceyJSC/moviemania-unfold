@@ -1,26 +1,18 @@
 import { useState, useEffect } from "react";
-import { Star, TrendingUp, Heart, Film, ArrowLeft } from "lucide-react";
+import { Star, TrendingUp, Heart, Film, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Movie {
-  id: number;
-  title: string;
-  poster_path?: string;
-  overview: string;
-  vote_average: number;
-  release_date: string;
-  genre_ids: number[];
-}
+import { tmdbService, Movie } from "@/lib/tmdb";
 
 interface RecommendationReason {
-  type: 'genre' | 'actor' | 'director' | 'similar';
+  type: 'liked' | 'rated' | 'watched' | 'trending';
+  basedOn?: string;
   message: string;
 }
 
@@ -37,93 +29,100 @@ export const Recommendations = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      loadRecommendations();
-    }
+    loadRecommendations();
   }, [user]);
 
   const loadRecommendations = async () => {
-    if (!user) return;
-
     setIsLoading(true);
     try {
-      // Get user's watchlist and ratings for analysis
-      const { data: watchlist } = await supabase
-        .from('watchlist')
-        .select('movie_id, movie_title')
-        .eq('user_id', user.id)
-        .eq('list_type', 'liked')
-        .limit(5);
+      let allRecommendations: MovieRecommendation[] = [];
 
-      // Generate mock recommendations based on popular movies
-      const mockRecommendations: MovieRecommendation[] = [
-        {
-          movie: {
-            id: 1263256,
-            title: "Mufasa: The Lion King",
-            poster_path: "/poster1.jpg",
-            overview: "A stunning visual spectacle that explores the origins of one of cinema's most beloved characters.",
-            vote_average: 8.2,
-            release_date: "2024-12-20",
-            genre_ids: [16, 12, 10751]
-          },
-          reason: {
-            type: 'genre',
-            message: 'Because you enjoyed animated family films'
-          },
-          confidence: 87
-        },
-        {
-          movie: {
-            id: 1100988,
-            title: "Nosferatu",
-            poster_path: "/poster2.jpg", 
-            overview: "A gothic tale of obsession between a haunted young woman and the terrifying vampire infatuated with her.",
-            vote_average: 7.8,
-            release_date: "2024-12-25",
-            genre_ids: [27, 18, 53]
-          },
-          reason: {
-            type: 'similar',
-            message: 'Similar to other horror films you\'ve rated highly'
-          },
-          confidence: 74
-        },
-        {
-          movie: {
-            id: 980477,
-            title: "Sonic the Hedgehog 3",
-            poster_path: "/poster3.jpg",
-            overview: "The blue blur returns for another high-speed adventure with friends and foes.",
-            vote_average: 7.5,
-            release_date: "2024-12-20",
-            genre_ids: [12, 35, 10751]
-          },
-          reason: {
-            type: 'actor',
-            message: 'Features actors from movies you\'ve enjoyed'
-          },
-          confidence: 82
-        },
-        {
-          movie: {
-            id: 1061474,
-            title: "Wicked",
-            poster_path: "/poster4.jpg",
-            overview: "The story of how a green-skinned woman framed by the Wizard of Oz becomes the Wicked Witch of the West.",
-            vote_average: 8.5,
-            release_date: "2024-11-22",
-            genre_ids: [14, 10749, 10402]
-          },
-          reason: {
-            type: 'director',
-            message: 'From directors of films you\'ve loved'
-          },
-          confidence: 91
+      if (user) {
+        // Get user's highly rated movies
+        const { data: ratings } = await supabase
+          .from('user_ratings')
+          .select('movie_id, movie_title, rating, media_type')
+          .eq('user_id', user.id)
+          .eq('media_type', 'movie')
+          .gte('rating', 7)
+          .order('rating', { ascending: false })
+          .limit(5);
+
+        // Get user's liked movies
+        const { data: liked } = await supabase
+          .from('watchlist')
+          .select('movie_id, movie_title')
+          .eq('user_id', user.id)
+          .eq('list_type', 'liked')
+          .eq('media_type', 'movie')
+          .limit(3);
+
+        // Fetch recommendations based on highly rated movies
+        if (ratings && ratings.length > 0) {
+          for (const rating of ratings.slice(0, 3)) {
+            try {
+              const response = await tmdbService.getMovieRecommendations(rating.movie_id);
+              const movieRecs = response.results.slice(0, 4).map(movie => ({
+                movie,
+                reason: {
+                  type: 'rated' as const,
+                  basedOn: rating.movie_title,
+                  message: `Because you rated "${rating.movie_title}" ${rating.rating}/10`
+                },
+                confidence: Math.min(95, 70 + (rating.rating || 0) * 2)
+              }));
+              allRecommendations.push(...movieRecs);
+            } catch (error) {
+              console.error('Error fetching recommendations for movie:', rating.movie_id);
+            }
+          }
         }
-      ];
 
-      setRecommendations(mockRecommendations);
+        // Fetch recommendations based on liked movies
+        if (liked && liked.length > 0) {
+          for (const item of liked.slice(0, 2)) {
+            try {
+              const response = await tmdbService.getSimilarMovies(item.movie_id);
+              const similarRecs = response.results.slice(0, 3).map(movie => ({
+                movie,
+                reason: {
+                  type: 'liked' as const,
+                  basedOn: item.movie_title,
+                  message: `Similar to "${item.movie_title}" which you liked`
+                },
+                confidence: Math.floor(Math.random() * 15) + 75
+              }));
+              allRecommendations.push(...similarRecs);
+            } catch (error) {
+              console.error('Error fetching similar movies:', item.movie_id);
+            }
+          }
+        }
+      }
+
+      // If no personalized recommendations, show trending
+      if (allRecommendations.length < 5) {
+        const trending = await tmdbService.getTrendingMovies('week');
+        const trendingRecs = trending.results.slice(0, 10 - allRecommendations.length).map(movie => ({
+          movie,
+          reason: {
+            type: 'trending' as const,
+            message: 'Trending this week'
+          },
+          confidence: Math.floor(Math.random() * 20) + 60
+        }));
+        allRecommendations.push(...trendingRecs);
+      }
+
+      // Deduplicate by movie ID and shuffle
+      const uniqueRecs = Array.from(
+        new Map(allRecommendations.map(rec => [rec.movie.id, rec])).values()
+      );
+      
+      // Sort by confidence
+      uniqueRecs.sort((a, b) => b.confidence - a.confidence);
+      
+      setRecommendations(uniqueRecs.slice(0, 12));
     } catch (error) {
       console.error('Error loading recommendations:', error);
     } finally {
@@ -133,147 +132,121 @@ export const Recommendations = () => {
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 85) return 'text-green-500';
-    if (confidence >= 70) return 'text-yellow-500';
+    if (confidence >= 70) return 'text-cinema-gold';
     return 'text-orange-500';
   };
 
   const getReasonIcon = (type: RecommendationReason['type']) => {
     switch (type) {
-      case 'genre':
-        return <Film className="h-4 w-4" />;
-      case 'actor':
-      case 'director':
+      case 'rated':
         return <Star className="h-4 w-4" />;
-      case 'similar':
+      case 'liked':
+        return <Heart className="h-4 w-4" />;
+      case 'trending':
         return <TrendingUp className="h-4 w-4" />;
       default:
-        return <Heart className="h-4 w-4" />;
+        return <Film className="h-4 w-4" />;
     }
   };
 
   return (
     <div className="min-h-screen bg-background pb-32">
-      <MobileHeader title="Recommendations" />
+      <MobileHeader title="For You" />
       
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-4 p-4">
-          <Button
-            onClick={() => navigate('/profile')}
-            size="sm"
-            variant="ghost"
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 -ml-2"
           >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-xl font-bold text-foreground">Smart Recommendations</h1>
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-xl font-bold text-foreground">Recommended For You</h1>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="space-y-6">
-          <Card className="bg-card border-border">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Star className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">Personalized for You</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Based on your viewing history and preferences
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-4">
-                    <div className="animate-pulse space-y-3">
-                      <div className="h-4 bg-muted rounded w-3/4"></div>
-                      <div className="h-3 bg-muted rounded w-1/2"></div>
-                      <div className="h-3 bg-muted rounded w-full"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recommendations.map((recommendation) => (
-                <Card key={recommendation.movie.id} className="bg-card border-border hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
-                      <div className="w-20 h-28 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Film className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      
-                      <div className="flex-1 space-y-3">
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground mb-1">
-                            {recommendation.movie.title}
-                          </h3>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 text-yellow-500" />
-                              <span className="text-sm text-muted-foreground">
-                                {recommendation.movie.vote_average.toFixed(1)}
-                              </span>
-                            </div>
-                            <Badge 
-                              variant="secondary" 
-                              className={`text-xs ${getConfidenceColor(recommendation.confidence)}`}
-                            >
-                              {recommendation.confidence}% match
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {recommendation.movie.overview}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm text-primary">
-                          {getReasonIcon(recommendation.reason.type)}
-                          <span>{recommendation.reason.message}</span>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => navigate(`/movie/${recommendation.movie.id}`)}
-                            size="sm"
-                            className="flex-1"
-                          >
-                            View Details
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              // Add to watchlist functionality would go here
-                            }}
-                          >
-                            <Heart className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          <Card className="bg-muted/20 border-muted">
+      <div className="container mx-auto px-4 py-6">
+        {!user && (
+          <Card className="bg-card border-border mb-6">
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground text-center">
-                Recommendations are generated using AI based on your viewing patterns, ratings, and preferences. 
-                The more you interact with the app, the better your recommendations become.
+              <p className="text-sm text-muted-foreground text-center">
+                <Link to="/auth" className="text-cinema-gold hover:underline">Sign in</Link> to get personalized recommendations based on your ratings and favorites.
               </p>
             </CardContent>
           </Card>
-        </div>
+        )}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {recommendations.map((rec) => (
+              <Link key={rec.movie.id} to={`/movie/${rec.movie.id}`}>
+                <Card className="bg-card border-border hover:bg-card/80 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <img
+                        src={tmdbService.getPosterUrl(rec.movie.poster_path, 'w300')}
+                        alt={rec.movie.title}
+                        className="w-20 h-28 rounded-lg object-cover flex-shrink-0"
+                      />
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h3 className="font-semibold text-foreground line-clamp-1">
+                            {rec.movie.title}
+                          </h3>
+                          <Badge 
+                            variant="secondary" 
+                            className={`text-xs flex-shrink-0 ${getConfidenceColor(rec.confidence)}`}
+                          >
+                            {rec.confidence}%
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3.5 w-3.5 text-cinema-gold fill-cinema-gold" />
+                            <span className="text-sm text-muted-foreground">
+                              {rec.movie.vote_average.toFixed(1)}
+                            </span>
+                          </div>
+                          {rec.movie.release_date && (
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(rec.movie.release_date).getFullYear()}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                          {rec.movie.overview}
+                        </p>
+
+                        <div className="flex items-center gap-2 text-xs text-primary">
+                          {getReasonIcon(rec.reason.type)}
+                          <span className="line-clamp-1">{rec.reason.message}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && recommendations.length === 0 && (
+          <Card className="bg-muted/20 border-muted">
+            <CardContent className="p-6 text-center">
+              <Film className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                Start rating movies to get personalized recommendations!
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Navigation />
