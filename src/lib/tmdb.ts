@@ -332,23 +332,23 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Latest Trailers - uses trending content which matches TMDB's "Latest Trailers" section
+  // Latest Trailers - uses upcoming movies which have the newest trailers
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = true): Promise<TMDBResponse<Movie | TVShow>> {
     let movieEndpoint = '';
     let tvEndpoint = '';
     
     switch (category) {
       case 'popular':
-        // Trending content - matches TMDB's Latest Trailers "Popular" tab
-        movieEndpoint = '/trending/movie/day';
-        tvEndpoint = '/trending/tv/day';
+        // Upcoming movies have the newest trailers - matches TMDB's Latest Trailers
+        movieEndpoint = '/movie/upcoming';
+        tvEndpoint = '/tv/on_the_air';
         break;
       case 'streaming':
         movieEndpoint = '/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
         tvEndpoint = '/discover/tv?with_watch_providers=8|9|15|337|384|350&watch_region=US&sort_by=popularity.desc';
         break;
       case 'on_tv':
-        movieEndpoint = '/trending/movie/day';
+        movieEndpoint = '/movie/upcoming';
         tvEndpoint = '/tv/airing_today';
         break;
       case 'for_rent':
