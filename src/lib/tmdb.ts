@@ -457,6 +457,74 @@ class TMDBService {
     return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`, fresh);
   }
 
+  // KinoCheck API integration for cutting-edge latest trailers
+  async getKinoCheckLatestTrailers(): Promise<{ results: (Movie | TVShow)[]; youtubeKeys: Map<number, string> }> {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      // Fetch both movies and TV trailers
+      const [movieResponse, tvResponse] = await Promise.all([
+        fetch(`${supabaseUrl}/functions/v1/kinocheck-trailers?limit=15&category=movie`, {
+          headers: { 'Authorization': `Bearer ${supabaseKey}` }
+        }),
+        fetch(`${supabaseUrl}/functions/v1/kinocheck-trailers?limit=10&category=tv`, {
+          headers: { 'Authorization': `Bearer ${supabaseKey}` }
+        })
+      ]);
+
+      if (!movieResponse.ok || !tvResponse.ok) {
+        throw new Error('KinoCheck API error');
+      }
+
+      const movieData = await movieResponse.json();
+      const tvData = await tvResponse.json();
+      
+      const allTrailers = [...(movieData.trailers || movieData || []), ...(tvData.trailers || tvData || [])];
+      
+      // Map to store YouTube keys by TMDB ID
+      const youtubeKeys = new Map<number, string>();
+      const results: (Movie | TVShow)[] = [];
+      const seenIds = new Set<number>();
+
+      // Fetch TMDB data for each trailer
+      for (const trailer of allTrailers.slice(0, 24)) {
+        const tmdbId = trailer.tmdb_id;
+        if (!tmdbId || seenIds.has(tmdbId)) continue;
+        seenIds.add(tmdbId);
+
+        try {
+          // Store YouTube key
+          if (trailer.youtube_video_id) {
+            youtubeKeys.set(tmdbId, trailer.youtube_video_id);
+          }
+
+          // Fetch TMDB details
+          const isMovie = trailer.categories?.includes('movie') || !trailer.categories?.includes('tv');
+          if (isMovie) {
+            const movieDetails = await this.getMovieDetails(tmdbId, false);
+            if (movieDetails.poster_path) {
+              results.push(movieDetails);
+            }
+          } else {
+            const tvDetails = await this.getTVShowDetails(tmdbId, false);
+            if (tvDetails.poster_path) {
+              results.push(tvDetails);
+            }
+          }
+        } catch (error) {
+          console.log(`Could not fetch TMDB data for ID ${tmdbId}`, error);
+        }
+      }
+
+      return { results, youtubeKeys };
+    } catch (error) {
+      console.error('KinoCheck API error, falling back to TMDB:', error);
+      // Fallback to TMDB
+      const fallback = await this.getLatestTrailers('popular', true);
+      return { results: fallback.results, youtubeKeys: new Map() };
+    }
+  }
 }
 
 export const tmdbService = new TMDBService();
