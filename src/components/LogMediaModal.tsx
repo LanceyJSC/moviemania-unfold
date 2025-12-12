@@ -48,7 +48,7 @@ export const LogMediaModal = ({
   const { addMovieDiaryEntry, addTVDiaryEntry } = useDiary();
   const { recalculateStats } = useUserStats();
   const queryClient = useQueryClient();
-  const { refetch: refetchUserState } = useUserStateContext();
+  const { refetch: refetchUserState, updateRatingLocally } = useUserStateContext();
   const [watchedDate, setWatchedDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState(initialNotes);
   const [rating, setRating] = useState<number>(initialRating);
@@ -258,6 +258,10 @@ export const LogMediaModal = ({
         queryClient.invalidateQueries({ queryKey: ['episode-community-reviews', mediaId, seasonNumber, episodeNumber] });
         queryClient.invalidateQueries({ queryKey: ['episode-review-count', mediaId, seasonNumber, episodeNumber] });
       }
+      
+      // Instantly update the local rating state so cards reflect the change immediately
+      updateRatingLocally(mediaId, rating);
+      
       await refetchUserState();
 
       resetForm();
