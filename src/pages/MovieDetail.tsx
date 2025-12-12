@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, Users } from "lucide-react";
+import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCarousel } from "@/components/MovieCarousel";
 import { FunFacts } from "@/components/FunFacts";
@@ -268,6 +268,16 @@ const MovieDetail = () => {
             >
               <BookOpen className="h-4 w-4" />
             </Button>
+
+            <Button 
+              variant="outline" 
+              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
+              asChild
+            >
+              <Link to={`/movie/${movieId}/reviews`}>
+                <MessageCircle className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -304,12 +314,6 @@ const MovieDetail = () => {
 
         {/* Fun Facts Carousel - Only show for movies */}
         {!isTV && <FunFacts movie={movie as Movie} />}
-        
-        {/* TMDB Reviews Section */}
-        <UserReviews movieId={movie.id} isTV={isTV} />
-        
-        {/* Community Reviews Section */}
-        <CommunityReviews movieId={movie.id} onWriteReview={() => setShowLogModal(true)} />
       </div>
 
       {/* Additional Content */}
