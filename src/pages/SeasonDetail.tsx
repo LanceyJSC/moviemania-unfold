@@ -382,7 +382,7 @@ const SeasonDetail = () => {
       <MobileHeader title={season.name} />
       
       {/* Hero Section */}
-      <div className="relative overflow-hidden h-[40vh] rounded-b-2xl">
+      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
@@ -396,44 +396,45 @@ const SeasonDetail = () => {
 
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
 
-        <div className="absolute bottom-6 left-4 right-4 z-30">
-          <div className="flex items-end gap-4">
-            <img 
-              src={seasonPosterUrl} 
-              alt={season.name}
-              className="w-24 h-36 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
-            />
-            <div className="flex-1">
-              <h1 className="font-cinematic text-white mb-2 tracking-wide text-2xl leading-tight">
-                {season.name}
-              </h1>
-              <div className="flex items-center space-x-3 mb-2 flex-wrap">
-                <span className="text-white/80 text-sm">{tvShow.name}</span>
-                {season.air_date && (
-                  <span className="text-white/80 text-sm">
-                    {new Date(season.air_date).getFullYear()}
-                  </span>
-                )}
-                <span className="text-white/80 text-sm">
-                  {totalEpisodes} episode{totalEpisodes !== 1 ? 's' : ''}
-                </span>
-              </div>
-              {/* Progress indicator */}
-              {user && (
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden max-w-32">
-                    <div 
-                      className="h-full bg-cinema-gold transition-all duration-300"
-                      style={{ width: `${totalEpisodes > 0 ? (watchedCount / totalEpisodes) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <span className="text-white/80 text-xs">
-                    {watchedCount}/{totalEpisodes} watched
-                  </span>
-                </div>
-              )}
-            </div>
+        <div className="absolute bottom-6 left-4 z-30">
+          <img 
+            src={seasonPosterUrl} 
+            alt={season.name}
+            className="w-24 h-36 rounded-lg shadow-cinematic object-cover border-2 border-white/20"
+          />
+        </div>
+
+        <div className="absolute bottom-6 left-32 right-4 z-30">
+          <div className="flex items-center space-x-2 mb-1 flex-wrap gap-y-1">
+            <span className="text-white/80 text-xs">{tvShow.name}</span>
+            {season.air_date && (
+              <span className="text-white/80 text-xs">
+                {new Date(season.air_date).getFullYear()}
+              </span>
+            )}
+            <span className="text-white/80 text-xs">
+              {totalEpisodes} episode{totalEpisodes !== 1 ? 's' : ''}
+            </span>
           </div>
+
+          <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg leading-tight">
+            {season.name}
+          </h1>
+          
+          {/* Progress indicator */}
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden max-w-32">
+                <div 
+                  className="h-full bg-cinema-gold transition-all duration-300"
+                  style={{ width: `${totalEpisodes > 0 ? (watchedCount / totalEpisodes) * 100 : 0}%` }}
+                />
+              </div>
+              <span className="text-white/80 text-xs">
+                {watchedCount}/{totalEpisodes} watched
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
