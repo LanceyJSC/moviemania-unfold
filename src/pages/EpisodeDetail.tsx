@@ -360,70 +360,10 @@ const EpisodeDetail = () => {
           </div>
         )}
 
-        {/* TMDB Reviews Section */}
+        {/* Episode Reviews Section (Community) */}
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-4">
-            TMDB Reviews
-            <span className="text-sm font-normal text-muted-foreground ml-2">
-              (for {tvShow.name})
-            </span>
-          </h2>
-          
-          {tmdbReviews && tmdbReviews.length > 0 ? (
-            <div className="space-y-4">
-              {tmdbReviews.slice(0, 5).map((review: Review) => (
-                <div 
-                  key={review.id}
-                  className="bg-card rounded-xl p-4 border border-border"
-                >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10 flex-shrink-0">
-                      {review.author_details.avatar_path ? (
-                        <AvatarImage 
-                          src={
-                            review.author_details.avatar_path.startsWith('/https')
-                              ? review.author_details.avatar_path.slice(1)
-                              : tmdbService.getProfileUrl(review.author_details.avatar_path)
-                          } 
-                        />
-                      ) : null}
-                      <AvatarFallback className="bg-muted">
-                        <User className="h-5 w-5 text-muted-foreground" />
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <span className="font-medium text-foreground">
-                          {review.author_details.username || review.author}
-                        </span>
-                        {review.author_details.rating && (
-                          <div className="flex items-center gap-1 text-cinema-gold text-sm">
-                            <Star className="h-3.5 w-3.5 fill-current" />
-                            <span>{review.author_details.rating}/10</span>
-                          </div>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(review.created_at), 'MMM d, yyyy')}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {formatReviewContent(review.content)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">No TMDB reviews available for this show.</p>
-          )}
-        </div>
-
-        {/* Community Reviews Section */}
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Community Reviews
+            Episode Reviews
             <span className="text-sm font-normal text-muted-foreground ml-2">
               ({communityReviews?.length || 0})
             </span>
@@ -476,19 +416,77 @@ const EpisodeDetail = () => {
             </div>
           ) : (
             <div className="text-center py-8 bg-card rounded-xl border border-border">
-              <p className="text-muted-foreground text-sm mb-2">No community reviews yet.</p>
+              <p className="text-muted-foreground text-sm mb-2">No episode reviews yet.</p>
               {user && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowLogModal(true)}
                 >
-                  Be the first to review
+                  Be the first to review this episode
                 </Button>
               )}
             </div>
           )}
         </div>
+
+        {/* TMDB Show Reviews Section */}
+        {tmdbReviews && tmdbReviews.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Show Reviews
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                (from TMDB)
+              </span>
+            </h2>
+            
+            <div className="space-y-4">
+              {tmdbReviews.slice(0, 3).map((review: Review) => (
+                <div 
+                  key={review.id}
+                  className="bg-card rounded-xl p-4 border border-border"
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      {review.author_details.avatar_path ? (
+                        <AvatarImage 
+                          src={
+                            review.author_details.avatar_path.startsWith('/https')
+                              ? review.author_details.avatar_path.slice(1)
+                              : tmdbService.getProfileUrl(review.author_details.avatar_path)
+                          } 
+                        />
+                      ) : null}
+                      <AvatarFallback className="bg-muted">
+                        <User className="h-5 w-5 text-muted-foreground" />
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <span className="font-medium text-foreground">
+                          {review.author_details.username || review.author}
+                        </span>
+                        {review.author_details.rating && (
+                          <div className="flex items-center gap-1 text-cinema-gold text-sm">
+                            <Star className="h-3.5 w-3.5 fill-current" />
+                            <span>{review.author_details.rating}/10</span>
+                          </div>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(review.created_at), 'MMM d, yyyy')}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {formatReviewContent(review.content)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Log Modal */}
