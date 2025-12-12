@@ -289,6 +289,16 @@ const TVShowDetail = () => {
             >
               <BookOpen className="h-4 w-4" />
             </Button>
+
+            <Button 
+              variant="outline" 
+              className="border-border hover:bg-card px-3 py-3 min-h-[44px] min-w-[44px]" 
+              asChild
+            >
+              <Link to={`/tv/${tvShowId}/reviews`}>
+                <MessageCircle className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -339,20 +349,6 @@ const TVShowDetail = () => {
             </div>
           </div>
         )}
-        
-        {/* Reviews Button */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="hover:border-foreground hover:text-foreground"
-            asChild
-          >
-            <Link to={`/tv/${tvShow.id}/reviews`}>
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Reviews
-            </Link>
-          </Button>
-        </div>
       </div>
 
       {/* Additional Content */}
