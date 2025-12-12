@@ -63,6 +63,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     setPage(1);
     setAdditionalMovies([]);
     setHasMore(true);
+    isLoadingRef.current = false;
   }, [category]);
 
   // Update hasMore when initial data loads
