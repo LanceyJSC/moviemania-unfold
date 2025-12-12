@@ -62,6 +62,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     setPage(1);
     setAdditionalShows([]);
     setHasMore(true);
+    isLoadingRef.current = false;
   }, [category]);
 
   // Update hasMore when initial data loads
