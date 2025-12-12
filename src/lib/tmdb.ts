@@ -332,37 +332,36 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Enhanced Latest Trailers - fetch recently released content with trailers
+  // Enhanced Latest Trailers - fetch recently released content sorted by newest first
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = true): Promise<TMDBResponse<Movie | TVShow>> {
     const today = new Date();
-    const threeMonthsAgo = new Date(today);
-    threeMonthsAgo.setMonth(today.getMonth() - 3);
-    const oneMonthAhead = new Date(today);
-    oneMonthAhead.setMonth(today.getMonth() + 1);
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    const twoMonthsAhead = new Date(today);
+    twoMonthsAhead.setMonth(today.getMonth() + 2);
     
-    const dateFrom = threeMonthsAgo.toISOString().split('T')[0];
-    const dateTo = oneMonthAhead.toISOString().split('T')[0];
-    const todayStr = today.toISOString().split('T')[0];
+    const dateFrom = sixMonthsAgo.toISOString().split('T')[0];
+    const dateTo = twoMonthsAhead.toISOString().split('T')[0];
     
     let movieEndpoint = '';
     let tvEndpoint = '';
     
     switch (category) {
       case 'popular':
-        // Get recently released movies sorted by release date (newest first)
-        movieEndpoint = `/discover/movie?primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&sort_by=primary_release_date.desc&vote_count.gte=10`;
-        tvEndpoint = `/discover/tv?first_air_date.gte=${dateFrom}&first_air_date.lte=${dateTo}&sort_by=first_air_date.desc&vote_count.gte=10`;
+        // Movies and TV with trailers, sorted by release date (newest first)
+        movieEndpoint = `/discover/movie?include_video=true&primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&sort_by=primary_release_date.desc&vote_count.gte=5`;
+        tvEndpoint = `/discover/tv?first_air_date.gte=${dateFrom}&first_air_date.lte=${dateTo}&sort_by=first_air_date.desc&vote_count.gte=5`;
         break;
       case 'streaming':
-        movieEndpoint = `/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&primary_release_date.gte=${dateFrom}&sort_by=primary_release_date.desc`;
+        movieEndpoint = `/discover/movie?with_watch_providers=8|9|15|337|384|350&watch_region=US&include_video=true&primary_release_date.gte=${dateFrom}&sort_by=primary_release_date.desc`;
         tvEndpoint = `/discover/tv?with_watch_providers=8|9|15|337|384|350&watch_region=US&first_air_date.gte=${dateFrom}&sort_by=first_air_date.desc`;
         break;
       case 'on_tv':
         tvEndpoint = '/tv/airing_today';
-        movieEndpoint = `/discover/movie?primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&sort_by=primary_release_date.desc`;
+        movieEndpoint = `/discover/movie?include_video=true&primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&sort_by=primary_release_date.desc`;
         break;
       case 'for_rent':
-        movieEndpoint = `/discover/movie?with_watch_monetization_types=rent&watch_region=US&primary_release_date.gte=${dateFrom}&sort_by=primary_release_date.desc`;
+        movieEndpoint = `/discover/movie?with_watch_monetization_types=rent&watch_region=US&include_video=true&primary_release_date.gte=${dateFrom}&sort_by=primary_release_date.desc`;
         tvEndpoint = `/discover/tv?with_watch_monetization_types=rent&watch_region=US&first_air_date.gte=${dateFrom}&sort_by=first_air_date.desc`;
         break;
       case 'in_theaters':
@@ -371,27 +370,31 @@ class TMDBService {
         break;
     }
     
-    // Always fetch fresh data for trailers - they change frequently
+    // Always fetch fresh data for trailers
     const [movieResponse, tvResponse] = await Promise.all([
       this.fetchFromTMDB<TMDBResponse<Movie>>(movieEndpoint, true),
       this.fetchFromTMDB<TMDBResponse<TVShow>>(tvEndpoint, true)
     ]);
     
-    // Mix movies and TV shows alternating, prioritizing newest releases
+    // Filter to only items with poster images
+    const moviesWithPosters = movieResponse.results.filter(m => m.poster_path);
+    const tvWithPosters = tvResponse.results.filter(t => t.poster_path);
+    
+    // Mix movies and TV shows, prioritizing newest releases
     const mixedResults: (Movie | TVShow)[] = [];
     const maxItems = 24;
     let movieIndex = 0;
     let tvIndex = 0;
     
     for (let i = 0; i < maxItems; i++) {
-      if (i % 3 === 0 && tvIndex < tvResponse.results.length) {
-        mixedResults.push(tvResponse.results[tvIndex]);
+      if (i % 3 === 0 && tvIndex < tvWithPosters.length) {
+        mixedResults.push(tvWithPosters[tvIndex]);
         tvIndex++;
-      } else if (movieIndex < movieResponse.results.length) {
-        mixedResults.push(movieResponse.results[movieIndex]);
+      } else if (movieIndex < moviesWithPosters.length) {
+        mixedResults.push(moviesWithPosters[movieIndex]);
         movieIndex++;
-      } else if (tvIndex < tvResponse.results.length) {
-        mixedResults.push(tvResponse.results[tvIndex]);
+      } else if (tvIndex < tvWithPosters.length) {
+        mixedResults.push(tvWithPosters[tvIndex]);
         tvIndex++;
       } else {
         break;
