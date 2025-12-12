@@ -566,7 +566,7 @@ const SeasonDetail = () => {
                           )}
                         </div>
                         
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <Button
                             size="sm"
                             variant={watched ? "default" : "outline"}
@@ -589,18 +589,20 @@ const SeasonDetail = () => {
                             <BookOpen className="h-3 w-3 mr-1" />
                             Log
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-8 hover:border-foreground hover:text-foreground"
+                            asChild
+                          >
+                            <Link to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}>
+                              <MessageCircle className="h-3 w-3 mr-1" />
+                              Reviews
+                            </Link>
+                          </Button>
                         </div>
                       </div>
                     )}
-
-                    {/* Link to Episode Reviews Page */}
-                    <Link 
-                      to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}
-                      className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <MessageCircle className="h-3 w-3" />
-                      View Reviews →
-                    </Link>
                   </div>
                 </div>
               </div>
