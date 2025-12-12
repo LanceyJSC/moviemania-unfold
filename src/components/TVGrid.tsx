@@ -41,11 +41,9 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const isMobile = useIsMobile();
   
-  // Refs for Intersection Observer and loading lock
+  // Refs for Intersection Observer
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<() => void>();
-  const isLoadingRef = useRef(false);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use React Query for caching - 24 hour cache for TMDB data
   const { data, isLoading } = useQuery({
@@ -62,7 +60,6 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     setPage(1);
     setAdditionalShows([]);
     setHasMore(true);
-    isLoadingRef.current = false;
   }, [category]);
 
   // Update hasMore when initial data loads
@@ -79,10 +76,8 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
   );
 
   const loadMore = useCallback(async () => {
-    // Use ref-based lock to prevent race conditions
-    if (isLoadingRef.current || !hasMore || isLoading) return;
+    if (isLoadingMore || !hasMore || isLoading) return;
     
-    isLoadingRef.current = true;
     setIsLoadingMore(true);
     const nextPage = page + 1;
     
@@ -95,46 +90,31 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
       console.error(`Failed to load more ${category} TV shows:`, error);
     } finally {
       setIsLoadingMore(false);
-      // Add small delay before allowing next load
-      setTimeout(() => {
-        isLoadingRef.current = false;
-      }, 300);
     }
-  }, [category, page, hasMore, isLoading]);
+  }, [category, page, hasMore, isLoading, isLoadingMore]);
 
   // Keep ref updated with latest loadMore
   useEffect(() => {
     loadMoreRef.current = loadMore;
   }, [loadMore]);
 
-  // Intersection Observer with debouncing
+  // Intersection Observer for infinite scroll - much more performant than scroll events
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || isLoading) return;
+    if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          // Debounce the load call
-          if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-          }
-          debounceTimerRef.current = setTimeout(() => {
-            loadMoreRef.current?.();
-          }, 100);
+        if (entries[0].isIntersecting && loadMoreRef.current) {
+          loadMoreRef.current();
         }
       },
-      { rootMargin: '400px', threshold: 0.1 }
+      { rootMargin: '500px' }
     );
 
     observer.observe(sentinel);
-    return () => {
-      observer.disconnect();
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [isLoading]);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -167,8 +147,8 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
         )}
       </div>
 
-      {/* Sentinel element for Intersection Observer - must have height to be observable */}
-      <div ref={sentinelRef} className="h-10 w-full" />
+      {/* Sentinel element for Intersection Observer */}
+      <div ref={sentinelRef} className="h-1" />
 
       {/* Loading more indicator */}
       {isLoadingMore && (
