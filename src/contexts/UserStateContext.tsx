@@ -35,6 +35,7 @@ interface UserStateContextType {
   isCurrentlyWatching: (movieId: number) => boolean;
   isWatched: (movieId: number) => boolean;
   getRating: (movieId: number) => number;
+  updateRatingLocally: (movieId: number, rating: number) => void;
   refetch: () => Promise<void>;
 }
 
@@ -417,6 +418,23 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Immediate local update for ratings (called by LogMediaModal for instant UI feedback)
+  const updateRatingLocally = (movieId: number, rating: number) => {
+    setUserState(prev => {
+      if (rating === 0) {
+        const newRatings = { ...prev.ratings };
+        delete newRatings[movieId];
+        return { ...prev, ratings: newRatings };
+      }
+      return {
+        ...prev,
+        ratings: { ...prev.ratings, [movieId]: rating },
+        watchedItems: prev.watchedItems.includes(movieId) ? prev.watchedItems : [...prev.watchedItems, movieId],
+        watchlist: prev.watchlist.filter(id => id !== movieId)
+      };
+    });
+  };
+
   const value: UserStateContextType = {
     userState,
     isLoading,
@@ -430,6 +448,7 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
     isCurrentlyWatching: (movieId: number) => userState.currentlyWatching.includes(movieId),
     isWatched: (movieId: number) => userState.watchedItems.includes(movieId),
     getRating: (movieId: number) => userState.ratings[movieId] || 0,
+    updateRatingLocally,
     refetch: loadUserData
   };
 
