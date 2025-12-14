@@ -345,12 +345,14 @@ export const LogMediaModal = ({
           {/* Rating */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Rating (1-10, optional)</label>
-            <RatingInput
-              value={rating}
-              onChange={setRating}
-              max={10}
-              size="sm"
-            />
+            <div className="overflow-x-auto">
+              <RatingInput
+                value={rating}
+                onChange={setRating}
+                max={10}
+                size="sm"
+              />
+            </div>
           </div>
 
           {/* Notes */}

@@ -63,13 +63,13 @@ export const RatingComparisonCard = ({
 
       {/* Rating Input */}
       <div className="mt-4 pt-4 border-t border-border/50">
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-sm text-muted-foreground">Rate:</span>
+        <div className="text-center">
+          <span className="text-sm text-muted-foreground mb-2 block">Rate this:</span>
           <RatingInput
             value={userRating}
             onChange={onRatingChange}
             max={10}
-            size="md"
+            size="sm"
           />
         </div>
       </div>
