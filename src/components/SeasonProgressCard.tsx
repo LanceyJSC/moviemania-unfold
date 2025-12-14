@@ -182,12 +182,12 @@ export const SeasonProgressCard = ({
           
           {/* Mark All / Unmark All Watched Buttons */}
           {user && (
-            <div className="flex gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2">
               {!isComplete && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs h-7 hover:bg-cinema-gold hover:text-cinema-black hover:border-cinema-gold"
+                  className="text-xs h-8 px-2 hover:bg-cinema-gold hover:text-cinema-black hover:border-cinema-gold"
                   onClick={handleMarkAllWatched}
                   disabled={isMarkingAll || isUnmarkingAll}
                 >
@@ -196,14 +196,15 @@ export const SeasonProgressCard = ({
                   ) : (
                     <Eye className="h-3 w-3 mr-1" />
                   )}
-                  Mark All Watched
+                  <span className="hidden xs:inline">Mark All</span>
+                  <span className="xs:hidden">All</span>
                 </Button>
               )}
               {hasAnyWatched && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs h-7 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
+                  className="text-xs h-8 px-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
                   onClick={handleUnmarkAllWatched}
                   disabled={isMarkingAll || isUnmarkingAll}
                 >
@@ -212,7 +213,8 @@ export const SeasonProgressCard = ({
                   ) : (
                     <EyeOff className="h-3 w-3 mr-1" />
                   )}
-                  Unmark All
+                  <span className="hidden xs:inline">Unmark All</span>
+                  <span className="xs:hidden">Clear</span>
                 </Button>
               )}
             </div>

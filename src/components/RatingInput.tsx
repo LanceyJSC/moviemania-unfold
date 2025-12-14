@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RatingInputProps {
   value: number;
@@ -15,14 +16,17 @@ export const RatingInput = ({
   size = 'md',
   disabled = false 
 }: RatingInputProps) => {
+  const isMobile = useIsMobile();
+  
+  // Smaller sizes on mobile to fit all 10 buttons
   const sizeClasses = {
-    sm: 'h-6 w-6 text-xs',
-    md: 'h-8 w-8 text-sm',
-    lg: 'h-10 w-10 text-base'
+    sm: isMobile ? 'h-7 w-7 text-xs' : 'h-6 w-6 text-xs',
+    md: isMobile ? 'h-7 w-7 text-xs' : 'h-8 w-8 text-sm',
+    lg: isMobile ? 'h-8 w-8 text-sm' : 'h-10 w-10 text-base'
   };
 
   return (
-    <div className="flex gap-1 flex-wrap">
+    <div className="flex gap-0.5 sm:gap-1 flex-wrap justify-center">
       {Array.from({ length: max }, (_, i) => i + 1).map((score) => (
         <button
           key={score}

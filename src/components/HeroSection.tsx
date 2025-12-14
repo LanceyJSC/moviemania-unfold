@@ -84,17 +84,19 @@ export const HeroSection = () => {
     }
   };
 
-  const startRotation = () => {
+  const startRotation = (movieCount: number) => {
     if (rotationIntervalRef.current) {
       clearInterval(rotationIntervalRef.current);
     }
+    
+    if (movieCount <= 1) return;
     
     // Use a shorter interval on mobile for more responsive rotation
     const interval = isMobile ? 5000 : 6000;
     
     rotationIntervalRef.current = setInterval(() => {
       setCurrentIndex(prevIndex => {
-        const newIndex = prevIndex >= heroMovies.length - 1 ? 0 : prevIndex + 1;
+        const newIndex = prevIndex >= movieCount - 1 ? 0 : prevIndex + 1;
         console.log('Hero rotation tick, new index:', newIndex);
         return newIndex;
       });
@@ -121,12 +123,17 @@ export const HeroSection = () => {
 
   useEffect(() => {
     if (heroMovies.length > 1 && !error) {
-      console.log('Starting hero rotation, movies:', heroMovies.length, 'isPaused:', isPaused);
-      startRotation();
+      // Only pause on desktop, not mobile (touch devices don't have hover)
+      if (!isPaused || isMobile) {
+        console.log('Starting hero rotation, movies:', heroMovies.length, 'isPaused:', isPaused, 'isMobile:', isMobile);
+        startRotation(heroMovies.length);
+      } else {
+        stopRotation();
+      }
     }
     
     return () => stopRotation();
-  }, [heroMovies.length, isPaused, error]);
+  }, [heroMovies.length, isPaused, error, isMobile]);
 
   useEffect(() => {
     if (!error) {
@@ -168,7 +175,7 @@ export const HeroSection = () => {
     if (index >= 0 && index < heroMovies.length) {
       setCurrentIndex(index);
       if (heroMovies.length > 1) {
-        startRotation();
+        startRotation(heroMovies.length);
       }
     }
   };
