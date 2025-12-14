@@ -91,16 +91,14 @@ export const HeroSection = () => {
     
     if (movieCount <= 1) return;
     
-    // Use a shorter interval on mobile for more responsive rotation
-    const interval = isMobile ? 5000 : 6000;
-    
+    // Fixed 5 second interval for all devices
     rotationIntervalRef.current = setInterval(() => {
       setCurrentIndex(prevIndex => {
         const newIndex = prevIndex >= movieCount - 1 ? 0 : prevIndex + 1;
         console.log('Hero rotation tick, new index:', newIndex);
         return newIndex;
       });
-    }, interval);
+    }, 5000);
   };
 
   const stopRotation = () => {
@@ -123,17 +121,14 @@ export const HeroSection = () => {
 
   useEffect(() => {
     if (heroMovies.length > 1 && !error) {
-      // Only pause on desktop, not mobile (touch devices don't have hover)
-      if (!isPaused || isMobile) {
-        console.log('Starting hero rotation, movies:', heroMovies.length, 'isPaused:', isPaused, 'isMobile:', isMobile);
-        startRotation(heroMovies.length);
-      } else {
-        stopRotation();
-      }
+      // Always start rotation - don't pause based on isPaused for touch devices
+      // The isPaused state is only set by mouse events which don't apply to touch
+      console.log('Starting hero rotation, movies:', heroMovies.length);
+      startRotation(heroMovies.length);
     }
     
     return () => stopRotation();
-  }, [heroMovies.length, isPaused, error, isMobile]);
+  }, [heroMovies.length, error]);
 
   useEffect(() => {
     if (!error) {

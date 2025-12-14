@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RatingInputProps {
   value: number;
@@ -16,13 +15,11 @@ export const RatingInput = ({
   size = 'md',
   disabled = false 
 }: RatingInputProps) => {
-  const isMobile = useIsMobile();
-  
-  // Smaller sizes on mobile to fit all 10 buttons
+  // Use CSS-responsive classes instead of JS detection for better iframe/preview support
   const sizeClasses = {
-    sm: isMobile ? 'h-7 w-7 text-xs' : 'h-6 w-6 text-xs',
-    md: isMobile ? 'h-7 w-7 text-xs' : 'h-8 w-8 text-sm',
-    lg: isMobile ? 'h-8 w-8 text-sm' : 'h-10 w-10 text-base'
+    sm: 'h-7 w-7 text-xs sm:h-6 sm:w-6',
+    md: 'h-7 w-7 text-xs sm:h-8 sm:w-8 sm:text-sm',
+    lg: 'h-8 w-8 text-sm sm:h-10 sm:w-10 sm:text-base'
   };
 
   return (
