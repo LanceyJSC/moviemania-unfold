@@ -84,9 +84,9 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 h-12">
+              <TabsTrigger value="signin" className="touch-manipulation h-10">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="touch-manipulation h-10">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -115,7 +115,7 @@ const Auth = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full h-12 touch-manipulation active:scale-95" 
                   disabled={isLoading}
                 >
                   {isLoading ? 'Signing in...' : 'Sign In'}
@@ -162,7 +162,7 @@ const Auth = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full h-12 touch-manipulation active:scale-95" 
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating account...' : 'Sign Up'}

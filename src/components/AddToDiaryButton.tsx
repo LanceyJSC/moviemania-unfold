@@ -80,7 +80,7 @@ const AddToDiaryButton = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={variant} size={size} className={className}>
+        <Button variant={variant} size={size} className={`touch-manipulation active:scale-95 min-h-[44px] ${className}`}>
           <BookOpen className="w-4 h-4 mr-2" />
           Add to Diary
         </Button>
@@ -145,13 +145,13 @@ const AddToDiaryButton = ({
 
           <div className="space-y-2">
             <Label>Rating (1-10)</Label>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
                 <button
                   key={value}
                   onClick={() => setRating(rating === value ? null : value)}
                   className={cn(
-                    "w-8 h-8 rounded-full text-sm font-medium transition-colors",
+                    "w-8 h-8 rounded-full text-sm font-medium transition-colors touch-manipulation active:scale-95 min-h-[44px] min-w-[44px]",
                     rating === value
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted hover:bg-muted/80"
@@ -174,10 +174,10 @@ const AddToDiaryButton = ({
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsOpen(false)} className="flex-1">
+            <Button variant="outline" onClick={() => setIsOpen(false)} className="flex-1 h-12 touch-manipulation active:scale-95">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} className="flex-1">
+            <Button onClick={handleSubmit} className="flex-1 h-12 touch-manipulation active:scale-95">
               Log It
             </Button>
           </div>

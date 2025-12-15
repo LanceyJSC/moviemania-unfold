@@ -501,8 +501,11 @@ const SeasonDetail = () => {
                 <div className={`flex gap-4 p-4 bg-card/30 rounded-lg border transition-all duration-200 hover:bg-card/50 ${
                   watched ? 'border-cinema-gold/50 bg-cinema-gold/5' : 'border-border/50 hover:border-cinema-red/50'
                 }`}>
-                  {/* Episode Screenshot */}
-                  <div className="flex-shrink-0">
+                  {/* Episode Screenshot - Clickable to Episode Detail */}
+                  <Link 
+                    to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}
+                    className="flex-shrink-0 touch-manipulation"
+                  >
                     <div className="relative w-32 h-18 rounded overflow-hidden bg-muted">
                       {episode.still_path ? (
                         <img 
@@ -524,16 +527,21 @@ const SeasonDetail = () => {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Episode Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2 gap-2">
-                      <h3 className={`font-semibold transition-colors truncate ${
-                        watched ? 'text-cinema-gold' : 'text-foreground group-hover:text-cinema-red'
-                      }`}>
-                        {episode.name}
-                      </h3>
+                      <Link 
+                        to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}
+                        className="touch-manipulation"
+                      >
+                        <h3 className={`font-semibold transition-colors truncate ${
+                          watched ? 'text-cinema-gold' : 'text-foreground group-hover:text-cinema-red'
+                        }`}>
+                          {episode.name}
+                        </h3>
+                      </Link>
                       {episode.vote_average > 0 && (
                         <div className="flex items-center gap-1 text-cinema-gold text-xs flex-shrink-0">
                           <Star className="h-3 w-3 fill-current" />

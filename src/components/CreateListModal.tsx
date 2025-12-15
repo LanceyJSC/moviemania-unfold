@@ -90,10 +90,10 @@ export const CreateListModal = ({ trigger, onCreated }: CreateListModalProps) =>
         </div>
         
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => setOpen(false)} className="h-12 touch-manipulation active:scale-95">
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={!name.trim() || creating}>
+          <Button onClick={handleCreate} disabled={!name.trim() || creating} className="h-12 touch-manipulation active:scale-95">
             {creating ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

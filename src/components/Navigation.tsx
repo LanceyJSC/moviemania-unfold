@@ -49,11 +49,11 @@ export const Navigation = () => {
             <Link 
               key={item.path} 
               to={item.path}
-              className={`flex flex-col items-center justify-center py-2 min-w-0 ${
+              className={`flex flex-col items-center justify-center py-2 min-w-0 min-h-[56px] touch-manipulation active:scale-95 ${
                 isActive ? 'text-cinema-red' : 'text-white/70'
               }`}
             >
-              <Icon className="h-5 w-5 mb-1 flex-shrink-0" />
+              <Icon className="h-6 w-6 mb-1 flex-shrink-0" />
               <span className="text-[10px] font-medium text-center whitespace-nowrap">
                 {item.label}
               </span>

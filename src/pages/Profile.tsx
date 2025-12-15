@@ -71,24 +71,24 @@ const Profile = () => {
 
         {/* Quick Links */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <Link to="/stats">
-            <Card className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 transition-colors">
+          <Link to="/stats" className="touch-manipulation">
+            <Card className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 active:scale-95 transition-all">
               <CardContent className="p-4 text-center">
                 <BarChart3 className="h-6 w-6 text-blue-500 mx-auto mb-2" />
                 <p className="text-xs font-medium text-foreground">Stats</p>
               </CardContent>
             </Card>
           </Link>
-          <Link to="/achievements">
-            <Card className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border-purple-500/30 hover:border-purple-500/50 transition-colors">
+          <Link to="/achievements" className="touch-manipulation">
+            <Card className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border-purple-500/30 hover:border-purple-500/50 active:scale-95 transition-all">
               <CardContent className="p-4 text-center">
                 <Award className="h-6 w-6 text-purple-500 mx-auto mb-2" />
                 <p className="text-xs font-medium text-foreground">Badges</p>
               </CardContent>
             </Card>
           </Link>
-          <Link to="/my-reviews">
-            <Card className="bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/30 hover:border-green-500/50 transition-colors">
+          <Link to="/my-reviews" className="touch-manipulation">
+            <Card className="bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/30 hover:border-green-500/50 active:scale-95 transition-all">
               <CardContent className="p-4 text-center">
                 <MessageCircle className="h-6 w-6 text-green-500 mx-auto mb-2" />
                 <p className="text-xs font-medium text-foreground">Reviews</p>
@@ -147,7 +147,7 @@ const Profile = () => {
                 <Button 
                   variant="destructive" 
                   onClick={signOut}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto h-12 touch-manipulation active:scale-95"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out

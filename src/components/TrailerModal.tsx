@@ -290,7 +290,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
                   variant="ghost"
                   size="sm"
                   onClick={handleClose}
-                  className="text-muted-foreground hover:text-foreground p-2"
+                  className="text-muted-foreground hover:text-foreground p-3 min-h-[48px] min-w-[48px] touch-manipulation active:scale-95"
                 >
                   <X className="h-6 w-6" />
                 </Button>
@@ -323,7 +323,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
             variant="ghost"
             size="sm"
             onClick={handleClose}
-            className="absolute top-4 right-4 z-20 text-white/80 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-2"
+            className="absolute top-4 right-4 z-20 text-white/80 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-3 min-h-[48px] min-w-[48px] touch-manipulation active:scale-95"
           >
             <X className="h-6 w-6" />
           </Button>

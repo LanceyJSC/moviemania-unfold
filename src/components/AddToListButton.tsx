@@ -44,7 +44,7 @@ export const AddToListButton = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={variant} size={size} className={className}>
+        <Button variant={variant} size={size} className={`touch-manipulation active:scale-95 min-h-[44px] ${className}`}>
           <ListPlus className="h-4 w-4 mr-2" />
           Add to List
         </Button>
@@ -82,7 +82,7 @@ export const AddToListButton = ({
                     <Button
                       key={list.id}
                       variant="ghost"
-                      className="w-full justify-between"
+                      className="w-full justify-between h-12 touch-manipulation active:scale-95"
                       onClick={() => !isAdded && handleAddToList(list.id)}
                       disabled={isAdding || isAdded}
                     >

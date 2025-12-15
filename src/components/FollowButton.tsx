@@ -45,7 +45,7 @@ export const FollowButton = ({
       variant={following ? "outline" : variant}
       size={size}
       onClick={handleClick}
-      className={className}
+      className={`touch-manipulation active:scale-95 min-h-[44px] ${className}`}
     >
       {following ? (
         <>
