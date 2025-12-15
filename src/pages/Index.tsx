@@ -1,5 +1,6 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { HeroSection } from "@/components/HeroSection";
 import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
@@ -9,18 +10,18 @@ import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
 import { FallbackHomepage } from "@/components/FallbackHomepage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PullToRefresh } from "@/components/PullToRefresh";
 
 const Index = () => {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Simple initialization check
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 100);
 
-    // Error handling for any uncaught errors
     const handleError = (event: ErrorEvent) => {
       console.error('Uncaught error on homepage:', event.error);
       setHasError(true);
@@ -33,6 +34,10 @@ const Index = () => {
       window.removeEventListener('error', handleError);
     };
   }, []);
+
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries();
+  }, [queryClient]);
 
   if (hasError) {
     return <FallbackHomepage />;
@@ -51,25 +56,20 @@ const Index = () => {
 
   return (
     <ErrorBoundary fallback={<FallbackHomepage />}>
-      <div className="min-h-screen bg-background">
-        {/* Hero Section - Mobile-first */}
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
         <ErrorBoundary>
           <HeroSection />
         </ErrorBoundary>
 
-        {/* Content Sections - Mobile-optimized spacing */}
         <div className="px-4 py-6 space-y-8 pb-32">
-          {/* Quick Stats - More compact on mobile */}
           <ErrorBoundary>
             <MovieStats />
           </ErrorBoundary>
           
-          {/* Genre Navigation - Horizontal scroll on mobile */}
           <ErrorBoundary>
             <QuickGenres />
           </ErrorBoundary>
 
-          {/* Dynamic Content Sections - Optimized for mobile */}
           <ErrorBoundary>
             <NewThisMonth />
           </ErrorBoundary>
@@ -83,11 +83,10 @@ const Index = () => {
           </ErrorBoundary>
         </div>
 
-        {/* iOS-style Tab Bar */}
         <ErrorBoundary>
           <Navigation />
         </ErrorBoundary>
-      </div>
+      </PullToRefresh>
     </ErrorBoundary>
   );
 };

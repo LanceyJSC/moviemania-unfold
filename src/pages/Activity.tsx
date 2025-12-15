@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
@@ -6,12 +8,18 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { PullToRefresh } from "@/components/PullToRefresh";
 
 const Activity = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['activity-feed'] });
+  }, [queryClient]);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background pb-24">
       <MobileHeader title="Activity" />
       
       <div className="px-4 pt-4 pb-8">
@@ -48,7 +56,7 @@ const Activity = () => {
       </div>
 
       <Navigation />
-    </div>
+    </PullToRefresh>
   );
 };
 
