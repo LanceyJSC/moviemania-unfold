@@ -304,20 +304,20 @@ const EpisodeDetail = () => {
           <div className="flex items-center gap-3">
             <Button
               variant={isWatched ? "default" : "outline"}
-              size="sm"
+              size="lg"
               onClick={handleMarkWatched}
-              className="flex-1"
+              className="flex-1 h-12 touch-manipulation active:scale-95"
             >
-              <Eye className="h-4 w-4 mr-2" />
+              <Eye className="h-5 w-5 mr-2" />
               {isWatched ? 'Watched' : 'Mark Watched'}
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => setShowLogModal(true)}
-              className="flex-1"
+              className="flex-1 h-12 touch-manipulation active:scale-95"
             >
-              <BookOpen className="h-4 w-4 mr-2" />
+              <BookOpen className="h-5 w-5 mr-2" />
               Log Episode
             </Button>
           </div>
@@ -403,8 +403,9 @@ const EpisodeDetail = () => {
               {user && (
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   onClick={() => setShowLogModal(true)}
+                  className="h-12 px-6 touch-manipulation active:scale-95"
                 >
                   Be the first to review this episode
                 </Button>

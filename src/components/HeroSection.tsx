@@ -364,17 +364,17 @@ export const HeroSection = () => {
             </div>
           )}
 
-          {/* Slide indicators */}
+          {/* Slide indicators - larger touch targets */}
           {heroMovies.length > 1 && (
-            <div className="flex justify-center space-x-2 mt-6">
+            <div className="flex justify-center space-x-3 mt-6">
               {heroMovies.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
                     index === currentIndex 
-                      ? 'bg-primary w-6' 
-                      : 'bg-foreground/30 hover:bg-foreground/50'
+                      ? 'bg-primary w-8' 
+                      : 'bg-foreground/30 hover:bg-foreground/50 w-3'
                   }`}
                 />
               ))}

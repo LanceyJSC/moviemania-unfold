@@ -114,9 +114,9 @@ export const CollectionMediaCard = ({
               variant="ghost"
               size="icon"
               onClick={onEdit}
-              className="text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted h-10 w-10 touch-manipulation active:scale-95"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-5 w-5" />
             </Button>
           )}
           <AlertDialog>
@@ -124,9 +124,9 @@ export const CollectionMediaCard = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-10 w-10 touch-manipulation active:scale-95"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-5 w-5" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

@@ -326,17 +326,17 @@ export const TVShowCollectionCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="mt-2 text-xs text-muted-foreground hover:text-foreground p-0 h-auto"
+            className="mt-2 text-xs text-muted-foreground hover:text-foreground p-2 h-10 touch-manipulation active:scale-95"
             onClick={handleToggleExpand}
           >
             {isExpanded ? (
               <>
-                <ChevronUp className="h-3 w-3 mr-1" />
+                <ChevronUp className="h-4 w-4 mr-1" />
                 Hide details
               </>
             ) : (
               <>
-                <ChevronDown className="h-3 w-3 mr-1" />
+                <ChevronDown className="h-4 w-4 mr-1" />
                 Show ratings & reviews
               </>
             )}
@@ -348,9 +348,9 @@ export const TVShowCollectionCard = ({
               variant="ghost"
               size="icon"
               onClick={onEdit}
-              className="text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted h-10 w-10 touch-manipulation active:scale-95"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-5 w-5" />
             </Button>
           )}
           <AlertDialog>
@@ -358,9 +358,9 @@ export const TVShowCollectionCard = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 h-10 w-10 touch-manipulation active:scale-95"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-5 w-5" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

@@ -182,39 +182,47 @@ export const SeasonProgressCard = ({
           
           {/* Mark All / Unmark All Watched Buttons */}
           {user && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2 pointer-events-auto relative z-10">
               {!isComplete && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs h-8 px-2 hover:bg-cinema-gold hover:text-cinema-black hover:border-cinema-gold"
+                  className="text-xs h-10 px-3 hover:bg-cinema-gold hover:text-cinema-black hover:border-cinema-gold touch-manipulation active:scale-95"
                   onClick={handleMarkAllWatched}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMarkAllWatched(e as unknown as React.MouseEvent);
+                  }}
                   disabled={isMarkingAll || isUnmarkingAll}
                 >
                   {isMarkingAll ? (
-                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                   ) : (
-                    <Eye className="h-3 w-3 mr-1" />
+                    <Eye className="h-4 w-4 mr-1" />
                   )}
-                  <span className="hidden xs:inline">Mark All</span>
-                  <span className="xs:hidden">All</span>
+                  Mark All
                 </Button>
               )}
               {hasAnyWatched && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs h-8 px-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
+                  className="text-xs h-10 px-3 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive touch-manipulation active:scale-95"
                   onClick={handleUnmarkAllWatched}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleUnmarkAllWatched(e as unknown as React.MouseEvent);
+                  }}
                   disabled={isMarkingAll || isUnmarkingAll}
                 >
                   {isUnmarkingAll ? (
-                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                   ) : (
-                    <EyeOff className="h-3 w-3 mr-1" />
+                    <EyeOff className="h-4 w-4 mr-1" />
                   )}
-                  <span className="hidden xs:inline">Unmark All</span>
-                  <span className="xs:hidden">Clear</span>
+                  Clear All
                 </Button>
               )}
             </div>
