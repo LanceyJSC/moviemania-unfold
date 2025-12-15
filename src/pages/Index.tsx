@@ -82,11 +82,10 @@ const Index = () => {
             <LatestTrailers />
           </ErrorBoundary>
         </div>
-
-        <ErrorBoundary>
-          <Navigation />
-        </ErrorBoundary>
       </PullToRefresh>
+      
+      {/* Navigation outside PullToRefresh for proper fixed positioning */}
+      <Navigation />
     </ErrorBoundary>
   );
 };
