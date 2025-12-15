@@ -358,9 +358,17 @@ const MovieDetail = () => {
         {/* Cast Section - Fixed to ensure it displays */}
         {cast && cast.length > 0 && (
           <div>
-            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
-              CAST
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-cinematic text-foreground tracking-wide">
+                CAST
+              </h2>
+              <Link 
+                to={`/movie/${movieId}/cast`}
+                className="text-cinema-gold hover:text-cinema-gold/80 text-sm font-medium touch-manipulation"
+              >
+                View All Cast & Crew →
+              </Link>
+            </div>
             <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
               {cast.map((actor) => (
                 <ActorCard key={actor.id} actor={actor} />
