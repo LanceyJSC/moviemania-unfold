@@ -36,6 +36,7 @@ import Activity from "./pages/Activity";
 import MyReviews from "./pages/MyReviews";
 import Stats from "./pages/Stats";
 import Achievements from "./pages/Achievements";
+import CastCrew from "./pages/CastCrew";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -73,8 +74,10 @@ const App = () => {
                           <Route path="/tv-shows" element={<TVShows />} />
                           <Route path="/genres" element={<Genres />} />
                           <Route path="/movie/:id/reviews" element={<MovieReviews />} />
+                          <Route path="/movie/:id/cast" element={<CastCrew />} />
                           <Route path="/movie/:id" element={<MovieDetail />} />
                           <Route path="/tv/:id/reviews" element={<TVShowReviews />} />
+                          <Route path="/tv/:id/cast" element={<CastCrew />} />
                           <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
                           <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
                           <Route path="/tv/:id" element={<TVShowDetail />} />
