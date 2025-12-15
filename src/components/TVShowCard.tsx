@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Star, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useUserStateContext } from "@/contexts/UserStateContext";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
 interface TVShowCardProps {
@@ -19,7 +18,6 @@ interface TVShowCardProps {
 
 export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) => {
   const { getRating } = useUserStateContext();
-  const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
   
   const userRating = getRating(tvShow.id);
@@ -39,7 +37,7 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
   };
 
   return (
-    <Link to={`/tv/${tvShow.id}`}>
+    <Link to={`/tv/${tvShow.id}`} className="block touch-manipulation">
       <Card className={`group relative overflow-hidden bg-card border-border transition-all duration-300 cursor-pointer flex-shrink-0 ${getCardClasses()}`}>
         <div className="w-full h-full relative">
           {/* TV Show Poster */}
@@ -62,21 +60,19 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
           )}
           
           {/* Base Gradient Overlay - Very light for consistent brightness */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent" />
           </div>
           
-          {/* Subtle Hover Enhancement - Very light */}
-          <div className={`absolute inset-0 transition-opacity duration-300 ${
-            isMobile ? 'opacity-0 group-active:opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
+          {/* Subtle Hover/Active Enhancement - CSS-based for iframe compatibility */}
+          <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 group-active:opacity-100 pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent" />
           </div>
           
           {/* Rating Badges - TMDB and User Rating */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <div className="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none">
             {/* TMDB Rating */}
             <div className="bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
               <Star className="h-3 w-3 text-cinema-gold fill-current" />

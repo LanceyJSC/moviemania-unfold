@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { tmdbService } from "@/lib/tmdb";
 import { Movie } from "@/lib/tmdb";
 import { MovieCard } from "@/components/MovieCard";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MovieGridProps {
   title: string;
@@ -40,7 +39,6 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const isMobile = useIsMobile();
   
   // Refs for Intersection Observer
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -123,15 +121,14 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className={`font-cinematic text-foreground tracking-wide ${
-          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
-        }`}>
+        {/* Use CSS responsive text instead of JS detection */}
+        <h2 className="font-cinematic text-foreground tracking-wide text-xl sm:text-2xl md:text-3xl">
           {title}
         </h2>
       </div>
 
-      {/* Movies Grid - Optimized for iPhone 3-across */}
-      <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
+      {/* Movies Grid - Optimized for mobile 3-across */}
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
         {isLoading && movies.length === 0 ? (
           Array.from({ length: 15 }).map((_, index) => (
             <div key={index}>

@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
+import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Info, Star, Calendar, TrendingUp, Users } from "lucide-react";
+import { Play, Info, Star, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { tmdbService } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -13,16 +12,36 @@ interface FeaturedHeroProps {
 }
 
 export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
-  const [featuredContent, setFeaturedContent] = useState<any>(null);
-  const [trailerKey, setTrailerKey] = useState<string | null>(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    trending: 0,
-    topRated: 0
-  });
+  const [featuredItems, setFeaturedItems] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [trailerKeys, setTrailerKeys] = useState<(string | null)[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
+  
+  const rotationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startRotation = (itemCount: number) => {
+    if (rotationIntervalRef.current) {
+      clearInterval(rotationIntervalRef.current);
+    }
+    
+    if (itemCount <= 1) return;
+    
+    rotationIntervalRef.current = setInterval(() => {
+      setCurrentIndex(prevIndex => {
+        const newIndex = prevIndex >= itemCount - 1 ? 0 : prevIndex + 1;
+        return newIndex;
+      });
+    }, 5000);
+  };
+
+  const stopRotation = () => {
+    if (rotationIntervalRef.current) {
+      clearInterval(rotationIntervalRef.current);
+      rotationIntervalRef.current = null;
+    }
+  };
 
   const loadFeaturedContent = async (isRefresh = false) => {
     if (isRefresh) {
@@ -32,54 +51,37 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
     }
     
     try {
+      let trending;
       if (type === 'movie') {
-        const [trending, topRated, popular] = await Promise.all([
-          tmdbService.getTrendingMovies(),
-          tmdbService.getTopRatedMovies(),
-          tmdbService.getPopularMovies()
-        ]);
-        
-        const featuredItem = trending.results[0];
-        setFeaturedContent(featuredItem);
-        
-        // Get movie details with trailer
-        if (featuredItem) {
-          const details = await tmdbService.getMovieDetails(featuredItem.id);
-          const trailer = details.videos?.results.find(
-            video => video.type === 'Trailer' && video.site === 'YouTube'
-          );
-          setTrailerKey(trailer ? trailer.key : null);
-        }
-        
-        setStats({
-          total: popular.total_results || 0,
-          trending: trending.total_results || 0,
-          topRated: topRated.total_results || 0
-        });
+        trending = await tmdbService.getTrendingMovies();
       } else {
-        const [trending, topRated, popular] = await Promise.all([
-          tmdbService.getTrendingTVShows(),
-          tmdbService.getTopRatedTVShows(),
-          tmdbService.getPopularTVShows()
-        ]);
-        
-        const featuredItem = trending.results[0];
-        setFeaturedContent(featuredItem);
-        
-        // Get TV show details with trailer
-        if (featuredItem) {
-          const details = await tmdbService.getTVShowDetails(featuredItem.id);
-          const trailer = details.videos?.results.find(
-            video => video.type === 'Trailer' && video.site === 'YouTube'
-          );
-          setTrailerKey(trailer ? trailer.key : null);
-        }
-        
-        setStats({
-          total: popular.total_results || 0,
-          trending: trending.total_results || 0,
-          topRated: topRated.total_results || 0
-        });
+        trending = await tmdbService.getTrendingTVShows();
+      }
+      
+      // Get top 5 trending items for rotation
+      const topItems = trending.results.slice(0, 5).filter((item: any) => item.backdrop_path);
+      setFeaturedItems(topItems);
+      
+      // Get trailer keys for all items
+      const keys = await Promise.all(
+        topItems.map(async (item: any) => {
+          try {
+            const details = type === 'movie' 
+              ? await tmdbService.getMovieDetails(item.id)
+              : await tmdbService.getTVShowDetails(item.id);
+            const trailer = details.videos?.results.find(
+              (video: any) => video.type === 'Trailer' && video.site === 'YouTube'
+            );
+            return trailer ? trailer.key : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+      setTrailerKeys(keys);
+      
+      if (isRefresh) {
+        setCurrentIndex(0);
       }
     } catch (error) {
       console.error(`Failed to load featured ${type} content:`, error);
@@ -91,17 +93,28 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   useEffect(() => {
     loadFeaturedContent();
-
-    // Set up periodic refresh every hour (3,600,000 milliseconds)
-    const refreshInterval = setInterval(() => {
-      loadFeaturedContent(true);
-    }, 3600000);
-
-    // Clean up interval on component unmount
-    return () => clearInterval(refreshInterval);
+    
+    return () => stopRotation();
   }, [type]);
 
-  if (isLoading || !featuredContent) {
+  useEffect(() => {
+    if (featuredItems.length > 1) {
+      startRotation(featuredItems.length);
+    }
+    
+    return () => stopRotation();
+  }, [featuredItems.length]);
+
+  const goToSlide = (index: number) => {
+    if (index >= 0 && index < featuredItems.length) {
+      setCurrentIndex(index);
+      if (featuredItems.length > 1) {
+        startRotation(featuredItems.length);
+      }
+    }
+  };
+
+  if (isLoading || featuredItems.length === 0) {
     return (
       <div className="relative h-96 bg-gradient-to-r from-cinema-charcoal to-cinema-black rounded-xl overflow-hidden mb-8">
         <div className="absolute inset-0 flex items-center justify-center">
@@ -111,6 +124,8 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
     );
   }
 
+  const featuredContent = featuredItems[currentIndex];
+  const currentTrailerKey = trailerKeys[currentIndex];
   const backdropUrl = featuredContent.backdrop_path 
     ? `https://image.tmdb.org/t/p/w1280${featuredContent.backdrop_path}`
     : null;
@@ -121,8 +136,8 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const overview = featuredContent.overview;
 
   const handleWatchTrailer = () => {
-    if (trailerKey) {
-      setGlobalTrailerKey(trailerKey);
+    if (currentTrailerKey) {
+      setGlobalTrailerKey(currentTrailerKey);
       setMovieTitle(title);
       setIsTrailerOpen(true);
     }
@@ -137,7 +152,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Background Image */}
       {backdropUrl && (
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
           style={{ 
             backgroundImage: `url(${backdropUrl})`,
             backgroundColor: 'hsl(var(--background))'
@@ -149,12 +164,12 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
       
-      {/* Bottom gradient blend - Creates smooth transition to page background */}
+      {/* Bottom gradient blend */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
       {/* Content */}
       <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 pb-6 sm:pb-8">
-        <div className="max-w-2xl">
+        <div className="max-w-2xl transition-all duration-500 ease-in-out">
           {/* Badge */}
           <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
             Featured {type === 'movie' ? 'Movie' : 'TV Show'}
@@ -162,7 +177,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
           </Badge>
           
           {/* Title */}
-          <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight">
+          <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight uppercase">
             {title}
           </h1>
           
@@ -186,42 +201,55 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
           </p>
           
           {/* Action Buttons */}
-          <div className="flex flex-col gap-3">
-            {/* Primary Action Buttons */}
-            <div className="flex gap-3">
-              {trailerKey ? (
-                <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium flex-1 sm:flex-none"
-                  disabled={isRefreshing}
-                  onClick={handleWatchTrailer}
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  <span className="hidden xs:inline">Watch Trailer</span>
-                  <span className="xs:hidden">Trailer</span>
-                </Button>
-              ) : (
-                <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium flex-1 sm:flex-none"
-                  disabled={true}
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  <span className="hidden xs:inline">No Trailer</span>
-                  <span className="xs:hidden">No Trailer</span>
-                </Button>
-              )}
-              <Link to={`/${type}/${featuredContent.id}`}>
-                <Button 
-                  variant="outline" 
-                  className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 sm:px-6"
-                  disabled={isRefreshing}
-                >
-                  <Info className="mr-2 h-4 w-4" />
-                  More Info
-                </Button>
-              </Link>
-            </div>
+          <div className="flex gap-3">
+            {currentTrailerKey ? (
+              <Button 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium"
+                disabled={isRefreshing}
+                onClick={handleWatchTrailer}
+              >
+                <Play className="mr-2 h-4 w-4" />
+                <span className="hidden xs:inline">Watch Trailer</span>
+                <span className="xs:hidden">Trailer</span>
+              </Button>
+            ) : (
+              <Button 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium"
+                disabled={true}
+              >
+                <Play className="mr-2 h-4 w-4" />
+                No Trailer
+              </Button>
+            )}
+            <Link to={`/${type}/${featuredContent.id}`}>
+              <Button 
+                variant="outline" 
+                className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 sm:px-6"
+                disabled={isRefreshing}
+              >
+                <Info className="mr-2 h-4 w-4" />
+                More Info
+              </Button>
+            </Link>
           </div>
         </div>
+
+        {/* Slide indicators */}
+        {featuredItems.length > 1 && (
+          <div className="flex justify-center space-x-2 mt-6">
+            {featuredItems.map((_: any, index: number) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex 
+                    ? 'bg-primary w-6' 
+                    : 'bg-foreground/30 hover:bg-foreground/50'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
