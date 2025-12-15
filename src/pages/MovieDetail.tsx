@@ -15,7 +15,7 @@ import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { tmdbService, Movie, TVShow, MovieWithCollection } from "@/lib/tmdb";
 import { useUserStateContext } from "@/contexts/UserStateContext";
-import { useIsMobile } from "@/hooks/use-mobile";
+// Removed useIsMobile - using CSS-based responsive design instead
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,7 +29,7 @@ const MovieDetail = () => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showSynopsis, setShowSynopsis] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
-  const isMobile = useIsMobile();
+  // Using CSS-based responsive design instead of JS detection
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
   const {
     toggleLike,

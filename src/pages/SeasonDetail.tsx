@@ -580,33 +580,33 @@ const SeasonDetail = () => {
                           <Button
                             size="sm"
                             variant={watched ? "default" : "outline"}
-                            className={`text-xs h-8 ${
+                            className={`text-xs h-10 px-3 touch-manipulation active:scale-95 ${
                               watched 
                                 ? 'bg-cinema-gold hover:bg-cinema-gold/90 text-cinema-black' 
                                 : 'hover:border-cinema-gold hover:text-cinema-gold'
                             }`}
                             onClick={() => handleMarkEpisodeWatched(episode)}
                           >
-                            <Eye className="h-3 w-3 mr-1" />
-                            {watched ? 'Watched' : 'Mark Watched'}
+                            <Eye className="h-4 w-4 mr-1" />
+                            {watched ? 'Watched' : 'Mark'}
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-xs h-8 hover:border-cinema-red hover:text-cinema-red"
+                            className="text-xs h-10 px-3 hover:border-cinema-red hover:text-cinema-red touch-manipulation active:scale-95"
                             onClick={() => handleLogEpisode(episode)}
                           >
-                            <BookOpen className="h-3 w-3 mr-1" />
+                            <BookOpen className="h-4 w-4 mr-1" />
                             Log
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-xs h-8 hover:border-foreground hover:text-foreground"
+                            className="text-xs h-10 px-3 hover:border-foreground hover:text-foreground touch-manipulation active:scale-95"
                             asChild
                           >
                             <Link to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}>
-                              <MessageCircle className="h-3 w-3 mr-1" />
+                              <MessageCircle className="h-4 w-4 mr-1" />
                               Reviews
                             </Link>
                           </Button>
