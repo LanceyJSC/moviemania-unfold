@@ -140,13 +140,14 @@ const MovieDetail = () => {
   const collectionInfo = !isTV ? (movie as MovieWithCollection).belongs_to_collection : null;
   
   // Fixed cast and crew data access
-  const cast = movie.credits?.cast?.slice(0, 8) || [];
+  // Show more cast and crew - TMDB returns full lists
+  const cast = movie.credits?.cast?.slice(0, 20) || [];
   const crew = movie.credits?.crew || [];
   const director = crew.find(person => person.job === 'Director');
   const producer = crew.find(person => person.job === 'Producer');
   const keyCrewMembers = crew.filter(person => 
-    ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer'].includes(person.job)
-  ).slice(0, 6);
+    ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer', 'Director of Photography', 'Original Music Composer', 'Editor'].includes(person.job)
+  ).slice(0, 12);
 
   return (
     <div className="min-h-screen bg-background pb-32">

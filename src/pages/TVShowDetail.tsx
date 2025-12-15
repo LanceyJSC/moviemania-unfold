@@ -157,12 +157,13 @@ const TVShowDetail = () => {
   const releaseYear = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : 'TBA';
   const genres = tvShow.genres?.map(g => g.name).join(', ') || 'Unknown';
   
-  const cast = tvShow.credits?.cast?.slice(0, 8) || [];
+  // Show more cast and crew - TMDB returns full lists
+  const cast = tvShow.credits?.cast?.slice(0, 20) || [];
   const crew = tvShow.credits?.crew || [];
   const creator = tvShow.created_by?.[0];
   const keyCrewMembers = crew.filter(person => 
-    ['Executive Producer', 'Producer', 'Writer', 'Creator'].includes(person.job)
-  ).slice(0, 6);
+    ['Executive Producer', 'Producer', 'Writer', 'Creator', 'Director', 'Director of Photography', 'Original Music Composer'].includes(person.job)
+  ).slice(0, 12);
 
   return (
     <div className="min-h-screen bg-background pb-32">
