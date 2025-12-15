@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { MovieGrid } from "@/components/MovieGrid";
 import { Navigation } from "@/components/Navigation";
+import { Header } from "@/components/Header";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { PullToRefresh } from "@/components/PullToRefresh";
@@ -43,12 +44,15 @@ const Movies = () => {
 
   return (
     <>
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
+      {/* Desktop Header */}
+      <Header />
+      
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background md:pt-16">
         <FeaturedHero type="movie" />
 
         <div className="relative">
-          <div className="container mx-auto px-4 md:px-6 py-8 space-y-12 pb-32">
-            <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4 px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-12 pb-32 md:pb-12">
+            <div className="sticky top-0 md:top-16 z-40 bg-background/95 backdrop-blur-sm py-4">
               <div className="flex justify-between space-x-1 sm:space-x-2">
                 {filterButtons.map((filter) => {
                   const Icon = filter.icon;
@@ -84,7 +88,10 @@ const Movies = () => {
         </div>
       </PullToRefresh>
 
-      <Navigation />
+      {/* Mobile Navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <Navigation />
+      </div>
     </>
   );
 };

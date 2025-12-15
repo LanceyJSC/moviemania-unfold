@@ -4,6 +4,7 @@ import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, ChevronRight
 import { Button } from "@/components/ui/button";
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
+import { Header } from "@/components/Header";
 import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { tmdbService, TVShow } from "@/lib/tmdb";
@@ -166,8 +167,14 @@ const TVShowDetail = () => {
   ).slice(0, 12);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      <MobileHeader title={tvShow.name} />
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      {/* Desktop Header */}
+      <Header />
+      
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <MobileHeader title={tvShow.name} />
+      </div>
       
       {/* Hero Section with Poster Overlay */}
       <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
@@ -440,8 +447,10 @@ const TVShowDetail = () => {
         initialRating={userRating}
       />
 
-      {/* Mobile Navigation */}
-      <Navigation />
+      {/* Mobile Navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <Navigation />
+      </div>
     </div>
   );
 };

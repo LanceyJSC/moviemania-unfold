@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
+import { Header } from "@/components/Header";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
@@ -56,12 +57,15 @@ const Index = () => {
 
   return (
     <ErrorBoundary fallback={<FallbackHomepage />}>
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
+      {/* Desktop Header */}
+      <Header />
+      
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background md:pt-16">
         <ErrorBoundary>
           <HeroSection />
         </ErrorBoundary>
 
-        <div className="px-4 py-6 space-y-8 pb-32">
+        <div className="px-4 md:px-8 lg:px-12 py-6 space-y-8 pb-32 md:pb-12">
           <ErrorBoundary>
             <MovieStats />
           </ErrorBoundary>
@@ -84,8 +88,10 @@ const Index = () => {
         </div>
       </PullToRefresh>
       
-      {/* Navigation outside PullToRefresh for proper fixed positioning */}
-      <Navigation />
+      {/* Mobile Navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <Navigation />
+      </div>
     </ErrorBoundary>
   );
 };
