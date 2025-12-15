@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { tmdbService } from "@/lib/tmdb";
 import { TVShow } from "@/lib/tmdb";
 import { TVShowCard } from "@/components/TVShowCard";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TVGridProps {
   title: string;
@@ -39,7 +38,6 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const isMobile = useIsMobile();
   
   // Refs for Intersection Observer
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -121,17 +119,15 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
+      {/* Section Header - CSS responsive text */}
       <div className="flex items-center justify-between">
-        <h2 className={`font-cinematic text-foreground tracking-wide ${
-          isMobile ? 'text-xl' : 'text-2xl md:text-3xl'
-        }`}>
+        <h2 className="font-cinematic text-foreground tracking-wide text-xl sm:text-2xl md:text-3xl">
           {title}
         </h2>
       </div>
 
-      {/* TV Shows Grid - Optimized for iPhone 3-across */}
-      <div className="grid grid-cols-3 gap-2 md:grid-cols-6 lg:grid-cols-8">
+      {/* TV Shows Grid - Optimized for mobile 3-across */}
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
         {isLoading && tvShows.length === 0 ? (
           Array.from({ length: 15 }).map((_, index) => (
             <div key={index}>
