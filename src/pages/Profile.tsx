@@ -9,6 +9,7 @@ import { ProfileEditor } from '@/components/ProfileEditor';
 import { LogOut, Settings, BarChart3, Award, MessageCircle, ChevronRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
+import { Header } from '@/components/Header';
 import { MobileHeader } from '@/components/MobileHeader';
 import { AdminMakeButton } from '@/components/AdminMakeButton';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -45,13 +46,16 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 pb-24 md:pb-12">
+      {/* Desktop Header */}
+      <Header />
+      
       {/* Mobile Header */}
-      <div className="block lg:hidden">
+      <div className="block md:hidden">
         <MobileHeader title="Settings" showBack={false} />
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 pt-4 md:pt-8">
+      <div className="container mx-auto px-4 md:px-6 pt-4 md:pt-24">
         {/* Profile Header */}
         <div className="flex items-center gap-4 mb-8">
           <Avatar className="h-16 w-16 md:h-20 md:w-20">
@@ -200,7 +204,10 @@ const Profile = () => {
         </div>
       </div>
 
-      <Navigation />
+      {/* Mobile Navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <Navigation />
+      </div>
     </div>
   );
 };

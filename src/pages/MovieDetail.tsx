@@ -11,6 +11,7 @@ import { MovieCollectionBanner } from "@/components/MovieCollectionBanner";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
+import { Header } from "@/components/Header";
 import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { tmdbService, Movie, TVShow, MovieWithCollection } from "@/lib/tmdb";
@@ -150,8 +151,14 @@ const MovieDetail = () => {
   ).slice(0, 12);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      <MobileHeader title={title} />
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      {/* Desktop Header */}
+      <Header />
+      
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <MobileHeader title={title} />
+      </div>
       
       {/* Hero Section with Poster Overlay */}
       <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
@@ -408,8 +415,10 @@ const MovieDetail = () => {
         initialRating={userRating}
       />
 
-      {/* Mobile Navigation */}
-      <Navigation />
+      {/* Mobile Navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <Navigation />
+      </div>
     </div>
   );
 };

@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Navigation } from '@/components/Navigation';
+import { Header } from '@/components/Header';
 import { MobileHeader } from '@/components/MobileHeader';
 import { CollectionMediaCard } from '@/components/CollectionMediaCard';
 import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
@@ -335,11 +336,21 @@ const Collection = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <MobileHeader title="Collection" />
-      <Navigation />
+    <div className="min-h-screen bg-background pb-24 md:pb-12">
+      {/* Desktop Header */}
+      <Header />
       
-      <div className="container mx-auto px-4 py-6">
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <MobileHeader title="Collection" />
+      </div>
+      
+      {/* Mobile Navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <Navigation />
+      </div>
+      
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-6 md:pt-24">
         {/* Stats Section - Filtered by media type */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
           {mediaFilter === 'all' && (
