@@ -388,10 +388,10 @@ export const LogMediaModal = ({
 
         {/* Actions */}
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} className="h-12 touch-manipulation active:scale-95">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 touch-manipulation active:scale-95">
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

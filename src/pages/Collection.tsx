@@ -439,7 +439,7 @@ const Collection = () => {
             size="sm"
             variant={mediaFilter === 'all' ? 'default' : 'outline'}
             onClick={() => setMediaFilter('all')}
-            className="text-xs"
+            className="text-xs h-10 touch-manipulation active:scale-95"
           >
             All
           </Button>
@@ -447,7 +447,7 @@ const Collection = () => {
             size="sm"
             variant={mediaFilter === 'movies' ? 'default' : 'outline'}
             onClick={() => setMediaFilter('movies')}
-            className="text-xs"
+            className="text-xs h-10 touch-manipulation active:scale-95"
           >
             <Film className="h-3 w-3 mr-1" />
             Movies
@@ -456,7 +456,7 @@ const Collection = () => {
             size="sm"
             variant={mediaFilter === 'tv' ? 'default' : 'outline'}
             onClick={() => setMediaFilter('tv')}
-            className="text-xs"
+            className="text-xs h-10 touch-manipulation active:scale-95"
           >
             <Tv className="h-3 w-3 mr-1" />
             TV Shows
@@ -464,23 +464,23 @@ const Collection = () => {
         </div>
 
         <Tabs defaultValue="watchlist" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
-            <TabsTrigger value="watchlist" className="flex items-center gap-1 text-xs sm:text-sm">
+          <TabsList className="grid w-full grid-cols-4 mb-6 h-12">
+            <TabsTrigger value="watchlist" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
               <Clock className="w-4 h-4" />
               <span className="hidden sm:inline">Watchlist</span>
               <Badge variant="secondary" className="ml-1 text-xs">{getUnwatchedItems().length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center gap-1 text-xs sm:text-sm">
+            <TabsTrigger value="favorites" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Favorites</span>
               <Badge variant="secondary" className="ml-1 text-xs">{getFilteredFavorites().length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="watched" className="flex items-center gap-1 text-xs sm:text-sm">
+            <TabsTrigger value="watched" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline">Watched</span>
               <Badge variant="secondary" className="ml-1 text-xs">{getWatchedItems().length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="diary" className="flex items-center gap-1 text-xs sm:text-sm">
+            <TabsTrigger value="diary" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
               <BookOpen className="w-4 h-4" />
               <span className="hidden sm:inline">Diary</span>
               <Badge variant="secondary" className="ml-1 text-xs">{getCombinedDiary().length}</Badge>
