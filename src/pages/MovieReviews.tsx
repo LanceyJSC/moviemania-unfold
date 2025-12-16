@@ -4,16 +4,10 @@ import { Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown } from "
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
+import { MobileActionSheet } from "@/components/MobileActionSheet";
 import { tmdbService, Movie, Review } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +38,7 @@ const MovieReviews = () => {
   const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
   const [showSpoilers, setShowSpoilers] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [showSortSheet, setShowSortSheet] = useState(false);
   const { user } = useAuth();
 
   const movieId = Number(id);
@@ -237,18 +232,20 @@ const MovieReviews = () => {
             </h2>
             
             {communityReviews && communityReviews.length > 1 && (
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                <SelectTrigger className="w-[130px] h-8 text-xs">
-                  <ArrowUpDown className="h-3 w-3 mr-1" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most Recent</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="highest">Highest Rated</SelectItem>
-                  <SelectItem value="lowest">Lowest Rated</SelectItem>
-                </SelectContent>
-              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSortSheet(true)}
+                className="h-9 px-3 rounded-lg gap-1.5"
+              >
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                <span className="text-xs">
+                  {sortBy === 'recent' && 'Recent'}
+                  {sortBy === 'oldest' && 'Oldest'}
+                  {sortBy === 'highest' && 'Highest'}
+                  {sortBy === 'lowest' && 'Lowest'}
+                </span>
+              </Button>
             )}
           </div>
           
@@ -436,6 +433,21 @@ const MovieReviews = () => {
           mediaType="movie"
         />
       )}
+
+      {/* Sort Action Sheet */}
+      <MobileActionSheet
+        isOpen={showSortSheet}
+        onClose={() => setShowSortSheet(false)}
+        title="Sort Reviews"
+        options={[
+          { value: 'recent', label: 'Most Recent' },
+          { value: 'oldest', label: 'Oldest First' },
+          { value: 'highest', label: 'Highest Rated' },
+          { value: 'lowest', label: 'Lowest Rated' },
+        ]}
+        selectedValue={sortBy}
+        onSelect={(v) => setSortBy(v as SortOption)}
+      />
 
       <Navigation />
     </div>
