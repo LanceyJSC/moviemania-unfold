@@ -237,7 +237,7 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
     setVideoError(true);
   };
 
-  const youtubeEmbedUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0`;
+  const youtubeEmbedUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=1&showinfo=0`;
 
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
