@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Film, Tv, Star, Calendar, BookOpen, Edit2, Trash2, Filter, ArrowUpDown } from 'lucide-react';
+import { Film, Star, Calendar, BookOpen, Edit2, Trash2, ArrowUpDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -10,13 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
 import { LogMediaModal } from '@/components/LogMediaModal';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { MobileFilterPills } from '@/components/MobileFilterPills';
+import { MobileActionSheet } from '@/components/MobileActionSheet';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,6 +51,7 @@ const MyReviews = () => {
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showSortSheet, setShowSortSheet] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -193,33 +189,33 @@ const MyReviews = () => {
           </Card>
         </div>
 
-        {/* Filters and Sort */}
-        <div className="flex gap-2 mb-6">
-          <Select value={filterBy} onValueChange={(v) => setFilterBy(v as FilterOption)}>
-            <SelectTrigger className="w-[140px]">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Reviews</SelectItem>
-              <SelectItem value="rated">With Rating</SelectItem>
-              <SelectItem value="unrated">No Rating</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-[140px]">
-              <ArrowUpDown className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">Most Recent</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="highest">Highest Rated</SelectItem>
-              <SelectItem value="lowest">Lowest Rated</SelectItem>
-              <SelectItem value="title">Title A-Z</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filters */}
+        <div className="mb-4">
+          <MobileFilterPills
+            options={[
+              { value: 'all', label: 'All Reviews' },
+              { value: 'rated', label: 'With Rating' },
+              { value: 'unrated', label: 'No Rating' },
+            ]}
+            selectedValue={filterBy}
+            onSelect={(v) => setFilterBy(v as FilterOption)}
+          />
+        </div>
+
+        {/* Sort Button */}
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            onClick={() => setShowSortSheet(true)}
+            className="h-11 px-4 rounded-xl gap-2"
+          >
+            <ArrowUpDown className="h-4 w-4" />
+            {sortBy === 'recent' && 'Most Recent'}
+            {sortBy === 'oldest' && 'Oldest First'}
+            {sortBy === 'highest' && 'Highest Rated'}
+            {sortBy === 'lowest' && 'Lowest Rated'}
+            {sortBy === 'title' && 'Title A-Z'}
+          </Button>
         </div>
 
         {/* Reviews List */}
@@ -351,6 +347,22 @@ const MyReviews = () => {
           initialRating={editingReview.rating || undefined}
         />
       )}
+
+      {/* Sort Action Sheet */}
+      <MobileActionSheet
+        isOpen={showSortSheet}
+        onClose={() => setShowSortSheet(false)}
+        title="Sort Reviews"
+        options={[
+          { value: 'recent', label: 'Most Recent' },
+          { value: 'oldest', label: 'Oldest First' },
+          { value: 'highest', label: 'Highest Rated' },
+          { value: 'lowest', label: 'Lowest Rated' },
+          { value: 'title', label: 'Title A-Z' },
+        ]}
+        selectedValue={sortBy}
+        onSelect={(v) => setSortBy(v as SortOption)}
+      />
     </div>
   );
 };

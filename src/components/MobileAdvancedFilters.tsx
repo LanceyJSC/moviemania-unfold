@@ -1,9 +1,8 @@
-
 import { useState } from "react";
-import { X, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MobileActionSheet } from "@/components/MobileActionSheet";
 import { cn } from "@/lib/utils";
 
 interface FilterState {
@@ -49,6 +48,13 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
     rating: false,
     runtime: false,
   });
+
+  const [showSortSheet, setShowSortSheet] = useState(false);
+
+  const getSortLabel = (value: string) => {
+    const option = SORT_OPTIONS.find(o => o.value === value);
+    return option?.label || 'Most Popular';
+  };
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
     const updatedFilters = { ...filters, ...newFilters };
@@ -118,18 +124,14 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
         {/* Sort By */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-foreground">Sort By</h3>
-          <Select value={filters.sortBy} onValueChange={(value) => updateFilters({ sortBy: value })}>
-            <SelectTrigger className="h-14 bg-card/60 border-border/50 rounded-2xl text-base">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Button
+            variant="outline"
+            onClick={() => setShowSortSheet(true)}
+            className="w-full h-14 bg-card/60 border-border/50 rounded-2xl text-base justify-between px-4"
+          >
+            <span>{getSortLabel(filters.sortBy)}</span>
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+          </Button>
         </div>
 
         {/* Genres - Mobile Grid */}
@@ -252,6 +254,16 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
           )}
         </div>
       </div>
+
+      {/* Sort Action Sheet */}
+      <MobileActionSheet
+        isOpen={showSortSheet}
+        onClose={() => setShowSortSheet(false)}
+        title="Sort By"
+        options={SORT_OPTIONS}
+        selectedValue={filters.sortBy}
+        onSelect={(value) => updateFilters({ sortBy: value })}
+      />
     </div>
   );
 };
