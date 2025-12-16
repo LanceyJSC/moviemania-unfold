@@ -6,10 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
-import { LogOut, Settings, BarChart3, Award, MessageCircle, ChevronRight } from 'lucide-react';
+import { LogOut, Settings, BarChart3, Award, MessageCircle } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
-import { Header } from '@/components/Header';
 import { MobileHeader } from '@/components/MobileHeader';
 import { AdminMakeButton } from '@/components/AdminMakeButton';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -46,19 +45,13 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 pb-24 md:pb-12">
-      {/* Desktop Header */}
-      <Header />
-      
-      {/* Mobile Header */}
-      <div className="block md:hidden">
-        <MobileHeader title="Settings" showBack={false} />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 pb-24">
+      <MobileHeader title="Settings" showBack={false} />
 
-      <div className="container mx-auto px-4 md:px-6 pt-4 md:pt-24">
+      <div className="px-4 pt-4">
         {/* Profile Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Avatar className="h-16 w-16 md:h-20 md:w-20">
+          <Avatar className="h-16 w-16">
             <AvatarImage src={profile.avatar_url} alt={profile.username} />
             <AvatarFallback className="text-xl font-semibold bg-primary text-primary-foreground">
               {profile.username?.charAt(0).toUpperCase() || 'U'}
@@ -66,7 +59,7 @@ const Profile = () => {
           </Avatar>
           
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">
+            <h1 className="text-xl font-bold text-foreground">
               {profile.username}
             </h1>
             <p className="text-muted-foreground text-sm">@{profile.username}</p>
@@ -204,10 +197,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation - hidden on desktop */}
-      <div className="md:hidden">
-        <Navigation />
-      </div>
+      <Navigation />
     </div>
   );
 };

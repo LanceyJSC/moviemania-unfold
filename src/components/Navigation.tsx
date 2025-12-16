@@ -31,10 +31,9 @@ export const Navigation = () => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border" 
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background" 
       style={{ 
-        paddingBottom: 'max(env(safe-area-inset-bottom), 8px)',
-        backgroundColor: '#000000'
+        paddingBottom: 'max(env(safe-area-inset-bottom), 8px)'
       }}
     >
       <div 

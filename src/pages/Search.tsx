@@ -10,7 +10,6 @@ import { AdvancedFilters } from "@/components/AdvancedFilters";
 
 import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
-import { Header } from "@/components/Header";
 import { MobileHeader } from "@/components/MobileHeader";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -222,18 +221,12 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-12 max-h-screen overflow-y-auto">
-      {/* Desktop Header */}
-      <Header />
+    <div className="min-h-screen bg-background pb-32 max-h-screen overflow-y-auto">
+      <MobileHeader title="Search" />
       
-      {/* Mobile Header */}
-      <div className="md:hidden">
-        <MobileHeader title="Search" />
-      </div>
-      
-      {/* Mobile-Optimized Header and Search Input */}
-      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 md:top-16 z-40">
-        <div className="container mx-auto space-y-4">
+      {/* Search Input */}
+      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
+        <div className="space-y-4">
           {/* Search Input Row */}
           <div className="flex items-center gap-2">
             <div className="relative flex-grow">
@@ -481,10 +474,7 @@ const Search = () => {
         )}
       </div>
       
-      {/* Mobile Navigation - hidden on desktop */}
-      <div className="md:hidden">
-        <Navigation />
-      </div>
+      <Navigation />
     </div>
   );
 };
