@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
+import { WatchProviders } from "@/components/WatchProviders";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +41,7 @@ interface Season {
 
 const SeasonDetail = () => {
   const { id, seasonNumber } = useParams<{ id: string; seasonNumber: string }>();
+  const navigate = useNavigate();
   const [season, setSeason] = useState<Season | null>(null);
   const [tvShow, setTVShow] = useState<TMDBTVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +52,14 @@ const SeasonDetail = () => {
   const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
   const { user } = useAuth();
   const { tvDiary, refetchTVDiary } = useDiary();
+
+  const requireAuth = (action: () => void) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    action();
+  };
 
   useEffect(() => {
     const loadSeasonDetails = async () => {
@@ -454,35 +464,38 @@ const SeasonDetail = () => {
         </div>
       )}
 
-      {/* Season Rating - Auto-calculated from episode ratings */}
-      {user && (
-        <div className="container mx-auto px-4 mb-6">
-          <div className="bg-card/50 rounded-lg p-4 border border-border/50">
-            <div className="flex flex-col gap-3">
-              <div>
-                <h3 className="font-semibold text-foreground">Season Rating</h3>
-                <p className="text-xs text-muted-foreground">
-                  {Object.keys(episodeRatings).length > 0 
-                    ? `Average of ${Object.keys(episodeRatings).length} rated episode${Object.keys(episodeRatings).length !== 1 ? 's' : ''}`
-                    : 'Rate episodes to calculate season average'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {seasonRating > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <Star className="h-5 w-5 fill-cinema-gold text-cinema-gold" />
-                    <span className="text-lg text-cinema-gold font-medium">
-                      {seasonRating}/10
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-muted-foreground">No ratings yet</span>
-                )}
-              </div>
+      {/* Where to Watch */}
+      <div className="container mx-auto px-4 mb-6">
+        <WatchProviders mediaId={Number(id)} mediaType="tv" />
+      </div>
+
+      {/* Season Rating - Auto-calculated from episode ratings - Always visible */}
+      <div className="container mx-auto px-4 mb-6">
+        <div className="bg-card/50 rounded-lg p-4 border border-border/50">
+          <div className="flex flex-col gap-3">
+            <div>
+              <h3 className="font-semibold text-foreground">Season Rating</h3>
+              <p className="text-xs text-muted-foreground">
+                {Object.keys(episodeRatings).length > 0 
+                  ? `Average of ${Object.keys(episodeRatings).length} rated episode${Object.keys(episodeRatings).length !== 1 ? 's' : ''}`
+                  : 'Rate episodes to calculate season average'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {seasonRating > 0 ? (
+                <div className="flex items-center gap-2">
+                  <Star className="h-5 w-5 fill-cinema-gold text-cinema-gold" />
+                  <span className="text-lg text-cinema-gold font-medium">
+                    {seasonRating}/10
+                  </span>
+                </div>
+              ) : (
+                <span className="text-sm text-muted-foreground">No ratings yet</span>
+              )}
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Episodes Section */}
       <div className="container mx-auto px-4">
@@ -566,61 +579,59 @@ const SeasonDetail = () => {
                       {episode.overview || "No description available."}
                     </p>
 
-                    {/* Episode Action Buttons */}
-                    {user && (
-                      <div className="flex flex-col gap-2">
-                        {/* Rating 1-10 */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs text-muted-foreground">Rate:</span>
-                          <RatingInput 
-                            value={getEpisodeRating(episode.episode_number)} 
-                            onChange={(rating) => handleRateEpisode(episode, rating)}
-                            size="sm"
-                          />
-                          {getEpisodeRating(episode.episode_number) > 0 && (
-                            <span className="text-xs text-cinema-gold">
-                              {getEpisodeRating(episode.episode_number)}/10
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="flex gap-2 flex-wrap">
-                          <Button
-                            size="sm"
-                            variant={watched ? "default" : "outline"}
-                            className={`text-xs h-10 px-3 touch-manipulation active:scale-95 ${
-                              watched 
-                                ? 'bg-cinema-gold hover:bg-cinema-gold/90 text-cinema-black' 
-                                : 'hover:border-cinema-gold hover:text-cinema-gold'
-                            }`}
-                            onClick={() => handleMarkEpisodeWatched(episode)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            {watched ? 'Watched' : 'Mark'}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-xs h-10 px-3 hover:border-cinema-red hover:text-cinema-red touch-manipulation active:scale-95"
-                            onClick={() => handleLogEpisode(episode)}
-                          >
-                            <BookOpen className="h-4 w-4 mr-1" />
-                            Log
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-xs h-10 px-3 hover:border-foreground hover:text-foreground touch-manipulation active:scale-95"
-                            asChild
-                          >
-                            <Link to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}>
-                              <MessageCircle className="h-4 w-4 mr-1" />
-                              Reviews
-                            </Link>
-                          </Button>
-                        </div>
+                    {/* Episode Action Buttons - Always visible */}
+                    <div className="flex flex-col gap-2">
+                      {/* Rating 1-10 */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground">Rate:</span>
+                        <RatingInput 
+                          value={getEpisodeRating(episode.episode_number)} 
+                          onChange={(rating) => requireAuth(() => handleRateEpisode(episode, rating))}
+                          size="sm"
+                        />
+                        {getEpisodeRating(episode.episode_number) > 0 && (
+                          <span className="text-xs text-cinema-gold">
+                            {getEpisodeRating(episode.episode_number)}/10
+                          </span>
+                        )}
                       </div>
-                    )}
+                      
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          size="sm"
+                          variant={watched ? "default" : "outline"}
+                          className={`text-xs h-10 px-3 touch-manipulation active:scale-95 ${
+                            watched 
+                              ? 'bg-cinema-gold hover:bg-cinema-gold/90 text-cinema-black' 
+                              : 'hover:border-cinema-gold hover:text-cinema-gold'
+                          }`}
+                          onClick={() => requireAuth(() => handleMarkEpisodeWatched(episode))}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          {watched ? 'Watched' : 'Mark'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs h-10 px-3 hover:border-cinema-red hover:text-cinema-red touch-manipulation active:scale-95"
+                          onClick={() => requireAuth(() => handleLogEpisode(episode))}
+                        >
+                          <BookOpen className="h-4 w-4 mr-1" />
+                          Log
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs h-10 px-3 hover:border-foreground hover:text-foreground touch-manipulation active:scale-95"
+                          asChild
+                        >
+                          <Link to={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}>
+                            <MessageCircle className="h-4 w-4 mr-1" />
+                            Reviews
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
