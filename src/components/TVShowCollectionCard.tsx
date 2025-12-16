@@ -281,12 +281,12 @@ export const TVShowCollectionCard = ({
 
             {/* View Details Button */}
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleShowDetails}
-              className="mt-2 h-10 px-3 text-xs text-muted-foreground hover:text-foreground touch-manipulation active:scale-95"
+              className="mt-2 h-10 px-4 text-xs touch-manipulation active:scale-95"
             >
-              <ChevronDown className="h-4 w-4 mr-1" />
+              <ChevronDown className="h-4 w-4" />
               View your ratings & reviews
             </Button>
           </div>
