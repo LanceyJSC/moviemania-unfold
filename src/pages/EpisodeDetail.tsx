@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Calendar, Clock, Star, Eye, BookOpen, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
+import { RatingComparisonCard } from "@/components/RatingComparisonCard";
+import { WatchProviders } from "@/components/WatchProviders";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,6 +48,7 @@ const EpisodeDetail = () => {
     seasonNumber: string; 
     episodeNumber: string;
   }>();
+  const navigate = useNavigate();
   const [episode, setEpisode] = useState<Episode | null>(null);
   const [tvShow, setTVShow] = useState<TMDBTVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +61,14 @@ const EpisodeDetail = () => {
   const tvId = Number(id);
   const seasonNum = Number(seasonNumber);
   const episodeNum = Number(episodeNumber);
+
+  const requireAuth = (action: () => void) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    action();
+  };
 
   // Fetch Community Reviews for this specific episode
   const { data: communityReviews, refetch: refetchCommunityReviews } = useQuery({
@@ -299,41 +310,41 @@ const EpisodeDetail = () => {
       </div>
 
       <div className="px-4 py-6 space-y-6">
-        {/* Action Buttons */}
-        {user && (
-          <div className="flex items-center gap-3">
-            <Button
-              variant={isWatched ? "default" : "outline"}
-              size="lg"
-              onClick={handleMarkWatched}
-              className="flex-1 h-12 touch-manipulation active:scale-95"
-            >
-              <Eye className="h-5 w-5 mr-2" />
-              {isWatched ? 'Watched' : 'Mark Watched'}
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setShowLogModal(true)}
-              className="flex-1 h-12 touch-manipulation active:scale-95"
-            >
-              <BookOpen className="h-5 w-5 mr-2" />
-              Log Episode
-            </Button>
-          </div>
-        )}
+        {/* Rating Comparison Card */}
+        <RatingComparisonCard
+          mediaId={tvId}
+          mediaType="tv"
+          tmdbRating={episode.vote_average}
+          userRating={episodeRating}
+          onRatingChange={(rating) => requireAuth(() => handleRateEpisode(rating))}
+          mediaTitle={`${tvShow.name} - S${seasonNum}E${episodeNum}`}
+          mediaPoster={tvShow.poster_path || undefined}
+        />
 
-        {/* Rating */}
-        {user && (
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h3 className="text-sm font-medium text-foreground mb-3">Your Rating</h3>
-            <RatingInput
-              value={episodeRating}
-              onChange={handleRateEpisode}
-              size="md"
-            />
-          </div>
-        )}
+        {/* Action Buttons - Always visible */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant={isWatched ? "default" : "outline"}
+            size="lg"
+            onClick={() => requireAuth(() => handleMarkWatched())}
+            className="flex-1 h-12 touch-manipulation active:scale-95"
+          >
+            <Eye className="h-5 w-5 mr-2" />
+            {isWatched ? 'Watched' : 'Mark Watched'}
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => requireAuth(() => setShowLogModal(true))}
+            className="flex-1 h-12 touch-manipulation active:scale-95"
+          >
+            <BookOpen className="h-5 w-5 mr-2" />
+            Log Episode
+          </Button>
+        </div>
+
+        {/* Where to Watch */}
+        <WatchProviders mediaId={tvId} mediaType="tv" />
 
         {/* Overview */}
         {episode.overview && (
@@ -400,16 +411,14 @@ const EpisodeDetail = () => {
           ) : (
             <div className="text-center py-8 bg-card rounded-xl border border-border">
               <p className="text-muted-foreground text-sm mb-2">No episode reviews yet.</p>
-              {user && (
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => setShowLogModal(true)}
-                  className="h-12 px-6 touch-manipulation active:scale-95"
-                >
-                  Be the first to review this episode
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => requireAuth(() => setShowLogModal(true))}
+                className="h-12 px-6 touch-manipulation active:scale-95"
+              >
+                Be the first to review this episode
+              </Button>
             </div>
           )}
         </div>
