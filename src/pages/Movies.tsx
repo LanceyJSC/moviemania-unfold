@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { MovieGrid } from "@/components/MovieGrid";
 import { Navigation } from "@/components/Navigation";
-import { Header } from "@/components/Header";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { PullToRefresh } from "@/components/PullToRefresh";
@@ -44,16 +43,13 @@ const Movies = () => {
 
   return (
     <>
-      {/* Desktop Header */}
-      <Header />
-      
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background md:pt-16">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
         <FeaturedHero type="movie" />
 
         <div className="relative">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-12 pb-32 md:pb-12">
-            <div className="sticky top-0 md:top-16 z-40 bg-background/95 backdrop-blur-sm py-4">
-              <div className="flex justify-between space-x-1 sm:space-x-2">
+          <div className="px-4 py-8 space-y-12 pb-32">
+            <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4">
+              <div className="flex justify-between space-x-1">
                 {filterButtons.map((filter) => {
                   const Icon = filter.icon;
                   return (
@@ -61,7 +57,7 @@ const Movies = () => {
                        key={filter.id}
                        variant={activeFilter === filter.id ? "default" : "outline"}
                        size="sm"
-                       className={`flex-1 h-9 sm:h-10 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl sm:rounded-2xl touch-target focus-ring ${
+                       className={`flex-1 h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-xl touch-target focus-ring ${
                          activeFilter === filter.id 
                            ? "bg-cinema-red text-white shadow-md" 
                            : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
@@ -69,7 +65,7 @@ const Movies = () => {
                        onClick={() => setActiveFilter(filter.id)}
                      >
                       <div className="flex flex-col items-center">
-                        <Icon className="h-3 w-3 sm:h-4 sm:w-4 mb-0.5" />
+                        <Icon className="h-3 w-3 mb-0.5" />
                         <span className="text-xs leading-none">{filter.label}</span>
                       </div>
                     </Button>
@@ -88,10 +84,7 @@ const Movies = () => {
         </div>
       </PullToRefresh>
 
-      {/* Mobile Navigation - hidden on desktop */}
-      <div className="md:hidden">
-        <Navigation />
-      </div>
+      <Navigation />
     </>
   );
 };
