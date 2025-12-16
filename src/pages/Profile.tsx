@@ -10,7 +10,6 @@ import { LogOut, Settings, BarChart3, Award, MessageCircle } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
-import { AdminMakeButton } from '@/components/AdminMakeButton';
 import { useUserRole } from '@/hooks/useUserRole';
 
 const Profile = () => {
@@ -140,7 +139,6 @@ const Profile = () => {
                 </div>
               )}
               <div className="flex flex-col gap-3 pt-2">
-                <AdminMakeButton />
                 <Button 
                   variant="destructive" 
                   onClick={signOut}
