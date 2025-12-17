@@ -16,13 +16,13 @@ export const RatingInput = ({
   disabled = false 
 }: RatingInputProps) => {
   const sizeClasses = {
-    sm: 'h-6 w-6 text-[10px]',
-    md: 'h-7 w-7 text-xs',
-    lg: 'h-8 w-8 text-sm'
+    sm: 'h-6 min-w-[24px] text-[10px]',
+    md: 'h-7 min-w-[28px] text-xs',
+    lg: 'h-8 min-w-[32px] text-sm'
   };
 
   return (
-    <div className="flex gap-0.5 flex-wrap">
+    <div className="flex gap-1 flex-wrap">
       {Array.from({ length: max }, (_, i) => i + 1).map((score) => (
         <button
           key={score}
@@ -30,12 +30,12 @@ export const RatingInput = ({
           disabled={disabled}
           onClick={() => onChange(value === score ? 0 : score)}
           className={cn(
-            'rounded font-semibold transition-all duration-200',
+            'rounded font-semibold transition-all duration-200 touch-manipulation',
             sizeClasses[size],
-            'flex items-center justify-center flex-shrink-0',
+            'flex items-center justify-center px-1',
             score === value
               ? 'bg-cinema-gold text-cinema-black'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80',
+              : 'bg-muted text-muted-foreground active:bg-muted/70',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
         >
