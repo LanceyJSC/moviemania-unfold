@@ -74,7 +74,7 @@ const Auth = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Film className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              CineScope
+              SceneBurn
             </span>
           </div>
           <CardTitle className="text-2xl">Welcome</CardTitle>

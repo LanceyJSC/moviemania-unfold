@@ -9,7 +9,7 @@ export const FallbackHomepage = () => {
       {/* Simple header */}
       <div className="bg-gradient-to-r from-cinema-black via-cinema-charcoal to-cinema-black p-6">
         <h1 className="font-cinematic text-3xl text-center text-foreground">
-          CINE<span className="text-cinema-red">SCOPE</span>
+          SCENE<span className="text-cinema-red">BURN</span>
         </h1>
       </div>
 
