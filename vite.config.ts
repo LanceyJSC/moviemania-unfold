@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
-        name: 'CineScope - Discover Movies & TV Shows',
-        short_name: 'CineScope',
+        name: 'SceneBurn - Discover Movies & TV Shows',
+        short_name: 'SceneBurn',
         description: 'Discover, Save, and Experience Movies Like Never Before',
         theme_color: '#000000',
         background_color: '#000000',
