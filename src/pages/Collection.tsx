@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
 import { CollectionMediaCard } from '@/components/CollectionMediaCard';
 import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
 import { LogMediaModal } from '@/components/LogMediaModal';
@@ -99,10 +100,11 @@ const Collection = () => {
   }, [user]);
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Collection" />
         <Navigation />
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="container mx-auto px-4 py-20 text-center max-w-7xl">
           <Film className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
           <h1 className="text-2xl font-bold mb-2">Your Collection</h1>
           <p className="text-muted-foreground mb-4">Sign in to track your movies and TV shows</p>
@@ -335,7 +337,8 @@ const Collection = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title="Collection" />
       <Navigation />
       

@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
@@ -56,12 +57,13 @@ const Index = () => {
 
   return (
     <ErrorBoundary fallback={<FallbackHomepage />}>
+      <DesktopHeader />
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
         <ErrorBoundary>
           <HeroSection />
         </ErrorBoundary>
 
-        <div className="px-4 py-6 space-y-8 pb-32">
+        <div className="px-4 md:px-6 py-6 space-y-8 pb-32 md:pb-12 max-w-7xl mx-auto">
           <ErrorBoundary>
             <MovieStats />
           </ErrorBoundary>
