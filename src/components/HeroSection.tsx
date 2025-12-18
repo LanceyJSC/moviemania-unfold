@@ -200,9 +200,9 @@ export const HeroSection = () => {
       <div 
         className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black"
         style={{ 
-          height: 'clamp(350px, 45vh, 500px)',
+          height: 'clamp(350px, 50vh, 600px)',
           minHeight: '350px',
-          maxHeight: '500px'
+          maxHeight: '600px'
         }}
       >
         <div className="relative z-10 flex flex-col justify-center items-center h-full px-6 text-center">
@@ -235,16 +235,16 @@ export const HeroSection = () => {
       <div 
         className="relative text-foreground overflow-hidden group"
         style={{ 
-          height: 'clamp(350px, 45vh, 500px)',
+          height: 'clamp(350px, 50vh, 600px)',
           minHeight: '350px',
-          maxHeight: '500px'
+          maxHeight: '600px'
         }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Hero Background */}
+        {/* Hero Background - no transition to prevent push animation */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out overflow-hidden"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ 
             backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))',
             backgroundColor: 'hsl(var(--background))'
@@ -284,8 +284,8 @@ export const HeroSection = () => {
           </>
         )}
 
-        {/* Hero Content - matching FeaturedHero layout */}
-        <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 pb-6 sm:pb-8">
+        {/* Hero Content - with desktop centering */}
+        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
           {isLoading ? (
             <div className="max-w-2xl animate-pulse space-y-3">
               <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
@@ -304,7 +304,7 @@ export const HeroSection = () => {
               </div>
             </div>
           ) : heroMovie ? (
-            <div className="max-w-2xl transition-all duration-500 ease-in-out">
+            <div className="max-w-2xl">
               {/* Title */}
               <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight uppercase">
                 {heroMovie.title}

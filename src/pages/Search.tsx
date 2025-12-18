@@ -227,8 +227,8 @@ const Search = () => {
       <MobileHeader title="Search" />
       
       {/* Search Input */}
-      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 z-40">
-        <div className="space-y-4">
+      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 md:top-16 z-40">
+        <div className="space-y-4 max-w-7xl mx-auto">
           {/* Search Input Row */}
           <div className="flex items-center gap-2">
             <div className="relative flex-grow">
@@ -355,7 +355,7 @@ const Search = () => {
 
       {/* Default Content - Discovery Hub */}
       {showDefaultContent && (
-        <div className="container mx-auto px-4 mt-8 space-y-12">
+        <div className="px-4 md:px-6 mt-8 space-y-12 max-w-7xl mx-auto">
           {/* Welcome Header */}
           <div className="text-center">
             <h1 className="font-cinematic text-4xl text-foreground tracking-wide mb-4">
@@ -444,7 +444,7 @@ const Search = () => {
 
 
       {/* Search Results */}
-      <div className="container mx-auto px-4 mt-8 pb-8">
+      <div className="px-4 md:px-6 mt-8 pb-8 max-w-7xl mx-auto">
         {isSearching && (
           <div className="text-center text-muted-foreground">Searching...</div>
         )}
