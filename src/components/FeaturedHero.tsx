@@ -145,14 +145,14 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   return (
     <div className="relative w-full overflow-hidden mb-8 group" style={{ 
-      height: 'clamp(350px, 45vh, 500px)',
+      height: 'clamp(350px, 50vh, 600px)',
       minHeight: '350px',
-      maxHeight: '500px'  
+      maxHeight: '600px'  
     }}>
-      {/* Background Image */}
+      {/* Background Image - no transition to prevent push animation */}
       {backdropUrl && (
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ 
             backgroundImage: `url(${backdropUrl})`,
             backgroundColor: 'hsl(var(--background))'
@@ -167,9 +167,9 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
-      {/* Content */}
-      <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 pb-6 sm:pb-8">
-        <div className="max-w-2xl transition-all duration-500 ease-in-out">
+      {/* Content - with desktop centering */}
+      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
+        <div className="max-w-2xl">
           {/* Badge */}
           <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
             Featured {type === 'movie' ? 'Movie' : 'TV Show'}

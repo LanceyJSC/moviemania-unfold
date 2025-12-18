@@ -49,7 +49,7 @@ const Profile = () => {
       <DesktopHeader />
       <MobileHeader title="Settings" showBack={false} />
 
-      <div className="px-4 pt-4">
+      <div className="px-4 md:px-6 pt-4 max-w-7xl mx-auto">
         {/* Profile Header */}
         <div className="flex items-center gap-4 mb-8">
           <Avatar className="h-16 w-16">

@@ -342,7 +342,7 @@ const Collection = () => {
       <MobileHeader title="Collection" />
       <Navigation />
       
-      <div className="px-4 py-6">
+      <div className="px-4 md:px-6 py-6 max-w-7xl mx-auto">
         {/* Stats Section - Filtered by media type */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
           {mediaFilter === 'all' && (
