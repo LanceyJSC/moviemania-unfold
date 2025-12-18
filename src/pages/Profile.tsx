@@ -10,6 +10,7 @@ import { LogOut, Settings, BarChart3, Award, MessageCircle } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
 import { useUserRole } from '@/hooks/useUserRole';
 
 const Profile = () => {
@@ -44,7 +45,8 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 pb-24 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title="Settings" showBack={false} />
 
       <div className="px-4 pt-4">

@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { MovieGrid } from "@/components/MovieGrid";
 import { Navigation } from "@/components/Navigation";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { PullToRefresh } from "@/components/PullToRefresh";
@@ -43,11 +44,12 @@ const Movies = () => {
 
   return (
     <>
+      <DesktopHeader />
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
         <FeaturedHero type="movie" />
 
         <div className="relative">
-          <div className="px-4 py-8 space-y-12 pb-32">
+          <div className="px-4 md:px-6 py-8 space-y-12 pb-32 md:pb-12 max-w-7xl mx-auto">
             <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm py-4">
               <div className="flex justify-between space-x-1">
                 {filterButtons.map((filter) => {
