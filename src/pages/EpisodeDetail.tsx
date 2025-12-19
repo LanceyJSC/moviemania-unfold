@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
@@ -257,11 +258,13 @@ const EpisodeDetail = () => {
     : tmdbService.getBackdropUrl(tvShow.backdrop_path, 'w1280');
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title={`S${seasonNum} E${episodeNum}`} />
       
       {/* Hero Section */}
-      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
+      <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
+        <div className="relative overflow-hidden h-[50vh] md:rounded-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
@@ -307,9 +310,10 @@ const EpisodeDetail = () => {
             {tvShow.name} - Season {seasonNum}
           </p>
         </div>
+        </div>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
         {/* Rating Comparison Card */}
         <RatingComparisonCard
           mediaId={tvId}

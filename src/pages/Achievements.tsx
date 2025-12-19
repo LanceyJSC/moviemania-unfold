@@ -3,6 +3,7 @@ import { ArrowLeft, Award, Film, Tv, Star, Clock, TrendingUp, Heart, MessageCirc
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Navigation } from "@/components/Navigation";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileHeader } from "@/components/MobileHeader";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -342,9 +343,10 @@ export const Achievements = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-32">
+      <div className="min-h-screen bg-background pb-32 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Achievements" />
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
           <Card className="bg-card border-border">
             <CardContent className="p-6 text-center">
               <p className="text-muted-foreground">
@@ -359,7 +361,8 @@ export const Achievements = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title="Achievements" />
       
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -371,7 +374,7 @@ export const Achievements = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
         {/* Progress Overview */}
         <Card className="bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cinema-gold/20 border-purple-500/30">
           <CardContent className="p-5">

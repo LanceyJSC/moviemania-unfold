@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Loader2, Users, Clapperboard } from "lucide-react";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { ActorCard } from "@/components/ActorCard";
 import { CrewCard } from "@/components/CrewCard";
@@ -40,7 +41,8 @@ const CastCrew = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pb-32 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Loading..." />
         <div className="flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-cinema-red" />
@@ -51,7 +53,8 @@ const CastCrew = () => {
 
   if (!media) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pb-32 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Not Found" />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
