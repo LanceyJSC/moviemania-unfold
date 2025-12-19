@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { Loader2, Calendar, MapPin } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { tmdbService, Person } from "@/lib/tmdb";
 
@@ -94,11 +95,12 @@ const ActorDetail = () => {
     .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime());
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title={actor.name} />
       
       {/* Actor Header */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Profile Image - Enhanced fallback */}
           <div className="flex-shrink-0 mx-auto lg:mx-0">
@@ -157,7 +159,7 @@ const ActorDetail = () => {
 
       {/* Filmography */}
       {allContent.length > 0 && (
-        <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
           <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">
             FILMOGRAPHY ({allContent.length} {allContent.length === 1 ? 'TITLE' : 'TITLES'})
           </h2>

@@ -11,11 +11,11 @@ import { MovieCollectionBanner } from "@/components/MovieCollectionBanner";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { tmdbService, Movie, TVShow, MovieWithCollection } from "@/lib/tmdb";
 import { useUserStateContext } from "@/contexts/UserStateContext";
-// Removed useIsMobile - using CSS-based responsive design instead
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -150,11 +150,13 @@ const MovieDetail = () => {
   ).slice(0, 12);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title={title} />
       
       {/* Hero Section with Poster Overlay */}
-      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
+      <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
+        <div className="relative overflow-hidden h-[50vh] md:rounded-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
@@ -195,10 +197,11 @@ const MovieDetail = () => {
             {genres}
           </p>
         </div>
+        </div>
       </div>
 
       {/* Synopsis Section - Positioned below the hero */}
-      <div className="container mx-auto px-4 -mt-4 relative z-30">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-4 relative z-30">
         <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-white/10">
           <p className="text-white leading-relaxed text-sm line-clamp-3">
             {movie.overview || "No synopsis available."}
@@ -216,7 +219,7 @@ const MovieDetail = () => {
       </div>
 
       {/* Action Section */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         {/* Watch Trailer Button */}
         <div className="mb-4">
           {trailerKey ? (
@@ -340,7 +343,7 @@ const MovieDetail = () => {
       </div>
 
       {/* Additional Content */}
-      <div className="container mx-auto px-4 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
         {/* Key Crew Section */}
         {keyCrewMembers.length > 0 && (
           <div>

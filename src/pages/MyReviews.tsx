@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Navigation } from '@/components/Navigation';
+import { DesktopHeader } from '@/components/DesktopHeader';
 import { MobileHeader } from '@/components/MobileHeader';
 import { LogMediaModal } from '@/components/LogMediaModal';
 import { MobileFilterPills } from '@/components/MobileFilterPills';
@@ -152,10 +153,11 @@ const MyReviews = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="My Reviews" />
         <Navigation />
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-20 text-center">
           <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
           <h1 className="text-2xl font-bold mb-2">My Reviews</h1>
           <p className="text-muted-foreground mb-4">Sign in to see your reviews</p>

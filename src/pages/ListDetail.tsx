@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -168,9 +169,10 @@ const ListDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="List" />
-        <div className="px-4 pt-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-4 w-full mb-6" />
           <div className="grid grid-cols-3 gap-2">
@@ -186,9 +188,10 @@ const ListDetail = () => {
 
   if (!list) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="List" />
-        <div className="px-4 pt-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
           <Card className="p-8 text-center">
             <p className="text-muted-foreground">List not found</p>
             <Link to="/lists">
@@ -207,10 +210,11 @@ const ListDetail = () => {
   const isOwner = user?.id === list.user_id;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title={list?.name || "List"} />
       
-      <div className="px-4 pt-4 pb-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
         <Link to="/lists" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Lists

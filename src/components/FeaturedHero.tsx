@@ -144,11 +144,12 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   };
 
   return (
-    <div className="relative w-full overflow-hidden mb-8 group" style={{ 
-      height: 'clamp(350px, 50vh, 600px)',
-      minHeight: '350px',
-      maxHeight: '600px'  
-    }}>
+    <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
+      <div className="relative w-full overflow-hidden mb-8 group md:rounded-2xl" style={{ 
+        height: 'clamp(350px, 50vh, 600px)',
+        minHeight: '350px',
+        maxHeight: '600px'  
+      }}>
       {/* Background Image - no transition to prevent push animation */}
       {backdropUrl && (
         <div 
@@ -250,6 +251,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

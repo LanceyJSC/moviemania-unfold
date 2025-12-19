@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
 import { Activity as ActivityIcon, Users } from "lucide-react";
@@ -20,10 +21,11 @@ const Activity = () => {
 
   return (
     <>
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background pb-24">
+      <DesktopHeader />
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background pb-24 md:pb-12">
         <MobileHeader title="Activity" />
         
-        <div className="px-4 pt-4 pb-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
           <div className="flex items-center gap-3 mb-6">
             <ActivityIcon className="h-8 w-8 text-cinema-red" />
             <h1 className="font-cinematic text-2xl text-foreground">Activity</h1>

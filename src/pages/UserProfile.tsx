@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -99,9 +100,10 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Profile" />
-        <div className="px-4 pt-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
           <Card className="p-6">
             <div className="flex items-center gap-4">
               <Skeleton className="h-20 w-20 rounded-full" />
@@ -119,9 +121,10 @@ const UserProfile = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Profile" />
-        <div className="px-4 pt-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
           <Card className="p-8 text-center">
             <p className="text-muted-foreground">User not found</p>
           </Card>
@@ -134,10 +137,11 @@ const UserProfile = () => {
   const isOwnProfile = currentUser?.id === profile.id;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title="Profile" />
       
-      <div className="px-4 pt-4 pb-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
         {/* Profile Header */}
         <Card className="p-6 mb-6">
           <div className="flex items-start gap-4">

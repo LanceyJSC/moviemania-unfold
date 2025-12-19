@@ -4,11 +4,11 @@ import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, ChevronRight
 import { Button } from "@/components/ui/button";
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { tmdbService, TVShow } from "@/lib/tmdb";
 import { useUserStateContext } from "@/contexts/UserStateContext";
-// Removed useIsMobile - using CSS-based responsive design instead
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
 import { LogMediaModal } from "@/components/LogMediaModal";
@@ -166,11 +166,13 @@ const TVShowDetail = () => {
   ).slice(0, 12);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title={tvShow.name} />
       
       {/* Hero Section with Poster Overlay */}
-      <div className="relative overflow-hidden h-[50vh] rounded-b-2xl">
+      <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
+        <div className="relative overflow-hidden h-[50vh] md:rounded-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
@@ -222,10 +224,11 @@ const TVShowDetail = () => {
             {genres}
           </p>
         </div>
+        </div>
       </div>
 
       {/* Synopsis Section */}
-      <div className="container mx-auto px-4 -mt-4 relative z-30">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-4 relative z-30">
         <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-white/10">
           <p className="text-white leading-relaxed text-sm line-clamp-3">
             {tvShow.overview || "No synopsis available."}
@@ -243,7 +246,7 @@ const TVShowDetail = () => {
       </div>
 
       {/* Action Section */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         {/* Watch Trailer Button */}
         <div className="mb-4">
           {trailerKey ? (
@@ -373,7 +376,7 @@ const TVShowDetail = () => {
       </div>
 
       {/* Additional Content */}
-      <div className="container mx-auto px-4 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
         {/* Key Crew Section */}
         {keyCrewMembers.length > 0 && (
           <div>

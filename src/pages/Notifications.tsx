@@ -1,4 +1,5 @@
 import { Navigation } from '@/components/Navigation';
+import { DesktopHeader } from '@/components/DesktopHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,9 +65,10 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <DesktopHeader />
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-0 md:top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
@@ -99,7 +101,7 @@ const Notifications = () => {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
