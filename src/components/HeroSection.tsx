@@ -232,16 +232,17 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div 
-        className="relative text-foreground overflow-hidden group"
-        style={{ 
-          height: 'clamp(350px, 50vh, 600px)',
-          minHeight: '350px',
-          maxHeight: '600px'
-        }}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
+      <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
+        <div 
+          className="relative text-foreground overflow-hidden group md:rounded-2xl"
+          style={{ 
+            height: 'clamp(350px, 50vh, 600px)',
+            minHeight: '350px',
+            maxHeight: '600px'
+          }}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
         {/* Hero Background - no transition to prevent push animation */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -391,6 +392,7 @@ export const HeroSection = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
     </>
   );
