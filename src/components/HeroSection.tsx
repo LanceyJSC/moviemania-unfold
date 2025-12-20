@@ -244,13 +244,19 @@ export const HeroSection = () => {
           onMouseLeave={() => setIsPaused(false)}
         >
         {/* Hero Background - no transition to prevent push animation */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: heroBackdrop ? `url(${heroBackdrop})` : 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))',
-            backgroundColor: 'hsl(var(--background))'
-          }}
-        />
+        {heroBackdrop ? (
+          <img 
+            src={heroBackdrop}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover object-top"
+            style={{ backgroundColor: 'hsl(var(--background))' }}
+          />
+        ) : (
+          <div 
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))' }}
+          />
+        )}
         
         {/* Gradient Overlays - matching FeaturedHero */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle } from "lucide-react";
+import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle, User } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -36,6 +37,10 @@ interface Season {
   episodes: Episode[];
   images?: {
     backdrops: { file_path: string; vote_average: number }[];
+  };
+  credits?: {
+    cast: { id: number; name: string; character: string; profile_path: string | null }[];
+    crew: { id: number; name: string; job: string; profile_path: string | null }[];
   };
 }
 
@@ -401,13 +406,13 @@ const SeasonDetail = () => {
       {/* Hero Section */}
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
         <div className="relative overflow-hidden h-[50vh] md:rounded-2xl">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ 
-            backgroundImage: `url(${getSeasonBackdrop()})`,
-            backgroundColor: 'hsl(var(--background))'
-          }}
-        >
+        <div className="absolute inset-0">
+          <img 
+            src={getSeasonBackdrop()}
+            alt=""
+            className="w-full h-full object-cover object-top"
+            style={{ backgroundColor: 'hsl(var(--background))' }}
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/50 via-transparent to-transparent" />
         </div>
@@ -500,6 +505,65 @@ const SeasonDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Cast Section */}
+      {season.credits?.cast && season.credits.cast.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Cast</h2>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {season.credits.cast.slice(0, 20).map((person) => (
+              <Link
+                key={person.id}
+                to={`/actor/${person.id}`}
+                className="flex-shrink-0 w-20 text-center group"
+              >
+                <Avatar className="h-16 w-16 mx-auto mb-2 ring-2 ring-transparent group-hover:ring-cinema-gold transition-all">
+                  {person.profile_path ? (
+                    <AvatarImage src={tmdbService.getPosterUrl(person.profile_path, 'w300')} />
+                  ) : null}
+                  <AvatarFallback className="bg-muted">
+                    <User className="h-6 w-6 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+                <p className="text-xs font-medium text-foreground truncate">{person.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{person.character}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Crew Section */}
+      {season.credits?.crew && season.credits.crew.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Crew</h2>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {season.credits.crew
+              .filter((person, index, self) => 
+                index === self.findIndex(p => p.id === person.id)
+              )
+              .slice(0, 15)
+              .map((person) => (
+                <Link
+                  key={`${person.id}-${person.job}`}
+                  to={`/actor/${person.id}`}
+                  className="flex-shrink-0 w-20 text-center group"
+                >
+                  <Avatar className="h-16 w-16 mx-auto mb-2 ring-2 ring-transparent group-hover:ring-cinema-gold transition-all">
+                    {person.profile_path ? (
+                      <AvatarImage src={tmdbService.getPosterUrl(person.profile_path, 'w300')} />
+                    ) : null}
+                    <AvatarFallback className="bg-muted">
+                      <User className="h-6 w-6 text-muted-foreground" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-xs font-medium text-foreground truncate">{person.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{person.job}</p>
+                </Link>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Episodes Section */}
       <div className="container mx-auto px-4">

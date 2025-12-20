@@ -445,11 +445,11 @@ class TMDBService {
   }
 
   async getSeasonDetails(tvId: number, seasonNumber: number, fresh: boolean = false) {
-    return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}?append_to_response=images`, fresh);
+    return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}?append_to_response=images,credits`, fresh);
   }
 
   async getEpisodeDetails(tvId: number, seasonNumber: number, episodeNumber: number, fresh: boolean = false) {
-    return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`, fresh);
+    return this.fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}?append_to_response=credits`, fresh);
   }
 
   // Watch Providers (Where to Watch)

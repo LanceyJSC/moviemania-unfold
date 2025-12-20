@@ -152,12 +152,11 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       }}>
       {/* Background Image - no transition to prevent push animation */}
       {backdropUrl && (
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: `url(${backdropUrl})`,
-            backgroundColor: 'hsl(var(--background))'
-          }}
+        <img 
+          src={backdropUrl}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-top"
+          style={{ backgroundColor: 'hsl(var(--background))' }}
         />
       )}
       
