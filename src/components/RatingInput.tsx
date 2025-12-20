@@ -22,7 +22,7 @@ export const RatingInput = ({
   };
 
   return (
-    <div className="flex gap-1 flex-wrap">
+    <div className="flex gap-1 flex-wrap justify-center">
       {Array.from({ length: max }, (_, i) => i + 1).map((score) => (
         <button
           key={score}
