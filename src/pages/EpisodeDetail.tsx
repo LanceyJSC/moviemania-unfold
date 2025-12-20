@@ -11,6 +11,8 @@ import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
 import { WatchProviders } from "@/components/WatchProviders";
+import { ActorCard } from "@/components/ActorCard";
+import { CrewCard } from "@/components/CrewCard";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -273,7 +275,7 @@ const EpisodeDetail = () => {
           <img 
             src={stillUrl}
             alt=""
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-cover object-center md:object-top"
             style={{ backgroundColor: 'hsl(var(--background))' }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
@@ -362,87 +364,66 @@ const EpisodeDetail = () => {
           </div>
         )}
 
-        {/* Cast Section */}
+        {/* Cast Section - Matching MovieDetail style */}
         {episode.credits?.cast && episode.credits.cast.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Cast</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">CAST</h2>
+            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
               {episode.credits.cast.slice(0, 20).map((person) => (
-                <Link
-                  key={person.id}
-                  to={`/actor/${person.id}`}
-                  className="flex-shrink-0 w-20 text-center group"
-                >
-                  <Avatar className="h-16 w-16 mx-auto mb-2 ring-2 ring-transparent group-hover:ring-cinema-gold transition-all">
-                    {person.profile_path ? (
-                      <AvatarImage src={tmdbService.getPosterUrl(person.profile_path, 'w300')} />
-                    ) : null}
-                    <AvatarFallback className="bg-muted">
-                      <User className="h-6 w-6 text-muted-foreground" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-xs font-medium text-foreground truncate">{person.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{person.character}</p>
-                </Link>
+                <ActorCard 
+                  key={person.id} 
+                  actor={{
+                    id: person.id,
+                    name: person.name,
+                    character: person.character,
+                    profile_path: person.profile_path
+                  }} 
+                />
               ))}
             </div>
           </div>
         )}
 
-        {/* Guest Stars Section */}
+        {/* Guest Stars Section - Matching MovieDetail style */}
         {episode.guest_stars && episode.guest_stars.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Guest Stars</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">GUEST STARS</h2>
+            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
               {episode.guest_stars.slice(0, 15).map((person) => (
-                <Link
-                  key={person.id}
-                  to={`/actor/${person.id}`}
-                  className="flex-shrink-0 w-20 text-center group"
-                >
-                  <Avatar className="h-16 w-16 mx-auto mb-2 ring-2 ring-transparent group-hover:ring-cinema-gold transition-all">
-                    {person.profile_path ? (
-                      <AvatarImage src={tmdbService.getPosterUrl(person.profile_path, 'w300')} />
-                    ) : null}
-                    <AvatarFallback className="bg-muted">
-                      <User className="h-6 w-6 text-muted-foreground" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-xs font-medium text-foreground truncate">{person.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{person.character}</p>
-                </Link>
+                <ActorCard 
+                  key={person.id} 
+                  actor={{
+                    id: person.id,
+                    name: person.name,
+                    character: person.character,
+                    profile_path: person.profile_path
+                  }} 
+                />
               ))}
             </div>
           </div>
         )}
 
-        {/* Crew Section */}
+        {/* Crew Section - Matching MovieDetail style */}
         {episode.credits?.crew && episode.credits.crew.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Crew</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">KEY CREW</h2>
+            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
               {episode.credits.crew
                 .filter((person, index, self) => 
                   index === self.findIndex(p => p.id === person.id)
                 )
                 .slice(0, 10)
                 .map((person) => (
-                  <Link
-                    key={`${person.id}-${person.job}`}
-                    to={`/actor/${person.id}`}
-                    className="flex-shrink-0 w-20 text-center group"
-                  >
-                    <Avatar className="h-16 w-16 mx-auto mb-2 ring-2 ring-transparent group-hover:ring-cinema-gold transition-all">
-                      {person.profile_path ? (
-                        <AvatarImage src={tmdbService.getPosterUrl(person.profile_path, 'w300')} />
-                      ) : null}
-                      <AvatarFallback className="bg-muted">
-                        <User className="h-6 w-6 text-muted-foreground" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className="text-xs font-medium text-foreground truncate">{person.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{person.job}</p>
-                  </Link>
+                  <CrewCard 
+                    key={`${person.id}-${person.job}`} 
+                    person={{
+                      id: person.id,
+                      name: person.name,
+                      job: person.job,
+                      profile_path: person.profile_path
+                    }} 
+                  />
                 ))}
             </div>
           </div>

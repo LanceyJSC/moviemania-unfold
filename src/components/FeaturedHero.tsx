@@ -155,7 +155,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
         <img 
           src={backdropUrl}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-top"
+          className="absolute inset-0 w-full h-full object-cover object-center md:object-top"
           style={{ backgroundColor: 'hsl(var(--background))' }}
         />
       )}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle, User } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -9,6 +8,8 @@ import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
 import { WatchProviders } from "@/components/WatchProviders";
+import { ActorCard } from "@/components/ActorCard";
+import { CrewCard } from "@/components/CrewCard";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -410,7 +411,7 @@ const SeasonDetail = () => {
           <img 
             src={getSeasonBackdrop()}
             alt=""
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-cover object-center md:object-top"
             style={{ backgroundColor: 'hsl(var(--background))' }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
@@ -506,60 +507,46 @@ const SeasonDetail = () => {
         </div>
       </div>
 
-      {/* Cast Section */}
+      {/* Cast Section - Matching MovieDetail style */}
       {season.credits?.cast && season.credits.cast.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Cast</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">CAST</h2>
+          <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
             {season.credits.cast.slice(0, 20).map((person) => (
-              <Link
-                key={person.id}
-                to={`/actor/${person.id}`}
-                className="flex-shrink-0 w-20 text-center group"
-              >
-                <Avatar className="h-16 w-16 mx-auto mb-2 ring-2 ring-transparent group-hover:ring-cinema-gold transition-all">
-                  {person.profile_path ? (
-                    <AvatarImage src={tmdbService.getPosterUrl(person.profile_path, 'w300')} />
-                  ) : null}
-                  <AvatarFallback className="bg-muted">
-                    <User className="h-6 w-6 text-muted-foreground" />
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-xs font-medium text-foreground truncate">{person.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{person.character}</p>
-              </Link>
+              <ActorCard 
+                key={person.id} 
+                actor={{
+                  id: person.id,
+                  name: person.name,
+                  character: person.character,
+                  profile_path: person.profile_path
+                }} 
+              />
             ))}
           </div>
         </div>
       )}
 
-      {/* Crew Section */}
+      {/* Crew Section - Matching MovieDetail style */}
       {season.credits?.crew && season.credits.crew.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Crew</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">KEY CREW</h2>
+          <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
             {season.credits.crew
               .filter((person, index, self) => 
                 index === self.findIndex(p => p.id === person.id)
               )
               .slice(0, 15)
               .map((person) => (
-                <Link
-                  key={`${person.id}-${person.job}`}
-                  to={`/actor/${person.id}`}
-                  className="flex-shrink-0 w-20 text-center group"
-                >
-                  <Avatar className="h-16 w-16 mx-auto mb-2 ring-2 ring-transparent group-hover:ring-cinema-gold transition-all">
-                    {person.profile_path ? (
-                      <AvatarImage src={tmdbService.getPosterUrl(person.profile_path, 'w300')} />
-                    ) : null}
-                    <AvatarFallback className="bg-muted">
-                      <User className="h-6 w-6 text-muted-foreground" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-xs font-medium text-foreground truncate">{person.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{person.job}</p>
-                </Link>
+                <CrewCard 
+                  key={`${person.id}-${person.job}`} 
+                  person={{
+                    id: person.id,
+                    name: person.name,
+                    job: person.job,
+                    profile_path: person.profile_path
+                  }} 
+                />
               ))}
           </div>
         </div>
