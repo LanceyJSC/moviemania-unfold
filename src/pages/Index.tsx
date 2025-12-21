@@ -63,7 +63,7 @@ const Index = () => {
           <HeroSection />
         </ErrorBoundary>
 
-        <div className="px-4 md:px-6 py-6 space-y-8 pb-32 md:pb-12 max-w-7xl mx-auto">
+        <div className="px-4 md:px-6 pt-2 pb-32 md:pb-12 space-y-8 max-w-7xl mx-auto">
           <ErrorBoundary>
             <MovieStats />
           </ErrorBoundary>
