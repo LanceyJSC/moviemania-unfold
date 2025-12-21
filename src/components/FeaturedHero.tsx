@@ -145,7 +145,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   return (
     <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
-      <div className="relative w-full overflow-hidden mb-8 group md:rounded-2xl h-[50vh]">
+      <div className="relative w-full overflow-hidden group md:rounded-2xl h-[50vh]">
       {/* Background Image */}
       {backdropUrl && (
         <img 
