@@ -145,17 +145,13 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   return (
     <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
-      <div className="relative w-full overflow-hidden mb-8 group md:rounded-2xl" style={{ 
-        height: 'clamp(350px, 50vh, 600px)',
-        minHeight: '350px',
-        maxHeight: '600px'  
-      }}>
-      {/* Background Image - no transition to prevent push animation */}
+      <div className="relative w-full overflow-hidden mb-8 group md:rounded-2xl aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9]">
+      {/* Background Image - taller aspect ratio on mobile to show full image */}
       {backdropUrl && (
         <img 
           src={backdropUrl}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center md:object-top"
+          className="absolute inset-0 w-full h-full object-cover object-top"
           style={{ backgroundColor: 'hsl(var(--background))' }}
         />
       )}

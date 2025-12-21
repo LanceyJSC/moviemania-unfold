@@ -198,12 +198,7 @@ export const HeroSection = () => {
   if (error && !isRefreshing) {
     return (
       <div 
-        className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black"
-        style={{ 
-          height: 'clamp(350px, 50vh, 600px)',
-          minHeight: '350px',
-          maxHeight: '600px'
-        }}
+        className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9]"
       >
         <div className="relative z-10 flex flex-col justify-center items-center h-full px-6 text-center">
           <AlertCircle className="h-12 w-12 text-cinema-red mb-4" />
@@ -234,21 +229,16 @@ export const HeroSection = () => {
     <>
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
         <div 
-          className="relative text-foreground overflow-hidden group md:rounded-2xl"
-          style={{ 
-            height: 'clamp(350px, 50vh, 600px)',
-            minHeight: '350px',
-            maxHeight: '600px'
-          }}
+          className="relative text-foreground overflow-hidden group md:rounded-2xl aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-        {/* Hero Background - no transition to prevent push animation */}
+        {/* Hero Background - taller aspect ratio on mobile to show full image */}
         {heroBackdrop ? (
           <img 
             src={heroBackdrop}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-top"
+            className="absolute inset-0 w-full h-full object-cover object-top"
             style={{ backgroundColor: 'hsl(var(--background))' }}
           />
         ) : (
