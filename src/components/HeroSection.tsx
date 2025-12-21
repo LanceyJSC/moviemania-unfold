@@ -198,7 +198,7 @@ export const HeroSection = () => {
   if (error && !isRefreshing) {
     return (
       <div 
-        className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black h-[50vh]"
+        className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black aspect-video md:h-[50vh] md:aspect-auto"
       >
         <div className="relative z-10 flex flex-col justify-center items-center h-full px-6 text-center">
           <AlertCircle className="h-12 w-12 text-cinema-red mb-4" />
@@ -229,7 +229,7 @@ export const HeroSection = () => {
     <>
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
         <div 
-          className="relative text-foreground overflow-hidden group md:rounded-2xl h-[50vh]"
+          className="relative text-foreground overflow-hidden group md:rounded-2xl aspect-video md:h-[50vh] md:aspect-auto"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -238,7 +238,7 @@ export const HeroSection = () => {
           <img 
             src={heroBackdrop}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover"
             style={{ backgroundColor: 'hsl(var(--background))' }}
           />
         ) : (
