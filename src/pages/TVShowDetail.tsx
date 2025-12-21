@@ -172,7 +172,7 @@ const TVShowDetail = () => {
       
       {/* Hero Section with Poster Overlay */}
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
-        <div className="relative overflow-hidden h-[50vh] md:rounded-2xl">
+        <div className="relative overflow-hidden aspect-video md:h-[50vh] md:aspect-auto md:rounded-2xl">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 

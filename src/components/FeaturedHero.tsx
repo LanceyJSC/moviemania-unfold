@@ -145,13 +145,13 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   return (
     <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
-      <div className="relative w-full overflow-hidden group md:rounded-2xl h-[50vh]">
+      <div className="relative w-full overflow-hidden group md:rounded-2xl aspect-video md:h-[50vh] md:aspect-auto">
       {/* Background Image */}
       {backdropUrl && (
         <img 
           src={backdropUrl}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{ backgroundColor: 'hsl(var(--background))' }}
         />
       )}
