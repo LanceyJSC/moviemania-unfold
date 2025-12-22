@@ -145,7 +145,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   return (
     <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
-      <div className="relative w-full overflow-hidden group md:rounded-2xl aspect-video">
+      <div className="relative w-full overflow-hidden group md:rounded-2xl aspect-[4/3] sm:aspect-video">
       {/* Background Image */}
       {backdropUrl && (
         <img 
@@ -163,8 +163,8 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
-      {/* Content - positioned at bottom like MovieDetail */}
-      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-20 md:pb-8 max-w-7xl mx-auto w-full">
+      {/* Content - positioned at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-16 md:pb-8">
         <div className="max-w-2xl">
           {/* Badge */}
           <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
