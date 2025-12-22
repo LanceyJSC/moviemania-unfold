@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
-import { LogOut, Settings, BarChart3, Award, MessageCircle } from 'lucide-react';
+import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
@@ -68,7 +68,15 @@ const Profile = () => {
         </div>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          <Link to="/wrapped" className="touch-manipulation">
+            <Card className="bg-gradient-to-br from-cinema-red/20 to-cinema-gold/20 border-cinema-gold/30 hover:border-cinema-gold/50 active:scale-95 transition-all">
+              <CardContent className="p-4 text-center">
+                <Sparkles className="h-6 w-6 text-cinema-gold mx-auto mb-2" />
+                <p className="text-xs font-medium text-foreground">Wrapped</p>
+              </CardContent>
+            </Card>
+          </Link>
           <Link to="/stats" className="touch-manipulation">
             <Card className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 active:scale-95 transition-all">
               <CardContent className="p-4 text-center">

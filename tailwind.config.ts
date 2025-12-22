@@ -140,13 +140,17 @@ export default {
 						opacity: '1'
 					}
 				},
-				'poster-hover': {
-					'0%': {
-						transform: 'scale(1)'
-					},
-					'100%': {
-						transform: 'scale(1.05)'
-					}
+			'poster-hover': {
+					'0%': { transform: 'scale(1)' },
+					'100%': { transform: 'scale(1.05)' }
+				},
+				'confetti': {
+					'0%': { transform: 'translateY(-10px) rotate(0deg)', opacity: '1' },
+					'100%': { transform: 'translateY(100vh) rotate(720deg)', opacity: '0' }
+				},
+				'progress': {
+					'0%': { width: '0%' },
+					'100%': { width: '100%' }
 				}
 			},
 			animation: {
@@ -154,7 +158,9 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.6s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'poster-hover': 'poster-hover 0.3s ease-out'
+				'poster-hover': 'poster-hover 0.3s ease-out',
+				'confetti': 'confetti 3s linear forwards',
+				'progress': 'progress 5s linear forwards'
 			}
 		}
 	},
