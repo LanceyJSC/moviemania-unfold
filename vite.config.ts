@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt'],
+      includeAssets: ['sceneburn-icon.png', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
         name: 'SceneBurn - Discover Movies & TV Shows',
         short_name: 'SceneBurn',
@@ -26,6 +26,8 @@ export default defineConfig(({ mode }) => ({
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
+        id: '/',
+        categories: ['entertainment', 'movies', 'tv'],
         icons: [
           {
             src: '/pwa-192x192.png',
@@ -44,6 +46,46 @@ export default defineConfig(({ mode }) => ({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
+          },
+          {
+            src: '/sceneburn-icon.png',
+            sizes: '180x180',
+            type: 'image/png',
+            purpose: 'any'
+          }
+        ],
+        screenshots: [
+          {
+            src: '/splash-750x1334.png',
+            sizes: '750x1334',
+            type: 'image/png',
+            form_factor: 'narrow'
+          },
+          {
+            src: '/splash-1284x2778.png',
+            sizes: '1284x2778',
+            type: 'image/png',
+            form_factor: 'narrow'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'Movies',
+            short_name: 'Movies',
+            url: '/movies',
+            icons: [{ src: '/sceneburn-icon.png', sizes: '192x192' }]
+          },
+          {
+            name: 'TV Shows',
+            short_name: 'TV',
+            url: '/tv-shows',
+            icons: [{ src: '/sceneburn-icon.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Search',
+            short_name: 'Search',
+            url: '/search',
+            icons: [{ src: '/sceneburn-icon.png', sizes: '192x192' }]
           }
         ]
       },
