@@ -13,6 +13,7 @@ import { LatestTrailers } from "@/components/LatestTrailers";
 import { FallbackHomepage } from "@/components/FallbackHomepage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 
 const Index = () => {
   const [hasError, setHasError] = useState(false);
@@ -90,6 +91,7 @@ const Index = () => {
         </PullToRefresh>
         
         <Navigation />
+        <PWAInstallBanner />
       </div>
     </ErrorBoundary>
   );
