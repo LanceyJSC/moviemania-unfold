@@ -360,9 +360,9 @@ export const HeroSection = () => {
               </div>
             )}
 
-            {/* Slide indicators - larger touch targets */}
+            {/* Slide indicators - desktop only inside hero */}
             {heroMovies.length > 1 && (
-              <div className="flex justify-center space-x-3 mt-6">
+              <div className="hidden md:flex justify-center space-x-3 mt-6">
                 {heroMovies.map((_, index) => (
                   <button
                     key={index}
@@ -389,7 +389,7 @@ export const HeroSection = () => {
           )}
         </div>
         
-        {/* Mobile only: Overview and buttons below hero */}
+        {/* Mobile only: Overview, buttons, and dots below hero */}
         {heroMovie && !isLoading && (
           <div className="md:hidden px-4 pt-6 pb-4">
             <p className="text-muted-foreground text-sm leading-relaxed mb-6 line-clamp-3">
@@ -423,6 +423,23 @@ export const HeroSection = () => {
                 </Button>
               </Link>
             </div>
+            
+            {/* Mobile slide indicators */}
+            {heroMovies.length > 1 && (
+              <div className="flex justify-center space-x-3 mt-6">
+                {heroMovies.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
+                      index === currentIndex 
+                        ? 'bg-primary w-8' 
+                        : 'bg-muted-foreground/30 hover:bg-muted-foreground/50 w-3'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
