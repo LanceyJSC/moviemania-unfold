@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { WrappedPeriod } from '@/hooks/useWrappedData';
-import { Sparkles } from 'lucide-react';
+import AnimatedBurningLogo from '@/components/AnimatedBurningLogo';
 
 interface IntroSlideProps {
   period: WrappedPeriod;
@@ -33,12 +33,9 @@ export const IntroSlide: React.FC<IntroSlideProps> = ({ period, memberSince, day
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-8">
-      {/* Logo animation */}
-      <div className={`transition-all duration-700 ${showTitle ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-        <div className="relative mb-8">
-          <Sparkles className="h-16 w-16 text-cinema-gold animate-pulse" />
-          <div className="absolute inset-0 bg-cinema-gold/30 blur-xl rounded-full" />
-        </div>
+      {/* Animated burning logo */}
+      <div className="mb-8">
+        <AnimatedBurningLogo size={160} />
       </div>
 
       {/* Main title */}
