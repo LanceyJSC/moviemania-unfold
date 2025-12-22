@@ -203,7 +203,7 @@ const Wrapped = () => {
       )}
     >
       {/* Top controls */}
-      <div className="absolute top-0 left-0 right-0 z-50 safe-area-inset-top">
+      <div className="absolute top-0 left-0 right-0 z-50 pt-2">
         <WrappedProgress 
           totalSlides={totalSlides}
           currentSlide={currentSlide}
@@ -211,12 +211,12 @@ const Wrapped = () => {
         />
         
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Close button */}
+          {/* Close button - larger and more prominent */}
           <button 
-            onClick={() => navigate(-1)}
-            className="p-2 rounded-full bg-background/20 backdrop-blur-sm hover:bg-background/40 transition-colors"
+            onClick={() => navigate('/profile')}
+            className="p-3 rounded-full bg-background/40 backdrop-blur-md hover:bg-background/60 transition-colors shadow-lg border border-foreground/10"
           >
-            <X className="h-5 w-5 text-foreground" />
+            <X className="h-6 w-6 text-foreground" />
           </button>
 
           {/* Period selector */}
