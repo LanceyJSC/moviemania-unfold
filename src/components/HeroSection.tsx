@@ -282,7 +282,7 @@ export const HeroSection = () => {
           )}
 
           {/* Hero Content - positioned at bottom (mobile: just title, desktop: everything) */}
-          <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4 md:pb-8">
+          <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-2 md:pb-8">
             {isLoading ? (
               <div className="max-w-2xl animate-pulse space-y-3">
                 <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
@@ -391,7 +391,7 @@ export const HeroSection = () => {
         
         {/* Mobile only: Overview, buttons, and dots below hero */}
         {heroMovie && !isLoading && (
-          <div className="md:hidden px-4 pt-2 pb-4">
+          <div className="md:hidden px-4 pb-4">
             <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">
               {heroMovie.overview}
             </p>

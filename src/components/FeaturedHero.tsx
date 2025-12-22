@@ -164,7 +164,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
         
         {/* Content - positioned at bottom (mobile: just title/meta, desktop: everything) */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4 md:pb-8">
+        <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-2 md:pb-8">
           <div className="max-w-2xl">
             {/* Badge */}
             <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
@@ -250,7 +250,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       </div>
       
       {/* Mobile only: Overview, buttons, and dots below hero */}
-      <div className="md:hidden px-4 pt-2 pb-4">
+      <div className="md:hidden px-4 pb-4">
         <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">
           {overview}
         </p>
