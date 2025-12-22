@@ -5,6 +5,7 @@ import { Film, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { MovieGrid } from "@/components/MovieGrid";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { PullToRefresh } from "@/components/PullToRefresh";
@@ -45,6 +46,7 @@ const Movies = () => {
   return (
     <div className="min-h-screen bg-background">
       <DesktopHeader />
+      <MobileBrandHeader />
       <PullToRefresh onRefresh={handleRefresh}>
         <FeaturedHero type="movie" />
 

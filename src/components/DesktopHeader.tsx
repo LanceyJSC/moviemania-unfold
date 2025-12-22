@@ -25,7 +25,8 @@ export const DesktopHeader = () => {
     <header className="hidden md:block sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center">
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/pwa-192x192.png" alt="SceneBurn" className="h-8 w-8" />
           <h1 className="font-cinematic text-2xl tracking-wider text-foreground">
             SCENE<span className="text-cinema-red">BURN</span>
           </h1>

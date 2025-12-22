@@ -282,7 +282,7 @@ export const HeroSection = () => {
         )}
 
         {/* Hero Content - with desktop centering */}
-        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pt-16 pb-6 md:pb-8 max-w-7xl mx-auto w-full" style={{ paddingTop: 'max(env(safe-area-inset-top), 4rem)' }}>
+        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
           {isLoading ? (
             <div className="max-w-2xl animate-pulse space-y-3">
               <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
@@ -316,7 +316,7 @@ export const HeroSection = () => {
               <div className="flex gap-3">
                 {currentTrailerKey ? (
                   <Button 
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium"
+                    className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium"
                     onClick={handleWatchNow}
                   >
                     <Play className="mr-2 h-4 w-4" />
@@ -325,7 +325,7 @@ export const HeroSection = () => {
                   </Button>
                 ) : (
                   <Link to={`/movie/${heroMovie.id}`}>
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium">
+                    <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium">
                       <Play className="mr-2 h-4 w-4" />
                       <span className="hidden xs:inline">Watch Trailer</span>
                       <span className="xs:hidden">Trailer</span>

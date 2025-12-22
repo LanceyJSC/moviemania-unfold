@@ -164,7 +164,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
       {/* Content - with desktop centering */}
-      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pt-16 pb-6 md:pb-8 max-w-7xl mx-auto w-full" style={{ paddingTop: 'max(env(safe-area-inset-top), 4rem)' }}>
+      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
         <div className="max-w-2xl">
           {/* Badge */}
           <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
@@ -200,7 +200,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
           <div className="flex gap-3">
             {currentTrailerKey ? (
               <Button 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium"
+                className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium"
                 disabled={isRefreshing}
                 onClick={handleWatchTrailer}
               >
@@ -210,7 +210,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
               </Button>
             ) : (
               <Button 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-4 sm:px-6 font-medium"
+                className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium"
                 disabled={true}
               >
                 <Play className="mr-2 h-4 w-4" />

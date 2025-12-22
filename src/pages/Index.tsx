@@ -6,6 +6,7 @@ import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { NewThisMonth } from "@/components/NewThisMonth";
 import { FreshPicks } from "@/components/FreshPicks";
 import { LatestTrailers } from "@/components/LatestTrailers";
@@ -59,6 +60,7 @@ const Index = () => {
     <ErrorBoundary fallback={<FallbackHomepage />}>
       <div className="min-h-screen bg-background">
         <DesktopHeader />
+        <MobileBrandHeader />
         <PullToRefresh onRefresh={handleRefresh}>
           <ErrorBoundary>
             <HeroSection />

@@ -4,6 +4,7 @@ import { Tv, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { TVGrid } from "@/components/TVGrid";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { PullToRefresh } from "@/components/PullToRefresh";
@@ -44,6 +45,7 @@ const TVShows = () => {
   return (
     <div className="min-h-screen bg-background">
       <DesktopHeader />
+      <MobileBrandHeader />
       <PullToRefresh onRefresh={handleRefresh}>
         <FeaturedHero type="tv" />
 
