@@ -282,7 +282,7 @@ export const HeroSection = () => {
         )}
 
         {/* Hero Content - positioned at bottom like MovieDetail */}
-        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
+        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-20 md:pb-8 max-w-7xl mx-auto w-full">
           {isLoading ? (
             <div className="max-w-2xl animate-pulse space-y-3">
               <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>

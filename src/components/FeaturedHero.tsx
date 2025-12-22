@@ -164,7 +164,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
       {/* Content - positioned at bottom like MovieDetail */}
-      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
+      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-20 md:pb-8 max-w-7xl mx-auto w-full">
         <div className="max-w-2xl">
           {/* Badge */}
           <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
