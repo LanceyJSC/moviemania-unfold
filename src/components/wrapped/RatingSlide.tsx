@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
+import { Flame } from 'lucide-react';
 
 interface RatingSlideProps {
   averageRating: number;
@@ -46,8 +46,8 @@ export const RatingSlide: React.FC<RatingSlideProps> = ({
     };
   }, [averageRating]);
 
-  const fullStars = Math.floor(displayRating);
-  const hasHalfStar = displayRating % 1 >= 0.5;
+  const fullFlames = Math.floor(displayRating);
+  const hasHalfFlame = displayRating % 1 >= 0.5;
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-8">
@@ -62,28 +62,28 @@ export const RatingSlide: React.FC<RatingSlideProps> = ({
 
       {/* Big rating number */}
       <div className="font-cinematic text-8xl md:text-9xl text-cinema-gold mb-4">
-        {displayRating.toFixed(1)}
+        {displayRating.toFixed(1)}<span className="text-4xl text-muted-foreground">/5</span>
       </div>
 
-      {/* Star visualization */}
+      {/* Flame visualization */}
       <div 
-        className={`flex gap-1 mb-8 transition-all duration-700 ${
+        className={`flex gap-2 mb-8 transition-all duration-700 ${
           showStars ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
         }`}
       >
-        {Array.from({ length: 10 }).map((_, i) => (
-          <Star
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Flame
             key={i}
-            className={`h-6 w-6 transition-all duration-300 ${
-              i < fullStars 
-                ? 'text-cinema-gold fill-cinema-gold' 
-                : i === fullStars && hasHalfStar
-                  ? 'text-cinema-gold fill-cinema-gold/50'
+            className={`h-8 w-8 transition-all duration-300 ${
+              i < fullFlames 
+                ? 'text-cinema-red fill-cinema-red' 
+                : i === fullFlames && hasHalfFlame
+                  ? 'text-cinema-red fill-cinema-red/50'
                   : 'text-muted-foreground/30'
             }`}
             style={{ 
-              transitionDelay: `${i * 50}ms`,
-              transform: showStars && i < fullStars ? 'scale(1.1)' : 'scale(1)'
+              transitionDelay: `${i * 100}ms`,
+              transform: showStars && i < fullFlames ? 'scale(1.2)' : 'scale(1)'
             }}
           />
         ))}

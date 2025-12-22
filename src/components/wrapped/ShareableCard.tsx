@@ -23,7 +23,7 @@ export const ShareableCard: React.FC<ShareableCardProps> = ({ data }) => {
     const shareText = `🎬 My SceneBurn ${periodLabels[data.period]} Wrapped!\n\n` +
       `📽️ ${data.totalMovies} movies • ${data.totalEpisodes} episodes\n` +
       `⏱️ ${data.totalHours} hours watched\n` +
-      `⭐ ${data.averageRating}/10 average rating\n` +
+      `🔥 ${data.averageRating}/5 average rating\n` +
       `${data.topGenre ? `🎭 ${data.topGenre.name} lover` : ''}\n\n` +
       `#SceneBurnWrapped`;
 
@@ -86,8 +86,8 @@ export const ShareableCard: React.FC<ShareableCardProps> = ({ data }) => {
               <p className="text-xs text-muted-foreground">Hours</p>
             </div>
             <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 text-center">
-              <p className="font-cinematic text-3xl text-purple-400">{data.averageRating}</p>
-              <p className="text-xs text-muted-foreground">Avg Rating</p>
+              <p className="font-cinematic text-3xl text-cinema-red">{data.averageRating}<span className="text-lg text-muted-foreground">/5</span></p>
+              <p className="text-xs text-muted-foreground">Avg 🔥</p>
             </div>
           </div>
 
