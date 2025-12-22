@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle } from "lucide-react";
+import { Calendar, Clock, Star, Play, Eye, BookOpen, Check, MessageCircle, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -494,9 +494,9 @@ const SeasonDetail = () => {
             <div className="flex items-center gap-2">
               {seasonRating > 0 ? (
                 <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 fill-cinema-gold text-cinema-gold" />
-                  <span className="text-lg text-cinema-gold font-medium">
-                    {seasonRating}/10
+                  <Flame className="h-5 w-5 fill-cinema-red text-cinema-red" />
+                  <span className="text-lg text-cinema-red font-medium">
+                    {seasonRating}/5
                   </span>
                 </div>
               ) : (

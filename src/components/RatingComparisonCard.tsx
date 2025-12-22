@@ -1,6 +1,6 @@
-import { Star, Users, User } from 'lucide-react';
+import { Star, Users, User, Flame } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { RatingInput } from '@/components/RatingInput';
+import { RatingInput, FlameRating } from '@/components/RatingInput';
 import { useAverageUserRating } from '@/hooks/useAverageUserRating';
 
 interface RatingComparisonCardProps {
@@ -41,8 +41,13 @@ export const RatingComparisonCard = ({
           <div className="flex items-center justify-center gap-1 mb-1">
             <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-primary">
-            {averageRating ? averageRating.toFixed(1) : '—'}
+          <div className="text-lg sm:text-2xl font-bold text-primary flex items-center justify-center gap-1">
+            {averageRating ? (
+              <>
+                <Flame className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
+                {averageRating.toFixed(1)}
+              </>
+            ) : '—'}
           </div>
           <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">
             {count > 0 ? `${count}` : 'Community'}
@@ -54,8 +59,13 @@ export const RatingComparisonCard = ({
           <div className="flex items-center justify-center gap-1 mb-1">
             <User className="h-3 w-3 sm:h-4 sm:w-4 text-foreground" />
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-foreground">
-            {userRating > 0 ? userRating : '—'}
+          <div className="text-lg sm:text-2xl font-bold text-foreground flex items-center justify-center gap-1">
+            {userRating > 0 ? (
+              <>
+                <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-cinema-red fill-cinema-red" />
+                {userRating}
+              </>
+            ) : '—'}
           </div>
           <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">You</div>
         </div>
@@ -68,8 +78,8 @@ export const RatingComparisonCard = ({
           <RatingInput
             value={userRating}
             onChange={onRatingChange}
-            max={10}
-            size="sm"
+            max={5}
+            size="md"
           />
         </div>
       </div>

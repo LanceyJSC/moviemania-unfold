@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Eye, Check, Loader2, EyeOff } from 'lucide-react';
+import { ChevronRight, Eye, Check, Loader2, EyeOff, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { tmdbService } from '@/lib/tmdb';
@@ -167,8 +167,9 @@ export const SeasonProgressCard = ({
           {seasonRating && seasonRating > 0 && (
             <div className="flex items-center gap-1 mt-1">
               <span className="text-xs text-muted-foreground">Season Rating:</span>
-              <span className="text-cinema-gold font-semibold text-sm">
-                {seasonRating}/10
+              <span className="text-cinema-red font-semibold text-sm flex items-center gap-1">
+                <Flame className="h-3 w-3 fill-current" />
+                {seasonRating}/5
               </span>
             </div>
           )}

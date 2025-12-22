@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Tv, Star, Trash2, Pencil, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { Tv, Star, Trash2, Pencil, ChevronDown, ChevronUp, BookOpen, Flame } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -265,8 +265,9 @@ export const TVShowCollectionCard = ({
                 </div>
               )}
               {displayRating && displayRating > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold font-semibold text-xs">
-                  {displayRating}/10
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red font-semibold text-xs">
+                  <Flame className="h-3 w-3 fill-current" />
+                  {displayRating}/5
                 </span>
               )}
             </div>
@@ -353,8 +354,9 @@ export const TVShowCollectionCard = ({
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-foreground">Show Rating</h3>
                     {(seriesRating || userRating) ? (
-                      <span className="px-3 py-1 bg-cinema-gold/20 rounded-lg text-cinema-gold font-bold">
-                        {seriesRating || userRating}/10
+                      <span className="px-3 py-1 bg-cinema-red/20 rounded-lg text-cinema-red font-bold flex items-center gap-1">
+                        <Flame className="h-4 w-4 fill-current" />
+                        {seriesRating || userRating}/5
                       </span>
                     ) : (
                       <span className="text-sm text-muted-foreground">Not rated</span>
@@ -396,8 +398,9 @@ export const TVShowCollectionCard = ({
                                   <span className="text-xs text-muted-foreground">{episodes.length} ep</span>
                                 )}
                                 {seasonReview?.rating && (
-                                  <span className="px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold text-xs font-semibold">
-                                    {seasonReview.rating}/10
+                                  <span className="px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red text-xs font-semibold flex items-center gap-1">
+                                    <Flame className="h-3 w-3 fill-current" />
+                                    {seasonReview.rating}/5
                                   </span>
                                 )}
                               </div>
@@ -417,8 +420,9 @@ export const TVShowCollectionCard = ({
                                       )}
                                     </div>
                                     {ep.rating && (
-                                      <span className="px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold text-xs font-semibold">
-                                        {ep.rating}/10
+                                      <span className="px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red text-xs font-semibold flex items-center gap-1">
+                                        <Flame className="h-3 w-3 fill-current" />
+                                        {ep.rating}/5
                                       </span>
                                     )}
                                   </div>

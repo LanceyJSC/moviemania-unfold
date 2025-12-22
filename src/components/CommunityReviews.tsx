@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, Heart, MessageCircle, PenLine } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, Heart, MessageCircle, PenLine, Flame } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -211,8 +211,9 @@ export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsPro
                           <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">You</span>
                         )}
                         {review.rating && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold font-semibold text-xs">
-                            {review.rating}/10
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red font-semibold text-xs">
+                            <Flame className="h-3 w-3 fill-current" />
+                            {review.rating}/5
                           </span>
                         )}
                         <span className="text-xs text-muted-foreground">

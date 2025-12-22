@@ -60,7 +60,7 @@ export const diaryNotesSchema = z
 export const ratingSchema = z
   .number()
   .min(0)
-  .max(10)
+  .max(5)
   .int('Rating must be a whole number');
 
 // Validation helper functions

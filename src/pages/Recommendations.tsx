@@ -67,7 +67,7 @@ export const Recommendations = () => {
                 reason: {
                   type: 'rated' as const,
                   basedOn: rating.movie_title,
-                  message: `Because you rated "${rating.movie_title}" ${rating.rating}/10`
+                  message: `Because you gave "${rating.movie_title}" ${rating.rating} flames`
                 },
                 confidence: Math.min(95, 70 + (rating.rating || 0) * 2)
               }));
