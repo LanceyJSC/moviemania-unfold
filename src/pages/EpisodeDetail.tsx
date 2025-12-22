@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, Clock, Star, Eye, BookOpen, User } from "lucide-react";
+import { Calendar, Clock, Star, Eye, BookOpen, User, Flame } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -466,9 +466,9 @@ const EpisodeDetail = () => {
                           {review.profile?.username || 'Anonymous'}
                         </Link>
                         {review.rating && (
-                          <div className="flex items-center gap-1 text-cinema-gold text-sm">
-                            <Star className="h-3.5 w-3.5 fill-current" />
-                            <span>{review.rating}/10</span>
+                          <div className="flex items-center gap-1 text-cinema-red text-sm">
+                            <Flame className="h-3.5 w-3.5 fill-current" />
+                            <span>{review.rating}/5</span>
                           </div>
                         )}
                         <span className="text-xs text-muted-foreground">

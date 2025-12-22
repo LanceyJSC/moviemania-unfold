@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react';
+import { Users, Flame } from 'lucide-react';
 import { useAverageUserRating } from '@/hooks/useAverageUserRating';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -30,7 +30,8 @@ export const UserAverageRating = ({ mediaId, mediaType }: UserAverageRatingProps
   return (
     <div className="flex items-center gap-1.5 text-xs">
       <Users className="h-3.5 w-3.5 text-primary" />
-      <span className="text-primary font-semibold">{average.toFixed(1)}</span>
+      <Flame className="h-3.5 w-3.5 text-cinema-red fill-cinema-red" />
+      <span className="text-cinema-red font-semibold">{average.toFixed(1)}/5</span>
       <span className="text-white/60">({count} {count === 1 ? 'rating' : 'ratings'})</span>
     </div>
   );

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { Flame } from 'lucide-react';
 
 interface RatingInputProps {
   value: number;
@@ -11,18 +12,24 @@ interface RatingInputProps {
 export const RatingInput = ({ 
   value, 
   onChange, 
-  max = 10, 
+  max = 5, 
   size = 'md',
   disabled = false 
 }: RatingInputProps) => {
   const sizeClasses = {
-    sm: 'h-6 min-w-[24px] text-[10px]',
-    md: 'h-7 min-w-[28px] text-xs',
-    lg: 'h-8 min-w-[32px] text-sm'
+    sm: 'h-7 w-7',
+    md: 'h-8 w-8',
+    lg: 'h-10 w-10'
+  };
+
+  const iconSizes = {
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-6 w-6'
   };
 
   return (
-    <div className="flex gap-1 flex-wrap justify-center">
+    <div className="flex gap-1 justify-center">
       {Array.from({ length: max }, (_, i) => i + 1).map((score) => (
         <button
           key={score}
@@ -30,18 +37,69 @@ export const RatingInput = ({
           disabled={disabled}
           onClick={() => onChange(value === score ? 0 : score)}
           className={cn(
-            'rounded font-semibold transition-all duration-200 touch-manipulation',
+            'rounded-full transition-all duration-200 touch-manipulation flex items-center justify-center',
             sizeClasses[size],
-            'flex items-center justify-center px-1',
-            score === value
-              ? 'bg-cinema-gold text-cinema-black'
-              : 'bg-muted text-muted-foreground active:bg-muted/70',
+            score <= value
+              ? 'text-cinema-red'
+              : 'text-muted-foreground/40 hover:text-muted-foreground/60',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
         >
-          {score}
+          <Flame 
+            className={cn(
+              iconSizes[size],
+              score <= value && 'fill-current'
+            )} 
+          />
         </button>
       ))}
     </div>
+  );
+};
+
+// Helper component to display a flame rating (read-only)
+export const FlameRating = ({ 
+  rating, 
+  max = 5,
+  size = 'sm',
+  showEmpty = false 
+}: { 
+  rating: number; 
+  max?: number;
+  size?: 'xs' | 'sm' | 'md';
+  showEmpty?: boolean;
+}) => {
+  const iconSizes = {
+    xs: 'h-3 w-3',
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5'
+  };
+
+  if (!showEmpty && rating === 0) return null;
+
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: max }, (_, i) => i + 1).map((score) => (
+        <Flame
+          key={score}
+          className={cn(
+            iconSizes[size],
+            score <= rating
+              ? 'text-cinema-red fill-cinema-red'
+              : 'text-muted-foreground/30'
+          )}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Simple text display for flame rating
+export const FlameRatingText = ({ rating }: { rating: number }) => {
+  return (
+    <span className="inline-flex items-center gap-1 text-cinema-red">
+      <Flame className="h-3.5 w-3.5 fill-current" />
+      <span className="font-semibold">{rating}/5</span>
+    </span>
   );
 };

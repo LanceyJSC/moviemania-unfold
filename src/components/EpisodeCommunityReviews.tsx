@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, User } from "lucide-react";
+import { Flame, User } from "lucide-react";
 import { format } from "date-fns";
 
 interface EpisodeCommunityReviewsProps {
@@ -119,9 +119,9 @@ export const EpisodeCommunityReviews = ({
                 {review.profile?.username || 'Anonymous'}
               </span>
               {review.rating && (
-                <div className="flex items-center gap-1 text-cinema-gold text-xs">
-                  <Star className="h-3 w-3 fill-current" />
-                  <span>{review.rating}/10</span>
+                <div className="flex items-center gap-1 text-cinema-red text-xs">
+                  <Flame className="h-3 w-3 fill-current" />
+                  <span>{review.rating}/5</span>
                 </div>
               )}
               <span className="text-xs text-muted-foreground">

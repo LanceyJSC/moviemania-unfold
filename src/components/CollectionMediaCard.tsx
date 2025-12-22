@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Film, Tv, Star, Trash2, Pencil } from 'lucide-react';
+import { Film, Tv, Star, Trash2, Pencil, Flame } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -99,8 +99,9 @@ export const CollectionMediaCard = ({
 
             {/* User Rating */}
             {userRating && userRating > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold font-semibold text-xs">
-                {userRating}/10
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red font-semibold text-xs">
+                <Flame className="h-3 w-3 fill-current" />
+                {userRating}/5
               </span>
             )}
           </div>

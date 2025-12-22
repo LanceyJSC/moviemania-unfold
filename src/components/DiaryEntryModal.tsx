@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Star } from 'lucide-react';
+import { Calendar as CalendarIcon, Flame } from 'lucide-react';
 import { useDiary, MovieDiaryEntry, TVDiaryEntry } from '@/hooks/useDiary';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -126,20 +126,24 @@ const DiaryEntryModal = ({ isOpen, onClose, entry, type }: DiaryEntryModalProps)
           )}
 
           <div className="space-y-2">
-            <Label>Rating (1-10)</Label>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
+            <Label>Rating (1-5 flames)</Label>
+            <div className="flex items-center justify-center gap-1">
+              {[1, 2, 3, 4, 5].map((value) => (
                 <button
                   key={value}
+                  type="button"
                   onClick={() => setRating(rating === value ? null : value)}
                   className={cn(
-                    "w-8 h-8 rounded-full text-sm font-medium transition-colors",
-                    rating === value
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted hover:bg-muted/80"
+                    "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                    rating !== null && value <= rating
+                      ? "text-cinema-red"
+                      : "text-muted-foreground/40 hover:text-muted-foreground/60"
                   )}
                 >
-                  {value}
+                  <Flame className={cn(
+                    "h-6 w-6",
+                    rating !== null && value <= rating && "fill-current"
+                  )} />
                 </button>
               ))}
             </div>
