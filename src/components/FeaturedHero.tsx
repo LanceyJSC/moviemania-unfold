@@ -145,7 +145,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
 
   return (
     <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
-      <div className="relative w-full overflow-hidden group md:rounded-2xl aspect-video md:h-[50vh] md:aspect-auto">
+      <div className="relative w-full overflow-hidden group md:rounded-2xl aspect-video">
       {/* Background Image */}
       {backdropUrl && (
         <img 
@@ -164,7 +164,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
       {/* Content - with desktop centering */}
-      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
+      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pt-16 pb-6 md:pb-8 max-w-7xl mx-auto w-full" style={{ paddingTop: 'max(env(safe-area-inset-top), 4rem)' }}>
         <div className="max-w-2xl">
           {/* Badge */}
           <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">

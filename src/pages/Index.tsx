@@ -57,36 +57,38 @@ const Index = () => {
 
   return (
     <ErrorBoundary fallback={<FallbackHomepage />}>
-      <DesktopHeader />
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
-        <ErrorBoundary>
-          <HeroSection />
-        </ErrorBoundary>
-
-        <div className="px-4 md:px-6 pt-2 pb-32 md:pb-12 space-y-8 max-w-7xl mx-auto">
+      <div className="min-h-screen bg-background">
+        <DesktopHeader />
+        <PullToRefresh onRefresh={handleRefresh}>
           <ErrorBoundary>
-            <MovieStats />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <QuickGenres />
+            <HeroSection />
           </ErrorBoundary>
 
-          <ErrorBoundary>
-            <NewThisMonth />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <FreshPicks />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <LatestTrailers />
-          </ErrorBoundary>
-        </div>
-      </PullToRefresh>
-      
-      <Navigation />
+          <div className="px-4 md:px-6 pt-2 pb-32 md:pb-12 space-y-8 max-w-7xl mx-auto">
+            <ErrorBoundary>
+              <MovieStats />
+            </ErrorBoundary>
+            
+            <ErrorBoundary>
+              <QuickGenres />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <NewThisMonth />
+            </ErrorBoundary>
+            
+            <ErrorBoundary>
+              <FreshPicks />
+            </ErrorBoundary>
+            
+            <ErrorBoundary>
+              <LatestTrailers />
+            </ErrorBoundary>
+          </div>
+        </PullToRefresh>
+        
+        <Navigation />
+      </div>
     </ErrorBoundary>
   );
 };

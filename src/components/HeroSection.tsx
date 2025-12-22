@@ -198,7 +198,7 @@ export const HeroSection = () => {
   if (error && !isRefreshing) {
     return (
       <div 
-        className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black aspect-video md:h-[50vh] md:aspect-auto"
+        className="relative text-foreground overflow-hidden bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black aspect-video"
       >
         <div className="relative z-10 flex flex-col justify-center items-center h-full px-6 text-center">
           <AlertCircle className="h-12 w-12 text-cinema-red mb-4" />
@@ -229,7 +229,7 @@ export const HeroSection = () => {
     <>
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
         <div 
-          className="relative text-foreground overflow-hidden group md:rounded-2xl aspect-video md:h-[50vh] md:aspect-auto"
+          className="relative text-foreground overflow-hidden group md:rounded-2xl aspect-video"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -282,7 +282,7 @@ export const HeroSection = () => {
         )}
 
         {/* Hero Content - with desktop centering */}
-        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
+        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pt-16 pb-6 md:pb-8 max-w-7xl mx-auto w-full" style={{ paddingTop: 'max(env(safe-area-inset-top), 4rem)' }}>
           {isLoading ? (
             <div className="max-w-2xl animate-pulse space-y-3">
               <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
