@@ -241,9 +241,20 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
 
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
+      {/* Close Button - OUTSIDE all containers, highest z-index */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleClose}
+        className="fixed top-4 right-4 z-[100] text-white bg-black/70 hover:bg-black/90 rounded-full p-3 min-h-[52px] min-w-[52px] touch-manipulation active:scale-95 backdrop-blur-md border border-white/20 shadow-lg"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
+      >
+        <X className="h-7 w-7" />
+      </Button>
+
       <div className={`relative h-full flex flex-col ${isLandscapeMobile ? 'landscape-mobile' : ''}`}>
         {/* Video Container - Full screen in landscape mobile */}
-        <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'flex-1 flex items-center justify-center p-4'}`}>
+        <div className={`${isFullscreen ? 'fixed inset-0 z-40' : 'flex-1 flex items-center justify-center p-4'}`}>
           <div className={`${isFullscreen ? 'w-screen h-screen' : 'w-full max-w-4xl aspect-video'} bg-cinema-charcoal ${isFullscreen ? '' : 'rounded-lg'} overflow-hidden`}>
             {videoError ? (
               <div className="w-full h-full flex items-center justify-center text-center">
@@ -270,16 +281,6 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
             )}
           </div>
         </div>
-
-      {/* Close Button - Always visible in top right */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleClose}
-        className="absolute top-4 right-4 z-50 text-white bg-black/60 hover:bg-black/80 rounded-full p-3 min-h-[48px] min-w-[48px] touch-manipulation active:scale-95 backdrop-blur-sm"
-      >
-        <X className="h-6 w-6" />
-      </Button>
 
       {/* Header - Hidden in landscape mobile */}
       {!isLandscapeMobile && (
