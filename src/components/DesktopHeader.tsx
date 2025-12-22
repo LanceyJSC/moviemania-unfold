@@ -26,7 +26,7 @@ export const DesktopHeader = () => {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img src="/pwa-192x192.png" alt="SceneBurn" className="h-8 w-8" />
+          <img src="/sceneburn-icon.ico" alt="SceneBurn" className="h-8 w-8" />
           <h1 className="font-cinematic text-2xl tracking-wider text-foreground">
             SCENE<span className="text-cinema-red">BURN</span>
           </h1>
