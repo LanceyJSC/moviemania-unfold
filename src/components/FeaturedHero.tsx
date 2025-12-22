@@ -250,8 +250,8 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       </div>
       
       {/* Mobile only: Overview, buttons, and dots below hero */}
-      <div className="md:hidden px-4 pt-6 pb-4">
-        <p className="text-muted-foreground text-sm leading-relaxed mb-6 line-clamp-3">
+      <div className="md:hidden px-4 pt-2 pb-4">
+        <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">
           {overview}
         </p>
         
