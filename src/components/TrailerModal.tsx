@@ -241,16 +241,23 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
 
   return (
     <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
-      {/* Close Button - OUTSIDE all containers, highest z-index */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleClose}
-        className="fixed top-4 right-4 z-[100] text-white bg-black/70 hover:bg-black/90 rounded-full p-3 min-h-[52px] min-w-[52px] touch-manipulation active:scale-95 backdrop-blur-md border border-white/20 shadow-lg"
-        style={{ WebkitTapHighlightColor: 'transparent' }}
+      {/* Close Button - Always visible, highest z-index, safe area aware */}
+      <div 
+        className="fixed z-[9999] pointer-events-auto"
+        style={{ 
+          top: 'max(16px, env(safe-area-inset-top, 16px))', 
+          right: 'max(16px, env(safe-area-inset-right, 16px))' 
+        }}
       >
-        <X className="h-7 w-7" />
-      </Button>
+        <button
+          onClick={handleClose}
+          className="flex items-center justify-center w-14 h-14 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-2xl touch-manipulation active:scale-95 transition-transform"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
+          aria-label="Close trailer"
+        >
+          <X className="h-8 w-8" strokeWidth={3} />
+        </button>
+      </div>
 
       <div className={`relative h-full flex flex-col ${isLandscapeMobile ? 'landscape-mobile' : ''}`}>
         {/* Video Container - Full screen in landscape mobile */}
