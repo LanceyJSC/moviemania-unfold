@@ -26,7 +26,7 @@ export const DesktopHeader = () => {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img src="/sceneburn-logo.png" alt="SceneBurn" className="h-8 w-8 rounded-lg overflow-hidden object-cover" style={{ clipPath: 'inset(8% round 16%)' }} />
+          <img src="/sceneburn-flame-icon.png" alt="SceneBurn" className="h-8 w-8" />
           <h1 className="font-cinematic text-2xl tracking-wider text-foreground">
             SCENE<span className="text-cinema-red">BURN</span>
           </h1>
