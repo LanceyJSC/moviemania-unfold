@@ -229,9 +229,9 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
               </div>
             </div>
 
-            {/* Slide indicators - larger touch targets */}
+            {/* Slide indicators - desktop only inside hero */}
             {featuredItems.length > 1 && (
-              <div className="flex justify-center space-x-3 mt-6 md:mt-6">
+              <div className="hidden md:flex justify-center space-x-3 mt-6">
                 {featuredItems.map((_: any, index: number) => (
                   <button
                     key={index}
@@ -249,7 +249,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
         </div>
       </div>
       
-      {/* Mobile only: Overview and buttons below hero */}
+      {/* Mobile only: Overview, buttons, and dots below hero */}
       <div className="md:hidden px-4 pt-6 pb-4">
         <p className="text-muted-foreground text-sm leading-relaxed mb-6 line-clamp-3">
           {overview}
@@ -285,6 +285,23 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
             </Button>
           </Link>
         </div>
+        
+        {/* Mobile slide indicators */}
+        {featuredItems.length > 1 && (
+          <div className="flex justify-center space-x-3 mt-6">
+            {featuredItems.map((_: any, index: number) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
+                  index === currentIndex 
+                    ? 'bg-primary w-8' 
+                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50 w-3'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
