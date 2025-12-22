@@ -271,32 +271,32 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           </div>
         </div>
 
-        {/* Header - Completely hidden in landscape mobile */}
-        {!isLandscapeMobile && (
-          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-cinema-charcoal/80 backdrop-blur-sm">
-              <h2 className="text-lg font-semibold text-foreground truncate pr-4">
-                {movieTitle} - Trailer
-              </h2>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleFullscreen}
-                  className="text-muted-foreground hover:text-foreground p-2 md:flex hidden"
-                >
-                  {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClose}
-                  className="text-muted-foreground hover:text-foreground p-3 min-h-[48px] min-w-[48px] touch-manipulation active:scale-95"
-                >
-                  <X className="h-6 w-6" />
-                </Button>
-            </div>
-          </div>
-        )}
+      {/* Close Button - Always visible in top right */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleClose}
+        className="absolute top-4 right-4 z-50 text-white bg-black/60 hover:bg-black/80 rounded-full p-3 min-h-[48px] min-w-[48px] touch-manipulation active:scale-95 backdrop-blur-sm"
+      >
+        <X className="h-6 w-6" />
+      </Button>
+
+      {/* Header - Hidden in landscape mobile */}
+      {!isLandscapeMobile && (
+        <div className="absolute top-0 left-0 right-16 z-10 flex items-center p-4 bg-gradient-to-r from-cinema-charcoal/80 via-cinema-charcoal/60 to-transparent backdrop-blur-sm">
+          <h2 className="text-lg font-semibold text-foreground truncate pr-4">
+            {movieTitle} - Trailer
+          </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullscreen}
+            className="text-muted-foreground hover:text-foreground p-2 md:flex hidden ml-auto"
+          >
+            {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+          </Button>
+        </div>
+      )}
 
         {/* Hints - Only show in portrait */}
         {!isLandscapeMobile && (
@@ -317,17 +317,6 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
           </>
         )}
 
-        {/* Landscape close button - floating close button for landscape */}
-        {isLandscapeMobile && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClose}
-            className="absolute top-4 right-4 z-20 text-white/80 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-3 min-h-[48px] min-w-[48px] touch-manipulation active:scale-95"
-          >
-            <X className="h-6 w-6" />
-          </Button>
-        )}
       </div>
     </div>
   );

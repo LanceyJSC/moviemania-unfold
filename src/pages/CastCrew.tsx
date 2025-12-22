@@ -102,7 +102,8 @@ const CastCrew = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <DesktopHeader />
       <MobileHeader title={`Cast & Crew`} />
       
       <div className="container mx-auto px-4 py-6">
