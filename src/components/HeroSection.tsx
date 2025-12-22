@@ -233,162 +233,198 @@ export const HeroSection = () => {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-        {/* Hero Background */}
-        {heroBackdrop ? (
-          <img 
-            src={heroBackdrop}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ backgroundColor: 'hsl(var(--background))' }}
-          />
-        ) : (
-          <div 
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))' }}
-          />
-        )}
-        
-        {/* Gradient Overlays - matching FeaturedHero */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-        
-        {/* Bottom gradient blend */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+          {/* Hero Background */}
+          {heroBackdrop ? (
+            <img 
+              src={heroBackdrop}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ backgroundColor: 'hsl(var(--background))' }}
+            />
+          ) : (
+            <div 
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(135deg, hsl(var(--cinema-black)), hsl(var(--cinema-charcoal)))' }}
+            />
+          )}
+          
+          {/* Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+          
+          {/* Bottom gradient blend */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
 
-        {/* Navigation arrows for desktop */}
-        {heroMovies.length > 1 && !isMobile && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 p-0 bg-background/20 backdrop-blur-sm hover:bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 p-0 bg-background/20 backdrop-blur-sm hover:bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Button>
-          </>
-        )}
+          {/* Navigation arrows for desktop */}
+          {heroMovies.length > 1 && !isMobile && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPrevious}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 p-0 bg-background/20 backdrop-blur-sm hover:bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 p-0 bg-background/20 backdrop-blur-sm hover:bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Button>
+            </>
+          )}
 
-        {/* Hero Content - positioned at bottom like MovieDetail */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4 md:pb-8">
-          {isLoading ? (
-            <div className="max-w-2xl animate-pulse space-y-3">
-              <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
-              <div className="h-8 bg-muted/60 rounded-lg w-3/4"></div>
-              <div className="flex gap-3">
-                <div className="h-4 bg-muted/40 rounded w-16"></div>
-                <div className="h-4 bg-muted/40 rounded w-16"></div>
+          {/* Hero Content - positioned at bottom (mobile: just title, desktop: everything) */}
+          <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4 md:pb-8">
+            {isLoading ? (
+              <div className="max-w-2xl animate-pulse space-y-3">
+                <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
+                <div className="h-8 bg-muted/60 rounded-lg w-3/4"></div>
+                <div className="flex gap-3">
+                  <div className="h-4 bg-muted/40 rounded w-16"></div>
+                  <div className="h-4 bg-muted/40 rounded w-16"></div>
+                </div>
+                <div className="hidden md:block space-y-2">
+                  <div className="h-4 bg-muted/40 rounded w-full"></div>
+                  <div className="h-4 bg-muted/40 rounded w-5/6"></div>
+                </div>
+                <div className="hidden md:flex gap-3 pt-2">
+                  <div className="h-12 bg-muted/60 rounded-xl w-32"></div>
+                  <div className="h-12 bg-muted/40 rounded-xl w-28"></div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="h-4 bg-muted/40 rounded w-full"></div>
-                <div className="h-4 bg-muted/40 rounded w-5/6"></div>
+            ) : heroMovie ? (
+              <div className="max-w-2xl">
+                {/* Title */}
+                <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight uppercase">
+                  {heroMovie.title}
+                </h1>
+                
+                {/* Desktop only: Overview and buttons inside hero */}
+                <div className="hidden md:block">
+                  <p className="text-white/90 text-sm sm:text-base leading-relaxed mb-4 line-clamp-3">
+                    {heroMovie.overview}
+                  </p>
+                  
+                  <div className="flex gap-3">
+                    {currentTrailerKey ? (
+                      <Button 
+                        className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium"
+                        onClick={handleWatchNow}
+                      >
+                        <Play className="mr-2 h-4 w-4" />
+                        Watch Trailer
+                      </Button>
+                    ) : (
+                      <Link to={`/movie/${heroMovie.id}`}>
+                        <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium">
+                          <Play className="mr-2 h-4 w-4" />
+                          Watch Trailer
+                        </Button>
+                      </Link>
+                    )}
+                    <Link to={`/movie/${heroMovie.id}`}>
+                      <Button 
+                        variant="outline" 
+                        className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-6"
+                      >
+                        <Info className="mr-2 h-4 w-4" />
+                        More Info
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-3 pt-2">
-                <div className="h-12 bg-muted/60 rounded-xl w-32"></div>
-                <div className="h-12 bg-muted/40 rounded-xl w-28"></div>
-              </div>
-            </div>
-          ) : heroMovie ? (
-            <div className="max-w-2xl">
-              {/* Title */}
-              <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight uppercase">
-                {heroMovie.title}
-              </h1>
-              
-              {/* Overview */}
-              <p className="text-white/90 text-sm sm:text-base leading-relaxed mb-4 line-clamp-2 sm:line-clamp-3">
-                {heroMovie.overview}
-              </p>
-              
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                {currentTrailerKey ? (
-                  <Button 
-                    className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium"
-                    onClick={handleWatchNow}
-                  >
-                    <Play className="mr-2 h-4 w-4" />
-                    <span className="hidden xs:inline">Watch Trailer</span>
-                    <span className="xs:hidden">Trailer</span>
-                  </Button>
-                ) : (
-                  <Link to={`/movie/${heroMovie.id}`}>
-                    <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium">
-                      <Play className="mr-2 h-4 w-4" />
-                      <span className="hidden xs:inline">Watch Trailer</span>
-                      <span className="xs:hidden">Trailer</span>
-                    </Button>
-                  </Link>
-                )}
-                <Link to={`/movie/${heroMovie.id}`}>
-                  <Button 
-                    variant="outline" 
-                    className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 sm:px-6"
-                  >
-                    <Info className="mr-2 h-4 w-4" />
-                    More Info
+            ) : (
+              <div className="max-w-2xl text-center space-y-4">
+                <div>
+                  <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
+                    Welcome to Your Movie Universe
+                  </h2>
+                  <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
+                    Discover, save, and explore thousands of movies with personalized recommendations.
+                  </p>
+                </div>
+                <Link to="/search">
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium touch-target">
+                    Start Exploring
                   </Button>
                 </Link>
               </div>
-            </div>
-          ) : (
-            <div className="max-w-2xl text-center space-y-4">
-              <div>
-                <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
-                  Welcome to Your Movie Universe
-                </h2>
-                <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
-                  Discover, save, and explore thousands of movies with personalized recommendations.
-                </p>
+            )}
+
+            {/* Slide indicators - larger touch targets */}
+            {heroMovies.length > 1 && (
+              <div className="flex justify-center space-x-3 mt-6">
+                {heroMovies.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
+                      index === currentIndex 
+                        ? 'bg-primary w-8' 
+                        : 'bg-foreground/30 hover:bg-foreground/50 w-3'
+                    }`}
+                  />
+                ))}
               </div>
-              <Link to="/search">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 px-6 font-medium touch-target">
-                  Start Exploring
+            )}
+          </div>
+
+          {/* Loading indicator for refresh */}
+          {isRefreshing && (
+            <div className="absolute top-16 right-6 z-30">
+              <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-foreground flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Refreshing...
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Mobile only: Overview and buttons below hero */}
+        {heroMovie && !isLoading && (
+          <div className="md:hidden px-4 pt-4">
+            <p className="text-foreground/90 text-sm leading-relaxed mb-4 line-clamp-3">
+              {heroMovie.overview}
+            </p>
+            
+            <div className="flex gap-3">
+              {currentTrailerKey ? (
+                <Button 
+                  className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 font-medium"
+                  onClick={handleWatchNow}
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Trailer
+                </Button>
+              ) : (
+                <Link to={`/movie/${heroMovie.id}`}>
+                  <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 font-medium">
+                    <Play className="mr-2 h-4 w-4" />
+                    Trailer
+                  </Button>
+                </Link>
+              )}
+              <Link to={`/movie/${heroMovie.id}`}>
+                <Button 
+                  variant="outline" 
+                  className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4"
+                >
+                  <Info className="mr-2 h-4 w-4" />
+                  More Info
                 </Button>
               </Link>
             </div>
-          )}
-
-          {/* Slide indicators - larger touch targets */}
-          {heroMovies.length > 1 && (
-            <div className="flex justify-center space-x-3 mt-6">
-              {heroMovies.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
-                    index === currentIndex 
-                      ? 'bg-primary w-8' 
-                      : 'bg-foreground/30 hover:bg-foreground/50 w-3'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Loading indicator for refresh */}
-        {isRefreshing && (
-          <div className="absolute top-16 right-6 z-30">
-            <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-foreground flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 animate-spin" />
-              Refreshing...
-            </div>
           </div>
         )}
-        </div>
       </div>
     </>
   );

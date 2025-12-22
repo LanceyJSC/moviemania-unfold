@@ -146,106 +146,144 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   return (
     <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
       <div className="relative w-full overflow-hidden group md:rounded-2xl aspect-video">
-      {/* Background Image */}
-      {backdropUrl && (
-        <img 
-          src={backdropUrl}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ backgroundColor: 'hsl(var(--background))' }}
-        />
-      )}
-      
-      {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-      
-      {/* Bottom gradient blend */}
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
-      
-      {/* Content - positioned at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4 md:pb-8">
-        <div className="max-w-2xl">
-          {/* Badge */}
-          <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
-            Featured {type === 'movie' ? 'Movie' : 'TV Show'}
-            {isRefreshing && <span className="ml-2 text-xs">Updating...</span>}
-          </Badge>
-          
-          {/* Title */}
-          <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight uppercase">
-            {title}
-          </h1>
-          
-          {/* Meta Info */}
-          <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
-            {releaseDate && (
+        {/* Background Image */}
+        {backdropUrl && (
+          <img 
+            src={backdropUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ backgroundColor: 'hsl(var(--background))' }}
+          />
+        )}
+        
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        
+        {/* Bottom gradient blend */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+        
+        {/* Content - positioned at bottom (mobile: just title/meta, desktop: everything) */}
+        <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4 md:pb-8">
+          <div className="max-w-2xl">
+            {/* Badge */}
+            <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
+              Featured {type === 'movie' ? 'Movie' : 'TV Show'}
+              {isRefreshing && <span className="ml-2 text-xs">Updating...</span>}
+            </Badge>
+            
+            {/* Title */}
+            <h1 className="font-cinematic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mb-2 sm:mb-4 tracking-wide leading-tight uppercase">
+              {title}
+            </h1>
+            
+            {/* Meta Info */}
+            <div className="flex items-center space-x-3 sm:space-x-4 mb-3 md:mb-4">
+              {releaseDate && (
+                <div className="flex items-center space-x-1 text-white/80">
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm">{new Date(releaseDate).getFullYear()}</span>
+                </div>
+              )}
               <div className="flex items-center space-x-1 text-white/80">
-                <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">{new Date(releaseDate).getFullYear()}</span>
+                <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-cinema-gold text-cinema-gold" />
+                <span className="text-xs sm:text-sm">{rating?.toFixed(1)}/10</span>
+              </div>
+            </div>
+            
+            {/* Desktop only: Overview and buttons inside hero */}
+            <div className="hidden md:block">
+              <p className="text-white/90 text-sm sm:text-base leading-relaxed mb-4 line-clamp-3">
+                {overview}
+              </p>
+              
+              <div className="flex gap-3">
+                {currentTrailerKey ? (
+                  <Button 
+                    className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium"
+                    disabled={isRefreshing}
+                    onClick={handleWatchTrailer}
+                  >
+                    <Play className="mr-2 h-4 w-4" />
+                    Watch Trailer
+                  </Button>
+                ) : (
+                  <Button 
+                    className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium"
+                    disabled={true}
+                  >
+                    <Play className="mr-2 h-4 w-4" />
+                    No Trailer
+                  </Button>
+                )}
+                <Link to={`/${type}/${featuredContent.id}`}>
+                  <Button 
+                    variant="outline" 
+                    className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-6"
+                    disabled={isRefreshing}
+                  >
+                    <Info className="mr-2 h-4 w-4" />
+                    More Info
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Slide indicators - larger touch targets */}
+            {featuredItems.length > 1 && (
+              <div className="flex justify-center space-x-3 mt-6 md:mt-6">
+                {featuredItems.map((_: any, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
+                      index === currentIndex 
+                        ? 'bg-primary w-8' 
+                        : 'bg-foreground/30 hover:bg-foreground/50 w-3'
+                    }`}
+                  />
+                ))}
               </div>
             )}
-            <div className="flex items-center space-x-1 text-white/80">
-              <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-cinema-gold text-cinema-gold" />
-              <span className="text-xs sm:text-sm">{rating?.toFixed(1)}/10</span>
-            </div>
-          </div>
-          
-          {/* Overview */}
-          <p className="text-white/90 text-sm sm:text-base leading-relaxed mb-4 line-clamp-2 sm:line-clamp-3">
-            {overview}
-          </p>
-          
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            {currentTrailerKey ? (
-              <Button 
-                className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium"
-                disabled={isRefreshing}
-                onClick={handleWatchTrailer}
-              >
-                <Play className="mr-2 h-4 w-4" />
-                <span className="hidden xs:inline">Watch Trailer</span>
-                <span className="xs:hidden">Trailer</span>
-              </Button>
-            ) : (
-              <Button 
-                className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 sm:px-6 font-medium"
-                disabled={true}
-              >
-                <Play className="mr-2 h-4 w-4" />
-                No Trailer
-              </Button>
-            )}
-            <Link to={`/${type}/${featuredContent.id}`}>
-              <Button 
-                variant="outline" 
-                className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4 sm:px-6"
-                disabled={isRefreshing}
-              >
-                <Info className="mr-2 h-4 w-4" />
-                More Info
-              </Button>
-            </Link>
           </div>
         </div>
-
-        {/* Slide indicators - larger touch targets */}
-        {featuredItems.length > 1 && (
-          <div className="flex justify-center space-x-3 mt-6">
-            {featuredItems.map((_: any, index: number) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
-                  index === currentIndex 
-                    ? 'bg-primary w-8' 
-                    : 'bg-foreground/30 hover:bg-foreground/50 w-3'
-                }`}
-              />
-            ))}
-          </div>
-        )}
+      </div>
+      
+      {/* Mobile only: Overview and buttons below hero */}
+      <div className="md:hidden px-4 pt-4">
+        <p className="text-foreground/90 text-sm leading-relaxed mb-4 line-clamp-3">
+          {overview}
+        </p>
+        
+        <div className="flex gap-3">
+          {currentTrailerKey ? (
+            <Button 
+              className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 font-medium"
+              disabled={isRefreshing}
+              onClick={handleWatchTrailer}
+            >
+              <Play className="mr-2 h-4 w-4" />
+              Trailer
+            </Button>
+          ) : (
+            <Button 
+              className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 font-medium"
+              disabled={true}
+            >
+              <Play className="mr-2 h-4 w-4" />
+              No Trailer
+            </Button>
+          )}
+          <Link to={`/${type}/${featuredContent.id}`}>
+            <Button 
+              variant="outline" 
+              className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4"
+              disabled={isRefreshing}
+            >
+              <Info className="mr-2 h-4 w-4" />
+              More Info
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
