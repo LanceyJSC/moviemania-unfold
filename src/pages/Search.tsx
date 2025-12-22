@@ -10,7 +10,7 @@ import { AdvancedFilters } from "@/components/AdvancedFilters";
 
 import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
-import { MobileHeader } from "@/components/MobileHeader";
+import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -224,7 +224,7 @@ const Search = () => {
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-12 max-h-screen overflow-y-auto">
       <DesktopHeader />
-      <MobileHeader title="Search" />
+      <MobileBrandHeader />
       
       {/* Search Input */}
       <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 md:top-16 z-40">

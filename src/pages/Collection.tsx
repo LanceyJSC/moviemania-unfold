@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Navigation } from '@/components/Navigation';
-import { MobileHeader } from '@/components/MobileHeader';
+import { MobileBrandHeader } from '@/components/MobileBrandHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { CollectionMediaCard } from '@/components/CollectionMediaCard';
 import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
@@ -102,7 +102,7 @@ const Collection = () => {
     return (
       <div className="min-h-screen bg-background pb-24 md:pb-12">
         <DesktopHeader />
-        <MobileHeader title="Collection" />
+        <MobileBrandHeader />
         <Navigation />
         <div className="container mx-auto px-4 py-20 text-center max-w-7xl">
           <Film className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
@@ -339,7 +339,7 @@ const Collection = () => {
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-12">
       <DesktopHeader />
-      <MobileHeader title="Collection" />
+      <MobileBrandHeader />
       <Navigation />
       
       <div className="px-4 md:px-6 py-6 max-w-7xl mx-auto">
