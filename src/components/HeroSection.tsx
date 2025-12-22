@@ -360,9 +360,9 @@ export const HeroSection = () => {
               </div>
             )}
 
-            {/* Desktop only: Slide indicators inside hero */}
+            {/* Slide indicators - larger touch targets */}
             {heroMovies.length > 1 && (
-              <div className="hidden md:flex justify-center space-x-3 mt-6">
+              <div className="flex justify-center space-x-3 mt-6">
                 {heroMovies.map((_, index) => (
                   <button
                     key={index}
@@ -418,28 +418,11 @@ export const HeroSection = () => {
                   variant="outline" 
                   className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4"
                 >
-              <Info className="mr-2 h-4 w-4" />
+                  <Info className="mr-2 h-4 w-4" />
                   More Info
                 </Button>
               </Link>
             </div>
-            
-            {/* Mobile only: Slide indicators below buttons */}
-            {heroMovies.length > 1 && (
-              <div className="flex md:hidden justify-center space-x-3 mt-4">
-                {heroMovies.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
-                      index === currentIndex 
-                        ? 'bg-primary w-8' 
-                        : 'bg-foreground/30 hover:bg-foreground/50 w-3'
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>
