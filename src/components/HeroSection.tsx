@@ -281,8 +281,8 @@ export const HeroSection = () => {
           </>
         )}
 
-        {/* Hero Content - with desktop centering */}
-        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
+        {/* Hero Content - positioned at bottom like MovieDetail */}
+        <div className="absolute bottom-16 left-0 right-0 px-4 md:px-6 max-w-7xl mx-auto w-full md:relative md:bottom-auto md:h-full md:flex md:flex-col md:justify-end md:pb-8">
           {isLoading ? (
             <div className="max-w-2xl animate-pulse space-y-3">
               <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>

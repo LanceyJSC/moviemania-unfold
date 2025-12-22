@@ -163,8 +163,8 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       {/* Bottom gradient blend */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
       
-      {/* Content - with desktop centering */}
-      <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-6 md:pb-8 max-w-7xl mx-auto w-full">
+      {/* Content - positioned at bottom like MovieDetail */}
+      <div className="absolute bottom-16 left-0 right-0 px-4 md:px-6 max-w-7xl mx-auto w-full md:relative md:bottom-auto md:h-full md:flex md:flex-col md:justify-end md:pb-8">
         <div className="max-w-2xl">
           {/* Badge */}
           <Badge className="mb-2 sm:mb-4 bg-cinema-red/20 text-cinema-red border-cinema-red text-xs sm:text-sm">
