@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Pause, Play, X } from 'lucide-react';
+import { Pause, Play, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWrappedData, WrappedPeriod } from '@/hooks/useWrappedData';
 import { WrappedProgress } from '@/components/wrapped/WrappedProgress';
@@ -9,7 +9,11 @@ import { TotalWatchedSlide } from '@/components/wrapped/TotalWatchedSlide';
 import { HoursWatchedSlide } from '@/components/wrapped/HoursWatchedSlide';
 import { TopMovieSlide } from '@/components/wrapped/TopMovieSlide';
 import { TopTVSlide } from '@/components/wrapped/TopTVSlide';
+import { TopActorsSlide } from '@/components/wrapped/TopActorsSlide';
+import { TopDirectorsSlide } from '@/components/wrapped/TopDirectorsSlide';
 import { TopGenreSlide } from '@/components/wrapped/TopGenreSlide';
+import { ViewingPatternsSlide } from '@/components/wrapped/ViewingPatternsSlide';
+import { FunFactsSlide } from '@/components/wrapped/FunFactsSlide';
 import { RatingSlide } from '@/components/wrapped/RatingSlide';
 import { ShareableCard } from '@/components/wrapped/ShareableCard';
 import { Button } from '@/components/ui/button';
@@ -28,9 +32,13 @@ const gradients: Record<number, string> = {
   2: 'from-blue-600/30 via-background to-background', // Hours
   3: 'from-cinema-red/40 via-background to-cinema-gold/20', // Top movie
   4: 'from-blue-500/30 via-background to-purple-500/20', // Top TV
-  5: 'from-purple-600/30 via-background to-background', // Genre
-  6: 'from-cinema-gold/40 via-background to-background', // Rating
-  7: 'from-cinema-red/30 via-cinema-gold/20 to-background' // Share
+  5: 'from-cinema-gold/40 via-background to-orange-500/20', // Top Actors
+  6: 'from-purple-600/30 via-background to-background', // Top Directors
+  7: 'from-pink-600/30 via-background to-background', // Genre
+  8: 'from-green-600/30 via-background to-background', // Viewing Patterns
+  9: 'from-yellow-600/30 via-background to-background', // Fun Facts
+  10: 'from-cinema-gold/40 via-background to-background', // Rating
+  11: 'from-cinema-red/30 via-cinema-gold/20 to-background' // Share
 };
 
 const Wrapped = () => {
@@ -41,7 +49,7 @@ const Wrapped = () => {
   const [isPaused, setIsPaused] = useState(false);
   const { data, loading } = useWrappedData(period);
 
-  const totalSlides = 8;
+  const totalSlides = 12;
 
   // Auto-advance slides
   useEffect(() => {
@@ -106,6 +114,7 @@ const Wrapped = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cinema-gold mx-auto mb-4" />
           <p className="text-muted-foreground">Loading your wrapped...</p>
+          <p className="text-muted-foreground/50 text-sm mt-2">Fetching your movie journey...</p>
         </div>
       </div>
     );
@@ -146,13 +155,32 @@ const Wrapped = () => {
       case 4:
         return <TopTVSlide tvShow={data.topTVShow} />;
       case 5:
+        return <TopActorsSlide actors={data.topActors} />;
+      case 6:
+        return <TopDirectorsSlide directors={data.topDirectors} />;
+      case 7:
         return (
           <TopGenreSlide 
             topGenre={data.topGenre}
             genres={data.genres}
           />
         );
-      case 6:
+      case 8:
+        return (
+          <ViewingPatternsSlide 
+            patterns={data.viewingPatterns}
+            totalMovies={data.totalMovies}
+            totalEpisodes={data.totalEpisodes}
+          />
+        );
+      case 9:
+        return (
+          <FunFactsSlide 
+            facts={data.funFacts}
+            totalHours={data.totalHours}
+          />
+        );
+      case 10:
         return (
           <RatingSlide 
             averageRating={data.averageRating}
@@ -160,7 +188,7 @@ const Wrapped = () => {
             highestRatedMovie={data.highestRatedMovie}
           />
         );
-      case 7:
+      case 11:
         return <ShareableCard data={data} />;
       default:
         return null;
