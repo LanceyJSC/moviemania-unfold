@@ -65,9 +65,12 @@ export interface WrappedData {
   funFacts: FunFacts;
 }
 
-const getDateRange = (period: WrappedPeriod): { start: Date; end: Date } => {
+const formatDateForQuery = (date: Date): string => {
+  return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+};
+
+const getDateRange = (period: WrappedPeriod): { start: string; end: string } => {
   const now = new Date();
-  const end = now;
   let start: Date;
 
   switch (period) {
@@ -87,7 +90,7 @@ const getDateRange = (period: WrappedPeriod): { start: Date; end: Date } => {
       start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }
 
-  return { start, end };
+  return { start: formatDateForQuery(start), end: formatDateForQuery(now) };
 };
 
 const getDayName = (date: Date): string => {
@@ -112,8 +115,6 @@ export const useWrappedData = (period: WrappedPeriod) => {
 
     try {
       const { start, end } = getDateRange(period);
-      const startStr = start.toISOString();
-      const endStr = end.toISOString();
 
       // Fetch profile for member since date
       const { data: profileData } = await supabase
@@ -135,7 +136,7 @@ export const useWrappedData = (period: WrappedPeriod) => {
         .order('rating', { ascending: false });
 
       if (period !== 'all-time') {
-        movieQuery = movieQuery.gte('watched_date', startStr).lte('watched_date', endStr);
+        movieQuery = movieQuery.gte('watched_date', start).lte('watched_date', end);
       }
 
       const { data: movieDiary } = await movieQuery;
@@ -148,7 +149,7 @@ export const useWrappedData = (period: WrappedPeriod) => {
         .order('rating', { ascending: false });
 
       if (period !== 'all-time') {
-        tvQuery = tvQuery.gte('watched_date', startStr).lte('watched_date', endStr);
+        tvQuery = tvQuery.gte('watched_date', start).lte('watched_date', end);
       }
 
       const { data: tvDiary } = await tvQuery;
@@ -161,7 +162,7 @@ export const useWrappedData = (period: WrappedPeriod) => {
         .order('rating', { ascending: false });
 
       if (period !== 'all-time') {
-        ratingsQuery = ratingsQuery.gte('created_at', startStr).lte('created_at', endStr);
+        ratingsQuery = ratingsQuery.gte('created_at', start).lte('created_at', end);
       }
 
       const { data: ratings } = await ratingsQuery;
