@@ -229,7 +229,7 @@ export const HeroSection = () => {
     <>
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
         <div 
-          className="relative text-foreground overflow-hidden group md:rounded-2xl aspect-video"
+          className="relative text-foreground overflow-hidden group md:rounded-2xl aspect-[4/3] sm:aspect-video"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -282,7 +282,7 @@ export const HeroSection = () => {
         )}
 
         {/* Hero Content - positioned at bottom like MovieDetail */}
-        <div className="relative h-full flex flex-col justify-end px-4 md:px-6 pb-20 md:pb-8 max-w-7xl mx-auto w-full">
+        <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-16 md:pb-8">
           {isLoading ? (
             <div className="max-w-2xl animate-pulse space-y-3">
               <div className="h-6 bg-muted/60 rounded w-32 mb-4"></div>
