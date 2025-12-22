@@ -192,4 +192,20 @@
   .animate-achievement-glow {
     animation: achievement-glow 2s ease-in-out infinite;
   }
+
+  /* PWA Install Banner slide up animation */
+  @keyframes slide-up {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
 }
