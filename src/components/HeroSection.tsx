@@ -391,32 +391,32 @@ export const HeroSection = () => {
         
         {/* Mobile only: Overview and buttons below hero */}
         {heroMovie && !isLoading && (
-          <div className="md:hidden px-4 pt-4">
-            <p className="text-foreground/90 text-sm leading-relaxed mb-4 line-clamp-3">
+          <div className="md:hidden px-4 pt-6 pb-4">
+            <p className="text-muted-foreground text-sm leading-relaxed mb-6 line-clamp-3">
               {heroMovie.overview}
             </p>
             
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               {currentTrailerKey ? (
                 <Button 
-                  className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 font-medium"
+                  className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium flex-1"
                   onClick={handleWatchNow}
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  Trailer
+                  Watch Trailer
                 </Button>
               ) : (
-                <Link to={`/movie/${heroMovie.id}`}>
-                  <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-4 font-medium">
+                <Link to={`/movie/${heroMovie.id}`} className="flex-1">
+                  <Button className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium w-full">
                     <Play className="mr-2 h-4 w-4" />
-                    Trailer
+                    Watch Trailer
                   </Button>
                 </Link>
               )}
-              <Link to={`/movie/${heroMovie.id}`}>
+              <Link to={`/movie/${heroMovie.id}`} className="flex-1">
                 <Button 
                   variant="outline" 
-                  className="border-foreground/30 text-foreground bg-background/20 backdrop-blur-sm hover:bg-background/40 rounded-xl h-12 px-4"
+                  className="border-border text-foreground hover:bg-accent rounded-xl h-12 px-6 w-full"
                 >
                   <Info className="mr-2 h-4 w-4" />
                   More Info
