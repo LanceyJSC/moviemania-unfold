@@ -43,9 +43,9 @@ const Movies = () => {
   }, [queryClient]);
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <DesktopHeader />
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
+      <PullToRefresh onRefresh={handleRefresh}>
         <FeaturedHero type="movie" />
 
         <div className="relative">
@@ -87,7 +87,7 @@ const Movies = () => {
       </PullToRefresh>
 
       <Navigation />
-    </>
+    </div>
   );
 };
 

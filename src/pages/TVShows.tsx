@@ -42,9 +42,9 @@ const TVShows = () => {
   }, [queryClient]);
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <DesktopHeader />
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
+      <PullToRefresh onRefresh={handleRefresh}>
         <FeaturedHero type="tv" />
 
         <div className="relative">
@@ -86,7 +86,7 @@ const TVShows = () => {
       </PullToRefresh>
 
       <Navigation />
-    </>
+    </div>
   );
 };
 
