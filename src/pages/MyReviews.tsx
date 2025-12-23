@@ -258,7 +258,7 @@ const MyReviews = () => {
                           {review.rating && review.rating > 0 && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cinema-gold/20 rounded text-cinema-gold font-semibold text-xs">
                               <Star className="h-3 w-3 fill-current" />
-                              {review.rating}/10
+                              {review.rating}/5
                             </span>
                           )}
                           {review.is_spoiler && (
