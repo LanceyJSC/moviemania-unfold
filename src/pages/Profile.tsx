@@ -1,23 +1,41 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
-import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles } from 'lucide-react';
+import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { useUserRole } from '@/hooks/useUserRole';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const { profile, updateProfile, loading } = useProfile();
+  const { preferences, updatePreferences, isLoading: preferencesLoading } = useUserPreferences();
   const navigate = useNavigate();
+  const [isExporting, setIsExporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -167,17 +185,45 @@ const Profile = () => {
               <CardDescription>Customize your app experience</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="py-2 border-b border-border">
-                <p className="font-medium">Notification Settings</p>
-                <p className="text-sm text-muted-foreground">
-                  Manage how you receive updates about new releases and more.
-                </p>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <div>
+                  <p className="font-medium">Push Notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    Get notified about new releases and updates
+                  </p>
+                </div>
+                <Switch
+                  checked={preferences?.notifications_enabled ?? true}
+                  onCheckedChange={async (checked) => {
+                    try {
+                      await updatePreferences({ notifications_enabled: checked });
+                      toast.success(checked ? 'Notifications enabled' : 'Notifications disabled');
+                    } catch {
+                      toast.error('Failed to update preferences');
+                    }
+                  }}
+                  disabled={preferencesLoading}
+                />
               </div>
-              <div className="py-2">
-                <p className="font-medium">Movie Preferences</p>
-                <p className="text-sm text-muted-foreground">
-                  Set your favorite genres, actors, and viewing preferences for better recommendations.
-                </p>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium">Email Notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    Receive email updates about your activity
+                  </p>
+                </div>
+                <Switch
+                  checked={preferences?.email_notifications ?? true}
+                  onCheckedChange={async (checked) => {
+                    try {
+                      await updatePreferences({ email_notifications: checked });
+                      toast.success(checked ? 'Email notifications enabled' : 'Email notifications disabled');
+                    } catch {
+                      toast.error('Failed to update preferences');
+                    }
+                  }}
+                  disabled={preferencesLoading}
+                />
               </div>
             </CardContent>
           </Card>
@@ -188,17 +234,140 @@ const Profile = () => {
               <CardDescription>Control your data and privacy settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="py-2 border-b border-border">
-                <p className="font-medium">Export Data</p>
-                <p className="text-sm text-muted-foreground">
-                  Download a copy of your watchlist, ratings, and reviews.
-                </p>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <div>
+                  <p className="font-medium">Export Data</p>
+                  <p className="text-sm text-muted-foreground">
+                    Download a copy of your watchlist, ratings, and reviews
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isExporting}
+                  onClick={async () => {
+                    if (!user) return;
+                    setIsExporting(true);
+                    try {
+                      const [
+                        { data: ratings },
+                        { data: reviews },
+                        { data: watchlist },
+                        { data: movieDiary },
+                        { data: tvDiary }
+                      ] = await Promise.all([
+                        supabase.from('user_ratings').select('*').eq('user_id', user.id),
+                        supabase.from('user_reviews').select('*').eq('user_id', user.id),
+                        supabase.from('enhanced_watchlist_items').select('*').eq('user_id', user.id),
+                        supabase.from('movie_diary').select('*').eq('user_id', user.id),
+                        supabase.from('tv_diary').select('*').eq('user_id', user.id)
+                      ]);
+
+                      const exportData = {
+                        exportedAt: new Date().toISOString(),
+                        profile: { username: profile?.username, email: user.email },
+                        ratings: ratings || [],
+                        reviews: reviews || [],
+                        watchlist: watchlist || [],
+                        movieDiary: movieDiary || [],
+                        tvDiary: tvDiary || []
+                      };
+
+                      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `sceneburn-export-${new Date().toISOString().split('T')[0]}.json`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      toast.success('Data exported successfully!');
+                    } catch (error) {
+                      console.error('Export error:', error);
+                      toast.error('Failed to export data');
+                    } finally {
+                      setIsExporting(false);
+                    }
+                  }}
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </>
+                  )}
+                </Button>
               </div>
-              <div className="py-2">
-                <p className="font-medium text-destructive">Delete Account</p>
-                <p className="text-sm text-muted-foreground">
-                  Permanently delete your account and all associated data.
-                </p>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium text-destructive">Delete Account</p>
+                  <p className="text-sm text-muted-foreground">
+                    Permanently delete your account and all data
+                  </p>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" disabled={isDeleting}>
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </>
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your account
+                        and remove all your data including reviews, ratings, watchlists, and diary entries.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={async () => {
+                          if (!user) return;
+                          setIsDeleting(true);
+                          try {
+                            // Delete user data from all tables
+                            await Promise.all([
+                              supabase.from('user_ratings').delete().eq('user_id', user.id),
+                              supabase.from('user_reviews').delete().eq('user_id', user.id),
+                              supabase.from('enhanced_watchlist_items').delete().eq('user_id', user.id),
+                              supabase.from('movie_diary').delete().eq('user_id', user.id),
+                              supabase.from('tv_diary').delete().eq('user_id', user.id),
+                              supabase.from('watchlist').delete().eq('user_id', user.id),
+                              supabase.from('activity_feed').delete().eq('user_id', user.id),
+                              supabase.from('user_follows').delete().eq('follower_id', user.id),
+                              supabase.from('user_follows').delete().eq('following_id', user.id),
+                              supabase.from('user_preferences').delete().eq('user_id', user.id),
+                              supabase.from('user_stats').delete().eq('user_id', user.id),
+                              supabase.from('profiles').delete().eq('id', user.id),
+                            ]);
+                            
+                            toast.success('Account data deleted. Signing out...');
+                            await signOut();
+                          } catch (error) {
+                            console.error('Delete error:', error);
+                            toast.error('Failed to delete account. Please contact support.');
+                          } finally {
+                            setIsDeleting(false);
+                          }
+                        }}
+                      >
+                        Delete Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>

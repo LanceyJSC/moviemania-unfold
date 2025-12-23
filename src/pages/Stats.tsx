@@ -158,14 +158,14 @@ export const Stats = () => {
         setGenreData(genreDataArray);
       }
 
-      // Process rating distribution
+      // Process rating distribution (1-5 scale)
       const ratingMap = new Map<number, number>();
-      for (let i = 1; i <= 10; i++) {
+      for (let i = 1; i <= 5; i++) {
         ratingMap.set(i, 0);
       }
       
       ratings?.forEach(r => {
-        if (r.rating) {
+        if (r.rating && r.rating >= 1 && r.rating <= 5) {
           ratingMap.set(r.rating, (ratingMap.get(r.rating) || 0) + 1);
         }
       });
