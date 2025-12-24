@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
+import { Navigation } from "@/components/Navigation";
 
 const MOVIE_GENRES = [
   { id: 28, name: "Action", emoji: "💥", color: "bg-red-500/20 text-red-400" },
@@ -66,23 +69,12 @@ export default function Genres() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* iOS-style header with safe area */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="flex items-center justify-between p-4 pt-[calc(1rem+env(safe-area-inset-top))]">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="touch-target focus-ring"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="font-cinematic text-xl tracking-wide text-foreground">
-            Browse Genres
-          </h1>
-          <div className="w-10" /> {/* Spacer for center alignment */}
-        </div>
+    <div className="min-h-screen bg-background pb-32 lg:pb-12">
+      <DesktopHeader />
+      <MobileHeader title="Browse Genres" />
+      
+      {/* Search and Tabs - sticky below header */}
+      <div className="sticky top-14 lg:top-16 z-40 bg-background/95 backdrop-blur-md border-b border-border">
 
         {/* Search bar */}
         <div className="px-4 pb-4">
@@ -167,6 +159,8 @@ export default function Genres() {
           </div>
         )}
       </div>
+      
+      <Navigation />
     </div>
   );
 }

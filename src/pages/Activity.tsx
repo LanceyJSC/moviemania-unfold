@@ -22,7 +22,7 @@ const Activity = () => {
   return (
     <>
       <DesktopHeader />
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background pb-24 md:pb-12">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background pb-24 lg:pb-12">
         <MobileHeader title="Activity" />
         
         <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">

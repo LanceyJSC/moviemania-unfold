@@ -400,7 +400,7 @@ const SeasonDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-12">
+    <div className="min-h-screen bg-background pb-32 lg:pb-12">
       <DesktopHeader />
       <MobileHeader title={season.name} />
       

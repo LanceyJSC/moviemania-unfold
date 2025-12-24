@@ -1,26 +1,22 @@
 import * as React from "react"
 
-// iPhone 6.5" and 6.7" screen width range: 414px-428px
-const MOBILE_BREAKPOINT = 640  // Anything below 640px is considered mobile (iPhone/small devices)
-const IPHONE_MAX_WIDTH = 428   // iPhone 6.7" max width
+// Breakpoints for different device categories
+const MOBILE_BREAKPOINT = 768   // Below this is mobile (phones)
+const TABLET_BREAKPOINT = 1024  // Between mobile and this is tablet (iPad, etc.)
 
+// Hook to detect mobile devices (phones) - under 768px
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean>(true) // Default to true for SSR/iframe safety
 
   React.useEffect(() => {
     const checkMobile = () => {
-      // Check multiple indicators for mobile detection
       const width = window.innerWidth
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-      const isSmallScreen = width < MOBILE_BREAKPOINT
-      
-      // Consider it mobile if small screen OR touch device with reasonable width
-      setIsMobile(isSmallScreen || (isTouchDevice && width <= 768))
+      // Mobile is anything under tablet breakpoint (768px)
+      setIsMobile(width < MOBILE_BREAKPOINT)
     }
     
     checkMobile()
     
-    // Use both resize and matchMedia for better detection
     window.addEventListener('resize', checkMobile)
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
     mql.addEventListener("change", checkMobile)
@@ -34,28 +30,49 @@ export function useIsMobile() {
   return isMobile
 }
 
-// iPhone-specific hook for 6.5" and 6.7" detection
-export function useIsIPhone() {
-  const [isIPhone, setIsIPhone] = React.useState<boolean>(true) // Default to true for safety
+// Hook to detect tablet devices (iPad, etc.) - between 768px and 1024px
+export function useIsTablet() {
+  const [isTablet, setIsTablet] = React.useState<boolean>(false)
 
   React.useEffect(() => {
-    const checkIPhone = () => {
-      setIsIPhone(window.innerWidth <= IPHONE_MAX_WIDTH)
+    const checkTablet = () => {
+      const width = window.innerWidth
+      setIsTablet(width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT)
     }
     
-    checkIPhone()
+    checkTablet()
     
-    const mql = window.matchMedia(`(max-width: ${IPHONE_MAX_WIDTH}px)`)
-    mql.addEventListener("change", checkIPhone)
-    window.addEventListener('resize', checkIPhone)
+    window.addEventListener('resize', checkTablet)
     
     return () => {
-      mql.removeEventListener("change", checkIPhone)
-      window.removeEventListener('resize', checkIPhone)
+      window.removeEventListener('resize', checkTablet)
     }
   }, [])
 
-  return isIPhone
+  return isTablet
+}
+
+// Hook to detect any mobile/touch device (phones + tablets) - under 1024px
+export function useIsTouchDevice() {
+  const [isTouchDevice, setIsTouchDevice] = React.useState<boolean>(true)
+
+  React.useEffect(() => {
+    const checkTouch = () => {
+      const width = window.innerWidth
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      // Consider it a touch device if under tablet breakpoint OR has touch with reasonable width
+      setIsTouchDevice(width < TABLET_BREAKPOINT || (hasTouch && width < 1280))
+    }
+    
+    checkTouch()
+    window.addEventListener('resize', checkTouch)
+    
+    return () => {
+      window.removeEventListener('resize', checkTouch)
+    }
+  }, [])
+
+  return isTouchDevice
 }
 
 // Generic media query hook
