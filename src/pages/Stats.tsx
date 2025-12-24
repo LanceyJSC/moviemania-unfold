@@ -203,7 +203,7 @@ export const Stats = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <div className="min-h-screen bg-background pb-32 lg:pb-12">
         <DesktopHeader />
         <MobileHeader title="Stats" />
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
@@ -221,19 +221,10 @@ export const Stats = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-12">
+    <div className="min-h-screen bg-background pb-32 lg:pb-12">
       <DesktopHeader />
-      <MobileHeader title="Stats" />
+      <MobileHeader title="Your Stats" />
       
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center gap-4 p-4">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <h1 className="text-xl font-bold text-foreground">Your Stats</h1>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 gap-3">

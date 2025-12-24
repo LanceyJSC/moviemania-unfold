@@ -343,7 +343,7 @@ export const Achievements = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <div className="min-h-screen bg-background pb-32 lg:pb-12">
         <DesktopHeader />
         <MobileHeader title="Achievements" />
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
@@ -361,7 +361,7 @@ export const Achievements = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-12">
+    <div className="min-h-screen bg-background pb-32 lg:pb-12">
       <DesktopHeader />
       <MobileHeader title="Achievements" />
       
