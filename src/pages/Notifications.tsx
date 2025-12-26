@@ -65,10 +65,10 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 lg:pb-12">
+    <div className="min-h-screen bg-background pb-32 xl:pb-12">
       <DesktopHeader />
       {/* Header */}
-      <div className="sticky top-0 md:top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-0 xl:top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-foreground">Notifications</h1>

@@ -69,12 +69,12 @@ export default function Genres() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 lg:pb-12">
+    <div className="min-h-screen bg-background pb-32 xl:pb-12">
       <DesktopHeader />
       <MobileHeader title="Browse Genres" />
       
       {/* Search and Tabs - sticky below header */}
-      <div className="sticky top-14 lg:top-16 z-40 bg-background/95 backdrop-blur-md border-b border-border">
+      <div className="sticky top-14 xl:top-16 z-40 bg-background/95 backdrop-blur-md border-b border-border">
 
         {/* Search bar */}
         <div className="px-4 pb-4">
