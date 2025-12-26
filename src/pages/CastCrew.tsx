@@ -41,7 +41,7 @@ const CastCrew = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-32 xl:pb-12">
+      <div className="min-h-screen bg-background pb-32 2xl:pb-12">
         <DesktopHeader />
         <MobileHeader title="Loading..." />
         <div className="flex items-center justify-center h-96">
@@ -53,7 +53,7 @@ const CastCrew = () => {
 
   if (!media) {
     return (
-      <div className="min-h-screen bg-background pb-32 xl:pb-12">
+      <div className="min-h-screen bg-background pb-32 2xl:pb-12">
         <DesktopHeader />
         <MobileHeader title="Not Found" />
         <div className="flex items-center justify-center h-96">
@@ -102,7 +102,7 @@ const CastCrew = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-32 xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
       <DesktopHeader />
       <MobileHeader title={`Cast & Crew`} />
       

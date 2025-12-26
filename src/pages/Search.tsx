@@ -222,12 +222,12 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 xl:pb-12 max-h-screen overflow-y-auto">
+    <div className="min-h-screen bg-background pb-32 2xl:pb-12 max-h-screen overflow-y-auto">
       <DesktopHeader />
       <MobileBrandHeader />
       
       {/* Search Input */}
-      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 xl:top-16 z-40">
+      <div className="bg-cinema-charcoal/80 backdrop-blur-sm p-4 sticky top-0 2xl:top-16 z-40">
         <div className="space-y-4 max-w-7xl mx-auto">
           {/* Search Input Row */}
           <div className="flex items-center gap-2">

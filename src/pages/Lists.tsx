@@ -107,7 +107,7 @@ const Lists = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-24 xl:pb-12">
+    <div className="min-h-screen bg-background pb-24 2xl:pb-12">
       <DesktopHeader />
       <MobileHeader title="Lists" />
       

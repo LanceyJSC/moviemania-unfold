@@ -95,7 +95,7 @@ const ActorDetail = () => {
     .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime());
 
   return (
-    <div className="min-h-screen bg-background pb-32 xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
       <DesktopHeader />
       <MobileHeader title={actor.name} />
       
