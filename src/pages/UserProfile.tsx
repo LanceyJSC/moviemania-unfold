@@ -100,7 +100,7 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24 xl:pb-12">
+      <div className="min-h-screen bg-background pb-24 2xl:pb-12">
         <DesktopHeader />
         <MobileHeader title="Profile" />
         <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
@@ -121,7 +121,7 @@ const UserProfile = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background pb-24 xl:pb-12">
+      <div className="min-h-screen bg-background pb-24 2xl:pb-12">
         <DesktopHeader />
         <MobileHeader title="Profile" />
         <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
@@ -137,7 +137,7 @@ const UserProfile = () => {
   const isOwnProfile = currentUser?.id === profile.id;
 
   return (
-    <div className="min-h-screen bg-background pb-24 xl:pb-12">
+    <div className="min-h-screen bg-background pb-24 2xl:pb-12">
       <DesktopHeader />
       <MobileHeader title="Profile" />
       

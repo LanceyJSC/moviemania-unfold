@@ -50,8 +50,8 @@ const TVShows = () => {
         <FeaturedHero type="tv" />
 
         <div className="relative">
-          <div className="px-4 xl:px-6 pt-2 pb-32 xl:pb-12 space-y-8 max-w-7xl mx-auto">
-            <div className="sticky top-0 xl:top-16 z-40 bg-background/95 backdrop-blur-sm py-4">
+          <div className="px-4 2xl:px-6 pt-2 pb-32 2xl:pb-12 space-y-8 max-w-7xl mx-auto">
+            <div className="sticky top-0 2xl:top-16 z-40 bg-background/95 backdrop-blur-sm py-4">
               <div className="flex justify-between space-x-1">
                 {filterButtons.map((filter) => {
                   const Icon = filter.icon;
