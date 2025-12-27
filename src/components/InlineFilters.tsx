@@ -198,25 +198,23 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             </Button>
           </div>
           
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          <div className="grid grid-cols-6 gap-2">
             {GENRES.map((genre) => (
               <button
                 key={genre.id}
                 onClick={() => handleGenreClick(genre.id)}
                 className={cn(
-                  "flex flex-col items-center gap-2 py-4 px-3 rounded-xl",
+                  "flex flex-col items-center gap-1 py-2 px-2 rounded-lg",
                   "bg-card/80 border border-border/50",
-                  "hover:bg-card hover:border-primary/50 hover:shadow-lg",
+                  "hover:bg-card hover:border-primary/50",
                   "transition-all duration-200 active:scale-95",
                   !isProUser && "opacity-70"
                 )}
               >
-                <div className="rounded-full w-12 h-12 bg-background/50 flex items-center justify-center">
-                  <span className="text-xl" role="img" aria-label={genre.name}>
-                    {genre.emoji}
-                  </span>
-                </div>
-                <span className="text-sm font-medium text-foreground text-center">
+                <span className="text-base" role="img" aria-label={genre.name}>
+                  {genre.emoji}
+                </span>
+                <span className="text-xs font-medium text-foreground text-center">
                   {genre.name}
                 </span>
               </button>
@@ -297,14 +295,11 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
 
           {/* Advanced Pro Filters */}
           <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-between h-10 px-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 border border-amber-500/20 rounded-lg"
-              >
+            <CollapsibleTrigger className="w-full">
+              <div className="flex items-center justify-between w-full h-10 px-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 border border-amber-500/20 rounded-lg cursor-pointer transition-colors">
                 <span className="text-sm font-medium">More Discovery Options</span>
-                <ChevronDown className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} />
-              </Button>
+                <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showAdvanced && "rotate-180")} />
+              </div>
             </CollapsibleTrigger>
             
             <CollapsibleContent className="pt-4 space-y-4">
