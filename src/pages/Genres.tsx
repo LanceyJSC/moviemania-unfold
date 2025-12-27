@@ -121,34 +121,26 @@ export default function Genres() {
       </div>
 
       {/* Genre grid */}
-      <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-        <div className="grid grid-cols-2 gap-3 iphone-65:gap-4">
+      <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] max-w-7xl mx-auto">
+        <div className="flex flex-wrap gap-2">
           {filteredGenres.map((genre) => (
             <Button
               key={genre.id}
               variant="outline"
               onClick={() => handleGenreClick(genre.id)}
               className={cn(
-                "h-auto p-4 rounded-2xl border-border/50",
+                "h-auto py-2 px-4 rounded-full border-border/50",
                 "bg-card/60 backdrop-blur-sm hover:bg-card/80",
                 "hover:border-primary/50 transition-all duration-200",
-                "active:scale-95 touch-target focus-ring"
+                "active:scale-95"
               )}
             >
-              <div className="flex flex-col items-center space-y-3 w-full">
-                <div className={cn(
-                  "rounded-full w-16 h-16 flex items-center justify-center",
-                  genre.color,
-                  "transition-transform duration-200 group-hover:scale-110"
-                )}>
-                  <span className="text-3xl" role="img" aria-label={genre.name}>
-                    {genre.emoji}
-                  </span>
-                </div>
-                <span className="text-sm font-medium text-foreground text-center leading-tight">
-                  {genre.name}
-                </span>
-              </div>
+              <span className="mr-2" role="img" aria-label={genre.name}>
+                {genre.emoji}
+              </span>
+              <span className="text-sm font-medium text-foreground">
+                {genre.name}
+              </span>
             </Button>
           ))}
         </div>

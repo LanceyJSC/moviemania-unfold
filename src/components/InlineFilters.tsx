@@ -198,25 +198,21 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             </Button>
           </div>
           
-          <div className="grid grid-cols-6 gap-2">
+          <div className="flex flex-wrap gap-2">
             {GENRES.map((genre) => (
               <button
                 key={genre.id}
                 onClick={() => handleGenreClick(genre.id)}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2 px-2 rounded-lg",
+                  "flex items-center gap-1.5 py-1.5 px-3 rounded-full",
                   "bg-card/80 border border-border/50",
                   "hover:bg-card hover:border-primary/50",
-                  "transition-all duration-200 active:scale-95",
+                  "transition-all duration-200 active:scale-95 text-sm",
                   !isProUser && "opacity-70"
                 )}
               >
-                <span className="text-base" role="img" aria-label={genre.name}>
-                  {genre.emoji}
-                </span>
-                <span className="text-xs font-medium text-foreground text-center">
-                  {genre.name}
-                </span>
+                <span role="img" aria-label={genre.name}>{genre.emoji}</span>
+                <span className="font-medium text-foreground">{genre.name}</span>
               </button>
             ))}
           </div>
