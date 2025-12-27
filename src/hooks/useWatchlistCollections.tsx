@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useSubscription } from '@/hooks/useSubscription';
 
 interface WatchlistCollection {
   id: string;
@@ -33,7 +32,6 @@ interface WatchlistItem {
 
 export const useWatchlistCollections = () => {
   const { user } = useAuth();
-  const { getLimit, isPro } = useSubscription();
   const [collections, setCollections] = useState<WatchlistCollection[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,13 +71,6 @@ export const useWatchlistCollections = () => {
     isPublic = false
   ) => {
     if (!user) return null;
-
-    // Check watchlist collection limit for free users
-    const maxWatchlists = getLimit('max_watchlists');
-    if (collections.length >= maxWatchlists) {
-      toast.error(`Free accounts can create up to ${maxWatchlists} watchlist collections. Upgrade to Pro for unlimited.`);
-      return null;
-    }
 
     try {
       const { data, error } = await supabase
@@ -145,22 +136,12 @@ export const useWatchlistCollections = () => {
     }
   };
 
-  // Computed values for limit checking
-  const maxWatchlists = getLimit('max_watchlists');
-  const isAtLimit = collections.length >= maxWatchlists;
-  const remainingCount = Math.max(0, maxWatchlists - collections.length);
-
   return {
     collections,
     loading,
     createCollection,
     updateCollection,
     deleteCollection,
-    refetch: fetchCollections,
-    // Limit info
-    isPro,
-    isAtLimit,
-    remainingCount,
-    maxWatchlists,
+    refetch: fetchCollections
   };
 };

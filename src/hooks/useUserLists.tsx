@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useSubscription } from '@/hooks/useSubscription';
 
 interface UserList {
   id: string;
@@ -28,7 +27,6 @@ interface ListItem {
 export const useUserLists = (userId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { getLimit, isPro } = useSubscription();
   const [lists, setLists] = useState<UserList[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,17 +66,6 @@ export const useUserLists = (userId?: string) => {
       toast({
         title: "Sign in required",
         description: "Please sign in to create lists",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    // Check list limit for free users
-    const maxLists = getLimit('max_lists');
-    if (lists.length >= maxLists) {
-      toast({
-        title: "List limit reached",
-        description: `Free accounts can create up to ${maxLists} lists. Upgrade to Pro for unlimited lists.`,
         variant: "destructive",
       });
       return null;
@@ -276,11 +263,6 @@ export const useUserLists = (userId?: string) => {
     }
   };
 
-  // Computed values for limit checking
-  const maxLists = getLimit('max_lists');
-  const isAtLimit = lists.length >= maxLists;
-  const remainingCount = Math.max(0, maxLists - lists.length);
-
   return {
     lists,
     loading,
@@ -290,11 +272,6 @@ export const useUserLists = (userId?: string) => {
     addToList,
     removeFromList,
     getListItems,
-    refetch: fetchLists,
-    // Limit info
-    isPro,
-    isAtLimit,
-    remainingCount,
-    maxLists,
+    refetch: fetchLists
   };
 };

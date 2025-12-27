@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { TrailerProvider } from "@/contexts/TrailerContext";
 import { UserStateProvider } from "@/contexts/UserStateContext";
@@ -39,7 +38,6 @@ import Stats from "./pages/Stats";
 import Achievements from "./pages/Achievements";
 import CastCrew from "./pages/CastCrew";
 import Wrapped from "./pages/Wrapped";
-import Upgrade from "./pages/Upgrade";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -62,11 +60,10 @@ const App = () => {
         <TooltipProvider>
           <ErrorBoundary>
             <AuthProvider>
-              <SubscriptionProvider>
-                <ProfileProvider>
-                  <ErrorBoundary>
-                    <UserStateProvider>
-                      <TrailerProvider>
+              <ProfileProvider>
+                <ErrorBoundary>
+                  <UserStateProvider>
+                    <TrailerProvider>
           
                       <GlobalTrailerModal />
                       <BrowserRouter>
@@ -100,17 +97,15 @@ const App = () => {
                           <Route path="/stats" element={<Stats />} />
                           <Route path="/achievements" element={<Achievements />} />
                           <Route path="/wrapped" element={<Wrapped />} />
-                          <Route path="/upgrade" element={<Upgrade />} />
                           <Route path="/auth" element={<Auth />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </BrowserRouter>
-                      </TrailerProvider>
-                    </UserStateProvider>
-                  </ErrorBoundary>
-                </ProfileProvider>
-              </SubscriptionProvider>
+                    </TrailerProvider>
+                  </UserStateProvider>
+                </ErrorBoundary>
+              </ProfileProvider>
             </AuthProvider>
           </ErrorBoundary>
         </TooltipProvider>
