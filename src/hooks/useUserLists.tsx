@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/hooks/useSubscription';
+
+export const FREE_LIST_LIMIT = 3;
 
 interface UserList {
   id: string;
@@ -27,10 +30,15 @@ interface ListItem {
 export const useUserLists = (userId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isProUser, loading: subscriptionLoading } = useSubscription();
   const [lists, setLists] = useState<UserList[]>([]);
   const [loading, setLoading] = useState(true);
 
   const targetUserId = userId || user?.id;
+  
+  // List limit helpers
+  const canCreateList = isProUser || lists.length < FREE_LIST_LIMIT;
+  const remainingLists = isProUser ? Infinity : Math.max(0, FREE_LIST_LIMIT - lists.length);
 
   useEffect(() => {
     if (targetUserId) {
@@ -61,14 +69,19 @@ export const useUserLists = (userId?: string) => {
     }
   };
 
-  const createList = async (name: string, description?: string, isPublic: boolean = true) => {
+  const createList = async (name: string, description?: string, isPublic: boolean = true): Promise<{ data: UserList | null; limitReached?: boolean }> => {
     if (!user) {
       toast({
         title: "Sign in required",
         description: "Please sign in to create lists",
         variant: "destructive",
       });
-      return null;
+      return { data: null };
+    }
+
+    // Check list limit for free users
+    if (!isProUser && lists.length >= FREE_LIST_LIMIT) {
+      return { data: null, limitReached: true };
     }
 
     try {
@@ -92,7 +105,7 @@ export const useUserLists = (userId?: string) => {
         description: `"${name}" has been created`,
       });
 
-      return data;
+      return { data };
     } catch (error) {
       console.error('Error creating list:', error);
       toast({
@@ -100,7 +113,7 @@ export const useUserLists = (userId?: string) => {
         description: "Failed to create list",
         variant: "destructive",
       });
-      return null;
+      return { data: null };
     }
   };
 
@@ -265,13 +278,18 @@ export const useUserLists = (userId?: string) => {
 
   return {
     lists,
-    loading,
+    loading: loading || subscriptionLoading,
     createList,
     updateList,
     deleteList,
     addToList,
     removeFromList,
     getListItems,
-    refetch: fetchLists
+    refetch: fetchLists,
+    // Subscription-based limits
+    isProUser,
+    canCreateList,
+    remainingLists,
+    listLimit: FREE_LIST_LIMIT
   };
 };
