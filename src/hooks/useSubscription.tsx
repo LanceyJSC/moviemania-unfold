@@ -57,14 +57,14 @@ export const useSubscription = () => {
     try {
       const { error } = await supabase
         .from('user_subscriptions')
-        .update({
+        .upsert({
+          user_id: user.id,
           tier: 'pro',
           status: 'active',
           current_period_start: new Date().toISOString(),
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
+        }, { onConflict: 'user_id' });
 
       if (error) {
         console.error('Error upgrading to pro:', error);
