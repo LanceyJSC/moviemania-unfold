@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
 import { InlineFilters } from "@/components/InlineFilters";
-import { QuickGenres } from "@/components/QuickGenres";
 import { Navigation } from "@/components/Navigation";
 import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -369,9 +368,6 @@ const Search = () => {
             </p>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
-
-          {/* Quick Genre Exploration */}
-          <QuickGenres />
 
           {/* Popular Searches */}
           <div>
