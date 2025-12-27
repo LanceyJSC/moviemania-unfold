@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon, Filter, X, TrendingUp, Film, Tv, ArrowRight, Star, Clock } from "lucide-react";
+import { Search as SearchIcon, X, TrendingUp, Film, Tv, ArrowRight, Star, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
@@ -24,7 +24,7 @@ const Search = () => {
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingTVShows, setTrendingTVShows] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  // Filters are always shown for Pro users
   const [selectedFilters, setSelectedFilters] = useState({});
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
   const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'release_date' | 'title'>('popularity');
@@ -250,24 +250,9 @@ const Search = () => {
                 </Button>
               )}
             </div>
-            <Button
-              variant={showFilters ? "default" : "outline"}
-              onClick={() => setShowFilters(!showFilters)}
-              className="rounded-full h-14 px-5 gap-2 touch-target focus-ring"
-            >
-              <Filter className="h-5 w-5" />
-              <span className="hidden sm:inline">Filters</span>
-            </Button>
           </div>
         </div>
       </div>
-
-      {/* Inline Filters Panel */}
-      <InlineFilters 
-        onFiltersChange={handleFilterChange}
-        isOpen={showFilters}
-        onToggle={() => setShowFilters(!showFilters)}
-      />
 
       {/* Control Tabs - only show when searching */}
       {(searchTerm || genreParam) && (
@@ -368,6 +353,9 @@ const Search = () => {
             </p>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
+
+          {/* Pro Discovery Filters - Inline */}
+          <InlineFilters onFiltersChange={handleFilterChange} />
 
           {/* Popular Searches */}
           <div>
