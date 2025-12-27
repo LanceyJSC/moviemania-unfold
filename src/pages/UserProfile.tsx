@@ -11,9 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Film, Star, List, Heart, Calendar } from "lucide-react";
 import { FollowButton } from "@/components/FollowButton";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { ProBadge } from "@/components/ProBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { tmdbService } from "@/lib/tmdb";
+import { checkIsProUser } from "@/hooks/useSubscription";
 
 interface UserProfileData {
   id: string;
@@ -50,6 +52,7 @@ const UserProfile = () => {
   const [lists, setLists] = useState<UserList[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("activity");
+  const [isProfileProUser, setIsProfileProUser] = useState(false);
 
   useEffect(() => {
     if (username) {
@@ -70,6 +73,10 @@ const UserProfile = () => {
 
       if (profileError) throw profileError;
       setProfile(profileData);
+
+      // Check if this user is a Pro subscriber
+      const isPro = await checkIsProUser(profileData.id);
+      setIsProfileProUser(isPro);
 
       // Fetch public diary entries
       const { data: diaryData } = await supabase
@@ -155,9 +162,12 @@ const UserProfile = () => {
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="font-cinematic text-xl text-foreground">
-                    {profile.username || 'User'}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-cinematic text-xl text-foreground">
+                      {profile.username || 'User'}
+                    </h1>
+                    {isProfileProUser && <ProBadge size="md" />}
+                  </div>
                   {profile.full_name && (
                     <p className="text-muted-foreground">{profile.full_name}</p>
                   )}
