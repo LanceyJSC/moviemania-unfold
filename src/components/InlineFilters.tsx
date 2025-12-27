@@ -51,20 +51,20 @@ const GENRES = [
 const MOODS = ["Feel-Good", "Intense", "Thought-Provoking", "Emotional", "Uplifting", "Dark", "Nostalgic", "Inspiring"];
 const TONES = ["Lighthearted", "Serious", "Satirical", "Suspenseful", "Romantic", "Gritty", "Whimsical"];
 const PACING_OPTIONS = [
-  { value: "", label: "Any Pacing" },
+  { value: "any", label: "Any Pacing" },
   { value: "slow", label: "Slow Burn" },
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast-Paced" }
 ];
 const ERA_OPTIONS = [
-  { value: "", label: "Any Era" },
+  { value: "any", label: "Any Era" },
   { value: "classic", label: "Classic (Pre-1970)" },
   { value: "vintage", label: "Vintage (1970-1990)" },
   { value: "modern", label: "Modern (1990-2010)" },
   { value: "contemporary", label: "Contemporary (2010+)" }
 ];
 const LANGUAGE_OPTIONS = [
-  { value: "", label: "Any Language" },
+  { value: "any", label: "Any Language" },
   { value: "en", label: "English" },
   { value: "es", label: "Spanish" },
   { value: "fr", label: "French" },
@@ -90,9 +90,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     sortBy: "popularity.desc",
     mood: [],
     tone: [],
-    pacing: "",
-    era: "",
-    language: ""
+    pacing: "any",
+    era: "any",
+    language: "any"
   });
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
@@ -152,9 +152,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
       sortBy: "popularity.desc",
       mood: [],
       tone: [],
-      pacing: "",
-      era: "",
-      language: ""
+      pacing: "any",
+      era: "any",
+      language: "any"
     };
     setFilters(resetFilters);
     onFiltersChange(resetFilters);
@@ -164,9 +164,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     filters.genres.length + 
     filters.mood.length + 
     filters.tone.length + 
-    (filters.pacing ? 1 : 0) + 
-    (filters.era ? 1 : 0) + 
-    (filters.language ? 1 : 0) +
+    (filters.pacing && filters.pacing !== "any" ? 1 : 0) + 
+    (filters.era && filters.era !== "any" ? 1 : 0) + 
+    (filters.language && filters.language !== "any" ? 1 : 0) +
     (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear() ? 1 : 0) +
     (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 ? 1 : 0);
 
