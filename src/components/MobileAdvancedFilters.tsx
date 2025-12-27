@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { X, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
+import { X, ChevronDown, ChevronUp, ArrowUpDown, Crown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { MobileActionSheet } from "@/components/MobileActionSheet";
+import { ProUpgradeModal } from "./ProUpgradeModal";
+import { useSubscription } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
 
 interface FilterState {
@@ -11,6 +13,11 @@ interface FilterState {
   ratingRange: [number, number];
   runtimeRange: [number, number];
   sortBy: string;
+  mood: string[];
+  tone: string[];
+  pacing: string;
+  era: string;
+  language: string;
 }
 
 interface MobileAdvancedFiltersProps {
@@ -33,13 +40,50 @@ const SORT_OPTIONS = [
   { value: "vote_count.desc", label: "Most Voted" },
 ];
 
+// Pro-only filter options
+const MOODS = ["Feel-Good", "Intense", "Thought-Provoking", "Emotional", "Uplifting", "Dark", "Nostalgic", "Inspiring"];
+const TONES = ["Lighthearted", "Serious", "Satirical", "Suspenseful", "Romantic", "Gritty", "Whimsical"];
+const PACING_OPTIONS = [
+  { value: "", label: "Any Pacing" },
+  { value: "slow", label: "Slow Burn" },
+  { value: "moderate", label: "Moderate" },
+  { value: "fast", label: "Fast-Paced" }
+];
+const ERA_OPTIONS = [
+  { value: "", label: "Any Era" },
+  { value: "classic", label: "Classic (Pre-1970)" },
+  { value: "vintage", label: "Vintage (1970-1990)" },
+  { value: "modern", label: "Modern (1990-2010)" },
+  { value: "contemporary", label: "Contemporary (2010+)" }
+];
+const LANGUAGE_OPTIONS = [
+  { value: "", label: "Any Language" },
+  { value: "en", label: "English" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
+  { value: "ja", label: "Japanese" },
+  { value: "ko", label: "Korean" },
+  { value: "zh", label: "Chinese" },
+  { value: "hi", label: "Hindi" },
+  { value: "it", label: "Italian" }
+];
+
 export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: MobileAdvancedFiltersProps) => {
+  const { isProUser } = useSubscription();
+  const [showProModal, setShowProModal] = useState(false);
+  
   const [filters, setFilters] = useState<FilterState>({
     genres: [],
     yearRange: [1990, 2024],
     ratingRange: [0, 10],
     runtimeRange: [60, 180],
     sortBy: "popularity.desc",
+    mood: [],
+    tone: [],
+    pacing: "",
+    era: "",
+    language: ""
   });
 
   const [expandedSections, setExpandedSections] = useState({
@@ -47,9 +91,13 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
     year: false,
     rating: false,
     runtime: false,
+    proFilters: false
   });
 
   const [showSortSheet, setShowSortSheet] = useState(false);
+  const [showPacingSheet, setShowPacingSheet] = useState(false);
+  const [showEraSheet, setShowEraSheet] = useState(false);
+  const [showLanguageSheet, setShowLanguageSheet] = useState(false);
 
   const getSortLabel = (value: string) => {
     const option = SORT_OPTIONS.find(o => o.value === value);
@@ -69,6 +117,32 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
     updateFilters({ genres: updatedGenres });
   };
 
+  const handleProFilterClick = (callback: () => void) => {
+    if (!isProUser) {
+      setShowProModal(true);
+      return;
+    }
+    callback();
+  };
+
+  const toggleMood = (mood: string) => {
+    handleProFilterClick(() => {
+      const newMoods = filters.mood.includes(mood)
+        ? filters.mood.filter(m => m !== mood)
+        : [...filters.mood, mood];
+      updateFilters({ mood: newMoods });
+    });
+  };
+
+  const toggleTone = (tone: string) => {
+    handleProFilterClick(() => {
+      const newTones = filters.tone.includes(tone)
+        ? filters.tone.filter(t => t !== tone)
+        : [...filters.tone, tone];
+      updateFilters({ tone: newTones });
+    });
+  };
+
   const clearFilters = () => {
     const defaultFilters: FilterState = {
       genres: [],
@@ -76,6 +150,11 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
       ratingRange: [0, 10],
       runtimeRange: [60, 180],
       sortBy: "popularity.desc",
+      mood: [],
+      tone: [],
+      pacing: "",
+      era: "",
+      language: ""
     };
     setFilters(defaultFilters);
     onFiltersChange(defaultFilters);
@@ -119,7 +198,7 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
       {/* Content with Safe Area Bottom */}
       <div 
         className="p-4 space-y-6 overflow-y-auto"
-        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
       >
         {/* Sort By */}
         <div className="space-y-3">
@@ -253,9 +332,123 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
             </div>
           )}
         </div>
+
+        {/* Pro Discovery Section */}
+        <div className="space-y-3 border-t border-border pt-6">
+          <Button
+            variant="ghost"
+            onClick={() => toggleSection("proFilters")}
+            className="w-full justify-between p-0 h-12 text-sm font-medium text-foreground rounded-xl"
+          >
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-amber-500" />
+              <span>Pro Discovery</span>
+              {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+            </div>
+            {expandedSections.proFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+
+          {expandedSections.proFilters && (
+            <div className="space-y-4">
+              {/* Mood */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Mood</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {MOODS.map((mood) => (
+                    <Button
+                      key={mood}
+                      variant={filters.mood.includes(mood) ? "default" : "outline"}
+                      onClick={() => toggleMood(mood)}
+                      className={cn(
+                        "h-12 text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl",
+                        !isProUser && "opacity-60",
+                        filters.mood.includes(mood)
+                          ? "bg-amber-500 text-white hover:bg-amber-600"
+                          : "bg-card/60 border-amber-500/30 hover:border-amber-500"
+                      )}
+                    >
+                      {mood}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tone */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Tone</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {TONES.map((tone) => (
+                    <Button
+                      key={tone}
+                      variant={filters.tone.includes(tone) ? "default" : "outline"}
+                      onClick={() => toggleTone(tone)}
+                      className={cn(
+                        "h-12 text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl",
+                        !isProUser && "opacity-60",
+                        filters.tone.includes(tone)
+                          ? "bg-amber-500 text-white hover:bg-amber-600"
+                          : "bg-card/60 border-amber-500/30 hover:border-amber-500"
+                      )}
+                    >
+                      {tone}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pacing */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Pacing</label>
+                <Button
+                  variant="outline"
+                  onClick={() => handleProFilterClick(() => setShowPacingSheet(true))}
+                  className={cn(
+                    "w-full h-14 bg-card/60 border-amber-500/30 rounded-2xl text-base justify-between px-4",
+                    !isProUser && "opacity-60"
+                  )}
+                >
+                  <span>{PACING_OPTIONS.find(o => o.value === filters.pacing)?.label || "Any Pacing"}</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+
+              {/* Era */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Era</label>
+                <Button
+                  variant="outline"
+                  onClick={() => handleProFilterClick(() => setShowEraSheet(true))}
+                  className={cn(
+                    "w-full h-14 bg-card/60 border-amber-500/30 rounded-2xl text-base justify-between px-4",
+                    !isProUser && "opacity-60"
+                  )}
+                >
+                  <span>{ERA_OPTIONS.find(o => o.value === filters.era)?.label || "Any Era"}</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+
+              {/* Language */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Language</label>
+                <Button
+                  variant="outline"
+                  onClick={() => handleProFilterClick(() => setShowLanguageSheet(true))}
+                  className={cn(
+                    "w-full h-14 bg-card/60 border-amber-500/30 rounded-2xl text-base justify-between px-4",
+                    !isProUser && "opacity-60"
+                  )}
+                >
+                  <span>{LANGUAGE_OPTIONS.find(o => o.value === filters.language)?.label || "Any Language"}</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Sort Action Sheet */}
+      {/* Action Sheets */}
       <MobileActionSheet
         isOpen={showSortSheet}
         onClose={() => setShowSortSheet(false)}
@@ -263,6 +456,40 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
         options={SORT_OPTIONS}
         selectedValue={filters.sortBy}
         onSelect={(value) => updateFilters({ sortBy: value })}
+      />
+
+      <MobileActionSheet
+        isOpen={showPacingSheet}
+        onClose={() => setShowPacingSheet(false)}
+        title="Pacing"
+        options={PACING_OPTIONS}
+        selectedValue={filters.pacing}
+        onSelect={(value) => updateFilters({ pacing: value })}
+      />
+
+      <MobileActionSheet
+        isOpen={showEraSheet}
+        onClose={() => setShowEraSheet(false)}
+        title="Era"
+        options={ERA_OPTIONS}
+        selectedValue={filters.era}
+        onSelect={(value) => updateFilters({ era: value })}
+      />
+
+      <MobileActionSheet
+        isOpen={showLanguageSheet}
+        onClose={() => setShowLanguageSheet(false)}
+        title="Language"
+        options={LANGUAGE_OPTIONS}
+        selectedValue={filters.language}
+        onSelect={(value) => updateFilters({ language: value })}
+      />
+
+      <ProUpgradeModal
+        isOpen={showProModal}
+        onClose={() => setShowProModal(false)}
+        feature="Advanced Discovery"
+        description="Unlock powerful filters like Mood, Tone, Pacing, Era, and Language to discover your perfect movie match."
       />
     </div>
   );
