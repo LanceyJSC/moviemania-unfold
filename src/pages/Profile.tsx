@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
+import { ProBadge } from '@/components/ProBadge';
 import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
@@ -33,6 +35,7 @@ const Profile = () => {
   const { role } = useUserRole();
   const { profile, updateProfile, loading } = useProfile();
   const { preferences, updatePreferences, isLoading: preferencesLoading } = useUserPreferences();
+  const { isProUser } = useSubscription();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -78,9 +81,12 @@ const Profile = () => {
           </Avatar>
           
           <div>
-            <h1 className="text-xl font-bold text-foreground">
-              {profile.username}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-foreground">
+                {profile.username}
+              </h1>
+              {isProUser && <ProBadge size="md" />}
+            </div>
             <p className="text-muted-foreground text-sm">@{profile.username}</p>
           </div>
         </div>
