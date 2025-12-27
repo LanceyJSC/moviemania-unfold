@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Crown, Lock, X } from "lucide-react";
+import { ChevronDown, Crown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -35,8 +35,6 @@ export interface FilterState {
 
 interface InlineFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
-  isOpen: boolean;
-  onToggle: () => void;
 }
 
 // Genre cards with TMDB IDs
@@ -78,9 +76,9 @@ const LANGUAGE_OPTIONS = [
   { value: "it", label: "Italian" }
 ];
 
-export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFiltersProps) => {
+export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   const navigate = useNavigate();
-  const { isProUser } = useSubscription();
+  const { isProUser, loading } = useSubscription();
   const [showProModal, setShowProModal] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   
@@ -172,78 +170,81 @@ export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFilte
     (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear() ? 1 : 0) +
     (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 ? 1 : 0);
 
-  if (!isOpen) return null;
+  // Show loading state
+  if (loading) {
+    return null;
+  }
 
   return (
     <>
-      <div className="bg-card/50 backdrop-blur-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
-          {/* Filter Header */}
+      <div className="space-y-6">
+        {/* Explore by Genre Section */}
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              Filters
+            <div>
+              <h3 className="font-cinematic text-lg tracking-wide text-foreground uppercase flex items-center gap-2">
+                Explore by Genre
+                {!isProUser && <Lock className="h-4 w-4 text-muted-foreground" />}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">Find your perfect movie</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleViewAllGenres}
+              className="text-primary hover:text-primary/80 font-medium"
+            >
+              View All
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+            {GENRES.map((genre) => (
+              <button
+                key={genre.id}
+                onClick={() => handleGenreClick(genre.id)}
+                className={cn(
+                  "flex flex-col items-center gap-2 py-4 px-3 rounded-xl",
+                  "bg-card/80 border border-border/50",
+                  "hover:bg-card hover:border-primary/50 hover:shadow-lg",
+                  "transition-all duration-200 active:scale-95",
+                  !isProUser && "opacity-70"
+                )}
+              >
+                <div className="rounded-full w-12 h-12 bg-background/50 flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label={genre.name}>
+                    {genre.emoji}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-foreground text-center">
+                  {genre.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Pro Discovery Filters - Always visible for Pro users */}
+        <div className="bg-card/50 rounded-xl border border-border/50 p-4 space-y-4">
+          {/* Header with active filter count */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-amber-500" />
+              <h3 className="font-cinematic text-lg tracking-wide text-foreground uppercase">
+                Pro Discovery Filters
+              </h3>
+              {!isProUser && <Lock className="h-4 w-4 text-muted-foreground" />}
               {activeFilterCount > 0 && (
                 <Badge variant="secondary" className="text-xs">
                   {activeFilterCount} active
                 </Badge>
               )}
-            </h3>
-            <div className="flex items-center gap-2">
-              {activeFilterCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs h-8">
-                  Clear All
-                </Button>
-              )}
-              <Button variant="ghost" size="sm" onClick={onToggle} className="h-8 w-8 p-0">
-                <X className="h-4 w-4" />
+            </div>
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs h-8">
+                Clear All
               </Button>
-            </div>
-          </div>
-
-          {/* Explore by Genre Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-cinematic text-sm tracking-wide text-foreground uppercase flex items-center gap-2">
-                  Explore by Genre
-                  {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Find your perfect movie</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleViewAllGenres}
-                className="text-primary hover:text-primary/80 text-xs font-medium h-8"
-              >
-                View All
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {GENRES.map((genre) => (
-                <button
-                  key={genre.id}
-                  onClick={() => handleGenreClick(genre.id)}
-                  className={cn(
-                    "flex flex-col items-center gap-2 py-3 px-2 rounded-xl",
-                    "bg-card/80 border border-border/50",
-                    "hover:bg-card hover:border-primary/50",
-                    "transition-all duration-200 active:scale-95",
-                    !isProUser && "opacity-70"
-                  )}
-                >
-                  <div className="rounded-full w-10 h-10 bg-background/50 flex items-center justify-center">
-                    <span className="text-lg" role="img" aria-label={genre.name}>
-                      {genre.emoji}
-                    </span>
-                  </div>
-                  <span className="text-xs font-medium text-foreground text-center">
-                    {genre.name}
-                  </span>
-                </button>
-              ))}
-            </div>
+            )}
           </div>
 
           {/* Basic Filters Row */}
@@ -255,11 +256,11 @@ export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFilte
               </label>
               <Slider
                 value={filters.yearRange}
-                onValueChange={(value) => updateFilters({ yearRange: value as [number, number] })}
+                onValueChange={(value) => handleProFilterClick(() => updateFilters({ yearRange: value as [number, number] }))}
                 min={1900}
                 max={new Date().getFullYear()}
                 step={1}
-                className="w-full"
+                className={cn("w-full", !isProUser && "opacity-60")}
               />
             </div>
 
@@ -270,11 +271,11 @@ export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFilte
               </label>
               <Slider
                 value={filters.ratingRange}
-                onValueChange={(value) => updateFilters({ ratingRange: value as [number, number] })}
+                onValueChange={(value) => handleProFilterClick(() => updateFilters({ ratingRange: value as [number, number] }))}
                 min={0}
                 max={10}
                 step={0.5}
-                className="w-full"
+                className={cn("w-full", !isProUser && "opacity-60")}
               />
             </div>
 
@@ -285,27 +286,23 @@ export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFilte
               </label>
               <Slider
                 value={filters.runtimeRange}
-                onValueChange={(value) => updateFilters({ runtimeRange: value as [number, number] })}
+                onValueChange={(value) => handleProFilterClick(() => updateFilters({ runtimeRange: value as [number, number] }))}
                 min={0}
                 max={300}
                 step={15}
-                className="w-full"
+                className={cn("w-full", !isProUser && "opacity-60")}
               />
             </div>
           </div>
 
-          {/* Pro Discovery Section */}
+          {/* Advanced Pro Filters */}
           <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
             <CollapsibleTrigger asChild>
               <Button 
                 variant="ghost" 
                 className="w-full justify-between h-10 px-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 border border-amber-500/20 rounded-lg"
               >
-                <div className="flex items-center gap-2">
-                  <Crown className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm font-medium">Pro Discovery Filters</span>
-                  {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
-                </div>
+                <span className="text-sm font-medium">More Discovery Options</span>
                 <ChevronDown className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} />
               </Button>
             </CollapsibleTrigger>
