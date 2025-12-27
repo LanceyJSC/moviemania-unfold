@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronDown, Crown, Lock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
 
 export interface FilterState {
-  genres: string[];
+  genres: number[];
   yearRange: [number, number];
   ratingRange: [number, number];
   runtimeRange: [number, number];
@@ -38,10 +39,14 @@ interface InlineFiltersProps {
   onToggle: () => void;
 }
 
+// Genre cards with TMDB IDs
 const GENRES = [
-  "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
-  "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery",
-  "Romance", "Science Fiction", "Thriller", "War", "Western"
+  { id: 28, name: "Action", emoji: "💥" },
+  { id: 35, name: "Comedy", emoji: "😂" },
+  { id: 27, name: "Horror", emoji: "👻" },
+  { id: 10749, name: "Romance", emoji: "💕" },
+  { id: 878, name: "Sci-Fi", emoji: "🚀" },
+  { id: 12, name: "Adventure", emoji: "🗺️" },
 ];
 
 // Pro-only filter options
@@ -74,6 +79,7 @@ const LANGUAGE_OPTIONS = [
 ];
 
 export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFiltersProps) => {
+  const navigate = useNavigate();
   const { isProUser } = useSubscription();
   const [showProModal, setShowProModal] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -97,11 +103,20 @@ export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFilte
     onFiltersChange(updated);
   };
 
-  const toggleGenre = (genre: string) => {
-    const newGenres = filters.genres.includes(genre)
-      ? filters.genres.filter(g => g !== genre)
-      : [...filters.genres, genre];
-    updateFilters({ genres: newGenres });
+  const handleGenreClick = (genreId: number) => {
+    if (!isProUser) {
+      setShowProModal(true);
+      return;
+    }
+    navigate(`/search?genre=${genreId}`);
+  };
+
+  const handleViewAllGenres = () => {
+    if (!isProUser) {
+      setShowProModal(true);
+      return;
+    }
+    navigate("/genres");
   };
 
   const handleProFilterClick = (callback: () => void) => {
@@ -185,24 +200,48 @@ export const InlineFilters = ({ onFiltersChange, isOpen, onToggle }: InlineFilte
             </div>
           </div>
 
-          {/* Genre Pills - Horizontal Scroll */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Genres</label>
-            <div className="flex flex-wrap gap-2">
-              {GENRES.map(genre => (
-                <Badge
-                  key={genre}
-                  variant={filters.genres.includes(genre) ? "default" : "outline"}
+          {/* Explore by Genre Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-cinematic text-sm tracking-wide text-foreground uppercase flex items-center gap-2">
+                  Explore by Genre
+                  {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Find your perfect movie</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleViewAllGenres}
+                className="text-primary hover:text-primary/80 text-xs font-medium h-8"
+              >
+                View All
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {GENRES.map((genre) => (
+                <button
+                  key={genre.id}
+                  onClick={() => handleGenreClick(genre.id)}
                   className={cn(
-                    "cursor-pointer transition-all text-xs py-1.5 px-3",
-                    filters.genres.includes(genre) 
-                      ? "bg-primary hover:bg-primary/90" 
-                      : "hover:border-primary/50 hover:bg-primary/10"
+                    "flex flex-col items-center gap-2 py-3 px-2 rounded-xl",
+                    "bg-card/80 border border-border/50",
+                    "hover:bg-card hover:border-primary/50",
+                    "transition-all duration-200 active:scale-95",
+                    !isProUser && "opacity-70"
                   )}
-                  onClick={() => toggleGenre(genre)}
                 >
-                  {genre}
-                </Badge>
+                  <div className="rounded-full w-10 h-10 bg-background/50 flex items-center justify-center">
+                    <span className="text-lg" role="img" aria-label={genre.name}>
+                      {genre.emoji}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-foreground text-center">
+                    {genre.name}
+                  </span>
+                </button>
               ))}
             </div>
           </div>
