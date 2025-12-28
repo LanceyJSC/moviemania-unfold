@@ -334,36 +334,48 @@ class TMDBService {
 
   // Enhanced Latest Trailers - fetches actual trailer data sorted by published_at
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = true): Promise<TMDBResponse<Movie | TVShow>> {
-    // Fetch from multiple sources to get movies/shows with recent trailers
-    const [upcoming, nowPlaying, trending, onTheAir, airingToday] = await Promise.all([
-      this.fetchFromTMDB<TMDBResponse<Movie>>('/movie/upcoming', true),
+    // Get today's date for filtering
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const sixMonthsLater = new Date(today.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    // Fetch movies with FUTURE release dates (these have recently published trailers)
+    const [upcomingSoon, upcomingLater, nowPlaying, popularTV, upcomingTV] = await Promise.all([
+      // Movies releasing in next 3 months (active marketing = recent trailers)
+      this.fetchFromTMDB<TMDBResponse<Movie>>(`/discover/movie?primary_release_date.gte=${todayStr}&primary_release_date.lte=${threeMonthsLater}&sort_by=popularity.desc`, true),
+      // Movies releasing 3-6 months out (new trailer drops)
+      this.fetchFromTMDB<TMDBResponse<Movie>>(`/discover/movie?primary_release_date.gte=${threeMonthsLater}&primary_release_date.lte=${sixMonthsLater}&sort_by=popularity.desc`, true),
+      // Currently playing (recent marketing push)
       this.fetchFromTMDB<TMDBResponse<Movie>>('/movie/now_playing', true),
-      this.fetchFromTMDB<TMDBResponse<Movie>>('/trending/movie/week', true),
+      // Popular TV currently airing
       this.fetchFromTMDB<TMDBResponse<TVShow>>('/tv/on_the_air', true),
-      this.fetchFromTMDB<TMDBResponse<TVShow>>('/tv/airing_today', true)
+      // Upcoming TV shows
+      this.fetchFromTMDB<TMDBResponse<TVShow>>('/discover/tv?first_air_date.gte=' + todayStr + '&sort_by=popularity.desc', true)
     ]);
     
-    // Combine all unique movies and TV shows
+    // Combine all unique movies
     const allMovies: Movie[] = [];
-    const movieIds = new Set<number>();
-    [...upcoming.results, ...nowPlaying.results, ...trending.results].forEach(m => {
-      if (!movieIds.has(m.id)) {
-        movieIds.add(m.id);
+    const movieIdSet = new Set<number>();
+    [...upcomingSoon.results, ...upcomingLater.results, ...nowPlaying.results].forEach(m => {
+      if (!movieIdSet.has(m.id)) {
+        movieIdSet.add(m.id);
         allMovies.push(m);
       }
     });
     
+    // Combine all unique TV shows
     const allTVShows: TVShow[] = [];
-    const tvIds = new Set<number>();
-    [...onTheAir.results, ...airingToday.results].forEach(t => {
-      if (!tvIds.has(t.id)) {
-        tvIds.add(t.id);
+    const tvIdSet = new Set<number>();
+    [...popularTV.results, ...upcomingTV.results].forEach(t => {
+      if (!tvIdSet.has(t.id)) {
+        tvIdSet.add(t.id);
         allTVShows.push(t);
       }
     });
     
-    // Fetch videos for top items from each
-    const movieIdsToFetch = allMovies.slice(0, 25).map(m => m.id);
+    // Fetch videos for items
+    const movieIdsToFetch = allMovies.slice(0, 30).map(m => m.id);
     const tvIdsToFetch = allTVShows.slice(0, 15).map(t => t.id);
     
     const [movieVideos, tvVideos] = await Promise.all([
@@ -379,31 +391,32 @@ class TMDBService {
       ))
     ]);
     
-    // Collect the BEST (most recent) trailer for each media item
+    // Collect the newest trailer for each media item
     type MediaWithTrailerDate = {
       mediaId: number;
       mediaType: 'movie' | 'tv';
       latestTrailerDate: Date;
+      trailerName: string;
     };
     
     const mediaWithTrailers: MediaWithTrailerDate[] = [];
     
     [...movieVideos, ...tvVideos].forEach(({ mediaId, videos, mediaType }) => {
-      // Step 1: Filter for YouTube videos that are Trailers
+      // Filter for YouTube Trailers
       let trailers = videos.filter(v => v.site === 'YouTube' && v.type === 'Trailer');
       
-      // Fallback to Teasers if no Trailers
+      // Fallback to Teasers
       if (trailers.length === 0) {
         trailers = videos.filter(v => v.site === 'YouTube' && v.type === 'Teaser');
       }
       
       if (trailers.length === 0) return;
       
-      // Step 2: Prefer official == true
+      // Prefer official trailers
       const officialTrailers = trailers.filter(v => v.official === true);
       const finalTrailers = officialTrailers.length > 0 ? officialTrailers : trailers;
       
-      // Step 3: Sort by published_at descending and take the first (newest)
+      // Sort by published_at descending and take the newest
       const sorted = [...finalTrailers].sort((a, b) => {
         if (a.published_at && b.published_at) {
           return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
@@ -418,7 +431,8 @@ class TMDBService {
         mediaWithTrailers.push({
           mediaId,
           mediaType,
-          latestTrailerDate: new Date(newestTrailer.published_at)
+          latestTrailerDate: new Date(newestTrailer.published_at),
+          trailerName: newestTrailer.name
         });
       }
     });
@@ -427,10 +441,11 @@ class TMDBService {
     mediaWithTrailers.sort((a, b) => b.latestTrailerDate.getTime() - a.latestTrailerDate.getTime());
     
     // Log for debugging
-    console.log('Latest trailers sorted by date:', mediaWithTrailers.slice(0, 10).map(m => ({
+    console.log('🎬 Latest trailers sorted by publish date:', mediaWithTrailers.slice(0, 15).map(m => ({
       id: m.mediaId,
       type: m.mediaType,
-      date: m.latestTrailerDate.toISOString()
+      date: m.latestTrailerDate.toLocaleDateString(),
+      name: m.trailerName
     })));
     
     // Build final results in order of newest trailer
