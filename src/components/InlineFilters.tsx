@@ -17,7 +17,9 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { ProUpgradeModal } from "./ProUpgradeModal";
+import { MobileInlineFilters } from "./MobileInlineFilters";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 export interface FilterState {
@@ -78,6 +80,7 @@ const LANGUAGE_OPTIONS = [
 
 export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { isProUser, loading } = useSubscription();
   const [showProModal, setShowProModal] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -173,6 +176,11 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   // Show loading state
   if (loading) {
     return null;
+  }
+
+  // Render mobile version on mobile devices
+  if (isMobile) {
+    return <MobileInlineFilters onFiltersChange={onFiltersChange} />;
   }
 
   return (
