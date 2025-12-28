@@ -332,7 +332,7 @@ class TMDBService {
     return this.fetchFromTMDB<TMDBResponse<Review>>(`/tv/${tvId}/reviews?page=${page}`, fresh);
   }
 
-  // Enhanced Latest Trailers with stronger cache busting
+  // Enhanced Latest Trailers - fetches actual trailer data sorted by published_at
   async getLatestTrailers(category: 'popular' | 'streaming' | 'on_tv' | 'for_rent' | 'in_theaters', fresh: boolean = true): Promise<TMDBResponse<Movie | TVShow>> {
     let movieEndpoint = '';
     let tvEndpoint = '';
@@ -360,38 +360,96 @@ class TMDBService {
         break;
     }
     
-    // Always fetch fresh data for trailers - they change frequently
+    // Fetch initial lists
     const [movieResponse, tvResponse] = await Promise.all([
       this.fetchFromTMDB<TMDBResponse<Movie>>(movieEndpoint, true),
       this.fetchFromTMDB<TMDBResponse<TVShow>>(tvEndpoint, true)
     ]);
     
-    // Mix movies and TV shows alternating like TMDB
-    const mixedResults: (Movie | TVShow)[] = [];
-    const maxItems = 20;
-    let movieIndex = 0;
-    let tvIndex = 0;
+    // Fetch videos for each item to get actual trailer publish dates
+    const movieIds = movieResponse.results.slice(0, 15).map(m => m.id);
+    const tvIds = tvResponse.results.slice(0, 10).map(t => t.id);
     
-    for (let i = 0; i < maxItems; i++) {
-      if (i % 3 === 0 && tvIndex < tvResponse.results.length) {
-        mixedResults.push(tvResponse.results[tvIndex]);
-        tvIndex++;
-      } else if (movieIndex < movieResponse.results.length) {
-        mixedResults.push(movieResponse.results[movieIndex]);
-        movieIndex++;
-      } else if (tvIndex < tvResponse.results.length) {
-        mixedResults.push(tvResponse.results[tvIndex]);
-        tvIndex++;
+    const [movieVideos, tvVideos] = await Promise.all([
+      Promise.all(movieIds.map(id => 
+        this.fetchFromTMDB<{ id: number; results: { id: string; key: string; name: string; type: string; site: string; official?: boolean; published_at?: string }[] }>(`/movie/${id}/videos`, true)
+          .then(res => ({ mediaId: id, videos: res.results, mediaType: 'movie' as const }))
+          .catch(() => ({ mediaId: id, videos: [], mediaType: 'movie' as const }))
+      )),
+      Promise.all(tvIds.map(id => 
+        this.fetchFromTMDB<{ id: number; results: { id: string; key: string; name: string; type: string; site: string; official?: boolean; published_at?: string }[] }>(`/tv/${id}/videos`, true)
+          .then(res => ({ mediaId: id, videos: res.results, mediaType: 'tv' as const }))
+          .catch(() => ({ mediaId: id, videos: [], mediaType: 'tv' as const }))
+      ))
+    ]);
+    
+    // Collect all trailers with their media info and published_at dates
+    type TrailerWithMedia = {
+      mediaId: number;
+      mediaType: 'movie' | 'tv';
+      trailer: { id: string; key: string; name: string; type: string; site: string; official?: boolean; published_at?: string };
+    };
+    
+    const allTrailers: TrailerWithMedia[] = [];
+    
+    [...movieVideos, ...tvVideos].forEach(({ mediaId, videos, mediaType }) => {
+      // Filter for official YouTube trailers
+      const trailers = videos.filter(v => 
+        v.type === 'Trailer' && 
+        v.site === 'YouTube' && 
+        v.official === true
+      );
+      
+      // If no official trailers, fall back to any YouTube trailer
+      const validTrailers = trailers.length > 0 ? trailers : videos.filter(v => 
+        v.type === 'Trailer' && v.site === 'YouTube'
+      );
+      
+      // Take the most recent trailer for this media
+      if (validTrailers.length > 0) {
+        const sorted = [...validTrailers].sort((a, b) => {
+          if (a.published_at && b.published_at) {
+            return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+          }
+          return 0;
+        });
+        allTrailers.push({ mediaId, mediaType, trailer: sorted[0] });
+      }
+    });
+    
+    // Sort all trailers by published_at descending (newest first)
+    allTrailers.sort((a, b) => {
+      if (a.trailer.published_at && b.trailer.published_at) {
+        return new Date(b.trailer.published_at).getTime() - new Date(a.trailer.published_at).getTime();
+      }
+      if (a.trailer.published_at) return -1;
+      if (b.trailer.published_at) return 1;
+      return 0;
+    });
+    
+    // Build results in trailer publish order
+    const sortedResults: (Movie | TVShow)[] = [];
+    const addedIds = new Set<string>();
+    
+    for (const { mediaId, mediaType } of allTrailers) {
+      const key = `${mediaType}-${mediaId}`;
+      if (addedIds.has(key)) continue;
+      addedIds.add(key);
+      
+      if (mediaType === 'movie') {
+        const movie = movieResponse.results.find(m => m.id === mediaId);
+        if (movie) sortedResults.push(movie);
       } else {
-        break;
+        const tv = tvResponse.results.find(t => t.id === mediaId);
+        if (tv) sortedResults.push(tv);
       }
     }
     
     return {
       page: 1,
-      results: mixedResults,
+      results: sortedResults.slice(0, 24),
       total_pages: 1,
-      total_results: mixedResults.length
+      total_results: sortedResults.length
     };
   }
 
