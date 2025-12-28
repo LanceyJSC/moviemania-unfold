@@ -337,15 +337,17 @@ class TMDBService {
     // Get today's date for filtering
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
-    const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const sixMonthsLater = new Date(today.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const oneYearLater = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
     // Fetch movies with FUTURE release dates (these have recently published trailers)
-    const [upcomingSoon, upcomingLater, nowPlaying, popularTV, upcomingTV] = await Promise.all([
-      // Movies releasing in next 3 months (active marketing = recent trailers)
-      this.fetchFromTMDB<TMDBResponse<Movie>>(`/discover/movie?primary_release_date.gte=${todayStr}&primary_release_date.lte=${threeMonthsLater}&sort_by=popularity.desc`, true),
-      // Movies releasing 3-6 months out (new trailer drops)
-      this.fetchFromTMDB<TMDBResponse<Movie>>(`/discover/movie?primary_release_date.gte=${threeMonthsLater}&primary_release_date.lte=${sixMonthsLater}&sort_by=popularity.desc`, true),
+    const [upcomingSoon, upcomingLater, upcomingFar, nowPlaying, popularTV, upcomingTV] = await Promise.all([
+      // Movies releasing in next 6 months (active marketing = recent trailers)
+      this.fetchFromTMDB<TMDBResponse<Movie>>(`/discover/movie?primary_release_date.gte=${todayStr}&primary_release_date.lte=${sixMonthsLater}&sort_by=popularity.desc`, true),
+      // Movies releasing 6-12 months out (new trailer drops for big films)
+      this.fetchFromTMDB<TMDBResponse<Movie>>(`/discover/movie?primary_release_date.gte=${sixMonthsLater}&primary_release_date.lte=${oneYearLater}&sort_by=popularity.desc`, true),
+      // Most anticipated upcoming movies (catches big releases like Odyssey)
+      this.fetchFromTMDB<TMDBResponse<Movie>>('/movie/upcoming', true),
       // Currently playing (recent marketing push)
       this.fetchFromTMDB<TMDBResponse<Movie>>('/movie/now_playing', true),
       // Popular TV currently airing
@@ -357,7 +359,7 @@ class TMDBService {
     // Combine all unique movies
     const allMovies: Movie[] = [];
     const movieIdSet = new Set<number>();
-    [...upcomingSoon.results, ...upcomingLater.results, ...nowPlaying.results].forEach(m => {
+    [...upcomingSoon.results, ...upcomingLater.results, ...upcomingFar.results, ...nowPlaying.results].forEach(m => {
       if (!movieIdSet.has(m.id)) {
         movieIdSet.add(m.id);
         allMovies.push(m);
