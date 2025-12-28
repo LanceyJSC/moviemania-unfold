@@ -73,7 +73,23 @@ export const LatestTrailers = () => {
         ? await tmdbService.getMovieDetails(item.id, true)
         : await tmdbService.getTVShowDetails(item.id, true);
       
-      const trailer = details.videos?.results?.find(
+      // Filter for official YouTube trailers and sort by published_at descending
+      const trailers = (details.videos?.results || [])
+        .filter(video => 
+          video.type === 'Trailer' && 
+          video.site === 'YouTube' && 
+          video.official === true
+        )
+        .sort((a, b) => {
+          // Sort by published_at descending (newest first)
+          if (a.published_at && b.published_at) {
+            return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+          }
+          return 0;
+        });
+      
+      // Fall back to any trailer if no official ones found
+      const trailer = trailers[0] || details.videos?.results?.find(
         video => video.type === 'Trailer' && video.site === 'YouTube'
       );
       

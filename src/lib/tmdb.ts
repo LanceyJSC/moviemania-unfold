@@ -24,7 +24,7 @@ export interface Movie {
     cast: { id: number; name: string; character: string; profile_path: string | null }[];
     crew: { id: number; name: string; job: string; profile_path: string | null }[];
   };
-  videos?: { results: { id: string; key: string; name: string; type: string; site: string }[] };
+  videos?: { results: { id: string; key: string; name: string; type: string; site: string; official?: boolean; published_at?: string }[] };
   images?: { logos: { file_path: string }[] };
 }
 
@@ -52,7 +52,7 @@ export interface TVShow {
     cast: { id: number; name: string; character: string; profile_path: string | null }[];
     crew: { id: number; name: string; job: string; profile_path: string | null }[];
   };
-  videos?: { results: { id: string; key: string; name: string; type: string; site: string }[] };
+  videos?: { results: { id: string; key: string; name: string; type: string; site: string; official?: boolean; published_at?: string }[] };
   seasons?: {
     id: number;
     name: string;
