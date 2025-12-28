@@ -185,77 +185,93 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Explore by Genre Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-cinematic text-lg tracking-wide text-foreground uppercase flex items-center gap-2">
-                Explore by Genre
-                {!isProUser && <Lock className="h-4 w-4 text-muted-foreground" />}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">Find your perfect movie</p>
+      <div className="space-y-8">
+        {/* Explore by Genre Section - Clean Card */}
+        <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <span className="text-xl">🎬</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">Explore by Genre</h3>
+                <p className="text-sm text-muted-foreground">Find your perfect movie</p>
+              </div>
+              {!isProUser && <Lock className="h-4 w-4 text-muted-foreground ml-2" />}
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleViewAllGenres}
-              className="text-primary hover:text-primary/80 font-medium"
+              className="text-primary border-primary/30 hover:bg-primary/10"
             >
-              View All
+              View All Genres
             </Button>
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {GENRES.map((genre) => (
               <button
                 key={genre.id}
                 onClick={() => handleGenreClick(genre.id)}
                 className={cn(
-                  "flex items-center gap-1.5 py-1.5 px-3 rounded-full",
-                  "bg-card/80 border border-border/50",
-                  "hover:bg-card hover:border-primary/50",
-                  "transition-all duration-200 active:scale-95 text-sm",
+                  "flex items-center gap-2 py-2.5 px-4 rounded-xl",
+                  "bg-background/80 border border-border/60",
+                  "hover:bg-primary/10 hover:border-primary/40 hover:shadow-md",
+                  "transition-all duration-200 active:scale-[0.98]",
                   !isProUser && "opacity-70"
                 )}
               >
-                <span role="img" aria-label={genre.name}>{genre.emoji}</span>
+                <span className="text-lg" role="img" aria-label={genre.name}>{genre.emoji}</span>
                 <span className="font-medium text-foreground">{genre.name}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Pro Discovery Filters - Always visible for Pro users */}
-        <div className="bg-card/50 rounded-xl border border-border/50 p-4 space-y-4">
-          {/* Header with active filter count */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Crown className="h-5 w-5 text-amber-500" />
-              <h3 className="font-cinematic text-lg tracking-wide text-foreground uppercase">
-                Pro Discovery Filters
-              </h3>
-              {!isProUser && <Lock className="h-4 w-4 text-muted-foreground" />}
+        {/* Pro Discovery Filters - Premium Card */}
+        <div className="bg-gradient-to-br from-amber-500/5 via-card/60 to-orange-500/5 backdrop-blur-sm rounded-2xl border border-amber-500/20 p-6 shadow-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                <Crown className="h-5 w-5 text-amber-500" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-lg text-foreground">Pro Discovery Filters</h3>
+                  {!isProUser && <Lock className="h-4 w-4 text-muted-foreground" />}
+                </div>
+                <p className="text-sm text-muted-foreground">Fine-tune your search with advanced options</p>
+              </div>
               {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge className="ml-2 bg-amber-500/20 text-amber-600 border-amber-500/30">
                   {activeFilterCount} active
                 </Badge>
               )}
             </div>
             {activeFilterCount > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs h-8">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearFilters} 
+                className="text-muted-foreground hover:text-foreground"
+              >
                 Clear All
               </Button>
             )}
           </div>
 
-          {/* Basic Filters Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Year Range */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Year: {filters.yearRange[0]} - {filters.yearRange[1]}
-              </label>
+          {/* Slider Filters - Clean Grid */}
+          <div className="grid grid-cols-3 gap-6 mb-6">
+            {/* Year Range Card */}
+            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-muted-foreground">Year</span>
+                <span className="text-sm font-semibold text-foreground bg-muted/50 px-2 py-0.5 rounded">
+                  {filters.yearRange[0]} - {filters.yearRange[1]}
+                </span>
+              </div>
               <Slider
                 value={filters.yearRange}
                 onValueChange={(value) => handleProFilterClick(() => updateFilters({ yearRange: value as [number, number] }))}
@@ -266,11 +282,14 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               />
             </div>
 
-            {/* Rating Range */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Rating: {filters.ratingRange[0].toFixed(1)} - {filters.ratingRange[1].toFixed(1)}
-              </label>
+            {/* Rating Range Card */}
+            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-muted-foreground">Rating</span>
+                <span className="text-sm font-semibold text-foreground bg-muted/50 px-2 py-0.5 rounded">
+                  {filters.ratingRange[0].toFixed(1)} - {filters.ratingRange[1].toFixed(1)}
+                </span>
+              </div>
               <Slider
                 value={filters.ratingRange}
                 onValueChange={(value) => handleProFilterClick(() => updateFilters({ ratingRange: value as [number, number] }))}
@@ -281,11 +300,14 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               />
             </div>
 
-            {/* Runtime Range */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Runtime: {filters.runtimeRange[0]} - {filters.runtimeRange[1]} min
-              </label>
+            {/* Runtime Range Card */}
+            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-muted-foreground">Runtime</span>
+                <span className="text-sm font-semibold text-foreground bg-muted/50 px-2 py-0.5 rounded">
+                  {filters.runtimeRange[0]} - {filters.runtimeRange[1]} min
+                </span>
+              </div>
               <Slider
                 value={filters.runtimeRange}
                 onValueChange={(value) => handleProFilterClick(() => updateFilters({ runtimeRange: value as [number, number] }))}
@@ -300,71 +322,69 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           {/* Advanced Pro Filters */}
           <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
             <CollapsibleTrigger className="w-full">
-              <div className="flex items-center justify-between w-full h-10 px-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 border border-amber-500/20 rounded-lg cursor-pointer transition-colors">
-                <span className="text-sm font-medium">More Discovery Options</span>
-                <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showAdvanced && "rotate-180")} />
+              <div className="flex items-center justify-center gap-2 w-full h-11 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/15 hover:to-orange-500/15 border border-amber-500/20 rounded-xl cursor-pointer transition-all hover:shadow-sm">
+                <span className="text-sm font-medium text-foreground">More Discovery Options</span>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", showAdvanced && "rotate-180")} />
               </div>
             </CollapsibleTrigger>
             
-            <CollapsibleContent className="pt-4 space-y-4">
-              {/* Mood */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Mood</label>
+            <CollapsibleContent className="pt-6 space-y-6">
+              {/* Mood Section */}
+              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                <label className="text-sm font-medium text-foreground mb-3 block">Mood</label>
                 <div className="flex flex-wrap gap-2">
                   {MOODS.map(mood => (
-                    <Badge
+                    <button
                       key={mood}
-                      variant={filters.mood.includes(mood) ? "default" : "outline"}
+                      onClick={() => toggleMood(mood)}
                       className={cn(
-                        "cursor-pointer transition-all text-xs py-1.5 px-3",
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                         !isProUser && "opacity-60",
                         filters.mood.includes(mood) 
-                          ? "bg-amber-500 hover:bg-amber-600 border-amber-500" 
-                          : "border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/10"
+                          ? "bg-amber-500 text-white shadow-md" 
+                          : "bg-muted/50 text-foreground hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30"
                       )}
-                      onClick={() => toggleMood(mood)}
                     >
                       {mood}
-                    </Badge>
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* Tone */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Tone</label>
+              {/* Tone Section */}
+              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                <label className="text-sm font-medium text-foreground mb-3 block">Tone</label>
                 <div className="flex flex-wrap gap-2">
                   {TONES.map(tone => (
-                    <Badge
+                    <button
                       key={tone}
-                      variant={filters.tone.includes(tone) ? "default" : "outline"}
+                      onClick={() => toggleTone(tone)}
                       className={cn(
-                        "cursor-pointer transition-all text-xs py-1.5 px-3",
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                         !isProUser && "opacity-60",
                         filters.tone.includes(tone) 
-                          ? "bg-amber-500 hover:bg-amber-600 border-amber-500" 
-                          : "border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/10"
+                          ? "bg-amber-500 text-white shadow-md" 
+                          : "bg-muted/50 text-foreground hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30"
                       )}
-                      onClick={() => toggleTone(tone)}
                     >
                       {tone}
-                    </Badge>
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* Pacing, Era, Language Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pacing</label>
+              {/* Dropdowns Row */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                  <label className="text-sm font-medium text-foreground mb-2 block">Pacing</label>
                   <Select 
                     value={filters.pacing} 
                     onValueChange={(value) => handleProFilterClick(() => updateFilters({ pacing: value }))}
                   >
-                    <SelectTrigger className={cn("h-10 border-amber-500/30", !isProUser && "opacity-60")}>
+                    <SelectTrigger className={cn("h-11 bg-background border-border/50", !isProUser && "opacity-60")}>
                       <SelectValue placeholder="Any Pacing" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover border-border">
                       {PACING_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -374,16 +394,16 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Era</label>
+                <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                  <label className="text-sm font-medium text-foreground mb-2 block">Era</label>
                   <Select 
                     value={filters.era} 
                     onValueChange={(value) => handleProFilterClick(() => updateFilters({ era: value }))}
                   >
-                    <SelectTrigger className={cn("h-10 border-amber-500/30", !isProUser && "opacity-60")}>
+                    <SelectTrigger className={cn("h-11 bg-background border-border/50", !isProUser && "opacity-60")}>
                       <SelectValue placeholder="Any Era" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover border-border">
                       {ERA_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -393,16 +413,16 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Language</label>
+                <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                  <label className="text-sm font-medium text-foreground mb-2 block">Language</label>
                   <Select 
                     value={filters.language} 
                     onValueChange={(value) => handleProFilterClick(() => updateFilters({ language: value }))}
                   >
-                    <SelectTrigger className={cn("h-10 border-amber-500/30", !isProUser && "opacity-60")}>
+                    <SelectTrigger className={cn("h-11 bg-background border-border/50", !isProUser && "opacity-60")}>
                       <SelectValue placeholder="Any Language" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover border-border">
                       {LANGUAGE_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
