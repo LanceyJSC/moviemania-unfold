@@ -5,16 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
 import { TVShowCard } from "@/components/TVShowCard";
+import { InlineFilters } from "@/components/InlineFilters";
 import { Navigation } from "@/components/Navigation";
 import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const genreParam = searchParams.get('genre');
+  const { isProUser } = useSubscription();
   
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -234,6 +237,11 @@ const Search = () => {
             </p>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
+
+          {/* Pro Discovery Filters - only show for Pro users */}
+          {isProUser && (
+            <InlineFilters onFiltersChange={() => {}} />
+          )}
 
           {/* Popular Searches */}
           <div>
