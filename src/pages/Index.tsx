@@ -2,8 +2,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { HeroSection } from "@/components/HeroSection";
-import { MovieStats } from "@/components/MovieStats";
-import { QuickGenres } from "@/components/QuickGenres";
 import { BecauseYouLoved } from "@/components/BecauseYouLoved";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -70,11 +68,7 @@ const Index = () => {
 
           <div className="px-4 2xl:px-6 pt-2 pb-32 2xl:pb-12 space-y-8 max-w-7xl mx-auto">
             <ErrorBoundary>
-              <MovieStats />
-            </ErrorBoundary>
-            
-            <ErrorBoundary>
-              <QuickGenres />
+              <BecauseYouLoved />
             </ErrorBoundary>
 
             <ErrorBoundary>
