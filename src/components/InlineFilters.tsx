@@ -33,6 +33,7 @@ export interface FilterState {
 
 interface InlineFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
+  activeTab?: 'all' | 'movies' | 'tv';
 }
 
 const GENRES_INITIAL = [
@@ -99,7 +100,7 @@ const PACING_OPTIONS = [
   { value: "fast", label: "Fast-Paced" }
 ];
 
-export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
+export const InlineFilters = ({ onFiltersChange, activeTab = 'all' }: InlineFiltersProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -161,7 +162,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 ? 1 : 0);
 
   if (isMobile) {
-    return <MobileInlineFilters onFiltersChange={onFiltersChange} />;
+    return <MobileInlineFilters onFiltersChange={onFiltersChange} activeTab={activeTab} />;
   }
 
   const displayGenres = showAllGenres ? ALL_GENRES : GENRES_INITIAL;
@@ -341,7 +342,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             Discover
           </Button>
           
-          <SurpriseMe variant="button" className="w-full h-12 rounded-lg" />
+          <SurpriseMe variant="button" className="w-full h-12 rounded-lg" mediaType={activeTab} />
         </div>
       </section>
     </div>

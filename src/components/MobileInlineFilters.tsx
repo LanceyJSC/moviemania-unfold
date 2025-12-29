@@ -29,6 +29,7 @@ export interface FilterState {
 
 interface MobileInlineFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
+  activeTab?: 'all' | 'movies' | 'tv';
 }
 
 const GENRES = [
@@ -45,7 +46,7 @@ const GENRES = [
 type SliderType = "year" | "rating" | "runtime" | null;
 
 // This component is ONLY rendered for Pro users - no internal Pro checks needed
-export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProps) => {
+export const MobileInlineFilters = ({ onFiltersChange, activeTab = 'all' }: MobileInlineFiltersProps) => {
   const navigate = useNavigate();
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [activeSlider, setActiveSlider] = useState<SliderType>(null);
@@ -299,7 +300,7 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
             Discover
           </Button>
           
-          <SurpriseMe variant="button" className="w-full h-12 rounded-xl text-base" />
+          <SurpriseMe variant="button" className="w-full h-12 rounded-xl text-base" mediaType={activeTab} />
         </div>
       </div>
 

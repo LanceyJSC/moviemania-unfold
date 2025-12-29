@@ -417,7 +417,7 @@ const Search = () => {
         {/* PRO USER: Discovery Experience */}
         {showProDiscovery && (
           <div className="py-6 space-y-8">
-            <InlineFilters onFiltersChange={handleFiltersChange} />
+            <InlineFilters onFiltersChange={handleFiltersChange} activeTab={activeTab} />
             
             {/* Filter Results */}
             {isFilterSearching && (
