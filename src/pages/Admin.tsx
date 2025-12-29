@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import { MobileHeader } from "@/components/MobileHeader";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -193,6 +194,7 @@ const Admin = () => {
     return (
       <div className="min-h-screen bg-background pb-24 2xl:pb-0">
         <DesktopHeader />
+        <MobileHeader title="Admin" />
         <div className="max-w-7xl mx-auto px-4 2xl:px-6 py-8 2xl:pt-24 space-y-6">
           <Skeleton className="h-10 w-48" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -214,8 +216,9 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background pb-24 2xl:pb-0">
       <DesktopHeader />
+      <MobileHeader title="Admin" />
 
-      <div className="max-w-7xl mx-auto px-4 2xl:px-6 py-8 2xl:pt-24 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 2xl:px-6 pt-4 pb-8 2xl:pt-24 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">

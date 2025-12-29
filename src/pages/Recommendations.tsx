@@ -156,19 +156,7 @@ export const Recommendations = () => {
       <DesktopHeader />
       <MobileHeader title="For You" />
       
-      <div className="sticky top-0 2xl:top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center gap-4 p-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 -ml-2"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <h1 className="text-xl font-bold text-foreground">Recommended For You</h1>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 py-4 max-w-7xl">
         {/* Surprise Me - Pro Feature */}
         <SurpriseMe variant="card" className="mb-6" />
 
