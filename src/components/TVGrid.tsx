@@ -7,9 +7,17 @@ import { TVShowCard } from "@/components/TVShowCard";
 interface TVGridProps {
   title: string;
   category: "all" | "popular" | "airing_today" | "on_the_air" | "top_rated";
+  genre?: number | null;
+  genres?: number[];
 }
 
-const fetchTVShows = async (category: string, page: number) => {
+const fetchTVShows = async (category: string, page: number, genre?: number | null, genres?: number[]) => {
+  // If genre filter is provided, use discover endpoint
+  if (genre || (genres && genres.length > 0)) {
+    const genreString = genre ? genre.toString() : genres!.join(',');
+    return tmdbService.discoverTV({ genre: genreString, page, sortBy: 'popularity.desc' });
+  }
+  
   let response;
   switch (category) {
     case "all":
@@ -33,7 +41,7 @@ const fetchTVShows = async (category: string, page: number) => {
   return response;
 };
 
-export const TVGrid = ({ title, category }: TVGridProps) => {
+export const TVGrid = ({ title, category, genre, genres }: TVGridProps) => {
   const [additionalShows, setAdditionalShows] = useState<TVShow[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -43,22 +51,25 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<() => void>();
 
+  // Create cache key that includes genre
+  const genreKey = genre || (genres && genres.length > 0 ? genres.join(',') : null);
+
   // Use React Query for caching - 24 hour cache for TMDB data
   const { data, isLoading } = useQuery({
-    queryKey: ['tvshows', category, 1],
-    queryFn: () => fetchTVShows(category, 1),
+    queryKey: ['tvshows', category, 1, genreKey],
+    queryFn: () => fetchTVShows(category, 1, genre, genres),
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  // Reset pagination when category changes
+  // Reset pagination when category or genre changes
   useEffect(() => {
     setPage(1);
     setAdditionalShows([]);
     setHasMore(true);
-  }, [category]);
+  }, [category, genreKey]);
 
   // Update hasMore when initial data loads
   useEffect(() => {
@@ -80,7 +91,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     const nextPage = page + 1;
     
     try {
-      const response = await fetchTVShows(category, nextPage);
+      const response = await fetchTVShows(category, nextPage, genre, genres);
       setAdditionalShows(prev => [...prev, ...response.results]);
       setHasMore(nextPage < response.total_pages);
       setPage(nextPage);
@@ -89,7 +100,7 @@ export const TVGrid = ({ title, category }: TVGridProps) => {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [category, page, hasMore, isLoading, isLoadingMore]);
+  }, [category, page, hasMore, isLoading, isLoadingMore, genre, genres]);
 
   // Keep ref updated with latest loadMore
   useEffect(() => {
