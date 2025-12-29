@@ -62,7 +62,7 @@ export const NewThisMonth = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
-  const displayedContent = isExpanded ? content : content.slice(0, 12);
+  const displayedContent = isExpanded ? content : content.slice(0, 8);
 
   if (isLoading) {
     return (
@@ -74,7 +74,7 @@ export const NewThisMonth = () => {
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-          {Array.from({ length: 12 }).map((_, index) => (
+          {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
           ))}
         </div>
@@ -123,7 +123,7 @@ export const NewThisMonth = () => {
               );
             })}
           </div>
-          {content.length > 12 && (
+          {content.length > 8 && (
             <div className="flex justify-center mt-6">
               <Button
                 variant="ghost"

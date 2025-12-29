@@ -100,7 +100,7 @@ export const BecauseYouLoved = () => {
               <Skeleton className="h-4 w-48 mx-auto" />
             </div>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
               ))}
             </div>
@@ -117,7 +117,7 @@ export const BecauseYouLoved = () => {
   const primarySection = sections[0];
   const displayedMovies = isExpanded 
     ? primarySection.recommendations 
-    : primarySection.recommendations.slice(0, 6);
+    : primarySection.recommendations.slice(0, 8);
 
   return (
     <>
@@ -149,7 +149,7 @@ export const BecauseYouLoved = () => {
           </div>
 
           {/* See More Button */}
-          {primarySection.recommendations.length > 6 && (
+          {primarySection.recommendations.length > 8 && (
             <div className="flex justify-center mt-6">
               <Button
                 variant="ghost"
