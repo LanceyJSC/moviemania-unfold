@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Crown, Search } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -53,13 +53,6 @@ const PACING_OPTIONS = [
   { value: "slow", label: "Slow Burn" },
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast-Paced" }
-];
-const ERA_OPTIONS = [
-  { value: "any", label: "Any Era" },
-  { value: "classic", label: "Classic (Pre-1970)" },
-  { value: "vintage", label: "Vintage (1970-1990)" },
-  { value: "modern", label: "Modern (1990-2010)" },
-  { value: "contemporary", label: "Contemporary (2010+)" }
 ];
 const LANGUAGE_OPTIONS = [
   { value: "any", label: "Any Language" },
@@ -191,14 +184,14 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
         </div>
       </div>
 
-      {/* Pro Discovery Filters */}
-      <div className="bg-gradient-to-br from-amber-500/5 via-card/60 to-orange-500/5 backdrop-blur-sm rounded-2xl border border-amber-500/20 p-6">
+      {/* Discovery Filters */}
+      <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/40 p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Crown className="h-5 w-5 text-amber-500" />
-            <h3 className="font-semibold text-lg text-foreground">Pro Discovery Filters</h3>
+            <span className="text-2xl">✨</span>
+            <h3 className="font-semibold text-lg text-foreground">Discovery Filters</h3>
             {activeFilterCount > 0 && (
-              <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">
+              <Badge className="bg-primary/20 text-primary border-primary/30">
                 {activeFilterCount} active
               </Badge>
             )}
@@ -271,7 +264,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
         {/* Advanced Filters Collapsible */}
         <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
           <CollapsibleTrigger className="w-full">
-            <div className="flex items-center justify-center gap-2 w-full h-10 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-xl cursor-pointer transition-all">
+            <div className="flex items-center justify-center gap-2 w-full h-10 bg-muted/50 hover:bg-muted/80 border border-border/30 rounded-xl cursor-pointer transition-all mt-4">
               <span className="text-sm font-medium text-foreground">More Options</span>
               <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", showAdvanced && "rotate-180")} />
             </div>
@@ -321,7 +314,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             </div>
 
             {/* Dropdowns */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="bg-background/50 rounded-xl p-4 border border-border/30">
                 <label className="text-sm font-medium text-foreground mb-2 block">Pacing</label>
                 <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
@@ -330,20 +323,6 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {PACING_OPTIONS.map(option => (
-                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-                <label className="text-sm font-medium text-foreground mb-2 block">Era</label>
-                <Select value={filters.era} onValueChange={(value) => updateFiltersLocally({ era: value })}>
-                  <SelectTrigger className="h-10 bg-background border-border/50">
-                    <SelectValue placeholder="Any Era" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ERA_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                     ))}
                   </SelectContent>
