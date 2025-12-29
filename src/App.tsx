@@ -39,8 +39,6 @@ import Achievements from "./pages/Achievements";
 import CastCrew from "./pages/CastCrew";
 import Wrapped from "./pages/Wrapped";
 import Admin from "./pages/Admin";
-import SmartLists from "./pages/SmartLists";
-import HiddenGems from "./pages/HiddenGems";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -100,8 +98,6 @@ const App = () => {
                           <Route path="/stats" element={<Stats />} />
                           <Route path="/achievements" element={<Achievements />} />
                           <Route path="/wrapped" element={<Wrapped />} />
-                          <Route path="/smart-lists" element={<SmartLists />} />
-                          <Route path="/hidden-gems" element={<HiddenGems />} />
                           <Route path="/admin" element={<Admin />} />
                           <Route path="/auth" element={<Auth />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

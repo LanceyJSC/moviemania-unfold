@@ -13,10 +13,7 @@ import { ProfileEditor } from '@/components/ProfileEditor';
 import { ProBadge } from '@/components/ProBadge';
 import { TasteProfileCard } from '@/components/TasteProfileCard';
 import { ProUpgradeModal } from '@/components/ProUpgradeModal';
-import { ThemeCustomizer } from '@/components/ThemeCustomizer';
-import { TagManager } from '@/components/TagManager';
-import { ImportData } from '@/components/ImportData';
-import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2, Zap, Gem } from 'lucide-react';
+import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
@@ -100,7 +97,7 @@ const Profile = () => {
         </div>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-4 gap-3 mb-6">
           <Link to="/wrapped" className="touch-manipulation">
             <Card className="bg-gradient-to-br from-cinema-red/20 to-cinema-gold/20 border-cinema-gold/30 hover:border-cinema-gold/50 active:scale-95 transition-all">
               <CardContent className="p-4 text-center">
@@ -130,22 +127,6 @@ const Profile = () => {
               <CardContent className="p-4 text-center">
                 <MessageCircle className="h-6 w-6 text-green-500 mx-auto mb-2" />
                 <p className="text-xs font-medium text-foreground">Reviews</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link to="/smart-lists" className="touch-manipulation">
-            <Card className="bg-gradient-to-br from-amber-500/20 to-orange-500/5 border-amber-500/30 hover:border-amber-500/50 active:scale-95 transition-all">
-              <CardContent className="p-4 text-center">
-                <Zap className="h-6 w-6 text-amber-500 mx-auto mb-2" />
-                <p className="text-xs font-medium text-foreground">Smart</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link to="/hidden-gems" className="touch-manipulation">
-            <Card className="bg-gradient-to-br from-pink-500/20 to-purple-500/5 border-pink-500/30 hover:border-pink-500/50 active:scale-95 transition-all">
-              <CardContent className="p-4 text-center">
-                <Gem className="h-6 w-6 text-pink-500 mx-auto mb-2" />
-                <p className="text-xs font-medium text-foreground">Gems</p>
               </CardContent>
             </Card>
           </Link>
@@ -183,22 +164,6 @@ const Profile = () => {
                 initialUsername={profile.username}
                 currentProfile={profile}
               />
-            </CardContent>
-          </Card>
-
-          {/* Pro Customization Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                Customization
-                <ProBadge size="sm" />
-              </CardTitle>
-              <CardDescription>Personalize your profile and organize your content</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-3">
-              <ThemeCustomizer />
-              <TagManager />
-              <ImportData />
             </CardContent>
           </Card>
 

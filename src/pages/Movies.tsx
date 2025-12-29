@@ -9,8 +9,6 @@ import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { FeaturedHero } from "@/components/FeaturedHero";
-import { MoodDiscovery } from "@/components/MoodDiscovery";
-import { SurpriseMe } from "@/components/SurpriseMe";
 import { Button } from "@/components/ui/button";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -90,12 +88,6 @@ const Movies = () => {
                   );
                 })}
               </div>
-            </div>
-
-            {/* Mood Discovery & Surprise Me - Pro Features */}
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-              <MoodDiscovery variant="pills" className="flex-wrap" />
-              <SurpriseMe variant="button" />
             </div>
 
             {/* Genre Filter - Pro Only */}
