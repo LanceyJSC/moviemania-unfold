@@ -7,9 +7,15 @@ export type UserRole = 'admin' | 'moderator' | 'member' | null;
 export const useUserRole = () => {
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking roles
+    if (authLoading) {
+      setLoading(true);
+      return;
+    }
+
     if (!user) {
       setRole(null);
       setLoading(false);
@@ -39,7 +45,7 @@ export const useUserRole = () => {
     };
 
     fetchUserRole();
-  }, [user]);
+  }, [user, authLoading]);
 
   const isAdmin = role === 'admin';
   const isModerator = role === 'moderator' || role === 'admin';
