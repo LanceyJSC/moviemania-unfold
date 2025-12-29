@@ -124,11 +124,9 @@ const Search = () => {
       filters.yearRange[0] === 1900 && filters.yearRange[1] === new Date().getFullYear() &&
       filters.ratingRange[0] === 0 && filters.ratingRange[1] === 10 &&
       filters.runtimeRange[0] === 0 && filters.runtimeRange[1] === 300 &&
-      filters.mood.length === 0 &&
-      filters.tone.length === 0 &&
-      filters.pacing === 'any' &&
-      filters.era === 'any' &&
-      filters.language === 'any';
+      filters.mood === 'any' &&
+      filters.tone === 'any' &&
+      filters.pacing === 'any';
     
     if (isDefault) {
       setFilterResults([]);
@@ -214,13 +212,28 @@ const Search = () => {
         }
       }
 
+      // Fetch based on active tab
       const pagePromises = [];
       for (let page = 1; page <= 25; page++) {
-        pagePromises.push(tmdbService.discoverMovies({ ...discoverParams, page }));
+        if (activeTab === 'tv') {
+          pagePromises.push(tmdbService.discoverTV({ ...discoverParams, page }));
+        } else if (activeTab === 'movies') {
+          pagePromises.push(tmdbService.discoverMovies({ ...discoverParams, page }));
+        } else {
+          // For 'all', fetch both movies and TV shows
+          pagePromises.push(tmdbService.discoverMovies({ ...discoverParams, page }));
+          pagePromises.push(tmdbService.discoverTV({ ...discoverParams, page }));
+        }
       }
       
       const allResults = await Promise.all(pagePromises);
       const combinedResults = allResults.flatMap(result => result.results);
+      
+      // Sort combined results by popularity for 'all' tab
+      if (activeTab === 'all') {
+        combinedResults.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
+      }
+      
       setFilterResults(combinedResults);
     } catch (error) {
       console.error("Filter search failed:", error);

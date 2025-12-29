@@ -293,6 +293,40 @@ class TMDBService {
     return this.fetchFromTMDB(`/discover/movie?${queryString}`);
   }
 
+  async discoverTV(filters: {
+    genre?: number;
+    year?: number;
+    yearFrom?: number;
+    yearTo?: number;
+    rating?: number;
+    voteAverageFrom?: number;
+    voteAverageTo?: number;
+    runtimeFrom?: number;
+    runtimeTo?: number;
+    language?: string;
+    page?: number;
+    sortBy?: string;
+  } = {}): Promise<TMDBResponse<TVShow>> {
+    const params = new URLSearchParams();
+    
+    if (filters.genre) params.append('with_genres', filters.genre.toString());
+    if (filters.year) params.append('first_air_date_year', filters.year.toString());
+    if (filters.yearFrom) params.append('first_air_date.gte', `${filters.yearFrom}-01-01`);
+    if (filters.yearTo) params.append('first_air_date.lte', `${filters.yearTo}-12-31`);
+    if (filters.rating) params.append('vote_average.gte', filters.rating.toString());
+    if (filters.voteAverageFrom !== undefined) params.append('vote_average.gte', filters.voteAverageFrom.toString());
+    if (filters.voteAverageTo !== undefined) params.append('vote_average.lte', filters.voteAverageTo.toString());
+    if (filters.runtimeFrom !== undefined) params.append('with_runtime.gte', filters.runtimeFrom.toString());
+    if (filters.runtimeTo !== undefined) params.append('with_runtime.lte', filters.runtimeTo.toString());
+    if (filters.language && filters.language !== 'any') params.append('with_original_language', filters.language);
+    if (filters.page) params.append('page', filters.page.toString());
+    if (filters.sortBy) params.append('sort_by', filters.sortBy);
+    
+    const queryString = params.toString();
+    return this.fetchFromTMDB(`/discover/tv?${queryString}`);
+  }
+
+
   async getThisMonthMovies(fresh: boolean = false): Promise<TMDBResponse<Movie>> {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
