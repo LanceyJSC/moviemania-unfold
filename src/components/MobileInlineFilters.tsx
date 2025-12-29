@@ -76,7 +76,11 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
   };
 
   const handleGenreClick = (genreId: number) => {
-    navigate(`/search?genre=${genreId}`);
+    const currentGenres = filters.genres;
+    const newGenres = currentGenres.includes(genreId)
+      ? currentGenres.filter(id => id !== genreId)
+      : [...currentGenres, genreId];
+    updateFiltersLocally({ genres: newGenres });
   };
 
   const handleViewAllGenres = () => {
@@ -156,16 +160,24 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           </div>
           
           <div className="grid grid-cols-4 gap-2">
-            {GENRES.map((genre) => (
-              <button
-                key={genre.id}
-                onClick={() => handleGenreClick(genre.id)}
-                className="group flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl bg-muted/50 hover:bg-primary/10 border border-transparent hover:border-primary/30 active:scale-95 transition-all"
-              >
-                <span className="text-lg group-hover:scale-110 transition-transform">{genre.emoji}</span>
-                <span className="text-foreground/80 text-[10px] font-medium text-center leading-tight">{genre.name}</span>
-              </button>
-            ))}
+            {GENRES.map((genre) => {
+              const isSelected = filters.genres.includes(genre.id);
+              return (
+                <button
+                  key={genre.id}
+                  onClick={() => handleGenreClick(genre.id)}
+                  className={cn(
+                    "group flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl border active:scale-95 transition-all",
+                    isSelected 
+                      ? "bg-primary text-primary-foreground border-primary" 
+                      : "bg-muted/50 hover:bg-primary/10 border-transparent hover:border-primary/30"
+                  )}
+                >
+                  <span className="text-lg group-hover:scale-110 transition-transform">{genre.emoji}</span>
+                  <span className="text-[10px] font-medium text-center leading-tight">{genre.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

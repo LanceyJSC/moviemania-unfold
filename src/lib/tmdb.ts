@@ -258,7 +258,7 @@ class TMDBService {
   }
 
   async discoverMovies(filters: {
-    genre?: number;
+    genre?: number | string;
     year?: number;
     yearFrom?: number;
     yearTo?: number;
@@ -294,7 +294,7 @@ class TMDBService {
   }
 
   async discoverTV(filters: {
-    genre?: number;
+    genre?: number | string;
     year?: number;
     yearFrom?: number;
     yearTo?: number;
