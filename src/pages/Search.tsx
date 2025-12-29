@@ -141,7 +141,7 @@ const Search = () => {
       };
       
       if (filters.genres && filters.genres.length > 0) {
-        discoverParams.genre = filters.genres[0];
+        discoverParams.genre = filters.genres.join(',');
       }
       
       // Map mood to genre IDs for better filtering

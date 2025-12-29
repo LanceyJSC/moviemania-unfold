@@ -124,7 +124,11 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   };
 
   const handleGenreClick = (genreId: number) => {
-    navigate(`/search?genre=${genreId}`);
+    const currentGenres = filters.genres;
+    const newGenres = currentGenres.includes(genreId)
+      ? currentGenres.filter(id => id !== genreId)
+      : [...currentGenres, genreId];
+    updateFiltersLocally({ genres: newGenres });
   };
 
   const toggleShowAllGenres = () => {
@@ -174,16 +178,24 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           "grid gap-2 mb-3 transition-all duration-300",
           showAllGenres ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8" : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8"
         )}>
-          {displayGenres.map((genre) => (
-            <button
-              key={genre.id}
-              onClick={() => handleGenreClick(genre.id)}
-              className="group flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-card hover:bg-card/80 border border-border/40 hover:border-primary/40 transition-all duration-200"
-            >
-              <span className="text-base">{genre.emoji}</span>
-              <span className="font-medium text-foreground text-xs">{genre.name}</span>
-            </button>
-          ))}
+          {displayGenres.map((genre) => {
+            const isSelected = filters.genres.includes(genre.id);
+            return (
+              <button
+                key={genre.id}
+                onClick={() => handleGenreClick(genre.id)}
+                className={cn(
+                  "group flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border transition-all duration-200",
+                  isSelected 
+                    ? "bg-primary text-primary-foreground border-primary" 
+                    : "bg-card hover:bg-card/80 border-border/40 hover:border-primary/40"
+                )}
+              >
+                <span className="text-base">{genre.emoji}</span>
+                <span className="font-medium text-xs">{genre.name}</span>
+              </button>
+            );
+          })}
         </div>
         
         <Button
