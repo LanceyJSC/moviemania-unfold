@@ -175,18 +175,18 @@ export const LatestTrailers = () => {
 
         {/* Trailers Grid */}
         {loading ? (
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {[...Array(12)].map((_, i) => (
-              <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
+          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
               {displayedItems.map((item) => (
                 <div
                   key={item.id}
-                  className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer aspect-[2/3] rounded-lg"
+                  className="flex-shrink-0 group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer w-32 h-48 rounded-lg"
                   onClick={() => handlePlayTrailer(item)}
                 >
                   <div className="w-full h-full relative">
@@ -208,15 +208,15 @@ export const LatestTrailers = () => {
                     </div>
                     
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
-                      <div className="flex flex-col items-center space-y-2">
+                      <div className="flex flex-col items-center space-y-1">
                         <Button
-                          size="lg"
-                          className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground p-4"
+                          size="sm"
+                          className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground p-2"
                         >
-                          <Play className="h-6 w-6 fill-current" />
+                          <Play className="h-4 w-4 fill-current" />
                         </Button>
-                        <span className="text-white font-medium text-sm text-center px-2">
-                          Watch Trailer
+                        <span className="text-white font-medium text-xs text-center px-1">
+                          Trailer
                         </span>
                       </div>
                     </div>
@@ -227,16 +227,6 @@ export const LatestTrailers = () => {
                         <span className="text-foreground font-semibold text-xs">{item.vote_average.toFixed(1)}</span>
                       </div>
                     )}
-                    
-                    <div className="absolute bottom-0 left-0 right-0 p-3 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
-                      <h3 className="text-foreground font-semibold mb-1 line-clamp-2 text-sm">
-                        {getItemTitle(item)}
-                      </h3>
-                      <div className="flex items-center justify-between text-muted-foreground text-xs">
-                        <span>{getItemYear(item)}</span>
-                        <span className="truncate ml-2">Trailer</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               ))}
