@@ -303,9 +303,9 @@ export const HeroSection = () => {
             ) : heroMovie ? (
               <div className="max-w-2xl">
                 {/* Title */}
-                <h1 className="font-cinematic text-lg sm:text-xl md:text-3xl lg:text-4xl text-white mb-1 sm:mb-2 md:mb-4 tracking-wide leading-tight uppercase">
+                <h2 className="font-cinematic text-lg sm:text-xl md:text-3xl lg:text-4xl text-white mb-1 sm:mb-2 md:mb-4 tracking-wide leading-tight uppercase">
                   {heroMovie.title}
-                </h1>
+                </h2>
                 
                 {/* Desktop only: Overview and buttons inside hero */}
                 <div className="hidden md:block">
@@ -345,9 +345,9 @@ export const HeroSection = () => {
             ) : (
               <div className="max-w-2xl text-center space-y-4">
                 <div>
-                  <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
+                  <p className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
                     Welcome to Your Movie Universe
-                  </h2>
+                  </p>
                   <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
                     Discover, save, and explore thousands of movies with personalized recommendations.
                   </p>

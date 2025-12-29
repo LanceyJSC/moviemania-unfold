@@ -59,6 +59,7 @@ const Index = () => {
   return (
     <ErrorBoundary fallback={<FallbackHomepage />}>
       <div className="min-h-screen bg-background">
+        <h1 className="sr-only">SceneBurn - Track, Rate & Discover Movies and TV Shows You Love</h1>
         <DesktopHeader />
         <MobileBrandHeader />
         <PullToRefresh onRefresh={handleRefresh}>
