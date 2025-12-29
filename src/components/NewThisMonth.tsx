@@ -73,9 +73,9 @@ export const NewThisMonth = () => {
           </h2>
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
-        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
+        <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -103,20 +103,18 @@ export const NewThisMonth = () => {
       
       {displayedContent.length > 0 ? (
         <>
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
             {displayedContent.map((item) => {
               const isMovie = 'title' in item;
               return (
-                <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
+                <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0">
                   {isMovie ? (
                     <MovieCard 
                       movie={tmdbService.formatMovieForCard(item as Movie)}
-                      variant="grid"
                     />
                   ) : (
                     <TVShowCard 
                       tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
-                      variant="grid"
                     />
                   )}
                 </div>
