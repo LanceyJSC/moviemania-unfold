@@ -282,7 +282,7 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           size="lg"
         >
           <Search className="h-4 w-4 mr-2" />
-          Discover Movies
+          Discover
         </Button>
       </div>
 
