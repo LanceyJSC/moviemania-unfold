@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FunFacts } from "@/components/FunFacts";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
+import { TagSelector } from "@/components/TagSelector";
 import { WatchProviders } from "@/components/WatchProviders";
 import { SimilarContent } from "@/components/SimilarContent";
 import { MovieCollectionBanner } from "@/components/MovieCollectionBanner";
@@ -292,6 +293,11 @@ const MovieDetail = () => {
               <span className="text-xs">Reviews</span>
             </Link>
           </Button>
+        </div>
+
+        {/* Tag Selector - Pro Feature */}
+        <div className="mb-4">
+          <TagSelector movieId={movieId} mediaType="movie" variant="inline" />
         </div>
 
         {/* Rating Comparison Card */}

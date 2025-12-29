@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { HeroSection } from "@/components/HeroSection";
 import { MovieStats } from "@/components/MovieStats";
 import { QuickGenres } from "@/components/QuickGenres";
+import { BecauseYouLoved } from "@/components/BecauseYouLoved";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileBrandHeader } from "@/components/MobileBrandHeader";
@@ -74,6 +75,10 @@ const Index = () => {
             
             <ErrorBoundary>
               <QuickGenres />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <BecauseYouLoved />
             </ErrorBoundary>
 
             <ErrorBoundary>

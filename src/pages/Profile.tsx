@@ -13,6 +13,8 @@ import { ProfileEditor } from '@/components/ProfileEditor';
 import { ProBadge } from '@/components/ProBadge';
 import { TasteProfileCard } from '@/components/TasteProfileCard';
 import { ProUpgradeModal } from '@/components/ProUpgradeModal';
+import { ThemeCustomizer } from '@/components/ThemeCustomizer';
+import { ImportData } from '@/components/ImportData';
 import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2, Crown } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
@@ -187,6 +189,11 @@ const Profile = () => {
                 initialUsername={profile.username}
                 currentProfile={profile}
               />
+              
+              {/* Theme Customizer - Pro Feature */}
+              <div className="pt-4 border-t border-border">
+                <ThemeCustomizer />
+              </div>
             </CardContent>
           </Card>
 
@@ -285,11 +292,13 @@ const Profile = () => {
                     Download a copy of your watchlist, ratings, and reviews
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isExporting}
-                  onClick={async () => {
+                <div className="flex gap-2">
+                  <ImportData />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isExporting}
+                    onClick={async () => {
                     if (!user) return;
                     setIsExporting(true);
                     try {
@@ -344,6 +353,7 @@ const Profile = () => {
                     </>
                   )}
                 </Button>
+                </div>
               </div>
               <div className="flex items-center justify-between py-2">
                 <div>
