@@ -286,39 +286,37 @@ const Search = () => {
         </div>
       </div>
 
-      {/* Media Type Tabs when searching */}
-      {searchTerm && (
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30">
-            <Button
-              variant={activeTab === 'all' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('all')}
-              className="flex-1 rounded-lg h-10 text-sm font-medium"
-            >
-              All
-            </Button>
-            <Button
-              variant={activeTab === 'movies' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('movies')}
-              className="flex-1 rounded-lg h-10 text-sm font-medium gap-2"
-            >
-              <Film className="h-4 w-4" />
-              Movies
-            </Button>
-            <Button
-              variant={activeTab === 'tv' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('tv')}
-              className="flex-1 rounded-lg h-10 text-sm font-medium gap-2"
-            >
-              <Tv className="h-4 w-4" />
-              TV Shows
-            </Button>
-          </div>
+      {/* Media Type Tabs - Always visible */}
+      <div className="max-w-2xl mx-auto px-4 py-4">
+        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30">
+          <Button
+            variant={activeTab === 'all' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('all')}
+            className="flex-1 rounded-lg h-10 text-sm font-medium"
+          >
+            All
+          </Button>
+          <Button
+            variant={activeTab === 'movies' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('movies')}
+            className="flex-1 rounded-lg h-10 text-sm font-medium gap-2"
+          >
+            <Film className="h-4 w-4" />
+            Movies
+          </Button>
+          <Button
+            variant={activeTab === 'tv' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('tv')}
+            className="flex-1 rounded-lg h-10 text-sm font-medium gap-2"
+          >
+            <Tv className="h-4 w-4" />
+            TV Shows
+          </Button>
         </div>
-      )}
+      </div>
 
       {/* Genre Header for Pro users */}
       {isProUser && genreParam && !searchTerm && (
