@@ -243,18 +243,18 @@ const Search = () => {
         <div className="relative overflow-hidden pt-6">
           {/* Title */}
           {!searchTerm && !genreParam && filterResults.length === 0 && (
-            <div className="text-center mb-8">
-              <h1 className="font-cinematic text-4xl md:text-5xl text-foreground tracking-wider mb-3">
+            <div className="mb-6">
+              <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wider mb-2">
                 DISCOVER
               </h1>
-              <p className="text-muted-foreground text-lg max-w-md mx-auto">
+              <p className="text-muted-foreground">
                 Find your next favorite movie or TV show
               </p>
             </div>
           )}
           
           {/* Search Input */}
-          <div className="max-w-2xl mx-auto">
+          <div>
             <div className="relative group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-300" />
               <div className="relative">
@@ -282,7 +282,7 @@ const Search = () => {
         </div>
 
         {/* Media Type Tabs - Always visible */}
-        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30 max-w-2xl mx-auto">
+        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30">
           <Button
             variant={activeTab === 'all' ? 'default' : 'ghost'}
             size="sm"
@@ -333,8 +333,8 @@ const Search = () => {
         
         {/* Empty State for FREE users */}
         {showEmptyState && !isProUser && (
-          <div className="py-16">
-            <div className="max-w-md mx-auto text-center">
+          <div className="py-12">
+            <div>
               <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-6">
                 <SearchIcon className="h-10 w-10 text-muted-foreground/50" />
               </div>
