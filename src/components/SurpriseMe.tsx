@@ -23,13 +23,34 @@ interface SurpriseMedia {
   media_type: 'movie' | 'tv';
 }
 
+export interface SurpriseFilters {
+  genres: number[];
+  yearRange: [number, number];
+  ratingRange: [number, number];
+  runtimeRange: [number, number];
+  mood: string;
+  tone: string;
+  pacing: string;
+}
+
 interface SurpriseMeProps {
   variant?: 'button' | 'card';
   className?: string;
   mediaType?: 'all' | 'movies' | 'tv';
+  filters?: SurpriseFilters;
 }
 
-export const SurpriseMe = ({ variant = 'button', className, mediaType = 'all' }: SurpriseMeProps) => {
+const DEFAULT_FILTERS: SurpriseFilters = {
+  genres: [],
+  yearRange: [1900, new Date().getFullYear()],
+  ratingRange: [0, 10],
+  runtimeRange: [0, 300],
+  mood: 'any',
+  tone: 'any',
+  pacing: 'any'
+};
+
+export const SurpriseMe = ({ variant = 'button', className, mediaType = 'all', filters = DEFAULT_FILTERS }: SurpriseMeProps) => {
   const { user } = useAuth();
   const { isProUser } = useSubscription();
   const navigate = useNavigate();
@@ -51,45 +72,108 @@ export const SurpriseMe = ({ variant = 'button', className, mediaType = 'all' }:
     setIsRevealing(true);
 
     try {
-      // Get user's highly rated content based on media type filter
-      const ratingsQuery = supabase
-        .from('user_ratings')
-        .select('movie_id, media_type')
-        .eq('user_id', user.id)
-        .gte('rating', 3)
-        .limit(20);
+      // Build discover params from filters
+      const discoverParams: any = {
+        sortBy: 'popularity.desc',
+        page: Math.floor(Math.random() * 5) + 1 // Random page 1-5 for variety
+      };
 
-      if (mediaType === 'movies') {
-        ratingsQuery.eq('media_type', 'movie');
-      } else if (mediaType === 'tv') {
-        ratingsQuery.eq('media_type', 'tv');
+      // Build genre list from explicit selection + mood/tone mappings
+      let genreIds: number[] = [...(filters.genres || [])];
+      
+      // Map mood to genre IDs
+      const moodGenreMap: { [key: string]: number[] } = {
+        'feel-good': [35, 10751],
+        'intense': [28, 53],
+        'thought-provoking': [18, 99],
+        'emotional': [18, 10749],
+        'uplifting': [35, 10751, 12],
+        'dark': [27, 53, 80],
+        'nostalgic': [10751, 14],
+        'inspiring': [18, 36],
+      };
+      
+      // Map tone to genre IDs
+      const toneGenreMap: { [key: string]: number[] } = {
+        'lighthearted': [35, 10751],
+        'serious': [18, 36],
+        'satirical': [35],
+        'suspenseful': [53, 9648],
+        'romantic': [10749],
+        'gritty': [80, 53],
+        'whimsical': [14, 16],
+      };
+      
+      if (filters.mood && filters.mood !== 'any') {
+        const moodGenres = moodGenreMap[filters.mood];
+        if (moodGenres) genreIds = [...genreIds, ...moodGenres];
+      }
+      
+      if (filters.tone && filters.tone !== 'any') {
+        const toneGenres = toneGenreMap[filters.tone];
+        if (toneGenres) genreIds = [...genreIds, ...toneGenres];
+      }
+      
+      if (genreIds.length > 0) {
+        discoverParams.genre = [...new Set(genreIds)].join(',');
+      }
+      
+      // Apply year range
+      if (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear()) {
+        discoverParams.yearFrom = filters.yearRange[0];
+        discoverParams.yearTo = filters.yearRange[1];
+      }
+      
+      // Apply rating range
+      if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10) {
+        discoverParams.voteAverageFrom = filters.ratingRange[0];
+        discoverParams.voteAverageTo = filters.ratingRange[1];
+      }
+      
+      // Apply runtime (or pacing override)
+      if (filters.pacing && filters.pacing !== 'any') {
+        const pacingRanges: { [key: string]: [number, number] } = {
+          'slow': [150, 300],
+          'moderate': [90, 150],
+          'fast': [60, 100]
+        };
+        const pacingRange = pacingRanges[filters.pacing];
+        if (pacingRange) {
+          discoverParams.runtimeFrom = pacingRange[0];
+          discoverParams.runtimeTo = pacingRange[1];
+        }
+      } else if (filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300) {
+        discoverParams.runtimeFrom = filters.runtimeRange[0];
+        discoverParams.runtimeTo = filters.runtimeRange[1];
       }
 
-      const { data: ratings } = await ratingsQuery;
-
       let selectedMedia: SurpriseMedia | null = null;
-
-      if (!ratings || ratings.length === 0) {
-        // Fallback to popular content based on filter
-        if (mediaType === 'movies' || (mediaType === 'all' && Math.random() > 0.5)) {
-          const popular = await tmdbService.getPopularMovies();
-          const randomIndex = Math.floor(Math.random() * popular.results.length);
-          const movie = popular.results[randomIndex];
+      
+      // Fetch based on media type
+      const shouldFetchMovies = mediaType === 'movies' || (mediaType === 'all' && Math.random() > 0.5);
+      
+      if (shouldFetchMovies) {
+        const results = await tmdbService.discoverMovies(discoverParams);
+        if (results.results && results.results.length > 0) {
+          const randomIndex = Math.floor(Math.random() * results.results.length);
+          const movie = results.results[randomIndex];
           const details = await tmdbService.getMovieDetails(movie.id);
-          selectedMedia = { 
-            ...movie, 
+          selectedMedia = {
+            ...movie,
             title: movie.title,
             release_date: movie.release_date,
             runtime: details.runtime,
             genres: details.genres,
-            media_type: 'movie' 
+            media_type: 'movie'
           };
-        } else {
-          const popular = await tmdbService.getPopularTVShows();
-          const randomIndex = Math.floor(Math.random() * popular.results.length);
-          const show = popular.results[randomIndex];
+        }
+      } else {
+        const results = await tmdbService.discoverTV(discoverParams);
+        if (results.results && results.results.length > 0) {
+          const randomIndex = Math.floor(Math.random() * results.results.length);
+          const show = results.results[randomIndex];
           const details = await tmdbService.getTVShowDetails(show.id);
-          selectedMedia = { 
+          selectedMedia = {
             id: show.id,
             title: show.name,
             poster_path: show.poster_path,
@@ -99,87 +183,43 @@ export const SurpriseMe = ({ variant = 'button', className, mediaType = 'all' }:
             release_date: show.first_air_date,
             runtime: details.episode_run_time?.[0],
             genres: details.genres,
-            media_type: 'tv' 
+            media_type: 'tv'
           };
         }
-      } else {
-        // Get recommendations from a random highly-rated item matching the filter
-        const randomRating = ratings[Math.floor(Math.random() * ratings.length)];
-        const isTV = randomRating.media_type === 'tv';
-
-        // Respect the media type filter for recommendations output
-        if (mediaType === 'movies' || (mediaType === 'all' && !isTV)) {
-          // Get movie recommendations
-          const sourceId = isTV ? null : randomRating.movie_id;
-          if (sourceId) {
-            const recommendations = await tmdbService.getMovieRecommendations(sourceId);
-            if (recommendations.results && recommendations.results.length > 0) {
-              const randomRec = recommendations.results[Math.floor(Math.random() * recommendations.results.length)];
-              const details = await tmdbService.getMovieDetails(randomRec.id);
-              selectedMedia = {
-                ...randomRec,
-                title: randomRec.title,
-                release_date: randomRec.release_date,
-                runtime: details.runtime,
-                genres: details.genres,
-                media_type: 'movie'
-              };
-            }
-          } else {
-            // Fallback to popular movies if user only has TV ratings but wants movies
-            const popular = await tmdbService.getPopularMovies();
-            const randomIndex = Math.floor(Math.random() * popular.results.length);
-            const movie = popular.results[randomIndex];
-            const details = await tmdbService.getMovieDetails(movie.id);
-            selectedMedia = { 
-              ...movie, 
-              title: movie.title,
-              release_date: movie.release_date,
-              runtime: details.runtime,
-              genres: details.genres,
-              media_type: 'movie' 
-            };
-          }
-        } else if (mediaType === 'tv' || (mediaType === 'all' && isTV)) {
-          // Get TV recommendations
-          const sourceId = isTV ? randomRating.movie_id : null;
-          if (sourceId) {
-            const recommendations = await tmdbService.getTVRecommendations(sourceId);
-            if (recommendations.results && recommendations.results.length > 0) {
-              const randomRec = recommendations.results[Math.floor(Math.random() * recommendations.results.length)];
-              const details = await tmdbService.getTVShowDetails(randomRec.id);
-              selectedMedia = {
-                id: randomRec.id,
-                title: randomRec.name,
-                poster_path: randomRec.poster_path,
-                backdrop_path: randomRec.backdrop_path,
-                overview: randomRec.overview,
-                vote_average: randomRec.vote_average,
-                release_date: randomRec.first_air_date,
-                runtime: details.episode_run_time?.[0],
-                genres: details.genres,
-                media_type: 'tv'
-              };
-            }
-          } else {
-            // Fallback to popular TV if user only has movie ratings but wants TV
-            const popular = await tmdbService.getPopularTVShows();
-            const randomIndex = Math.floor(Math.random() * popular.results.length);
-            const show = popular.results[randomIndex];
-            const details = await tmdbService.getTVShowDetails(show.id);
-            selectedMedia = { 
-              id: show.id,
-              title: show.name,
-              poster_path: show.poster_path,
-              backdrop_path: show.backdrop_path,
-              overview: show.overview,
-              vote_average: show.vote_average,
-              release_date: show.first_air_date,
-              runtime: details.episode_run_time?.[0],
-              genres: details.genres,
-              media_type: 'tv' 
-            };
-          }
+      }
+      
+      // Fallback to popular if no results from filters
+      if (!selectedMedia) {
+        if (shouldFetchMovies) {
+          const popular = await tmdbService.getPopularMovies();
+          const randomIndex = Math.floor(Math.random() * popular.results.length);
+          const movie = popular.results[randomIndex];
+          const details = await tmdbService.getMovieDetails(movie.id);
+          selectedMedia = {
+            ...movie,
+            title: movie.title,
+            release_date: movie.release_date,
+            runtime: details.runtime,
+            genres: details.genres,
+            media_type: 'movie'
+          };
+        } else {
+          const popular = await tmdbService.getPopularTVShows();
+          const randomIndex = Math.floor(Math.random() * popular.results.length);
+          const show = popular.results[randomIndex];
+          const details = await tmdbService.getTVShowDetails(show.id);
+          selectedMedia = {
+            id: show.id,
+            title: show.name,
+            poster_path: show.poster_path,
+            backdrop_path: show.backdrop_path,
+            overview: show.overview,
+            vote_average: show.vote_average,
+            release_date: show.first_air_date,
+            runtime: details.episode_run_time?.[0],
+            genres: details.genres,
+            media_type: 'tv'
+          };
         }
       }
 
