@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { tmdbService, Movie, TVShow } from "@/lib/tmdb";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const TRAILER_CATEGORIES = [
   { id: 'popular', label: 'Popular' },
@@ -73,33 +74,51 @@ export const LatestTrailers = () => {
         ? await tmdbService.getMovieDetails(item.id, true)
         : await tmdbService.getTVShowDetails(item.id, true);
       
-      // Filter for official YouTube trailers and sort by published_at descending
-      const trailers = (details.videos?.results || [])
+      const videos = details.videos?.results || [];
+      
+      // Priority 1: Official YouTube trailers, sorted by newest
+      let trailer = videos
         .filter(video => 
           video.type === 'Trailer' && 
           video.site === 'YouTube' && 
           video.official === true
         )
         .sort((a, b) => {
-          // Sort by published_at descending (newest first)
           if (a.published_at && b.published_at) {
             return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
           }
           return 0;
-        });
+        })[0];
       
-      // Fall back to any trailer if no official ones found
-      const trailer = trailers[0] || details.videos?.results?.find(
-        video => video.type === 'Trailer' && video.site === 'YouTube'
-      );
+      // Priority 2: Any YouTube trailer (not necessarily official)
+      if (!trailer) {
+        trailer = videos.find(video => video.type === 'Trailer' && video.site === 'YouTube');
+      }
+      
+      // Priority 3: YouTube teaser
+      if (!trailer) {
+        trailer = videos.find(video => video.type === 'Teaser' && video.site === 'YouTube');
+      }
+      
+      // Priority 4: Any YouTube video
+      if (!trailer) {
+        trailer = videos.find(video => video.site === 'YouTube');
+      }
       
       if (trailer) {
         setTrailerKey(trailer.key);
         setMovieTitle(isMovie ? item.title : item.name);
         setIsTrailerOpen(true);
+      } else {
+        toast.error("No trailer available", {
+          description: `We couldn't find a trailer for "${isMovie ? item.title : item.name}"`
+        });
       }
     } catch (error) {
       console.error('Error playing trailer:', error);
+      toast.error("Failed to load trailer", {
+        description: "Please try again later"
+      });
     }
   };
 
