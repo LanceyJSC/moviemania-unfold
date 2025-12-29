@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon, X, TrendingUp, Film, Tv, ArrowRight, Crown, Sparkles } from "lucide-react";
+import { Search as SearchIcon, X, Film, Tv, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MovieCard } from "@/components/MovieCard";
@@ -302,12 +302,8 @@ const Search = () => {
       {showProDiscovery && (
         <div className="px-4 md:px-6 mt-8 max-w-7xl mx-auto">
           <div className="space-y-10">
-            {filterResults.length === 0 && !isFilterSearching && (
+          {filterResults.length === 0 && !isFilterSearching && (
               <div className="text-center">
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
-                  <Crown className="h-4 w-4" />
-                  <span className="text-sm font-medium">Pro Discovery</span>
-                </div>
                 <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wide mb-3">
                   DISCOVER YOUR NEXT FAVORITE
                 </h1>

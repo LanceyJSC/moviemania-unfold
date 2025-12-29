@@ -165,19 +165,18 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
             </Button>
           </div>
           
-          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-            <div className="flex gap-2.5 pb-1">
-              {GENRES.map((genre) => (
-                <button
-                  key={genre.id}
-                  onClick={() => handleGenreClick(genre.id)}
-                  className="flex items-center gap-1.5 py-2.5 px-4 rounded-full whitespace-nowrap bg-card border border-border/60 hover:bg-card/80 hover:border-primary/50 active:scale-95 transition-all min-h-[44px] text-sm font-medium"
-                >
-                  <span className="text-base">{genre.emoji}</span>
-                  <span className="text-foreground">{genre.name}</span>
-                </button>
-              ))}
-            </div>
+          {/* Centered responsive grid */}
+          <div className="grid grid-cols-4 gap-2">
+            {GENRES.map((genre) => (
+              <button
+                key={genre.id}
+                onClick={() => handleGenreClick(genre.id)}
+                className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl bg-card border border-border/60 hover:bg-card/80 hover:border-primary/50 active:scale-95 transition-all min-h-[72px]"
+              >
+                <span className="text-xl">{genre.emoji}</span>
+                <span className="text-foreground text-xs font-medium text-center">{genre.name}</span>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -243,23 +242,26 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </button>
 
-          {/* Pro Filters Card */}
+          {/* More Filters Card */}
           <button
             onClick={() => setShowAdvancedFilters(true)}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 active:from-amber-500/15 active:to-orange-500/15 transition-colors"
+            className={cn(
+              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
+              activeFilterCount > 0 ? "border-primary/50" : "border-border/50"
+            )}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <Crown className="h-5 w-5 text-amber-500" />
+              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", activeFilterCount > 0 ? "bg-primary/20" : "bg-muted")}>
+                ✨
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground">More Filters</p>
-                <p className="text-sm text-muted-foreground">Mood • Tone • Pacing • Era</p>
+                <p className="text-sm text-muted-foreground">Mood • Tone • Pacing • Language</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-500 border-0">
+                <Badge variant="secondary" className="text-xs bg-primary/20 text-primary border-0">
                   {activeFilterCount}
                 </Badge>
               )}
