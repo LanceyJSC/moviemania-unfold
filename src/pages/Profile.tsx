@@ -15,7 +15,8 @@ import { TasteProfileCard } from '@/components/TasteProfileCard';
 import { ProUpgradeModal } from '@/components/ProUpgradeModal';
 import { ThemeCustomizer } from '@/components/ThemeCustomizer';
 import { ImportData } from '@/components/ImportData';
-import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2, Crown } from 'lucide-react';
+import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2, Crown, Tags } from 'lucide-react';
+import { TagManager } from '@/components/TagManager';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
@@ -193,6 +194,22 @@ const Profile = () => {
               {/* Theme Customizer - Pro Feature */}
               <div className="pt-4 border-t border-border">
                 <ThemeCustomizer />
+              </div>
+              
+              {/* Tag Manager - Pro Feature */}
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium flex items-center gap-2">
+                      <Tags className="h-4 w-4" />
+                      Custom Tags
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Organize your media with custom labels
+                    </p>
+                  </div>
+                  <TagManager />
+                </div>
               </div>
             </CardContent>
           </Card>
