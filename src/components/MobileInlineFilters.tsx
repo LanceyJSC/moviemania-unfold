@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Star, Clock, Crown, ChevronRight, Check, Search } from "lucide-react";
+import { Calendar, Star, Clock, ChevronRight, ChevronDown, Check, Search, Shuffle, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import {
   Drawer,
@@ -12,6 +11,11 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "@/components/ui/drawer";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { MobileAdvancedFilters } from "./MobileAdvancedFilters";
 import { SurpriseMe } from "@/components/SurpriseMe";
 import { cn } from "@/lib/utils";
@@ -50,6 +54,7 @@ export const MobileInlineFilters = ({ onFiltersChange, activeTab = 'all' }: Mobi
   const navigate = useNavigate();
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [activeSlider, setActiveSlider] = useState<SliderType>(null);
+  const [showFilters, setShowFilters] = useState(false);
   
   const [tempYearRange, setTempYearRange] = useState<[number, number]>([1900, new Date().getFullYear()]);
   const [tempRatingRange, setTempRatingRange] = useState<[number, number]>([0, 10]);
@@ -131,6 +136,7 @@ export const MobileInlineFilters = ({ onFiltersChange, activeTab = 'all' }: Mobi
   };
 
   const activeFilterCount = 
+    filters.genres.length +
     (filters.mood !== "any" ? 1 : 0) + 
     (filters.tone !== "any" ? 1 : 0) + 
     (filters.pacing !== "any" ? 1 : 0) + 
@@ -141,27 +147,26 @@ export const MobileInlineFilters = ({ onFiltersChange, activeTab = 'all' }: Mobi
   const isYearModified = filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear();
   const isRatingModified = filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10;
   const isRuntimeModified = filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300;
+  const hasAdvancedFilters = filters.mood !== "any" || filters.tone !== "any" || filters.pacing !== "any";
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Explore by Genre - Premium card design */}
-        <div className="rounded-2xl bg-gradient-to-br from-card via-card to-muted/30 border border-border/40 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-foreground text-base">
-              Explore by Genre
-            </h3>
+      <div className="space-y-4">
+        {/* Genre Pills - Compact horizontal scroll */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium text-foreground text-sm">Genres</h3>
             <Button
               variant="link"
               size="sm"
               onClick={handleViewAllGenres}
-              className="text-primary hover:text-primary/80 font-medium text-sm h-auto p-0"
+              className="text-primary hover:text-primary/80 text-xs h-auto p-0"
             >
-              View All →
+              All →
             </Button>
           </div>
           
-          <div className="grid grid-cols-4 gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
             {GENRES.map((genre) => {
               const isSelected = filters.genres.includes(genre.id);
               return (
@@ -169,138 +174,125 @@ export const MobileInlineFilters = ({ onFiltersChange, activeTab = 'all' }: Mobi
                   key={genre.id}
                   onClick={() => handleGenreClick(genre.id)}
                   className={cn(
-                    "group flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl border active:scale-95 transition-all",
+                    "flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full border text-sm font-medium transition-all active:scale-95 touch-manipulation",
                     isSelected 
                       ? "bg-primary text-primary-foreground border-primary" 
-                      : "bg-muted/50 hover:bg-primary/10 border-transparent hover:border-primary/30"
+                      : "bg-card border-border/50 text-foreground"
                   )}
                 >
-                  <span className="text-lg group-hover:scale-110 transition-transform">{genre.emoji}</span>
-                  <span className="text-[10px] font-medium text-center leading-tight">{genre.name}</span>
+                  <span>{genre.emoji}</span>
+                  <span>{genre.name}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Filters Section */}
-        <div className="rounded-2xl bg-gradient-to-br from-card via-card to-muted/30 border border-border/40 p-4 shadow-sm space-y-3">
-          <h3 className="font-semibold text-foreground text-base mb-3">
-            Discovery Filters
-          </h3>
-
-          {/* Year Range */}
-          <button
-            onClick={() => openSliderSheet("year")}
-            className={cn(
-              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
-              isYearModified ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-9 h-9 rounded-lg flex items-center justify-center",
-                isYearModified ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-              )}>
-                <Calendar className="h-4 w-4" />
+        {/* Collapsible Filters Section */}
+        <Collapsible open={showFilters} onOpenChange={setShowFilters}>
+          <CollapsibleTrigger asChild>
+            <button className="w-full flex items-center justify-between p-3 rounded-xl bg-card border border-border/50 touch-manipulation active:scale-[0.98]">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-foreground text-sm">Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    {activeFilterCount}
+                  </span>
+                )}
               </div>
-              <div className="text-left">
-                <p className="font-medium text-foreground text-sm">Year</p>
-                <p className="text-xs text-muted-foreground">{filters.yearRange[0]} – {filters.yearRange[1]}</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-
-          {/* Rating Range */}
-          <button
-            onClick={() => openSliderSheet("rating")}
-            className={cn(
-              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
-              isRatingModified ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-9 h-9 rounded-lg flex items-center justify-center",
-                isRatingModified ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-              )}>
-                <Star className="h-4 w-4" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium text-foreground text-sm">Rating</p>
-                <p className="text-xs text-muted-foreground">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-
-          {/* Runtime Range */}
-          <button
-            onClick={() => openSliderSheet("runtime")}
-            className={cn(
-              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
-              isRuntimeModified ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-9 h-9 rounded-lg flex items-center justify-center",
-                isRuntimeModified ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-              )}>
-                <Clock className="h-4 w-4" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium text-foreground text-sm">Runtime</p>
-                <p className="text-xs text-muted-foreground">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-
-          {/* More Filters (Mood, Tone, etc.) */}
-          <button
-            onClick={() => setShowAdvancedFilters(true)}
-            className={cn(
-              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
-              activeFilterCount > 0 ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-9 h-9 rounded-lg flex items-center justify-center text-base",
-                activeFilterCount > 0 ? "bg-primary/20" : "bg-muted"
-              )}>
-                ✨
-              </div>
-              <div className="text-left">
-                <p className="font-medium text-foreground text-sm">More Options</p>
-                <p className="text-xs text-muted-foreground">Mood, Tone, Pacing</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5">
-              {activeFilterCount > 0 && (
-                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                  {activeFilterCount}
-                </span>
+              <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", showFilters && "rotate-180")} />
+            </button>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="pt-3 space-y-2">
+            {/* Year Range */}
+            <button
+              onClick={() => openSliderSheet("year")}
+              className={cn(
+                "w-full flex items-center justify-between p-3 rounded-xl bg-muted/30 border transition-all active:scale-[0.98] touch-manipulation",
+                isYearModified ? "border-primary/40" : "border-transparent"
               )}
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </button>
-        </div>
+            >
+              <div className="flex items-center gap-3">
+                <Calendar className={cn("h-4 w-4", isYearModified ? "text-primary" : "text-muted-foreground")} />
+                <span className="text-sm text-foreground">Year</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{filters.yearRange[0]} – {filters.yearRange[1]}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </button>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3">
+            {/* Rating Range */}
+            <button
+              onClick={() => openSliderSheet("rating")}
+              className={cn(
+                "w-full flex items-center justify-between p-3 rounded-xl bg-muted/30 border transition-all active:scale-[0.98] touch-manipulation",
+                isRatingModified ? "border-primary/40" : "border-transparent"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <Star className={cn("h-4 w-4", isRatingModified ? "text-primary" : "text-muted-foreground")} />
+                <span className="text-sm text-foreground">Rating</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </button>
+
+            {/* Runtime Range */}
+            <button
+              onClick={() => openSliderSheet("runtime")}
+              className={cn(
+                "w-full flex items-center justify-between p-3 rounded-xl bg-muted/30 border transition-all active:scale-[0.98] touch-manipulation",
+                isRuntimeModified ? "border-primary/40" : "border-transparent"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <Clock className={cn("h-4 w-4", isRuntimeModified ? "text-primary" : "text-muted-foreground")} />
+                <span className="text-sm text-foreground">Runtime</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{filters.runtimeRange[0]} – {filters.runtimeRange[1]}m</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </button>
+
+            {/* More Options */}
+            <button
+              onClick={() => setShowAdvancedFilters(true)}
+              className={cn(
+                "w-full flex items-center justify-between p-3 rounded-xl bg-muted/30 border transition-all active:scale-[0.98] touch-manipulation",
+                hasAdvancedFilters ? "border-primary/40" : "border-transparent"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-base">✨</span>
+                <span className="text-sm text-foreground">Mood & Tone</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasAdvancedFilters && (
+                  <span className="text-xs font-medium text-primary">Active</span>
+                )}
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </button>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Action Buttons - Compact side by side */}
+        <div className="flex gap-3 pt-2">
           <Button 
             onClick={handleDiscover}
-            className="w-full h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
-            size="lg"
+            className="flex-1 h-11 rounded-xl text-sm font-semibold"
           >
             <Search className="h-4 w-4 mr-2" />
             Discover
           </Button>
           
-          <SurpriseMe variant="button" className="w-full h-12 rounded-xl text-base" mediaType={activeTab} filters={filters} />
+          <SurpriseMe variant="button" className="flex-1 h-11 rounded-xl text-sm" mediaType={activeTab} filters={filters} />
         </div>
       </div>
 

@@ -269,12 +269,12 @@ const Search = () => {
       <DesktopHeader />
       <MobileBrandHeader />
       
-      <div className="px-4 2xl:px-6 pb-32 2xl:pb-12 space-y-6 max-w-7xl mx-auto">
-        {/* Hero Search Section */}
-        <div className="relative overflow-hidden pt-6">
-          {/* Title */}
+      <div className="px-4 2xl:px-6 pb-32 2xl:pb-12 space-y-4 2xl:space-y-6 max-w-7xl mx-auto">
+        {/* Search Section */}
+        <div className="pt-4 2xl:pt-6">
+          {/* Title - Only on desktop or when no results */}
           {!searchTerm && !genreParam && filterResults.length === 0 && (
-            <div className="mb-6">
+            <div className="hidden 2xl:block mb-6">
               <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wider mb-2">
                 DISCOVER
               </h1>
@@ -284,41 +284,36 @@ const Search = () => {
             </div>
           )}
           
-          {/* Search Input */}
-          <div>
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-300" />
-              <div className="relative">
-                <Input
-                  type="search"
-                  placeholder="Search movies, TV shows, actors..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="rounded-xl pl-12 pr-12 h-14 text-base bg-card border-border/50 focus:border-primary/50 shadow-lg"
-                />
-                <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                {searchTerm && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearSearch}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-10 rounded-full hover:bg-muted"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
+          {/* Search Input - Optimized for mobile */}
+          <div className="relative">
+            <Input
+              type="search"
+              placeholder="Search movies, TV shows..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="rounded-xl pl-11 pr-10 h-12 2xl:h-14 text-base bg-card border-border/50 focus:border-primary/50"
+            />
+            <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSearch}
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-10 w-10 rounded-full hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Media Type Tabs - Always visible */}
-        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30">
+        {/* Media Type Tabs - Compact on mobile */}
+        <div className="flex gap-1.5 bg-card/50 backdrop-blur-sm rounded-xl p-1 border border-border/30">
           <Button
             variant={activeTab === 'all' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveTab('all')}
-            className="flex-1 rounded-lg h-10 text-sm font-medium"
+            className="flex-1 rounded-lg h-9 text-sm font-medium"
           >
             All
           </Button>
@@ -326,19 +321,21 @@ const Search = () => {
             variant={activeTab === 'movies' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveTab('movies')}
-            className="flex-1 rounded-lg h-10 text-sm font-medium gap-2"
+            className="flex-1 rounded-lg h-9 text-sm font-medium gap-1.5"
           >
-            <Film className="h-4 w-4" />
-            Movies
+            <Film className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Movies</span>
+            <span className="sm:hidden">Films</span>
           </Button>
           <Button
             variant={activeTab === 'tv' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveTab('tv')}
-            className="flex-1 rounded-lg h-10 text-sm font-medium gap-2"
+            className="flex-1 rounded-lg h-9 text-sm font-medium gap-1.5"
           >
-            <Tv className="h-4 w-4" />
-            TV Shows
+            <Tv className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">TV Shows</span>
+            <span className="sm:hidden">TV</span>
           </Button>
         </div>
 
@@ -362,48 +359,44 @@ const Search = () => {
         {/* Main Content Area */}
         <div>
         
-        {/* Empty State for FREE users */}
+        {/* Empty State for FREE users - Compact on mobile */}
         {showEmptyState && !isProUser && (
-          <div className="py-12">
-            <div>
-              <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-6">
-                <SearchIcon className="h-10 w-10 text-muted-foreground/50" />
+          <div className="py-8 2xl:py-12">
+            <div className="text-center">
+              <div className="w-16 h-16 2xl:w-20 2xl:h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <SearchIcon className="h-8 w-8 2xl:h-10 2xl:w-10 text-muted-foreground/50" />
               </div>
-              <h2 className="text-2xl font-semibold text-foreground mb-3">
+              <h2 className="text-xl 2xl:text-2xl font-semibold text-foreground mb-2">
                 Start Searching
               </h2>
-              <p className="text-muted-foreground mb-10">
-                Type in the search box above to find movies and TV shows
+              <p className="text-sm text-muted-foreground mb-6 2xl:mb-10">
+                Type above to find movies and TV shows
               </p>
               
-              {/* Pro Upgrade Card */}
-              <div className="bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 rounded-2xl p-8 text-left">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="h-5 w-5 text-primary" />
+              {/* Pro Upgrade Card - Compact on mobile */}
+              <div className="bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 rounded-xl 2xl:rounded-2xl p-5 2xl:p-8 text-left">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 2xl:w-10 2xl:h-10 rounded-lg 2xl:rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 2xl:h-5 2xl:w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Unlock Pro Discovery</h3>
-                    <p className="text-sm text-muted-foreground">Advanced filters & recommendations</p>
+                    <h3 className="font-semibold text-foreground text-sm 2xl:text-base">Unlock Pro Discovery</h3>
+                    <p className="text-xs 2xl:text-sm text-muted-foreground">Advanced filters</p>
                   </div>
                 </div>
-                <ul className="space-y-2 mb-6 text-sm text-muted-foreground">
+                <ul className="space-y-1.5 mb-4 2xl:mb-6 text-xs 2xl:text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <div className="w-1 h-1 2xl:w-1.5 2xl:h-1.5 rounded-full bg-primary" />
                     Browse by genre, mood, and era
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <div className="w-1 h-1 2xl:w-1.5 2xl:h-1.5 rounded-full bg-primary" />
                     Filter by rating and runtime
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    Personalized recommendations
                   </li>
                 </ul>
                 <Button 
                   onClick={() => setShowProModal(true)}
-                  className="w-full h-12 rounded-xl"
+                  className="w-full h-11 2xl:h-12 rounded-xl text-sm"
                   size="lg"
                 >
                   <Crown className="h-4 w-4 mr-2" />
@@ -416,29 +409,29 @@ const Search = () => {
 
         {/* PRO USER: Discovery Experience */}
         {showProDiscovery && (
-          <div className="py-6 space-y-8">
+          <div className="space-y-6">
             <InlineFilters onFiltersChange={handleFiltersChange} activeTab={activeTab} />
             
             {/* Filter Results */}
             {isFilterSearching && (
-              <div className="flex items-center justify-center py-16">
+              <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent mx-auto mb-4" />
-                  <p className="text-muted-foreground">Discovering movies...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Discovering...</p>
                 </div>
               </div>
             )}
             
             {!isFilterSearching && filterResults.length > 0 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-8 w-1 bg-primary rounded-full" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-primary rounded-full" />
                   <div>
-                    <h2 className="text-xl font-semibold text-foreground">Discovery Results</h2>
-                    <p className="text-sm text-muted-foreground">{filterResults.length} movies found</p>
+                    <h2 className="text-lg font-semibold text-foreground">Results</h2>
+                    <p className="text-xs text-muted-foreground">{filterResults.length} found</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 2xl:gap-4">
                   {filterResults.map((item) => renderMediaCard(item))}
                 </div>
               </div>
@@ -446,38 +439,38 @@ const Search = () => {
           </div>
         )}
 
-        {/* Search Results */}
+        {/* Search Results - Optimized grid for mobile */}
         {(searchTerm || genreParam) && (
-          <div className="py-6">
+          <div className="py-4 2xl:py-6">
             {isSearching ? (
-              <div className="flex items-center justify-center py-16">
+              <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent mx-auto mb-4" />
-                  <p className="text-muted-foreground">Searching...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Searching...</p>
                 </div>
               </div>
             ) : !hasResults ? (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                  <SearchIcon className="h-8 w-8 text-muted-foreground/50" />
+              <div className="text-center py-12">
+                <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <SearchIcon className="h-7 w-7 text-muted-foreground/50" />
                 </div>
-                <p className="text-muted-foreground">No results found for "{searchTerm || getGenreName(genreParam)}"</p>
+                <p className="text-sm text-muted-foreground">No results for "{searchTerm || getGenreName(genreParam)}"</p>
               </div>
             ) : (
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-8 w-1 bg-primary rounded-full" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 bg-primary rounded-full" />
                   <div>
-                    <h2 className="text-xl font-semibold text-foreground">
-                      {genreParam ? `${getGenreName(genreParam)} Movies` : 'Search Results'}
+                    <h2 className="text-lg font-semibold text-foreground">
+                      {genreParam ? `${getGenreName(genreParam)} Movies` : 'Results'}
                     </h2>
-                    <p className="text-sm text-muted-foreground">
-                      {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                    <p className="text-xs text-muted-foreground">
+                      {searchResults.length} found
                     </p>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 2xl:gap-4">
                   {searchResults.map((item) => renderMediaCard(item))}
                 </div>
               </div>
