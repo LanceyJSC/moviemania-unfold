@@ -72,10 +72,6 @@ const Index = () => {
             </ErrorBoundary>
 
             <ErrorBoundary>
-              <BecauseYouLoved />
-            </ErrorBoundary>
-
-            <ErrorBoundary>
               <NewThisMonth />
             </ErrorBoundary>
             
