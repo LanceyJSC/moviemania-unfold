@@ -146,7 +146,22 @@ const Search = () => {
         discoverParams.genre = filters.genres[0];
       }
       
-      if (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear()) {
+      // Handle era filter - convert to year range (takes priority over manual year range)
+      if (filters.era && filters.era !== 'any') {
+        const currentYear = new Date().getFullYear();
+        const eraRanges: { [key: string]: [number, number] } = {
+          'classic': [1900, 1969],
+          '70s80s': [1970, 1989],
+          '90s00s': [1990, 2009],
+          'modern': [2010, currentYear],
+          'recent': [2020, currentYear]
+        };
+        const eraRange = eraRanges[filters.era];
+        if (eraRange) {
+          discoverParams.yearFrom = eraRange[0];
+          discoverParams.yearTo = eraRange[1];
+        }
+      } else if (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear()) {
         discoverParams.yearFrom = filters.yearRange[0];
         discoverParams.yearTo = filters.yearRange[1];
       }
@@ -163,6 +178,20 @@ const Search = () => {
       
       if (filters.language && filters.language !== 'any') {
         discoverParams.language = filters.language;
+      }
+      
+      // Handle pacing filter - map to runtime ranges
+      if (filters.pacing && filters.pacing !== 'any') {
+        const pacingRanges: { [key: string]: [number, number] } = {
+          'slow': [150, 300],
+          'moderate': [90, 150],
+          'fast': [60, 100]
+        };
+        const pacingRange = pacingRanges[filters.pacing];
+        if (pacingRange && !discoverParams.runtimeFrom) {
+          discoverParams.runtimeFrom = pacingRange[0];
+          discoverParams.runtimeTo = pacingRange[1];
+        }
       }
 
       const pagePromises = [];
