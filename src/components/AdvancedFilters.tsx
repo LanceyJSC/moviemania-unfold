@@ -24,11 +24,9 @@ export interface FilterState {
   runtimeRange: [number, number];
   sortBy: string;
   // Pro filters
-  mood: string[];
-  tone: string[];
+  mood: string;
+  tone: string;
   pacing: string;
-  era: string;
-  language: string;
 }
 
 const GENRES = [
@@ -50,29 +48,10 @@ const SORT_OPTIONS = [
 const MOODS = ["Feel-Good", "Intense", "Thought-Provoking", "Emotional", "Uplifting", "Dark", "Nostalgic", "Inspiring"];
 const TONES = ["Lighthearted", "Serious", "Satirical", "Suspenseful", "Romantic", "Gritty", "Whimsical"];
 const PACING_OPTIONS = [
-  { value: "", label: "Any Pacing" },
+  { value: "any", label: "Any Pacing" },
   { value: "slow", label: "Slow Burn" },
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast-Paced" }
-];
-const ERA_OPTIONS = [
-  { value: "", label: "Any Era" },
-  { value: "classic", label: "Classic (Pre-1970)" },
-  { value: "vintage", label: "Vintage (1970-1990)" },
-  { value: "modern", label: "Modern (1990-2010)" },
-  { value: "contemporary", label: "Contemporary (2010+)" }
-];
-const LANGUAGE_OPTIONS = [
-  { value: "", label: "Any Language" },
-  { value: "en", label: "English" },
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "ja", label: "Japanese" },
-  { value: "ko", label: "Korean" },
-  { value: "zh", label: "Chinese" },
-  { value: "hi", label: "Hindi" },
-  { value: "it", label: "Italian" }
 ];
 
 export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedFiltersProps) => {
@@ -86,11 +65,9 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
     ratingRange: [0, 10],
     runtimeRange: [0, 300],
     sortBy: "popularity.desc",
-    mood: [],
-    tone: [],
-    pacing: "",
-    era: "",
-    language: ""
+    mood: "any",
+    tone: "any",
+    pacing: "any"
   });
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
@@ -114,21 +91,15 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
     callback();
   };
 
-  const toggleMood = (mood: string) => {
+  const setMood = (mood: string) => {
     handleProFilterClick(() => {
-      const newMoods = filters.mood.includes(mood)
-        ? filters.mood.filter(m => m !== mood)
-        : [...filters.mood, mood];
-      updateFilters({ mood: newMoods });
+      updateFilters({ mood });
     });
   };
 
-  const toggleTone = (tone: string) => {
+  const setTone = (tone: string) => {
     handleProFilterClick(() => {
-      const newTones = filters.tone.includes(tone)
-        ? filters.tone.filter(t => t !== tone)
-        : [...filters.tone, tone];
-      updateFilters({ tone: newTones });
+      updateFilters({ tone });
     });
   };
 
@@ -139,11 +110,9 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
       ratingRange: [0, 10],
       runtimeRange: [0, 300],
       sortBy: "popularity.desc",
-      mood: [],
-      tone: [],
-      pacing: "",
-      era: "",
-      language: ""
+      mood: "any",
+      tone: "any",
+      pacing: "any"
     };
     setFilters(resetFilters);
     onFiltersChange(resetFilters);
@@ -274,15 +243,15 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
               {MOODS.map(mood => (
                 <Badge
                   key={mood}
-                  variant={filters.mood.includes(mood) ? "default" : "outline"}
+                  variant={filters.mood === mood.toLowerCase().replace(/-/g, '-') ? "default" : "outline"}
                   className={cn(
                     "cursor-pointer text-xs",
                     !isProUser && "opacity-60",
-                    filters.mood.includes(mood) 
+                    filters.mood === mood.toLowerCase().replace(/-/g, '-')
                       ? "bg-amber-500 hover:bg-amber-600" 
                       : "hover:border-amber-500/50"
                   )}
-                  onClick={() => toggleMood(mood)}
+                  onClick={() => setMood(mood.toLowerCase().replace(/-/g, '-'))}
                 >
                   {mood}
                 </Badge>
@@ -297,15 +266,15 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
               {TONES.map(tone => (
                 <Badge
                   key={tone}
-                  variant={filters.tone.includes(tone) ? "default" : "outline"}
+                  variant={filters.tone === tone.toLowerCase() ? "default" : "outline"}
                   className={cn(
                     "cursor-pointer text-xs",
                     !isProUser && "opacity-60",
-                    filters.tone.includes(tone) 
+                    filters.tone === tone.toLowerCase()
                       ? "bg-amber-500 hover:bg-amber-600" 
                       : "hover:border-amber-500/50"
                   )}
-                  onClick={() => toggleTone(tone)}
+                  onClick={() => setTone(tone.toLowerCase())}
                 >
                   {tone}
                 </Badge>
@@ -332,46 +301,6 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
               </SelectContent>
             </Select>
           </div>
-
-          {/* Era */}
-          <div className="mb-4">
-            <label className="text-sm font-medium text-foreground mb-2 block">Era</label>
-            <Select 
-              value={filters.era} 
-              onValueChange={(value) => handleProFilterClick(() => updateFilters({ era: value }))}
-            >
-              <SelectTrigger className={cn(!isProUser && "opacity-60")}>
-                <SelectValue placeholder="Any Era" />
-              </SelectTrigger>
-              <SelectContent>
-                {ERA_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Language */}
-          <div className="mb-4">
-            <label className="text-sm font-medium text-foreground mb-2 block">Language</label>
-            <Select 
-              value={filters.language} 
-              onValueChange={(value) => handleProFilterClick(() => updateFilters({ language: value }))}
-            >
-              <SelectTrigger className={cn(!isProUser && "opacity-60")}>
-                <SelectValue placeholder="Any Language" />
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <Button variant="outline" onClick={clearFilters} className="w-full touch-target focus-ring">
@@ -383,7 +312,7 @@ export const AdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: AdvancedF
         isOpen={showProModal}
         onClose={() => setShowProModal(false)}
         feature="Advanced Discovery"
-        description="Unlock powerful filters like Mood, Tone, Pacing, Era, and Language to discover your perfect movie match."
+        description="Unlock powerful filters like Mood, Tone, and Pacing to discover your perfect movie match."
       />
     </>
   );
