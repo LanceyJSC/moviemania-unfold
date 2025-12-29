@@ -260,7 +260,14 @@ class TMDBService {
   async discoverMovies(filters: {
     genre?: number;
     year?: number;
+    yearFrom?: number;
+    yearTo?: number;
     rating?: number;
+    voteAverageFrom?: number;
+    voteAverageTo?: number;
+    runtimeFrom?: number;
+    runtimeTo?: number;
+    language?: string;
     page?: number;
     sortBy?: string;
     releaseDate?: { gte?: string; lte?: string };
@@ -269,7 +276,14 @@ class TMDBService {
     
     if (filters.genre) params.append('with_genres', filters.genre.toString());
     if (filters.year) params.append('year', filters.year.toString());
+    if (filters.yearFrom) params.append('primary_release_date.gte', `${filters.yearFrom}-01-01`);
+    if (filters.yearTo) params.append('primary_release_date.lte', `${filters.yearTo}-12-31`);
     if (filters.rating) params.append('vote_average.gte', filters.rating.toString());
+    if (filters.voteAverageFrom !== undefined) params.append('vote_average.gte', filters.voteAverageFrom.toString());
+    if (filters.voteAverageTo !== undefined) params.append('vote_average.lte', filters.voteAverageTo.toString());
+    if (filters.runtimeFrom !== undefined) params.append('with_runtime.gte', filters.runtimeFrom.toString());
+    if (filters.runtimeTo !== undefined) params.append('with_runtime.lte', filters.runtimeTo.toString());
+    if (filters.language && filters.language !== 'any') params.append('with_original_language', filters.language);
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.sortBy) params.append('sort_by', filters.sortBy);
     if (filters.releaseDate?.gte) params.append('release_date.gte', filters.releaseDate.gte);
