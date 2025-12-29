@@ -4,19 +4,23 @@ import { Sparkles, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
-import { tmdbService, Movie } from '@/lib/tmdb';
+import { tmdbService, Movie, TVShow } from '@/lib/tmdb';
 import { Skeleton } from './ui/skeleton';
 import { Button } from './ui/button';
 import { MovieCard } from './MovieCard';
+import { TVShowCard } from './TVShowCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+
+type MediaItem = (Movie | TVShow) & { mediaType: 'movie' | 'tv' };
 
 interface RecommendationSection {
   basedOn: {
     id: number;
     title: string;
     poster: string | null;
+    mediaType: 'movie' | 'tv';
   };
-  recommendations: Movie[];
+  recommendations: MediaItem[];
 }
 
 export const BecauseYouLoved = () => {
@@ -37,40 +41,74 @@ export const BecauseYouLoved = () => {
       }
 
       try {
-        // Get user's top-rated movies (4-5 rating)
-        const { data: topRated } = await supabase
+        // Get user's top-rated movies (rating >= 4 out of 5, so >= 8 out of 10 scale or 4+ on 5 scale)
+        const { data: topRatedMovies } = await supabase
           .from('user_ratings')
-          .select('movie_id, movie_title, movie_poster, rating')
+          .select('movie_id, movie_title, movie_poster, rating, media_type')
           .eq('user_id', user.id)
           .eq('media_type', 'movie')
           .gte('rating', 4)
           .order('rating', { ascending: false })
-          .limit(3);
+          .limit(2);
 
-        if (!topRated || topRated.length === 0) {
+        // Get user's top-rated TV shows
+        const { data: topRatedTV } = await supabase
+          .from('user_ratings')
+          .select('movie_id, movie_title, movie_poster, rating, media_type')
+          .eq('user_id', user.id)
+          .eq('media_type', 'tv')
+          .gte('rating', 4)
+          .order('rating', { ascending: false })
+          .limit(2);
+
+        const allTopRated = [
+          ...(topRatedMovies || []).map(m => ({ ...m, mediaType: 'movie' as const })),
+          ...(topRatedTV || []).map(t => ({ ...t, mediaType: 'tv' as const }))
+        ];
+
+        // Sort by rating and take top 3
+        allTopRated.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        const topThree = allTopRated.slice(0, 3);
+
+        if (topThree.length === 0) {
           setLoading(false);
           return;
         }
 
-        // Fetch SIMILAR movies (more accurate than recommendations)
+        // Fetch RECOMMENDATIONS (better quality than 'similar') for each top-rated item
         const recommendationSections: RecommendationSection[] = [];
 
-        for (const movie of topRated) {
+        for (const item of topThree) {
           try {
-            const response = await tmdbService.getSimilarMovies(movie.movie_id);
-            const similarMovies = response.results || [];
-            if (similarMovies.length > 0) {
+            let recommendations: MediaItem[] = [];
+            
+            if (item.mediaType === 'movie') {
+              const response = await tmdbService.getMovieRecommendations(item.movie_id);
+              recommendations = (response.results || [])
+                .filter(m => m.poster_path)
+                .slice(0, 12)
+                .map(m => ({ ...m, mediaType: 'movie' as const }));
+            } else {
+              const response = await tmdbService.getTVRecommendations(item.movie_id);
+              recommendations = (response.results || [])
+                .filter(t => t.poster_path)
+                .slice(0, 12)
+                .map(t => ({ ...t, mediaType: 'tv' as const }));
+            }
+
+            if (recommendations.length > 0) {
               recommendationSections.push({
                 basedOn: {
-                  id: movie.movie_id,
-                  title: movie.movie_title,
-                  poster: movie.movie_poster
+                  id: item.movie_id,
+                  title: item.movie_title,
+                  poster: item.movie_poster,
+                  mediaType: item.mediaType
                 },
-                recommendations: similarMovies.slice(0, 12)
+                recommendations
               });
             }
           } catch (error) {
-            console.error(`Error fetching similar movies for ${movie.movie_title}:`, error);
+            console.error(`Error fetching recommendations for ${item.movie_title}:`, error);
           }
         }
 
@@ -88,6 +126,18 @@ export const BecauseYouLoved = () => {
   const handleSeeMore = (section: RecommendationSection) => {
     setActiveSection(section);
     setShowModal(true);
+  };
+
+  const getItemTitle = (item: MediaItem) => {
+    return 'title' in item ? item.title : item.name;
+  };
+
+  const navigateToDetail = (item: MediaItem) => {
+    if (item.mediaType === 'movie') {
+      navigate(`/movie/${item.id}`);
+    } else {
+      navigate(`/tv/${item.id}`);
+    }
   };
 
   if (!isProUser || loading) {
@@ -115,9 +165,11 @@ export const BecauseYouLoved = () => {
 
   // Get the first section for display
   const primarySection = sections[0];
-  const displayedMovies = isExpanded 
+  const displayedItems = isExpanded 
     ? primarySection.recommendations 
     : primarySection.recommendations.slice(0, 8);
+
+  const mediaTypeLabel = primarySection.basedOn.mediaType === 'movie' ? 'movie' : 'show';
 
   return (
     <>
@@ -132,18 +184,26 @@ export const BecauseYouLoved = () => {
               <Sparkles className="h-8 w-8 text-amber-500" />
             </div>
             <p className="text-muted-foreground mb-4">
-              Similar to <span className="text-cinema-red font-medium">{primarySection.basedOn.title}</span>
+              Based on the {mediaTypeLabel}{' '}
+              <span className="text-cinema-red font-medium">{primarySection.basedOn.title}</span>
             </p>
             <div className="w-16 h-0.5 bg-amber-500 mx-auto"></div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-            {displayedMovies.map((movie) => (
-              <div key={movie.id}>
-                <MovieCard 
-                  movie={tmdbService.formatMovieForCard(movie)} 
-                  variant="grid"
-                />
+            {displayedItems.map((item) => (
+              <div key={`${item.mediaType}-${item.id}`}>
+                {item.mediaType === 'movie' ? (
+                  <MovieCard 
+                    movie={tmdbService.formatMovieForCard(item as Movie)} 
+                    variant="grid"
+                  />
+                ) : (
+                  <TVShowCard 
+                    tvShow={tmdbService.formatTVShowForCard(item as TVShow)} 
+                    variant="grid"
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -156,8 +216,8 @@ export const BecauseYouLoved = () => {
                 onClick={() => handleSeeMore(primarySection)}
                 className="flex items-center gap-2 text-amber-500 hover:text-amber-400 hover:bg-amber-500/10"
               >
-                {isExpanded ? 'Show Less' : 'See More'}
-                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                See More
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </div>
           )}
@@ -175,37 +235,47 @@ export const BecauseYouLoved = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 mt-4">
-            {activeSection?.recommendations.map((movie) => (
+            {activeSection?.recommendations.map((item) => (
               <button
-                key={movie.id}
+                key={`modal-${item.mediaType}-${item.id}`}
                 onClick={() => {
                   setShowModal(false);
-                  navigate(`/movie/${movie.id}`);
+                  navigateToDetail(item);
                 }}
                 className="w-full flex items-center gap-4 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-cinema-red/50 hover:bg-card transition-all text-left"
               >
                 <img
-                  src={tmdbService.getPosterUrl(movie.poster_path, 'w300')}
-                  alt={movie.title}
+                  src={tmdbService.getPosterUrl(item.poster_path, 'w300')}
+                  alt={getItemTitle(item)}
                   className="w-16 h-24 object-cover rounded-md flex-shrink-0"
                   loading="lazy"
                 />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate">{movie.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-foreground truncate">{getItemTitle(item)}</h3>
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                      {item.mediaType === 'movie' ? 'Movie' : 'TV'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1">
                       <Star className="h-3.5 w-3.5 text-cinema-gold fill-current" />
-                      <span className="text-sm text-foreground">{movie.vote_average.toFixed(1)}</span>
+                      <span className="text-sm text-foreground">{item.vote_average.toFixed(1)}</span>
                     </div>
-                    {movie.release_date && (
+                    {('release_date' in item && item.release_date) && (
                       <span className="text-sm text-muted-foreground">
-                        {new Date(movie.release_date).getFullYear()}
+                        {new Date(item.release_date).getFullYear()}
+                      </span>
+                    )}
+                    {('first_air_date' in item && item.first_air_date) && (
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(item.first_air_date).getFullYear()}
                       </span>
                     )}
                   </div>
-                  {movie.overview && (
+                  {item.overview && (
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                      {movie.overview}
+                      {item.overview}
                     </p>
                   )}
                 </div>
