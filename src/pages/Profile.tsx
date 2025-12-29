@@ -13,7 +13,7 @@ import { ProfileEditor } from '@/components/ProfileEditor';
 import { ProBadge } from '@/components/ProBadge';
 import { TasteProfileCard } from '@/components/TasteProfileCard';
 import { ProUpgradeModal } from '@/components/ProUpgradeModal';
-import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2 } from 'lucide-react';
+import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2, Crown } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { MobileHeader } from '@/components/MobileHeader';
@@ -131,6 +131,29 @@ const Profile = () => {
             </Card>
           </Link>
         </div>
+
+        {/* Pro Upgrade Card - Only show for free users */}
+        {!isProUser && (
+          <Link to="/pro" className="block mb-6">
+            <Card className="bg-gradient-to-br from-amber-500/20 to-orange-500/10 border-amber-500/30 hover:border-amber-500/50 transition-all">
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-amber-500/30 to-orange-500/30 flex items-center justify-center">
+                  <Crown className="h-6 w-6 text-amber-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    Upgrade to Pro
+                    <ProBadge size="sm" />
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Unlock unlimited lists, smart recommendations & more
+                  </p>
+                </div>
+                <Sparkles className="h-5 w-5 text-amber-500" />
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
         {/* Taste Profile Card (compact) */}
         <TasteProfileCard
