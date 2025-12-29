@@ -78,58 +78,58 @@ const Profile = () => {
       <DesktopHeader />
       <MobileHeader title="Settings" showBack={false} />
 
-      <div className="px-4 md:px-6 pt-4 max-w-7xl mx-auto">
-        {/* Profile Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Avatar className="h-16 w-16">
+      <div className="px-4 md:px-6 pt-3 2xl:pt-4 max-w-7xl mx-auto">
+        {/* Profile Header - Compact on mobile */}
+        <div className="flex items-center gap-3 mb-6">
+          <Avatar className="h-14 w-14 2xl:h-16 2xl:w-16">
             <AvatarImage src={profile.avatar_url} alt={profile.username} />
-            <AvatarFallback className="text-xl font-semibold bg-primary text-primary-foreground">
+            <AvatarFallback className="text-lg 2xl:text-xl font-semibold bg-primary text-primary-foreground">
               {profile.username?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-foreground">
+              <h1 className="text-lg 2xl:text-xl font-bold text-foreground">
                 {profile.username}
               </h1>
               {isProUser && <ProBadge size="md" />}
             </div>
-            <p className="text-muted-foreground text-sm">@{profile.username}</p>
+            <p className="text-muted-foreground text-xs 2xl:text-sm">@{profile.username}</p>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        {/* Quick Links - More compact on mobile */}
+        <div className="grid grid-cols-4 gap-2 mb-4 2xl:mb-6">
           <Link to="/wrapped" className="touch-manipulation">
             <Card className="bg-gradient-to-br from-cinema-red/20 to-cinema-gold/20 border-cinema-gold/30 hover:border-cinema-gold/50 active:scale-95 transition-all">
-              <CardContent className="p-4 text-center">
-                <Sparkles className="h-6 w-6 text-cinema-gold mx-auto mb-2" />
-                <p className="text-xs font-medium text-foreground">Wrapped</p>
+              <CardContent className="p-3 2xl:p-4 text-center">
+                <Sparkles className="h-5 w-5 2xl:h-6 2xl:w-6 text-cinema-gold mx-auto mb-1" />
+                <p className="text-[10px] 2xl:text-xs font-medium text-foreground">Wrapped</p>
               </CardContent>
             </Card>
           </Link>
           <Link to="/stats" className="touch-manipulation">
             <Card className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 active:scale-95 transition-all">
-              <CardContent className="p-4 text-center">
-                <BarChart3 className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-                <p className="text-xs font-medium text-foreground">Stats</p>
+              <CardContent className="p-3 2xl:p-4 text-center">
+                <BarChart3 className="h-5 w-5 2xl:h-6 2xl:w-6 text-blue-500 mx-auto mb-1" />
+                <p className="text-[10px] 2xl:text-xs font-medium text-foreground">Stats</p>
               </CardContent>
             </Card>
           </Link>
           <Link to="/achievements" className="touch-manipulation">
             <Card className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border-purple-500/30 hover:border-purple-500/50 active:scale-95 transition-all">
-              <CardContent className="p-4 text-center">
-                <Award className="h-6 w-6 text-purple-500 mx-auto mb-2" />
-                <p className="text-xs font-medium text-foreground">Badges</p>
+              <CardContent className="p-3 2xl:p-4 text-center">
+                <Award className="h-5 w-5 2xl:h-6 2xl:w-6 text-purple-500 mx-auto mb-1" />
+                <p className="text-[10px] 2xl:text-xs font-medium text-foreground">Badges</p>
               </CardContent>
             </Card>
           </Link>
           <Link to="/my-reviews" className="touch-manipulation">
             <Card className="bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/30 hover:border-green-500/50 active:scale-95 transition-all">
-              <CardContent className="p-4 text-center">
-                <MessageCircle className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                <p className="text-xs font-medium text-foreground">Reviews</p>
+              <CardContent className="p-3 2xl:p-4 text-center">
+                <MessageCircle className="h-5 w-5 2xl:h-6 2xl:w-6 text-green-500 mx-auto mb-1" />
+                <p className="text-[10px] 2xl:text-xs font-medium text-foreground">Reviews</p>
               </CardContent>
             </Card>
           </Link>

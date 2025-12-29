@@ -113,17 +113,17 @@ export default function Genres() {
       <DesktopHeader />
       <MobileHeader title="Browse Genres" />
       
-      {/* Header Section */}
-      <div className="max-w-7xl mx-auto px-4 pt-6 pb-4">
-        <h1 className="font-cinematic text-3xl text-foreground tracking-wide mb-2">
+      {/* Header Section - Compact on mobile */}
+      <div className="max-w-7xl mx-auto px-4 pt-4 2xl:pt-6 pb-3">
+        <h1 className="font-cinematic text-2xl 2xl:text-3xl text-foreground tracking-wide mb-1">
           EXPLORE BY GENRE
         </h1>
-        <div className="w-16 h-0.5 bg-cinema-red mb-4"></div>
-        <p className="text-muted-foreground">Discover movies and TV shows by genre</p>
+        <div className="w-12 h-0.5 bg-cinema-red mb-2"></div>
+        <p className="text-muted-foreground text-sm">Discover movies and TV shows</p>
       </div>
 
-      {/* Search and Tabs */}
-      <div className="max-w-7xl mx-auto px-4 space-y-4 mb-6">
+      {/* Search and Tabs - Compact on mobile */}
+      <div className="max-w-7xl mx-auto px-4 space-y-3 mb-4 2xl:mb-6">
         {/* Search bar */}
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -136,38 +136,38 @@ export default function Genres() {
         </div>
 
         {/* Tab switcher */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <Button
             variant={activeTab === "movies" ? "default" : "outline"}
             onClick={() => setActiveTab("movies")}
             size="sm"
-            className="gap-2"
+            className="gap-1.5 h-9"
           >
-            <Film className="h-4 w-4" />
+            <Film className="h-3.5 w-3.5" />
             Movies
           </Button>
           <Button
             variant={activeTab === "tv" ? "default" : "outline"}
             onClick={() => setActiveTab("tv")}
             size="sm"
-            className="gap-2"
+            className="gap-1.5 h-9"
           >
-            <Tv className="h-4 w-4" />
-            TV Shows
+            <Tv className="h-3.5 w-3.5" />
+            TV
           </Button>
         </div>
 
-        {/* Genre Pills */}
-        <div className="flex flex-wrap gap-2">
+        {/* Genre Pills - Horizontal scroll on mobile */}
+        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 2xl:flex-wrap 2xl:overflow-visible 2xl:mx-0 2xl:px-0">
           {filteredGenres.map((genre) => (
             <button
               key={genre.id}
               onClick={() => handleGenreClick(genre.id)}
               className={cn(
-                "flex items-center gap-1.5 py-1.5 px-3 rounded-full text-sm",
+                "flex-shrink-0 flex items-center gap-1 py-1.5 px-2.5 rounded-full text-xs 2xl:text-sm",
                 "bg-card/80 border border-border/50",
                 "hover:bg-card hover:border-primary/50",
-                "transition-all duration-200 active:scale-95"
+                "transition-all duration-200 active:scale-95 touch-manipulation"
               )}
             >
               <span role="img" aria-label={genre.name}>{genre.emoji}</span>
@@ -178,14 +178,14 @@ export default function Genres() {
       </div>
 
       {/* Genre Content Sections */}
-      <div className="max-w-7xl mx-auto px-4 space-y-10">
+      <div className="max-w-7xl mx-auto px-4 space-y-6 2xl:space-y-10">
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Loading genres...</div>
+          <div className="text-center py-8 text-muted-foreground text-sm">Loading genres...</div>
         ) : (
           genreContents.map((genreContent) => (
-            <div key={genreContent.genreId} className="space-y-4">
+            <div key={genreContent.genreId} className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                <h2 className="text-base 2xl:text-xl font-semibold text-foreground flex items-center gap-1.5">
                   <span>{genreContent.emoji}</span>
                   {genreContent.genreName}
                 </h2>
@@ -193,17 +193,18 @@ export default function Genres() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleGenreClick(genreContent.genreId)}
-                  className="text-primary hover:text-primary/80 gap-1"
+                  className="text-primary hover:text-primary/80 gap-1 text-xs h-8"
                 >
                   View All
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 2xl:gap-4">
                 {genreContent.items.map((item) => (
                   <MovieCard 
                     key={item.id} 
-                    movie={tmdbService.formatMovieForCard(item)} 
+                    movie={tmdbService.formatMovieForCard(item)}
+                    variant="grid"
                   />
                 ))}
               </div>
