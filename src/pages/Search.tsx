@@ -25,6 +25,8 @@ const Search = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
   const [showProModal, setShowProModal] = useState(false);
+  const [filterResults, setFilterResults] = useState<any[]>([]);
+  const [isFilterSearching, setIsFilterSearching] = useState(false);
   
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -71,15 +73,11 @@ const Search = () => {
       setIsSearching(true);
       try {
         let results;
-        // Free users can only search 'all' - no tab filtering
-        if (isProUser) {
-          if (activeTab === 'movies') {
-            results = await tmdbService.searchMovies(debouncedSearchTerm);
-          } else if (activeTab === 'tv') {
-            results = await tmdbService.searchTVShows(debouncedSearchTerm);
-          } else {
-            results = await tmdbService.searchMulti(debouncedSearchTerm);
-          }
+        // All users can filter by media type
+        if (activeTab === 'movies') {
+          results = await tmdbService.searchMovies(debouncedSearchTerm);
+        } else if (activeTab === 'tv') {
+          results = await tmdbService.searchTVShows(debouncedSearchTerm);
         } else {
           results = await tmdbService.searchMulti(debouncedSearchTerm);
         }
@@ -92,7 +90,7 @@ const Search = () => {
     };
 
     searchContent();
-  }, [debouncedSearchTerm, genreParam, activeTab, isProUser]);
+  }, [debouncedSearchTerm, genreParam, activeTab]);
 
   const clearSearch = () => {
     setSearchTerm("");
@@ -121,8 +119,73 @@ const Search = () => {
     }
   };
 
+  const handleFiltersChange = async (filters: any) => {
+    // Skip if all filters are at default values
+    const isDefault = 
+      filters.genres.length === 0 &&
+      filters.yearRange[0] === 1900 && filters.yearRange[1] === new Date().getFullYear() &&
+      filters.ratingRange[0] === 0 && filters.ratingRange[1] === 10 &&
+      filters.runtimeRange[0] === 0 && filters.runtimeRange[1] === 300 &&
+      filters.mood.length === 0 &&
+      filters.tone.length === 0 &&
+      filters.pacing === 'any' &&
+      filters.era === 'any' &&
+      filters.language === 'any';
+    
+    if (isDefault) {
+      setFilterResults([]);
+      return;
+    }
+
+    setIsFilterSearching(true);
+    try {
+      // Build discover query based on filters
+      const discoverParams: any = {
+        sortBy: filters.sortBy || 'popularity.desc',
+        page: 1
+      };
+      
+      if (filters.genres && filters.genres.length > 0) {
+        discoverParams.genre = filters.genres[0];
+      }
+      
+      if (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear()) {
+        discoverParams.yearFrom = filters.yearRange[0];
+        discoverParams.yearTo = filters.yearRange[1];
+      }
+      
+      if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10) {
+        discoverParams.voteAverageFrom = filters.ratingRange[0];
+        discoverParams.voteAverageTo = filters.ratingRange[1];
+      }
+      
+      if (filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300) {
+        discoverParams.runtimeFrom = filters.runtimeRange[0];
+        discoverParams.runtimeTo = filters.runtimeRange[1];
+      }
+      
+      if (filters.language && filters.language !== 'any') {
+        discoverParams.language = filters.language;
+      }
+
+      // Fetch multiple pages for more results
+      const pagePromises = [];
+      for (let page = 1; page <= 3; page++) {
+        pagePromises.push(tmdbService.discoverMovies({ ...discoverParams, page }));
+      }
+      
+      const allResults = await Promise.all(pagePromises);
+      const combinedResults = allResults.flatMap(result => result.results);
+      setFilterResults(combinedResults);
+    } catch (error) {
+      console.error("Filter search failed:", error);
+    } finally {
+      setIsFilterSearching(false);
+    }
+  };
+
   const hasResults = searchResults.length > 0;
-  const showEmptyState = !searchTerm && !genreParam && !hasResults;
+  const showEmptyState = !searchTerm && !genreParam && !hasResults && filterResults.length === 0;
 
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12 max-h-screen overflow-y-auto">
@@ -155,8 +218,8 @@ const Search = () => {
         </div>
       </div>
 
-      {/* PRO USERS ONLY: Media Type Tabs when searching */}
-      {isProUser && searchTerm && (
+      {/* Media Type Tabs when searching - Available to ALL users */}
+      {searchTerm && (
         <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex space-x-2 bg-muted/30 rounded-xl p-1">
             <Button
@@ -219,7 +282,25 @@ const Search = () => {
               </div>
 
               {/* Pro Discovery Filters */}
-              <InlineFilters onFiltersChange={() => {}} />
+              <InlineFilters onFiltersChange={handleFiltersChange} />
+              
+              {/* Filter Results */}
+              {isFilterSearching && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              )}
+              {!isFilterSearching && filterResults.length > 0 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground">Discovery Results</h2>
+                    <p className="text-sm text-muted-foreground mt-1">{filterResults.length} results</p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+                    {filterResults.map((item) => renderMediaCard(item))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             // FREE USER: Simple search prompt
