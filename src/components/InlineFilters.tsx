@@ -164,15 +164,15 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   return (
     <div className="space-y-8">
       {/* Genre Section */}
-      <section className="text-center">
+      <section>
         <div className="mb-4">
           <h3 className="font-cinematic text-lg text-foreground tracking-wide mb-1">EXPLORE BY GENRE</h3>
           <p className="text-muted-foreground text-sm">Jump into your favorite category</p>
         </div>
         
         <div className={cn(
-          "grid gap-2 max-w-xl mx-auto mb-3 transition-all duration-300",
-          showAllGenres ? "grid-cols-4 md:grid-cols-5" : "grid-cols-4"
+          "grid gap-2 mb-3 transition-all duration-300",
+          showAllGenres ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8" : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8"
         )}>
           {displayGenres.map((genre) => (
             <button
@@ -198,7 +198,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
       </section>
 
       {/* Filters Section */}
-      <section className="text-center">
+      <section>
         <div className="mb-4">
           <h3 className="font-cinematic text-lg text-foreground tracking-wide mb-1">REFINE YOUR SEARCH</h3>
           <p className="text-muted-foreground text-sm">
@@ -214,7 +214,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
         </div>
 
         {/* Slider Filters */}
-        <div className="max-w-xl mx-auto space-y-3 mb-5">
+        <div className="space-y-3 mb-5">
           {/* Year Range */}
           <div className="bg-card/60 rounded-lg border border-border/50 p-3">
             <div className="flex items-center justify-between mb-2">
@@ -266,7 +266,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
         </div>
 
         {/* Advanced Filters - Mood, Tone, Pacing (using Select dropdowns like sliders) */}
-        <div className="max-w-xl mx-auto space-y-3 mb-5">
+        <div className="space-y-3 mb-5">
           {/* Mood */}
           <div className="bg-card/60 rounded-lg border border-border/50 p-3">
             <div className="flex items-center justify-between mb-2">
