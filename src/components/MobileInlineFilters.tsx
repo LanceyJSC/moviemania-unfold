@@ -13,6 +13,7 @@ import {
   DrawerClose,
 } from "@/components/ui/drawer";
 import { MobileAdvancedFilters } from "./MobileAdvancedFilters";
+import { SurpriseMe } from "@/components/SurpriseMe";
 import { cn } from "@/lib/utils";
 
 export interface FilterState {
@@ -287,15 +288,19 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           </button>
         </div>
 
-        {/* Discover Button */}
-        <Button 
-          onClick={handleDiscover}
-          className="w-full h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
-          size="lg"
-        >
-          <Search className="h-4 w-4 mr-2" />
-          Discover
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3">
+          <Button 
+            onClick={handleDiscover}
+            className="w-full h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
+            size="lg"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Discover
+          </Button>
+          
+          <SurpriseMe variant="button" className="w-full h-12 rounded-xl text-base" />
+        </div>
       </div>
 
       {/* Year Range Bottom Sheet */}

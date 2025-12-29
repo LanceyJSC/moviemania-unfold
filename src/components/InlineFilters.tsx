@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Search, Sparkles } from "lucide-react";
+import { ChevronDown, Search, Sparkles, Shuffle } from "lucide-react";
+import { SurpriseMe } from "@/components/SurpriseMe";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -330,15 +331,17 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           </div>
         </div>
 
-        {/* Discover Button - Single instance */}
-        <div className="max-w-xs mx-auto">
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3 max-w-xs mx-auto">
           <Button 
             onClick={handleDiscover}
-            className="w-full h-10 rounded-lg text-sm font-semibold"
+            className="w-full h-12 rounded-lg text-sm font-semibold"
           >
             <Search className="h-4 w-4 mr-2" />
             Discover
           </Button>
+          
+          <SurpriseMe variant="button" className="w-full h-12 rounded-lg" />
         </div>
       </section>
     </div>
