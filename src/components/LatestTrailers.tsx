@@ -134,25 +134,25 @@ export const LatestTrailers = () => {
   const displayedItems = isExpanded ? items : items.slice(0, 8);
 
   return (
-    <div className="mb-12 pt-4">
-      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Film className="h-8 w-8 text-primary" />
-            <h2 className="font-cinematic text-3xl text-foreground tracking-wide">
+    <div className="mb-6 sm:mb-12">
+      <div className="bg-background rounded-2xl -mx-4 px-3 sm:px-4 py-4 sm:py-8">
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+            <Film className="h-5 w-5 sm:h-8 sm:w-8 text-primary" />
+            <h2 className="font-cinematic text-xl sm:text-3xl text-foreground tracking-wide">
               LATEST TRAILERS
             </h2>
-            <Video className="h-8 w-8 text-primary" />
+            <Video className="h-5 w-5 sm:h-8 sm:w-8 text-primary" />
           </div>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground text-xs sm:text-base mb-2 sm:mb-4">
             Watch the newest trailers across all categories
           </p>
-          <div className="w-16 h-0.5 bg-primary mx-auto"></div>
+          <div className="w-12 sm:w-16 h-0.5 bg-primary mx-auto"></div>
         </div>
 
         {/* Mobile-First Category Tabs */}
-        <div className="mb-6">
-          <div className="flex justify-between space-x-1 sm:space-x-2 max-w-2xl mx-auto">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex justify-between gap-1 max-w-2xl mx-auto">
             {TRAILER_CATEGORIES.map((category) => (
               <Button
                 key={category.id}
@@ -160,8 +160,8 @@ export const LatestTrailers = () => {
                 size="sm"
                 onClick={() => setActiveCategory(category.id)}
                 className={cn(
-                  "flex-1 h-9 sm:h-10 text-xs sm:text-sm font-medium transition-all duration-200 active:scale-95",
-                  "touch-target focus-ring rounded-xl",
+                  "flex-1 h-8 sm:h-10 text-[10px] sm:text-sm font-medium transition-all duration-200 active:scale-95 px-1 sm:px-3",
+                  "touch-target focus-ring rounded-lg sm:rounded-xl",
                   activeCategory === category.id
                     ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-card/60 border-border/50 text-muted-foreground hover:text-foreground hover:bg-card/80"
@@ -175,14 +175,14 @@ export const LatestTrailers = () => {
 
         {/* Trailers Grid */}
         {loading ? (
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
               {displayedItems.map((item) => (
                 <div
                   key={item.id}

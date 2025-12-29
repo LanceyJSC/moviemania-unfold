@@ -66,14 +66,14 @@ export const NewThisMonth = () => {
 
   if (isLoading) {
     return (
-      <div className="mb-12">
-        <div className="text-center mb-8">
-          <h2 className="font-cinematic text-3xl text-foreground tracking-wide mb-4">
+      <div className="mb-6 sm:mb-12">
+        <div className="text-center mb-4 sm:mb-8">
+          <h2 className="font-cinematic text-xl sm:text-3xl text-foreground tracking-wide mb-2 sm:mb-4">
             NEW THIS MONTH
           </h2>
-          <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
+          <div className="w-12 sm:w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
           {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
           ))}
@@ -85,25 +85,25 @@ export const NewThisMonth = () => {
   const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long' });
 
   return (
-    <div className="mb-12 pt-4">
-      <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Calendar className="h-8 w-8 text-cinema-gold" />
-            <h2 className="font-cinematic text-3xl text-foreground tracking-wide">
+    <div className="mb-6 sm:mb-12">
+      <div className="bg-background rounded-2xl -mx-4 px-3 sm:px-4 py-4 sm:py-8">
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+            <Calendar className="h-5 w-5 sm:h-8 sm:w-8 text-cinema-gold" />
+            <h2 className="font-cinematic text-xl sm:text-3xl text-foreground tracking-wide">
               NEW THIS MONTH
             </h2>
-            <TrendingUp className="h-8 w-8 text-cinema-gold" />
+            <TrendingUp className="h-5 w-5 sm:h-8 sm:w-8 text-cinema-gold" />
           </div>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground text-xs sm:text-base mb-2 sm:mb-4">
             Recent movies & TV shows from {currentMonth}
           </p>
-          <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
+          <div className="w-12 sm:w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
       
       {displayedContent.length > 0 ? (
         <>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
             {displayedContent.map((item) => {
               const isMovie = 'title' in item;
               return (

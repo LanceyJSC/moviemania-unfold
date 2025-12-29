@@ -250,37 +250,37 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
       </div>
       
       {/* Mobile only: Overview, buttons, and dots below hero */}
-      <div className="md:hidden px-4 pb-4">
-        <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">
+      <div className="md:hidden px-3 pb-3">
+        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed mb-3 line-clamp-2">
           {overview}
         </p>
         
-        <div className="flex flex-wrap gap-3">
+        <div className="flex gap-2">
           {currentTrailerKey ? (
             <Button 
-              className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium flex-1"
+              className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-lg h-10 px-4 text-sm font-medium flex-1"
               disabled={isRefreshing}
               onClick={handleWatchTrailer}
             >
-              <Play className="mr-2 h-4 w-4" />
-              Watch Trailer
+              <Play className="mr-1.5 h-3.5 w-3.5" />
+              Trailer
             </Button>
           ) : (
             <Button 
-              className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-xl h-12 px-6 font-medium flex-1"
+              className="bg-cinema-red hover:bg-cinema-red/90 text-white rounded-lg h-10 px-4 text-sm font-medium flex-1"
               disabled={true}
             >
-              <Play className="mr-2 h-4 w-4" />
+              <Play className="mr-1.5 h-3.5 w-3.5" />
               No Trailer
             </Button>
           )}
           <Link to={`/${type}/${featuredContent.id}`} className="flex-1">
             <Button 
               variant="outline" 
-              className="border-border text-foreground hover:bg-accent rounded-xl h-12 px-6 w-full"
+              className="border-border text-foreground hover:bg-accent rounded-lg h-10 px-4 text-sm w-full"
               disabled={isRefreshing}
             >
-              <Info className="mr-2 h-4 w-4" />
+              <Info className="mr-1.5 h-3.5 w-3.5" />
               More Info
             </Button>
           </Link>
@@ -288,15 +288,15 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
         
         {/* Mobile slide indicators */}
         {featuredItems.length > 1 && (
-          <div className="flex justify-center space-x-3 mt-6">
+          <div className="flex justify-center space-x-2 mt-4">
             {featuredItems.map((_: any, index: number) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`h-3 rounded-full transition-all duration-300 touch-manipulation ${
+                className={`h-2 rounded-full transition-all duration-300 touch-manipulation ${
                   index === currentIndex 
-                    ? 'bg-primary w-8' 
-                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50 w-3'
+                    ? 'bg-primary w-6' 
+                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50 w-2'
                 }`}
               />
             ))}
