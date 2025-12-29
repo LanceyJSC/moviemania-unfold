@@ -10,7 +10,6 @@ import { Navigation } from "@/components/Navigation";
 import { MobileBrandHeader } from "@/components/MobileBrandHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
-import { SurpriseMe } from "@/components/SurpriseMe";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -418,9 +417,6 @@ const Search = () => {
         {/* PRO USER: Discovery Experience */}
         {showProDiscovery && (
           <div className="py-6 space-y-8">
-            {/* Surprise Me Card for Pro users */}
-            <SurpriseMe variant="card" />
-            
             <InlineFilters onFiltersChange={handleFiltersChange} />
             
             {/* Filter Results */}
