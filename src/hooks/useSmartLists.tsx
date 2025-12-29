@@ -73,7 +73,7 @@ export const useSmartLists = () => {
       // Parse the criteria from JSON
       const parsedData = (data || []).map(list => ({
         ...list,
-        criteria: list.criteria as SmartListCriteria
+        criteria: list.criteria as unknown as SmartListCriteria
       }));
       
       setSmartLists(parsedData);
