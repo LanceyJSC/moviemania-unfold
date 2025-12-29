@@ -129,6 +129,12 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
     return `${filters.tone.length} selected`;
   };
 
+  const isMoodModified = filters.mood.length > 0;
+  const isToneModified = filters.tone.length > 0;
+  const isPacingModified = filters.pacing !== "any";
+  const isEraModified = filters.era !== "any";
+  const isLanguageModified = filters.language !== "any";
+
   if (!isOpen) return null;
 
   return (
@@ -143,7 +149,7 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
             <X className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-amber-500" />
+            <Crown className="h-5 w-5 text-primary" />
             <h1 className="font-cinematic text-xl tracking-wide text-foreground">Pro Filters</h1>
           </div>
           <Button variant="ghost" onClick={clearFilters} className="text-primary text-sm font-medium h-12 px-4 rounded-full">
@@ -152,18 +158,18 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
         </div>
       </div>
 
-      {/* Filter Cards */}
+      {/* Filter Cards - Matching MobileInlineFilters style */}
       <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-3" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Mood Card */}
         <button
           onClick={() => openSheet("mood")}
           className={cn(
             "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-            filters.mood.length > 0 ? "border-amber-500/50" : "border-border/50"
+            isMoodModified ? "border-primary/50" : "border-border/50"
           )}
         >
           <div className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", filters.mood.length > 0 ? "bg-amber-500/20" : "bg-muted")}>
+            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", isMoodModified ? "bg-primary/20" : "bg-muted")}>
               😊
             </div>
             <div className="text-left">
@@ -179,11 +185,11 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
           onClick={() => openSheet("tone")}
           className={cn(
             "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-            filters.tone.length > 0 ? "border-amber-500/50" : "border-border/50"
+            isToneModified ? "border-primary/50" : "border-border/50"
           )}
         >
           <div className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", filters.tone.length > 0 ? "bg-amber-500/20" : "bg-muted")}>
+            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", isToneModified ? "bg-primary/20" : "bg-muted")}>
               🎭
             </div>
             <div className="text-left">
@@ -199,11 +205,11 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
           onClick={() => openSheet("pacing")}
           className={cn(
             "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-            filters.pacing !== "any" ? "border-amber-500/50" : "border-border/50"
+            isPacingModified ? "border-primary/50" : "border-border/50"
           )}
         >
           <div className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", filters.pacing !== "any" ? "bg-amber-500/20" : "bg-muted")}>
+            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", isPacingModified ? "bg-primary/20" : "bg-muted")}>
               ⏱️
             </div>
             <div className="text-left">
@@ -219,11 +225,11 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
           onClick={() => openSheet("era")}
           className={cn(
             "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-            filters.era !== "any" ? "border-amber-500/50" : "border-border/50"
+            isEraModified ? "border-primary/50" : "border-border/50"
           )}
         >
           <div className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", filters.era !== "any" ? "bg-amber-500/20" : "bg-muted")}>
+            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", isEraModified ? "bg-primary/20" : "bg-muted")}>
               📅
             </div>
             <div className="text-left">
@@ -239,11 +245,11 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
           onClick={() => openSheet("language")}
           className={cn(
             "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-            filters.language !== "any" ? "border-amber-500/50" : "border-border/50"
+            isLanguageModified ? "border-primary/50" : "border-border/50"
           )}
         >
           <div className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", filters.language !== "any" ? "bg-amber-500/20" : "bg-muted")}>
+            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", isLanguageModified ? "bg-primary/20" : "bg-muted")}>
               🌍
             </div>
             <div className="text-left">
@@ -271,19 +277,20 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
             </DrawerTitle>
           </DrawerHeader>
           <div className="px-4 py-4 overflow-y-auto">
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="space-y-2">
               {MOODS.map((mood) => (
                 <button
                   key={mood}
                   onClick={() => setTempMoods(prev => prev.includes(mood) ? prev.filter(m => m !== mood) : [...prev, mood])}
                   className={cn(
-                    "px-4 py-3 rounded-xl text-sm font-medium transition-all active:scale-95 min-w-[100px]",
+                    "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98] flex items-center justify-between",
                     tempMoods.includes(mood)
-                      ? "bg-amber-500 text-white"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-muted text-foreground"
                   )}
                 >
                   {mood}
+                  {tempMoods.includes(mood) && <Check className="h-5 w-5" />}
                 </button>
               ))}
             </div>
@@ -308,19 +315,20 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
             </DrawerTitle>
           </DrawerHeader>
           <div className="px-4 py-4 overflow-y-auto">
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="space-y-2">
               {TONES.map((tone) => (
                 <button
                   key={tone}
                   onClick={() => setTempTones(prev => prev.includes(tone) ? prev.filter(t => t !== tone) : [...prev, tone])}
                   className={cn(
-                    "px-4 py-3 rounded-xl text-sm font-medium transition-all active:scale-95 min-w-[100px]",
+                    "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98] flex items-center justify-between",
                     tempTones.includes(tone)
-                      ? "bg-amber-500 text-white"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-muted text-foreground"
                   )}
                 >
                   {tone}
+                  {tempTones.includes(tone) && <Check className="h-5 w-5" />}
                 </button>
               ))}
             </div>
@@ -350,13 +358,14 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
                 key={option.value}
                 onClick={() => { updateFilters({ pacing: option.value }); setActiveSheet(null); }}
                 className={cn(
-                  "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98]",
+                  "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98] flex items-center justify-between",
                   filters.pacing === option.value
-                    ? "bg-amber-500 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground"
                 )}
               >
                 {option.label}
+                {filters.pacing === option.value && <Check className="h-5 w-5" />}
               </button>
             ))}
           </div>
@@ -377,13 +386,14 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
                 key={option.value}
                 onClick={() => { updateFilters({ era: option.value }); setActiveSheet(null); }}
                 className={cn(
-                  "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98]",
+                  "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98] flex items-center justify-between",
                   filters.era === option.value
-                    ? "bg-amber-500 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground"
                 )}
               >
                 {option.label}
+                {filters.era === option.value && <Check className="h-5 w-5" />}
               </button>
             ))}
           </div>
@@ -404,13 +414,14 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
                 key={option.value}
                 onClick={() => { updateFilters({ language: option.value }); setActiveSheet(null); }}
                 className={cn(
-                  "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98]",
+                  "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98] flex items-center justify-between",
                   filters.language === option.value
-                    ? "bg-amber-500 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground"
                 )}
               >
                 {option.label}
+                {filters.language === option.value && <Check className="h-5 w-5" />}
               </button>
             ))}
           </div>
