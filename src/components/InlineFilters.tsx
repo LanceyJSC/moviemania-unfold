@@ -165,15 +165,15 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           <p className="text-muted-foreground">Jump into your favorite category</p>
         </div>
         
-        <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto mb-4">
+        <div className="grid grid-cols-4 gap-3 max-w-2xl mx-auto mb-4">
           {GENRES.map((genre) => (
             <button
               key={genre.id}
               onClick={() => handleGenreClick(genre.id)}
-              className="group relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-card hover:bg-card/80 border border-border/40 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+              className="group flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card hover:bg-card/80 border border-border/40 hover:border-primary/40 transition-all duration-200"
             >
-              <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{genre.emoji}</span>
-              <span className="font-medium text-foreground text-lg">{genre.name}</span>
+              <span className="text-lg">{genre.emoji}</span>
+              <span className="font-medium text-foreground text-sm">{genre.name}</span>
             </button>
           ))}
         </div>
