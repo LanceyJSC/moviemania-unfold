@@ -215,7 +215,7 @@ const Search = () => {
       }
 
       const pagePromises = [];
-      for (let page = 1; page <= 3; page++) {
+      for (let page = 1; page <= 10; page++) {
         pagePromises.push(tmdbService.discoverMovies({ ...discoverParams, page }));
       }
       
