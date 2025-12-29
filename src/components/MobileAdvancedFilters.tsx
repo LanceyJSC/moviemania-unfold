@@ -1,10 +1,7 @@
 import { useState } from "react";
-import { X, ChevronDown, ChevronUp, ArrowUpDown, Crown, Lock } from "lucide-react";
+import { X, Crown, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { MobileActionSheet } from "@/components/MobileActionSheet";
-import { ProUpgradeModal } from "./ProUpgradeModal";
-import { useSubscription } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
 
 interface FilterState {
@@ -26,38 +23,24 @@ interface MobileAdvancedFiltersProps {
   onToggle: () => void;
 }
 
-const GENRES = [
-  "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
-  "Drama", "Family", "Fantasy", "History", "Horror", "Music",
-  "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
-];
-
-const SORT_OPTIONS = [
-  { value: "popularity.desc", label: "Most Popular" },
-  { value: "release_date.desc", label: "Newest First" },
-  { value: "release_date.asc", label: "Oldest First" },
-  { value: "vote_average.desc", label: "Highest Rated" },
-  { value: "vote_count.desc", label: "Most Voted" },
-];
-
-// Pro-only filter options
+// ONLY Pro-exclusive filter options - basic filters are in MobileInlineFilters
 const MOODS = ["Feel-Good", "Intense", "Thought-Provoking", "Emotional", "Uplifting", "Dark", "Nostalgic", "Inspiring"];
 const TONES = ["Lighthearted", "Serious", "Satirical", "Suspenseful", "Romantic", "Gritty", "Whimsical"];
 const PACING_OPTIONS = [
-  { value: "", label: "Any Pacing" },
+  { value: "any", label: "Any Pacing" },
   { value: "slow", label: "Slow Burn" },
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast-Paced" }
 ];
 const ERA_OPTIONS = [
-  { value: "", label: "Any Era" },
+  { value: "any", label: "Any Era" },
   { value: "classic", label: "Classic (Pre-1970)" },
   { value: "vintage", label: "Vintage (1970-1990)" },
   { value: "modern", label: "Modern (1990-2010)" },
   { value: "contemporary", label: "Contemporary (2010+)" }
 ];
 const LANGUAGE_OPTIONS = [
-  { value: "", label: "Any Language" },
+  { value: "any", label: "Any Language" },
   { value: "en", label: "English" },
   { value: "es", label: "Spanish" },
   { value: "fr", label: "French" },
@@ -69,40 +52,25 @@ const LANGUAGE_OPTIONS = [
   { value: "it", label: "Italian" }
 ];
 
+// This component is ONLY for Pro users and ONLY shows advanced filters
+// Basic filters (Year, Rating, Runtime, Genres) are handled by MobileInlineFilters
 export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: MobileAdvancedFiltersProps) => {
-  const { isProUser } = useSubscription();
-  const [showProModal, setShowProModal] = useState(false);
-  
   const [filters, setFilters] = useState<FilterState>({
     genres: [],
-    yearRange: [1990, 2024],
+    yearRange: [1900, new Date().getFullYear()],
     ratingRange: [0, 10],
-    runtimeRange: [60, 180],
+    runtimeRange: [0, 300],
     sortBy: "popularity.desc",
     mood: [],
     tone: [],
-    pacing: "",
-    era: "",
-    language: ""
+    pacing: "any",
+    era: "any",
+    language: "any"
   });
 
-  const [expandedSections, setExpandedSections] = useState({
-    genres: true,
-    year: false,
-    rating: false,
-    runtime: false,
-    proFilters: false
-  });
-
-  const [showSortSheet, setShowSortSheet] = useState(false);
   const [showPacingSheet, setShowPacingSheet] = useState(false);
   const [showEraSheet, setShowEraSheet] = useState(false);
   const [showLanguageSheet, setShowLanguageSheet] = useState(false);
-
-  const getSortLabel = (value: string) => {
-    const option = SORT_OPTIONS.find(o => o.value === value);
-    return option?.label || 'Most Popular';
-  };
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
     const updatedFilters = { ...filters, ...newFilters };
@@ -110,67 +78,49 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
     onFiltersChange(updatedFilters);
   };
 
-  const toggleGenre = (genre: string) => {
-    const updatedGenres = filters.genres.includes(genre)
-      ? filters.genres.filter(g => g !== genre)
-      : [...filters.genres, genre];
-    updateFilters({ genres: updatedGenres });
-  };
-
-  const handleProFilterClick = (callback: () => void) => {
-    if (!isProUser) {
-      setShowProModal(true);
-      return;
-    }
-    callback();
-  };
-
   const toggleMood = (mood: string) => {
-    handleProFilterClick(() => {
-      const newMoods = filters.mood.includes(mood)
-        ? filters.mood.filter(m => m !== mood)
-        : [...filters.mood, mood];
-      updateFilters({ mood: newMoods });
-    });
+    const newMoods = filters.mood.includes(mood)
+      ? filters.mood.filter(m => m !== mood)
+      : [...filters.mood, mood];
+    updateFilters({ mood: newMoods });
   };
 
   const toggleTone = (tone: string) => {
-    handleProFilterClick(() => {
-      const newTones = filters.tone.includes(tone)
-        ? filters.tone.filter(t => t !== tone)
-        : [...filters.tone, tone];
-      updateFilters({ tone: newTones });
-    });
+    const newTones = filters.tone.includes(tone)
+      ? filters.tone.filter(t => t !== tone)
+      : [...filters.tone, tone];
+    updateFilters({ tone: newTones });
   };
 
   const clearFilters = () => {
     const defaultFilters: FilterState = {
       genres: [],
-      yearRange: [1990, 2024],
+      yearRange: [1900, new Date().getFullYear()],
       ratingRange: [0, 10],
-      runtimeRange: [60, 180],
+      runtimeRange: [0, 300],
       sortBy: "popularity.desc",
       mood: [],
       tone: [],
-      pacing: "",
-      era: "",
-      language: ""
+      pacing: "any",
+      era: "any",
+      language: "any"
     };
     setFilters(defaultFilters);
     onFiltersChange(defaultFilters);
   };
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
+  const activeCount = filters.mood.length + filters.tone.length + 
+    (filters.pacing !== "any" ? 1 : 0) + 
+    (filters.era !== "any" ? 1 : 0) + 
+    (filters.language !== "any" ? 1 : 0);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background">
-      {/* iOS-style Header with Safe Area */}
+    <div className="fixed inset-0 z-50 bg-background flex flex-col">
+      {/* Header */}
       <div 
-        className="sticky top-0 bg-background/95 backdrop-blur-xl border-b border-border"
+        className="flex-shrink-0 bg-background/95 backdrop-blur-xl border-b border-border"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <div className="flex items-center justify-between p-4">
@@ -178,286 +128,138 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
             variant="ghost"
             size="icon"
             onClick={onToggle}
-            className="h-12 w-12 rounded-full touch-target focus-ring"
+            className="h-12 w-12 rounded-full"
           >
             <X className="h-5 w-5" />
           </Button>
-          <h1 className="font-cinematic text-xl tracking-wide text-foreground">
-            Advanced Filters
-          </h1>
+          <div className="flex items-center gap-2">
+            <Crown className="h-5 w-5 text-amber-500" />
+            <h1 className="font-cinematic text-xl tracking-wide text-foreground">
+              Pro Filters
+            </h1>
+          </div>
           <Button
             variant="ghost"
             onClick={clearFilters}
-            className="text-primary hover:text-primary/80 text-sm font-medium h-12 px-4 rounded-full"
+            className="text-primary text-sm font-medium h-12 px-4 rounded-full"
           >
-            Clear All
+            Clear
           </Button>
         </div>
       </div>
 
-      {/* Content with Safe Area Bottom */}
+      {/* Scrollable Content */}
       <div 
-        className="p-4 space-y-6 overflow-y-auto"
-        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        className="flex-1 overflow-y-auto overscroll-contain"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        {/* Sort By */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-foreground">Sort By</h3>
-          <Button
-            variant="outline"
-            onClick={() => setShowSortSheet(true)}
-            className="w-full h-14 bg-card/60 border-border/50 rounded-2xl text-base justify-between px-4"
-          >
-            <span>{getSortLabel(filters.sortBy)}</span>
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        </div>
-
-        {/* Genres - Mobile Grid */}
-        <div className="space-y-3">
-          <Button
-            variant="ghost"
-            onClick={() => toggleSection("genres")}
-            className="w-full justify-between p-0 h-12 text-sm font-medium text-foreground rounded-xl"
-          >
-            Genres ({filters.genres.length} selected)
-            {expandedSections.genres ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-          
-          {expandedSections.genres && (
-            <div className="grid grid-cols-2 gap-3">
-              {GENRES.map((genre) => (
-                <Button
-                  key={genre}
-                  variant={filters.genres.includes(genre) ? "default" : "outline"}
-                  onClick={() => toggleGenre(genre)}
+        <div className="p-4 space-y-6">
+          {/* Mood */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-foreground">Mood</label>
+            <div className="flex flex-wrap gap-2">
+              {MOODS.map((mood) => (
+                <button
+                  key={mood}
+                  onClick={() => toggleMood(mood)}
                   className={cn(
-                    "h-14 text-sm font-medium transition-all duration-200 active:scale-95 rounded-2xl",
-                    "touch-target focus-ring",
-                    filters.genres.includes(genre)
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-card/60 border-border/50 hover:bg-card/80"
+                    "px-4 py-2.5 rounded-full text-sm font-medium transition-all active:scale-95",
+                    filters.mood.includes(mood)
+                      ? "bg-amber-500 text-white"
+                      : "bg-card border border-border/60 text-foreground"
                   )}
                 >
-                  {genre}
-                </Button>
+                  {mood}
+                </button>
               ))}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Year Range */}
-        <div className="space-y-3">
-          <Button
-            variant="ghost"
-            onClick={() => toggleSection("year")}
-            className="w-full justify-between p-0 h-12 text-sm font-medium text-foreground rounded-xl"
-          >
-            Release Year ({filters.yearRange[0]} - {filters.yearRange[1]})
-            {expandedSections.year ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-          
-          {expandedSections.year && (
-            <div className="px-4 py-6 bg-card/40 rounded-2xl">
-              <Slider
-                value={filters.yearRange}
-                onValueChange={(value) => updateFilters({ yearRange: value as [number, number] })}
-                min={1950}
-                max={2024}
-                step={1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-3">
-                <span>1950</span>
-                <span>2024</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Rating Range */}
-        <div className="space-y-3">
-          <Button
-            variant="ghost"
-            onClick={() => toggleSection("rating")}
-            className="w-full justify-between p-0 h-12 text-sm font-medium text-foreground rounded-xl"
-          >
-            Rating ({filters.ratingRange[0]} - {filters.ratingRange[1]})
-            {expandedSections.rating ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-          
-          {expandedSections.rating && (
-            <div className="px-4 py-6 bg-card/40 rounded-2xl">
-              <Slider
-                value={filters.ratingRange}
-                onValueChange={(value) => updateFilters({ ratingRange: value as [number, number] })}
-                min={0}
-                max={10}
-                step={0.1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-3">
-                <span>0</span>
-                <span>10</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Runtime Range */}
-        <div className="space-y-3">
-          <Button
-            variant="ghost"
-            onClick={() => toggleSection("runtime")}
-            className="w-full justify-between p-0 h-12 text-sm font-medium text-foreground rounded-xl"
-          >
-            Runtime ({filters.runtimeRange[0]} - {filters.runtimeRange[1]} min)
-            {expandedSections.runtime ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-          
-          {expandedSections.runtime && (
-            <div className="px-4 py-6 bg-card/40 rounded-2xl">
-              <Slider
-                value={filters.runtimeRange}
-                onValueChange={(value) => updateFilters({ runtimeRange: value as [number, number] })}
-                min={30}
-                max={300}
-                step={10}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-3">
-                <span>30 min</span>
-                <span>300 min</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Pro Discovery Section */}
-        <div className="space-y-3 border-t border-border pt-6">
-          <Button
-            variant="ghost"
-            onClick={() => toggleSection("proFilters")}
-            className="w-full justify-between p-0 h-12 text-sm font-medium text-foreground rounded-xl"
-          >
-            <div className="flex items-center gap-2">
-              <Crown className="h-4 w-4 text-amber-500" />
-              <span>Pro Discovery</span>
-              {!isProUser && <Lock className="h-3 w-3 text-muted-foreground" />}
-            </div>
-            {expandedSections.proFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-
-          {expandedSections.proFilters && (
-            <div className="space-y-4">
-              {/* Mood */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Mood</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {MOODS.map((mood) => (
-                    <Button
-                      key={mood}
-                      variant={filters.mood.includes(mood) ? "default" : "outline"}
-                      onClick={() => toggleMood(mood)}
-                      className={cn(
-                        "h-12 text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl",
-                        !isProUser && "opacity-60",
-                        filters.mood.includes(mood)
-                          ? "bg-amber-500 text-white hover:bg-amber-600"
-                          : "bg-card/60 border-amber-500/30 hover:border-amber-500"
-                      )}
-                    >
-                      {mood}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tone */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Tone</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {TONES.map((tone) => (
-                    <Button
-                      key={tone}
-                      variant={filters.tone.includes(tone) ? "default" : "outline"}
-                      onClick={() => toggleTone(tone)}
-                      className={cn(
-                        "h-12 text-sm font-medium transition-all duration-200 active:scale-95 rounded-xl",
-                        !isProUser && "opacity-60",
-                        filters.tone.includes(tone)
-                          ? "bg-amber-500 text-white hover:bg-amber-600"
-                          : "bg-card/60 border-amber-500/30 hover:border-amber-500"
-                      )}
-                    >
-                      {tone}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pacing */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Pacing</label>
-                <Button
-                  variant="outline"
-                  onClick={() => handleProFilterClick(() => setShowPacingSheet(true))}
+          {/* Tone */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-foreground">Tone</label>
+            <div className="flex flex-wrap gap-2">
+              {TONES.map((tone) => (
+                <button
+                  key={tone}
+                  onClick={() => toggleTone(tone)}
                   className={cn(
-                    "w-full h-14 bg-card/60 border-amber-500/30 rounded-2xl text-base justify-between px-4",
-                    !isProUser && "opacity-60"
+                    "px-4 py-2.5 rounded-full text-sm font-medium transition-all active:scale-95",
+                    filters.tone.includes(tone)
+                      ? "bg-amber-500 text-white"
+                      : "bg-card border border-border/60 text-foreground"
                   )}
                 >
-                  <span>{PACING_OPTIONS.find(o => o.value === filters.pacing)?.label || "Any Pacing"}</span>
-                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </div>
+                  {tone}
+                </button>
+              ))}
+            </div>
+          </div>
 
-              {/* Era */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Era</label>
-                <Button
-                  variant="outline"
-                  onClick={() => handleProFilterClick(() => setShowEraSheet(true))}
-                  className={cn(
-                    "w-full h-14 bg-card/60 border-amber-500/30 rounded-2xl text-base justify-between px-4",
-                    !isProUser && "opacity-60"
-                  )}
-                >
-                  <span>{ERA_OPTIONS.find(o => o.value === filters.era)?.label || "Any Era"}</span>
-                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </div>
+          {/* Pacing */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-foreground">Pacing</label>
+            <Button
+              variant="outline"
+              onClick={() => setShowPacingSheet(true)}
+              className="w-full h-14 bg-card border-border/50 rounded-xl text-base justify-between px-4"
+            >
+              <span>{PACING_OPTIONS.find(o => o.value === filters.pacing)?.label || "Any Pacing"}</span>
+              <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </div>
 
-              {/* Language */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Language</label>
-                <Button
-                  variant="outline"
-                  onClick={() => handleProFilterClick(() => setShowLanguageSheet(true))}
-                  className={cn(
-                    "w-full h-14 bg-card/60 border-amber-500/30 rounded-2xl text-base justify-between px-4",
-                    !isProUser && "opacity-60"
-                  )}
-                >
-                  <span>{LANGUAGE_OPTIONS.find(o => o.value === filters.language)?.label || "Any Language"}</span>
-                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </div>
+          {/* Era */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-foreground">Era</label>
+            <Button
+              variant="outline"
+              onClick={() => setShowEraSheet(true)}
+              className="w-full h-14 bg-card border-border/50 rounded-xl text-base justify-between px-4"
+            >
+              <span>{ERA_OPTIONS.find(o => o.value === filters.era)?.label || "Any Era"}</span>
+              <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </div>
+
+          {/* Language */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-foreground">Language</label>
+            <Button
+              variant="outline"
+              onClick={() => setShowLanguageSheet(true)}
+              className="w-full h-14 bg-card border-border/50 rounded-xl text-base justify-between px-4"
+            >
+              <span>{LANGUAGE_OPTIONS.find(o => o.value === filters.language)?.label || "Any Language"}</span>
+              <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </div>
+
+          {/* Active Filters Summary */}
+          {activeCount > 0 && (
+            <div className="pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground text-center">
+                {activeCount} filter{activeCount !== 1 ? 's' : ''} active
+              </p>
             </div>
           )}
         </div>
+      </div>
+
+      {/* Apply Button */}
+      <div 
+        className="flex-shrink-0 p-4 border-t border-border bg-background"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      >
+        <Button 
+          onClick={onToggle}
+          className="w-full h-14 rounded-xl text-base font-medium"
+        >
+          Apply Filters
+        </Button>
       </div>
 
       {/* Action Sheets */}
-      <MobileActionSheet
-        isOpen={showSortSheet}
-        onClose={() => setShowSortSheet(false)}
-        title="Sort By"
-        options={SORT_OPTIONS}
-        selectedValue={filters.sortBy}
-        onSelect={(value) => updateFilters({ sortBy: value })}
-      />
-
       <MobileActionSheet
         isOpen={showPacingSheet}
         onClose={() => setShowPacingSheet(false)}
@@ -483,13 +285,6 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
         options={LANGUAGE_OPTIONS}
         selectedValue={filters.language}
         onSelect={(value) => updateFilters({ language: value })}
-      />
-
-      <ProUpgradeModal
-        isOpen={showProModal}
-        onClose={() => setShowProModal(false)}
-        feature="Advanced Discovery"
-        description="Unlock powerful filters like Mood, Tone, Pacing, Era, and Language to discover your perfect movie match."
       />
     </div>
   );
