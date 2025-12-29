@@ -315,38 +315,40 @@ const Search = () => {
         </div>
       )}
 
-      {/* Search Results */}
-      <div className="px-4 md:px-6 mt-8 pb-8 max-w-7xl mx-auto">
-        {isSearching && (
-          <div className="text-center text-muted-foreground">Searching...</div>
-        )}
-        {!isSearching && searchResults.length === 0 && (searchTerm || genreParam) && (
-          <div className="text-center text-muted-foreground">No results found.</div>
-        )}
-        {searchResults.length > 0 && (
-          <div className="bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
-            {/* Movie/TV Page Style Header */}
-            <div className="bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-6">
-              <div className="container mx-auto">
-                <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wide mb-2">
-                  {genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : "SEARCH RESULTS"}
-                </h1>
-                <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
-                <p className="text-muted-foreground">
-                  Showing {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
-                </p>
+      {/* Search Results - only show when NOT showing default content */}
+      {!showDefaultContent && (
+        <div className="px-4 md:px-6 mt-8 pb-8 max-w-7xl mx-auto">
+          {isSearching && (
+            <div className="text-center text-muted-foreground">Searching...</div>
+          )}
+          {!isSearching && searchResults.length === 0 && (searchTerm || genreParam) && (
+            <div className="text-center text-muted-foreground">No results found.</div>
+          )}
+          {searchResults.length > 0 && (
+            <div className="bg-gradient-to-br from-cinema-black via-cinema-charcoal to-cinema-black">
+              {/* Movie/TV Page Style Header */}
+              <div className="bg-background/95 backdrop-blur-sm border-b border-border px-4 md:px-6 py-6">
+                <div className="container mx-auto">
+                  <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wide mb-2">
+                    {genreParam ? `${getGenreName(genreParam).toUpperCase()} MOVIES` : "SEARCH RESULTS"}
+                  </h1>
+                  <div className="w-20 h-1 bg-cinema-gold mb-4"></div>
+                  <p className="text-muted-foreground">
+                    Showing {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Results Grid */}
+              <div className="container mx-auto px-4 md:px-6 py-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                  {searchResults.map((item) => renderMediaCard(item))}
+                </div>
               </div>
             </div>
-            
-            {/* Results Grid */}
-            <div className="container mx-auto px-4 md:px-6 py-8">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                {searchResults.map((item) => renderMediaCard(item))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
       
       <Navigation />
     </div>
