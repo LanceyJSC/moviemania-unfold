@@ -159,67 +159,57 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   return (
     <div className="space-y-8">
       {/* Genre Section */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-cinematic text-xl text-foreground tracking-wide">EXPLORE BY GENRE</h3>
-            <div className="w-12 h-0.5 bg-primary mt-1"></div>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleViewAllGenres}
-            className="text-primary hover:text-primary/80 gap-1"
-          >
-            View All
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+      <section className="text-center">
+        <div className="mb-4">
+          <h3 className="font-cinematic text-lg text-foreground tracking-wide mb-1">EXPLORE BY GENRE</h3>
+          <p className="text-muted-foreground text-sm">Jump into your favorite category</p>
         </div>
         
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-2 max-w-xl mx-auto mb-3">
           {GENRES.map((genre) => (
             <button
               key={genre.id}
               onClick={() => handleGenreClick(genre.id)}
-              className={cn(
-                "flex items-center gap-1.5 py-1.5 px-3 rounded-full text-sm",
-                "bg-card/80 border border-border/50",
-                "hover:bg-card hover:border-primary/50",
-                "transition-all duration-200 active:scale-95"
-              )}
+              className="group flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-card hover:bg-card/80 border border-border/40 hover:border-primary/40 transition-all duration-200"
             >
-              <span role="img" aria-label={genre.name}>{genre.emoji}</span>
-              <span className="font-medium text-foreground">{genre.name}</span>
+              <span className="text-base">{genre.emoji}</span>
+              <span className="font-medium text-foreground text-xs">{genre.name}</span>
             </button>
           ))}
         </div>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleViewAllGenres}
+          className="text-primary hover:text-primary/80 gap-1"
+        >
+          View All
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </section>
 
       {/* Filters Section */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-cinematic text-xl text-foreground tracking-wide">REFINE YOUR SEARCH</h3>
-            <div className="w-12 h-0.5 bg-primary mt-1"></div>
-          </div>
+      <section className="text-center">
+        <div className="mb-4">
+          <h3 className="font-cinematic text-lg text-foreground tracking-wide mb-1">REFINE YOUR SEARCH</h3>
+          <p className="text-muted-foreground text-sm">
+            {activeFilterCount > 0 
+              ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active` 
+              : 'Use filters to find exactly what you want'}
+          </p>
           {activeFilterCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-primary hover:text-primary/80 gap-1">
-              Reset Filters
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-primary hover:text-primary/80 mt-1 text-xs">
+              Reset All Filters
             </Button>
           )}
         </div>
 
-        {activeFilterCount > 0 && (
-          <p className="text-muted-foreground text-sm mb-4">
-            {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
-          </p>
-        )}
-
         {/* Slider Filters */}
-        <div className="space-y-4 mb-6">
+        <div className="max-w-xl mx-auto space-y-3 mb-5">
           {/* Year Range */}
-          <div className="bg-card/60 rounded-lg border border-border/50 p-4">
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Year Range</span>
               <span className="text-sm text-primary font-semibold">{filters.yearRange[0]} – {filters.yearRange[1]}</span>
             </div>
@@ -234,9 +224,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           </div>
 
           {/* Rating and Runtime side by side */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-card/60 rounded-lg border border-border/50 p-4">
-              <div className="flex items-center justify-between mb-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-foreground">Rating</span>
                 <span className="text-sm text-primary font-semibold">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</span>
               </div>
@@ -250,8 +240,8 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               />
             </div>
 
-            <div className="bg-card/60 rounded-lg border border-border/50 p-4">
-              <div className="flex items-center justify-between mb-3">
+            <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-foreground">Runtime</span>
                 <span className="text-sm text-primary font-semibold">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</span>
               </div>
@@ -268,37 +258,39 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
         </div>
 
         {/* Discover Button */}
-        <Button 
-          onClick={handleDiscover}
-          className="w-full h-10 rounded-lg text-sm font-semibold mb-6"
-        >
-          <Search className="h-4 w-4 mr-2" />
-          Discover Movies
-        </Button>
+        <div className="max-w-xs mx-auto mb-5">
+          <Button 
+            onClick={handleDiscover}
+            className="w-full h-9 rounded-lg text-sm font-semibold"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Discover Movies
+          </Button>
+        </div>
 
         {/* Advanced Filters */}
         <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-          <CollapsibleTrigger className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer py-2">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">Advanced Filters</span>
-            <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", showAdvanced && "rotate-180")} />
+          <CollapsibleTrigger className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer py-1">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">Advanced Filters</span>
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", showAdvanced && "rotate-180")} />
           </CollapsibleTrigger>
           
           <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-            <div className="pt-4 space-y-6">
+            <div className="max-w-xl mx-auto pt-4 space-y-4">
               {/* Mood */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">Mood</h4>
-                <div className="flex flex-wrap gap-2">
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">Mood</h4>
+                <div className="flex flex-wrap justify-center gap-1.5">
                   {MOODS.map(mood => (
                     <button
                       key={mood}
                       onClick={() => toggleMood(mood)}
                       className={cn(
-                        "py-1.5 px-3 rounded-full text-sm font-medium transition-all duration-200 active:scale-95",
+                        "py-1 px-2.5 rounded-lg text-xs font-medium transition-all duration-200",
                         filters.mood.includes(mood) 
                           ? "bg-primary text-primary-foreground" 
-                          : "bg-card/80 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
+                          : "bg-card/60 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
                       )}
                     >
                       {mood}
@@ -309,17 +301,17 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
 
               {/* Tone */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">Tone</h4>
-                <div className="flex flex-wrap gap-2">
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">Tone</h4>
+                <div className="flex flex-wrap justify-center gap-1.5">
                   {TONES.map(tone => (
                     <button
                       key={tone}
                       onClick={() => toggleTone(tone)}
                       className={cn(
-                        "py-1.5 px-3 rounded-full text-sm font-medium transition-all duration-200 active:scale-95",
+                        "py-1 px-2.5 rounded-lg text-xs font-medium transition-all duration-200",
                         filters.tone.includes(tone) 
                           ? "bg-primary text-primary-foreground" 
-                          : "bg-card/80 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
+                          : "bg-card/60 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
                       )}
                     >
                       {tone}
@@ -329,12 +321,12 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               </div>
 
               {/* Dropdowns */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-2">Pacing</label>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">Pacing</label>
                   <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
-                    <SelectTrigger className="h-9 bg-card/60 border-border/50 rounded-lg text-sm">
-                      <SelectValue placeholder="Any Pacing" />
+                    <SelectTrigger className="h-8 bg-card/60 border-border/50 rounded-lg text-xs">
+                      <SelectValue placeholder="Any" />
                     </SelectTrigger>
                     <SelectContent>
                       {PACING_OPTIONS.map(option => (
@@ -345,10 +337,10 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-2">Era</label>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">Era</label>
                   <Select value={filters.era} onValueChange={(value) => updateFiltersLocally({ era: value })}>
-                    <SelectTrigger className="h-9 bg-card/60 border-border/50 rounded-lg text-sm">
-                      <SelectValue placeholder="Any Era" />
+                    <SelectTrigger className="h-8 bg-card/60 border-border/50 rounded-lg text-xs">
+                      <SelectValue placeholder="Any" />
                     </SelectTrigger>
                     <SelectContent>
                       {ERA_OPTIONS.map(option => (
@@ -359,10 +351,10 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-2">Language</label>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">Language</label>
                   <Select value={filters.language} onValueChange={(value) => updateFiltersLocally({ language: value })}>
-                    <SelectTrigger className="h-9 bg-card/60 border-border/50 rounded-lg text-sm">
-                      <SelectValue placeholder="Any Language" />
+                    <SelectTrigger className="h-8 bg-card/60 border-border/50 rounded-lg text-xs">
+                      <SelectValue placeholder="Any" />
                     </SelectTrigger>
                     <SelectContent>
                       {LANGUAGE_OPTIONS.map(option => (
