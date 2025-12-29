@@ -287,8 +287,8 @@ const Search = () => {
       </div>
 
       {/* Media Type Tabs - Always visible */}
-      <div className="max-w-2xl mx-auto px-4 py-4">
-        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30">
+      <div className="px-4 2xl:px-6 py-4 max-w-7xl mx-auto">
+        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30 max-w-2xl">
           <Button
             variant={activeTab === 'all' ? 'default' : 'ghost'}
             size="sm"
