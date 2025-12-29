@@ -213,12 +213,12 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           )}
         </div>
 
-        {/* Slider Filters */}
-        <div className="space-y-3 mb-5">
+        {/* Slider Filters - All on one row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
           {/* Year Range */}
           <div className="bg-card/60 rounded-lg border border-border/50 p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Year Range</span>
+              <span className="text-sm font-medium text-foreground">Year</span>
               <span className="text-sm text-primary font-semibold">{filters.yearRange[0]} – {filters.yearRange[1]}</span>
             </div>
             <Slider
@@ -231,49 +231,45 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             />
           </div>
 
-          {/* Rating and Runtime side by side */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-card/60 rounded-lg border border-border/50 p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">Rating</span>
-                <span className="text-sm text-primary font-semibold">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</span>
-              </div>
-              <Slider
-                value={filters.ratingRange}
-                onValueChange={(value) => updateFiltersLocally({ ratingRange: value as [number, number] })}
-                min={0}
-                max={10}
-                step={0.5}
-                className="w-full"
-              />
+          {/* Rating */}
+          <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Rating</span>
+              <span className="text-sm text-primary font-semibold">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</span>
             </div>
+            <Slider
+              value={filters.ratingRange}
+              onValueChange={(value) => updateFiltersLocally({ ratingRange: value as [number, number] })}
+              min={0}
+              max={10}
+              step={0.5}
+              className="w-full"
+            />
+          </div>
 
-            <div className="bg-card/60 rounded-lg border border-border/50 p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">Runtime</span>
-                <span className="text-sm text-primary font-semibold">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</span>
-              </div>
-              <Slider
-                value={filters.runtimeRange}
-                onValueChange={(value) => updateFiltersLocally({ runtimeRange: value as [number, number] })}
-                min={0}
-                max={300}
-                step={15}
-                className="w-full"
-              />
+          {/* Runtime */}
+          <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Runtime</span>
+              <span className="text-sm text-primary font-semibold">{filters.runtimeRange[0]} – {filters.runtimeRange[1]}m</span>
             </div>
+            <Slider
+              value={filters.runtimeRange}
+              onValueChange={(value) => updateFiltersLocally({ runtimeRange: value as [number, number] })}
+              min={0}
+              max={300}
+              step={15}
+              className="w-full"
+            />
           </div>
         </div>
 
-        {/* Advanced Filters - Mood, Tone, Pacing (using Select dropdowns like sliders) */}
-        <div className="space-y-3 mb-5">
+        {/* Advanced Filters - Mood, Tone, Pacing on one row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
           {/* Mood */}
           <div className="bg-card/60 rounded-lg border border-border/50 p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Mood</span>
-              <span className="text-sm text-primary font-semibold">
-                {MOOD_OPTIONS.find(m => m.value === filters.mood)?.label || "Any Mood"}
-              </span>
             </div>
             <Select value={filters.mood} onValueChange={(value) => updateFiltersLocally({ mood: value })}>
               <SelectTrigger className="h-9 bg-muted/40 border-border/30">
@@ -291,9 +287,6 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           <div className="bg-card/60 rounded-lg border border-border/50 p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Tone</span>
-              <span className="text-sm text-primary font-semibold">
-                {TONE_OPTIONS.find(t => t.value === filters.tone)?.label || "Any Tone"}
-              </span>
             </div>
             <Select value={filters.tone} onValueChange={(value) => updateFiltersLocally({ tone: value })}>
               <SelectTrigger className="h-9 bg-muted/40 border-border/30">
@@ -311,9 +304,6 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           <div className="bg-card/60 rounded-lg border border-border/50 p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Pacing</span>
-              <span className="text-sm text-primary font-semibold">
-                {PACING_OPTIONS.find(p => p.value === filters.pacing)?.label || "Any Pacing"}
-              </span>
             </div>
             <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
               <SelectTrigger className="h-9 bg-muted/40 border-border/30">
