@@ -54,6 +54,14 @@ const PACING_OPTIONS = [
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast-Paced" }
 ];
+const ERA_OPTIONS = [
+  { value: "any", label: "Any Era" },
+  { value: "classic", label: "Classic (Pre-1970)" },
+  { value: "70s80s", label: "70s & 80s" },
+  { value: "90s00s", label: "90s & 2000s" },
+  { value: "modern", label: "Modern (2010+)" },
+  { value: "recent", label: "Recent (2020+)" }
+];
 const LANGUAGE_OPTIONS = [
   { value: "any", label: "Any Language" },
   { value: "en", label: "English" },
@@ -314,7 +322,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             </div>
 
             {/* Dropdowns */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="bg-background/50 rounded-xl p-4 border border-border/30">
                 <label className="text-sm font-medium text-foreground mb-2 block">Pacing</label>
                 <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
@@ -323,6 +331,20 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {PACING_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                <label className="text-sm font-medium text-foreground mb-2 block">Era</label>
+                <Select value={filters.era} onValueChange={(value) => updateFiltersLocally({ era: value })}>
+                  <SelectTrigger className="h-10 bg-background border-border/50">
+                    <SelectValue placeholder="Any Era" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ERA_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                     ))}
                   </SelectContent>

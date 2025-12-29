@@ -148,137 +148,152 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
 
   return (
     <>
-      <div className="space-y-5">
-        {/* Explore by Genre */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-cinematic text-base tracking-wide text-foreground uppercase">
+      <div className="space-y-6">
+        {/* Explore by Genre - Premium card design */}
+        <div className="rounded-2xl bg-gradient-to-br from-card via-card to-muted/30 border border-border/40 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-foreground text-base">
               Explore by Genre
             </h3>
             <Button
-              variant="ghost"
+              variant="link"
               size="sm"
               onClick={handleViewAllGenres}
-              className="text-primary hover:text-primary/80 font-medium text-sm h-8 px-2"
+              className="text-primary hover:text-primary/80 font-medium text-sm h-auto p-0"
             >
-              View All
+              View All →
             </Button>
           </div>
           
-          {/* Centered responsive grid */}
           <div className="grid grid-cols-4 gap-2">
             {GENRES.map((genre) => (
               <button
                 key={genre.id}
                 onClick={() => handleGenreClick(genre.id)}
-                className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl bg-card border border-border/60 hover:bg-card/80 hover:border-primary/50 active:scale-95 transition-all min-h-[72px]"
+                className="group flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl bg-muted/50 hover:bg-primary/10 border border-transparent hover:border-primary/30 active:scale-95 transition-all"
               >
-                <span className="text-xl">{genre.emoji}</span>
-                <span className="text-foreground text-xs font-medium text-center">{genre.name}</span>
+                <span className="text-lg group-hover:scale-110 transition-transform">{genre.emoji}</span>
+                <span className="text-foreground/80 text-[10px] font-medium text-center leading-tight">{genre.name}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Filter Cards */}
-        <div className="space-y-3">
-          {/* Year Range Card */}
+        {/* Filters Section */}
+        <div className="rounded-2xl bg-gradient-to-br from-card via-card to-muted/30 border border-border/40 p-4 shadow-sm space-y-3">
+          <h3 className="font-semibold text-foreground text-base mb-3">
+            Discovery Filters
+          </h3>
+
+          {/* Year Range */}
           <button
             onClick={() => openSliderSheet("year")}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-              isYearModified ? "border-primary/50" : "border-border/50"
+              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
+              isYearModified ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", isYearModified ? "bg-primary/20" : "bg-muted")}>
-                <Calendar className={cn("h-5 w-5", isYearModified ? "text-primary" : "text-muted-foreground")} />
+              <div className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center",
+                isYearModified ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                <Calendar className="h-4 w-4" />
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground">Year Range</p>
-                <p className="text-sm text-muted-foreground">{filters.yearRange[0]} – {filters.yearRange[1]}</p>
+                <p className="font-medium text-foreground text-sm">Year</p>
+                <p className="text-xs text-muted-foreground">{filters.yearRange[0]} – {filters.yearRange[1]}</p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
 
-          {/* Rating Range Card */}
+          {/* Rating Range */}
           <button
             onClick={() => openSliderSheet("rating")}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-              isRatingModified ? "border-primary/50" : "border-border/50"
+              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
+              isRatingModified ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", isRatingModified ? "bg-primary/20" : "bg-muted")}>
-                <Star className={cn("h-5 w-5", isRatingModified ? "text-primary" : "text-muted-foreground")} />
+              <div className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center",
+                isRatingModified ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                <Star className="h-4 w-4" />
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground">Rating</p>
-                <p className="text-sm text-muted-foreground">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</p>
+                <p className="font-medium text-foreground text-sm">Rating</p>
+                <p className="text-xs text-muted-foreground">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
 
-          {/* Runtime Range Card */}
+          {/* Runtime Range */}
           <button
             onClick={() => openSliderSheet("runtime")}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-              isRuntimeModified ? "border-primary/50" : "border-border/50"
+              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
+              isRuntimeModified ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", isRuntimeModified ? "bg-primary/20" : "bg-muted")}>
-                <Clock className={cn("h-5 w-5", isRuntimeModified ? "text-primary" : "text-muted-foreground")} />
+              <div className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center",
+                isRuntimeModified ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                <Clock className="h-4 w-4" />
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground">Runtime</p>
-                <p className="text-sm text-muted-foreground">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</p>
+                <p className="font-medium text-foreground text-sm">Runtime</p>
+                <p className="text-xs text-muted-foreground">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
 
-          {/* More Filters Card */}
+          {/* More Filters (Mood, Tone, etc.) */}
           <button
             onClick={() => setShowAdvancedFilters(true)}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
-              activeFilterCount > 0 ? "border-primary/50" : "border-border/50"
+              "w-full flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border transition-all active:scale-[0.98]",
+              activeFilterCount > 0 ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", activeFilterCount > 0 ? "bg-primary/20" : "bg-muted")}>
+              <div className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center text-base",
+                activeFilterCount > 0 ? "bg-primary/20" : "bg-muted"
+              )}>
                 ✨
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground">More Filters</p>
-                <p className="text-sm text-muted-foreground">Mood • Tone • Pacing • Language</p>
+                <p className="font-medium text-foreground text-sm">More Options</p>
+                <p className="text-xs text-muted-foreground">Mood, Tone, Pacing, Era</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="text-xs bg-primary/20 text-primary border-0">
+                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   {activeFilterCount}
-                </Badge>
+                </span>
               )}
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
           </button>
-
-          {/* Discover Button */}
-          <Button 
-            onClick={handleDiscover}
-            className="w-full h-14 rounded-xl text-base font-medium mt-4"
-            size="lg"
-          >
-            <Search className="h-5 w-5 mr-2" />
-            Discover Movies
-          </Button>
         </div>
+
+        {/* Discover Button */}
+        <Button 
+          onClick={handleDiscover}
+          className="w-full h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
+          size="lg"
+        >
+          <Search className="h-4 w-4 mr-2" />
+          Discover Movies
+        </Button>
       </div>
 
       {/* Year Range Bottom Sheet */}
