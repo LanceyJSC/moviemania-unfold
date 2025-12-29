@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Search, Sparkles, ArrowRight } from "lucide-react";
+import { ChevronDown, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -34,7 +34,7 @@ interface InlineFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
 }
 
-const GENRES = [
+const GENRES_INITIAL = [
   { id: 28, name: "Action", emoji: "💥" },
   { id: 35, name: "Comedy", emoji: "😂" },
   { id: 27, name: "Horror", emoji: "👻" },
@@ -43,6 +43,28 @@ const GENRES = [
   { id: 12, name: "Adventure", emoji: "🗺️" },
   { id: 18, name: "Drama", emoji: "🎭" },
   { id: 53, name: "Thriller", emoji: "😱" },
+];
+
+const ALL_GENRES = [
+  { id: 28, name: "Action", emoji: "💥" },
+  { id: 12, name: "Adventure", emoji: "🗺️" },
+  { id: 16, name: "Animation", emoji: "🎨" },
+  { id: 35, name: "Comedy", emoji: "😂" },
+  { id: 80, name: "Crime", emoji: "🔪" },
+  { id: 99, name: "Documentary", emoji: "📹" },
+  { id: 18, name: "Drama", emoji: "🎭" },
+  { id: 10751, name: "Family", emoji: "👨‍👩‍👧" },
+  { id: 14, name: "Fantasy", emoji: "🧙" },
+  { id: 36, name: "History", emoji: "📜" },
+  { id: 27, name: "Horror", emoji: "👻" },
+  { id: 10402, name: "Music", emoji: "🎵" },
+  { id: 9648, name: "Mystery", emoji: "🔍" },
+  { id: 10749, name: "Romance", emoji: "💕" },
+  { id: 878, name: "Sci-Fi", emoji: "🚀" },
+  { id: 10770, name: "TV Movie", emoji: "📺" },
+  { id: 53, name: "Thriller", emoji: "😱" },
+  { id: 10752, name: "War", emoji: "⚔️" },
+  { id: 37, name: "Western", emoji: "🤠" },
 ];
 
 // Mood maps to genre combinations for better TMDB results
@@ -80,7 +102,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
+  const [showAllGenres, setShowAllGenres] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     genres: [],
     yearRange: [1900, new Date().getFullYear()],
@@ -105,8 +127,8 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     navigate(`/search?genre=${genreId}`);
   };
 
-  const handleViewAllGenres = () => {
-    navigate("/genres");
+  const toggleShowAllGenres = () => {
+    setShowAllGenres(!showAllGenres);
   };
 
 
@@ -137,6 +159,8 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     return <MobileInlineFilters onFiltersChange={onFiltersChange} />;
   }
 
+  const displayGenres = showAllGenres ? ALL_GENRES : GENRES_INITIAL;
+
   return (
     <div className="space-y-8">
       {/* Genre Section */}
@@ -146,8 +170,11 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           <p className="text-muted-foreground text-sm">Jump into your favorite category</p>
         </div>
         
-        <div className="grid grid-cols-4 gap-2 max-w-xl mx-auto mb-3">
-          {GENRES.map((genre) => (
+        <div className={cn(
+          "grid gap-2 max-w-xl mx-auto mb-3 transition-all duration-300",
+          showAllGenres ? "grid-cols-4 md:grid-cols-5" : "grid-cols-4"
+        )}>
+          {displayGenres.map((genre) => (
             <button
               key={genre.id}
               onClick={() => handleGenreClick(genre.id)}
@@ -162,11 +189,11 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleViewAllGenres}
+          onClick={toggleShowAllGenres}
           className="text-primary hover:text-primary/80 gap-1"
         >
-          View All
-          <ArrowRight className="h-4 w-4" />
+          {showAllGenres ? "Show Less" : "View All"}
+          <ChevronDown className={cn("h-4 w-4 transition-transform", showAllGenres && "rotate-180")} />
         </Button>
       </section>
 
