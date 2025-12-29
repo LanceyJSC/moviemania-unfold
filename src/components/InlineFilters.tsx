@@ -277,20 +277,20 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           </CollapsibleTrigger>
           
           <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-            <div className="max-w-xl mx-auto pt-4 space-y-4">
+            <div className="max-w-2xl mx-auto pt-6 space-y-6">
               {/* Mood */}
               <div>
-                <h4 className="text-xs font-medium text-muted-foreground mb-2">Mood</h4>
-                <div className="flex flex-wrap justify-center gap-1.5">
+                <h4 className="text-sm font-medium text-muted-foreground mb-3 text-center">Mood</h4>
+                <div className="flex flex-wrap justify-center gap-2">
                   {MOODS.map(mood => (
                     <button
                       key={mood}
                       onClick={() => toggleMood(mood)}
                       className={cn(
-                        "py-1 px-2.5 rounded-lg text-xs font-medium transition-all duration-200",
+                        "py-1.5 px-3 rounded-full text-sm font-medium transition-all duration-200 active:scale-95",
                         filters.mood.includes(mood) 
                           ? "bg-primary text-primary-foreground" 
-                          : "bg-card/60 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
+                          : "bg-card/80 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
                       )}
                     >
                       {mood}
@@ -301,17 +301,17 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
 
               {/* Tone */}
               <div>
-                <h4 className="text-xs font-medium text-muted-foreground mb-2">Tone</h4>
-                <div className="flex flex-wrap justify-center gap-1.5">
+                <h4 className="text-sm font-medium text-muted-foreground mb-3 text-center">Tone</h4>
+                <div className="flex flex-wrap justify-center gap-2">
                   {TONES.map(tone => (
                     <button
                       key={tone}
                       onClick={() => toggleTone(tone)}
                       className={cn(
-                        "py-1 px-2.5 rounded-lg text-xs font-medium transition-all duration-200",
+                        "py-1.5 px-3 rounded-full text-sm font-medium transition-all duration-200 active:scale-95",
                         filters.tone.includes(tone) 
                           ? "bg-primary text-primary-foreground" 
-                          : "bg-card/60 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
+                          : "bg-card/80 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
                       )}
                     >
                       {tone}
@@ -321,12 +321,12 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               </div>
 
               {/* Dropdowns */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
                 <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">Pacing</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-center">Pacing</label>
                   <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
-                    <SelectTrigger className="h-8 bg-card/60 border-border/50 rounded-lg text-xs">
-                      <SelectValue placeholder="Any" />
+                    <SelectTrigger className="h-9 bg-card/80 border-border/50 rounded-full text-sm">
+                      <SelectValue placeholder="Any Pacing" />
                     </SelectTrigger>
                     <SelectContent>
                       {PACING_OPTIONS.map(option => (
@@ -337,10 +337,10 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">Era</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-center">Era</label>
                   <Select value={filters.era} onValueChange={(value) => updateFiltersLocally({ era: value })}>
-                    <SelectTrigger className="h-8 bg-card/60 border-border/50 rounded-lg text-xs">
-                      <SelectValue placeholder="Any" />
+                    <SelectTrigger className="h-9 bg-card/80 border-border/50 rounded-full text-sm">
+                      <SelectValue placeholder="Any Era" />
                     </SelectTrigger>
                     <SelectContent>
                       {ERA_OPTIONS.map(option => (
@@ -351,10 +351,10 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">Language</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-center">Language</label>
                   <Select value={filters.language} onValueChange={(value) => updateFiltersLocally({ language: value })}>
-                    <SelectTrigger className="h-8 bg-card/60 border-border/50 rounded-lg text-xs">
-                      <SelectValue placeholder="Any" />
+                    <SelectTrigger className="h-9 bg-card/80 border-border/50 rounded-full text-sm">
+                      <SelectValue placeholder="Any Language" />
                     </SelectTrigger>
                     <SelectContent>
                       {LANGUAGE_OPTIONS.map(option => (
