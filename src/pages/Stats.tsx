@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Film, Tv, Clock, Star, TrendingUp, Calendar, Award } from "lucide-react";
+import { ArrowLeft, Film, Tv, Clock, Star, TrendingUp, Calendar, Award, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileHeader } from "@/components/MobileHeader";
+import { TasteProfileCard } from "@/components/TasteProfileCard";
+import { TasteInsightsSection } from "@/components/TasteInsightsSection";
+import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useTasteProfile } from "@/hooks/useTasteProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -40,6 +45,8 @@ const GENRE_COLORS = [
 export const Stats = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isProUser } = useSubscription();
+  const { profile: tasteProfile, loading: tasteLoading, error: tasteError } = useTasteProfile();
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [genreData, setGenreData] = useState<GenreData[]>([]);
   const [ratingDistribution, setRatingDistribution] = useState<RatingData[]>([]);
@@ -52,6 +59,7 @@ export const Stats = () => {
     reviewsWritten: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [showProModal, setShowProModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -297,12 +305,32 @@ export const Stats = () => {
         </div>
 
         {/* Charts */}
-        <Tabs defaultValue="activity" className="w-full">
-          <TabsList className="w-full grid grid-cols-3">
+        <Tabs defaultValue="taste" className="w-full">
+          <TabsList className="w-full grid grid-cols-4">
+            <TabsTrigger value="taste" className="flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              <span className="hidden sm:inline">Taste</span>
+            </TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="genres">Genres</TabsTrigger>
             <TabsTrigger value="ratings">Ratings</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="taste" className="mt-4 space-y-4">
+            <TasteProfileCard 
+              profile={tasteProfile}
+              loading={tasteLoading}
+              error={tasteError}
+              isProUser={isProUser}
+              onUpgradeClick={() => setShowProModal(true)}
+            />
+            <TasteInsightsSection
+              profile={tasteProfile}
+              loading={tasteLoading}
+              isProUser={isProUser}
+              onUpgradeClick={() => setShowProModal(true)}
+            />
+          </TabsContent>
 
           <TabsContent value="activity" className="mt-4">
             <Card className="bg-card border-border">
@@ -480,6 +508,13 @@ export const Stats = () => {
           </Card>
         </Link>
       </div>
+
+      <ProUpgradeModal
+        isOpen={showProModal}
+        onClose={() => setShowProModal(false)}
+        feature="Taste Profile"
+        description="Get personalized insights from your ratings including your genre DNA, rating style, favorite actors/directors, and more."
+      />
 
       <Navigation />
     </div>

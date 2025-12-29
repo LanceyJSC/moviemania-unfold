@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useTasteProfile } from '@/hooks/useTasteProfile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,6 +11,8 @@ import { Switch } from '@/components/ui/switch';
 import { AvatarUpload } from '@/components/AvatarUpload';
 import { ProfileEditor } from '@/components/ProfileEditor';
 import { ProBadge } from '@/components/ProBadge';
+import { TasteProfileCard } from '@/components/TasteProfileCard';
+import { ProUpgradeModal } from '@/components/ProUpgradeModal';
 import { LogOut, Settings, BarChart3, Award, MessageCircle, Sparkles, Download, Trash2, Loader2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
@@ -36,9 +39,11 @@ const Profile = () => {
   const { profile, updateProfile, loading } = useProfile();
   const { preferences, updatePreferences, isLoading: preferencesLoading } = useUserPreferences();
   const { isProUser } = useSubscription();
+  const { profile: tasteProfile, loading: tasteLoading, error: tasteError } = useTasteProfile();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showProModal, setShowProModal] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -126,6 +131,16 @@ const Profile = () => {
             </Card>
           </Link>
         </div>
+
+        {/* Taste Profile Card (compact) */}
+        <TasteProfileCard
+          profile={tasteProfile}
+          loading={tasteLoading}
+          error={tasteError}
+          isProUser={isProUser}
+          onUpgradeClick={() => setShowProModal(true)}
+          compact
+        />
 
         {/* Settings Content */}
         <div className="space-y-6">
@@ -379,6 +394,13 @@ const Profile = () => {
           </Card>
         </div>
       </div>
+
+      <ProUpgradeModal
+        isOpen={showProModal}
+        onClose={() => setShowProModal(false)}
+        feature="Taste Profile"
+        description="Get personalized insights from your ratings including your genre DNA, rating style, and more."
+      />
 
       <Navigation />
     </div>
