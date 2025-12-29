@@ -38,6 +38,14 @@ const PACING_OPTIONS = [
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast-Paced" }
 ];
+const ERA_OPTIONS = [
+  { value: "any", label: "Any Era" },
+  { value: "classic", label: "Classic (Pre-1970)" },
+  { value: "70s80s", label: "70s & 80s" },
+  { value: "90s00s", label: "90s & 2000s" },
+  { value: "modern", label: "Modern (2010+)" },
+  { value: "recent", label: "Recent (2020+)" }
+];
 const LANGUAGE_OPTIONS = [
   { value: "any", label: "Any Language" },
   { value: "en", label: "English" },
@@ -51,7 +59,7 @@ const LANGUAGE_OPTIONS = [
   { value: "it", label: "Italian" }
 ];
 
-type SheetType = "mood" | "tone" | "pacing" | "language" | null;
+type SheetType = "mood" | "tone" | "pacing" | "era" | "language" | null;
 
 export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: MobileAdvancedFiltersProps) => {
   const [activeSheet, setActiveSheet] = useState<SheetType>(null);
@@ -125,6 +133,7 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
   const isMoodModified = filters.mood.length > 0;
   const isToneModified = filters.tone.length > 0;
   const isPacingModified = filters.pacing !== "any";
+  const isEraModified = filters.era !== "any";
   const isLanguageModified = filters.language !== "any";
 
   if (!isOpen) return null;
@@ -209,6 +218,25 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </button>
 
+        {/* Era Card */}
+        <button
+          onClick={() => openSheet("era")}
+          className={cn(
+            "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
+            isEraModified ? "border-primary/50" : "border-border/50"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg", isEraModified ? "bg-primary/20" : "bg-muted")}>
+              📅
+            </div>
+            <div className="text-left">
+              <p className="font-medium text-foreground">Era</p>
+              <p className="text-sm text-muted-foreground">{ERA_OPTIONS.find(o => o.value === filters.era)?.label}</p>
+            </div>
+          </div>
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+        </button>
 
         {/* Language Card */}
         <button
@@ -342,6 +370,33 @@ export const MobileAdvancedFilters = ({ onFiltersChange, isOpen, onToggle }: Mob
         </DrawerContent>
       </Drawer>
 
+      {/* Era Selection Sheet */}
+      <Drawer open={activeSheet === "era"} onOpenChange={(open) => !open && setActiveSheet(null)}>
+        <DrawerContent className="bg-card border-t border-border">
+          <DrawerHeader className="text-center pb-2">
+            <DrawerTitle className="flex items-center justify-center gap-2 text-lg">
+              <span className="text-xl">📅</span> Era
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 py-4 space-y-2">
+            {ERA_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => { updateFilters({ era: option.value }); setActiveSheet(null); }}
+                className={cn(
+                  "w-full p-4 rounded-xl text-left font-medium transition-all active:scale-[0.98] flex items-center justify-between",
+                  filters.era === option.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground"
+                )}
+              >
+                {option.label}
+                {filters.era === option.value && <Check className="h-5 w-5" />}
+              </button>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* Language Selection Sheet */}
       <Drawer open={activeSheet === "language"} onOpenChange={(open) => !open && setActiveSheet(null)}>
