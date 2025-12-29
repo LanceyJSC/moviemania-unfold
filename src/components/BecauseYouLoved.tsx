@@ -165,9 +165,12 @@ export const BecauseYouLoved = () => {
 
   // Get the first section for display
   const primarySection = sections[0];
+  // Show 6 on mobile (2 rows of 3), 8 on larger screens
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const initialCount = isMobile ? 6 : 8;
   const displayedItems = isExpanded 
     ? primarySection.recommendations 
-    : primarySection.recommendations.slice(0, 8);
+    : primarySection.recommendations.slice(0, initialCount);
 
   const mediaTypeLabel = primarySection.basedOn.mediaType === 'movie' ? 'movie' : 'show';
 
@@ -209,7 +212,7 @@ export const BecauseYouLoved = () => {
           </div>
 
           {/* See More Button */}
-          {primarySection.recommendations.length > 8 && (
+          {primarySection.recommendations.length > initialCount && (
             <div className="flex justify-center mt-6">
               <Button
                 variant="ghost"

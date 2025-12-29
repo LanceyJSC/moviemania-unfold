@@ -74,7 +74,10 @@ export const FreshPicks = () => {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const displayedContent = isExpanded ? content : content.slice(0, 8);
+  // Show 6 on mobile (2 rows of 3), 8 on larger screens
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const initialCount = isMobile ? 6 : 8;
+  const displayedContent = isExpanded ? content : content.slice(0, initialCount);
 
   if (isLoading) {
     return (
@@ -135,7 +138,7 @@ export const FreshPicks = () => {
                 );
               })}
             </div>
-            {content.length > 8 && (
+            {content.length > initialCount && (
               <div className="flex justify-center mt-6">
                 <Button
                   variant="ghost"
