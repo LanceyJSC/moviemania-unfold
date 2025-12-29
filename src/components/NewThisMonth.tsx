@@ -73,12 +73,7 @@ export const NewThisMonth = () => {
           </h2>
           <div className="w-16 h-0.5 bg-cinema-gold mx-auto"></div>
         </div>
-        <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg"></div>
-          ))}
-        </div>
-        <div className="hidden 2xl:grid grid-cols-6 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
           {Array.from({ length: 12 }).map((_, index) => (
             <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
           ))}
@@ -108,31 +103,11 @@ export const NewThisMonth = () => {
       
       {displayedContent.length > 0 ? (
         <>
-          {/* Mobile: Horizontal scroll */}
-          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
             {displayedContent.map((item) => {
               const isMovie = 'title' in item;
               return (
-                <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`} className="flex-shrink-0">
-                  {isMovie ? (
-                    <MovieCard 
-                      movie={tmdbService.formatMovieForCard(item as Movie)}
-                    />
-                  ) : (
-                    <TVShowCard 
-                      tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          {/* Desktop: Grid layout */}
-          <div className="hidden 2xl:grid grid-cols-6 gap-4">
-            {displayedContent.map((item) => {
-              const isMovie = 'title' in item;
-              return (
-                <div key={`new-desktop-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
+                <div key={`new-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
                   {isMovie ? (
                     <MovieCard 
                       movie={tmdbService.formatMovieForCard(item as Movie)}
