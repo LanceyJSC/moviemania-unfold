@@ -185,7 +185,8 @@ const Search = () => {
   };
 
   const hasResults = searchResults.length > 0;
-  const showEmptyState = !searchTerm && !genreParam && !hasResults && filterResults.length === 0;
+  const showEmptyState = !searchTerm && !genreParam && !hasResults && filterResults.length === 0 && !isFilterSearching;
+  const showProDiscovery = isProUser && !searchTerm && !genreParam;
 
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12 max-h-screen overflow-y-auto">
@@ -262,12 +263,46 @@ const Search = () => {
         </div>
       )}
 
-      {/* Empty State - Different for Pro vs Free */}
-      {showEmptyState && (
+      {/* Empty State for FREE users only */}
+      {showEmptyState && !isProUser && (
         <div className="px-4 md:px-6 mt-8 max-w-7xl mx-auto">
-          {isProUser ? (
-            // PRO USER: Full discovery experience
-            <div className="space-y-10">
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <SearchIcon className="h-16 w-16 text-muted-foreground/30 mx-auto mb-6" />
+              <h2 className="text-2xl font-semibold text-foreground mb-3">
+                Search for Movies & TV Shows
+              </h2>
+              <p className="text-muted-foreground mb-8">
+                Type in the search box above to find your favorite content
+              </p>
+              
+              {/* Upgrade CTA */}
+              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-6">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <span className="font-semibold text-foreground">Unlock Pro Discovery</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Get advanced filters, genre browsing, and personalized recommendations
+                </p>
+                <Button 
+                  onClick={() => setShowProModal(true)}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Crown className="h-4 w-4 mr-2" />
+                  Upgrade to Pro
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PRO USER: Discovery Experience - Always show when not text searching */}
+      {showProDiscovery && (
+        <div className="px-4 md:px-6 mt-8 max-w-7xl mx-auto">
+          <div className="space-y-10">
+            {filterResults.length === 0 && !isFilterSearching && (
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
                   <Crown className="h-4 w-4" />
@@ -277,63 +312,32 @@ const Search = () => {
                   DISCOVER YOUR NEXT FAVORITE
                 </h1>
                 <p className="text-muted-foreground max-w-lg mx-auto">
-                  Use the advanced filters below to find exactly what you're looking for
+                  Use the filters below to find exactly what you're looking for
                 </p>
               </div>
+            )}
 
-              {/* Pro Discovery Filters */}
-              <InlineFilters onFiltersChange={handleFiltersChange} />
-              
-              {/* Filter Results */}
-              {isFilterSearching && (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            {/* Pro Discovery Filters - Always visible */}
+            <InlineFilters onFiltersChange={handleFiltersChange} />
+            
+            {/* Filter Results */}
+            {isFilterSearching && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            )}
+            {!isFilterSearching && filterResults.length > 0 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">Discovery Results</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{filterResults.length} results</p>
                 </div>
-              )}
-              {!isFilterSearching && filterResults.length > 0 && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold text-foreground">Discovery Results</h2>
-                    <p className="text-sm text-muted-foreground mt-1">{filterResults.length} results</p>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
-                    {filterResults.map((item) => renderMediaCard(item))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            // FREE USER: Simple search prompt
-            <div className="text-center py-16">
-              <div className="max-w-md mx-auto">
-                <SearchIcon className="h-16 w-16 text-muted-foreground/30 mx-auto mb-6" />
-                <h2 className="text-2xl font-semibold text-foreground mb-3">
-                  Search for Movies & TV Shows
-                </h2>
-                <p className="text-muted-foreground mb-8">
-                  Type in the search box above to find your favorite content
-                </p>
-                
-                {/* Upgrade CTA */}
-                <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-6">
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    <span className="font-semibold text-foreground">Unlock Pro Discovery</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Get advanced filters, genre browsing, and personalized recommendations
-                  </p>
-                  <Button 
-                    onClick={() => setShowProModal(true)}
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    <Crown className="h-4 w-4 mr-2" />
-                    Upgrade to Pro
-                  </Button>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+                  {filterResults.map((item) => renderMediaCard(item))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 
