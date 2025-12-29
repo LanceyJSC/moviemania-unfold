@@ -131,7 +131,7 @@ export const LatestTrailers = () => {
     return date ? new Date(date).getFullYear() : 'TBA';
   };
 
-  const displayedItems = isExpanded ? items : items.slice(0, 12);
+  const displayedItems = isExpanded ? items : items.slice(0, 8);
 
   return (
     <div className="mb-12 pt-4">
@@ -176,7 +176,7 @@ export const LatestTrailers = () => {
         {/* Trailers Grid */}
         {loading ? (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-            {[...Array(12)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
@@ -226,7 +226,7 @@ export const LatestTrailers = () => {
                 </div>
               ))}
             </div>
-            {items.length > 12 && (
+            {items.length > 8 && (
               <div className="flex justify-center mt-6">
                 <Button
                   variant="ghost"
