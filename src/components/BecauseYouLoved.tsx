@@ -7,6 +7,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { fetchMovieRecommendations, getImageUrl } from '@/lib/tmdb';
 import { ProBadge } from './ProBadge';
 import { Skeleton } from './ui/skeleton';
+import { Button } from './ui/button';
 
 interface RecommendationSection {
   basedOn: {
@@ -85,9 +86,14 @@ export const BecauseYouLoved = () => {
       return (
         <div className="space-y-6">
           <Skeleton className="h-8 w-64" />
-        <div className="flex gap-3 overflow-hidden">
+          <div className="flex gap-3 overflow-hidden 2xl:hidden">
             {[...Array(6)].map((_, i) => (
               <Skeleton key={i} className="w-32 h-48 flex-shrink-0 rounded-lg" />
+            ))}
+          </div>
+          <div className="hidden 2xl:grid grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="aspect-[2/3] rounded-lg" />
             ))}
           </div>
         </div>
@@ -111,7 +117,8 @@ export const BecauseYouLoved = () => {
             {index === 0 && <ProBadge size="sm" />}
           </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          {/* Mobile: Horizontal scroll */}
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide 2xl:hidden">
             {section.recommendations.map((movie) => (
               <button
                 key={movie.id}
@@ -144,6 +151,45 @@ export const BecauseYouLoved = () => {
               <ChevronRight className="h-6 w-6" />
               <span className="text-xs">See More</span>
             </button>
+          </div>
+          {/* Desktop: Grid layout */}
+          <div className="hidden 2xl:grid grid-cols-6 gap-4">
+            {section.recommendations.map((movie) => (
+              <button
+                key={`desktop-${movie.id}`}
+                onClick={() => navigate(`/movie/${movie.id}`)}
+                className="group relative aspect-[2/3]"
+              >
+                <div className="w-full h-full rounded-lg overflow-hidden bg-card border border-border/50 group-hover:border-cinema-red/50 transition-all">
+                  {movie.poster_path ? (
+                    <img
+                      src={getImageUrl(movie.poster_path, 'w342')}
+                      alt={movie.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm text-center p-4">
+                      {movie.title}
+                    </div>
+                  )}
+                </div>
+                <div className="absolute bottom-2 right-2 bg-black/70 text-sm px-2 py-1 rounded text-amber-400 font-medium">
+                  {movie.vote_average.toFixed(1)}
+                </div>
+              </button>
+            ))}
+          </div>
+          {/* Desktop: See More button */}
+          <div className="hidden 2xl:flex justify-center mt-6">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/recommendations')}
+              className="flex items-center gap-2 text-cinema-red hover:text-cinema-red/80 hover:bg-cinema-red/10"
+            >
+              See More Recommendations
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       ))}

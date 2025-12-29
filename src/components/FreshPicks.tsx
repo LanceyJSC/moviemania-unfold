@@ -86,9 +86,14 @@ export const FreshPicks = () => {
             </h2>
             <div className="w-16 h-0.5 bg-cinema-red mx-auto"></div>
           </div>
-          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
+          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg"></div>
+            ))}
+          </div>
+          <div className="hidden 2xl:grid grid-cols-6 gap-4">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <div key={index} className="aspect-[2/3] bg-muted animate-pulse rounded-lg"></div>
             ))}
           </div>
         </div>
@@ -115,7 +120,8 @@ export const FreshPicks = () => {
         
         {displayedContent.length > 0 ? (
           <>
-            <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4">
+            {/* Mobile: Horizontal scroll */}
+            <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
               {displayedContent.map((item) => {
                 const isMovie = 'title' in item;
                 return (
@@ -127,6 +133,27 @@ export const FreshPicks = () => {
                     ) : (
                       <TVShowCard 
                         tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {/* Desktop: Grid layout */}
+            <div className="hidden 2xl:grid grid-cols-6 gap-4">
+              {displayedContent.map((item) => {
+                const isMovie = 'title' in item;
+                return (
+                  <div key={`fresh-desktop-${item.id}-${isMovie ? 'movie' : 'tv'}`}>
+                    {isMovie ? (
+                      <MovieCard 
+                        movie={tmdbService.formatMovieForCard(item as Movie)}
+                        variant="grid"
+                      />
+                    ) : (
+                      <TVShowCard 
+                        tvShow={tmdbService.formatTVShowForCard(item as TVShow)}
+                        variant="grid"
                       />
                     )}
                   </div>
