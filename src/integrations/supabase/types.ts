@@ -292,6 +292,41 @@ export type Database = {
           },
         ]
       }
+      media_tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          media_type: string | null
+          movie_id: number
+          tag_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          media_type?: string | null
+          movie_id: number
+          tag_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          media_type?: string | null
+          movie_id?: number
+          tag_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "user_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movie_diary: {
         Row: {
           created_at: string
@@ -372,10 +407,13 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          featured_badges: string[] | null
           follower_count: number | null
           following_count: number | null
           full_name: string | null
           id: string
+          profile_effects: string | null
+          theme_color: string | null
           updated_at: string
           username: string | null
         }
@@ -383,10 +421,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          featured_badges?: string[] | null
           follower_count?: number | null
           following_count?: number | null
           full_name?: string | null
           id: string
+          profile_effects?: string | null
+          theme_color?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -394,10 +435,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          featured_badges?: string[] | null
           follower_count?: number | null
           following_count?: number | null
           full_name?: string | null
           id?: string
+          profile_effects?: string | null
+          theme_color?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -490,6 +534,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      smart_lists: {
+        Row: {
+          created_at: string | null
+          criteria: Json
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          criteria?: Json
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          criteria?: Json
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       tv_diary: {
         Row: {
@@ -874,6 +948,30 @@ export type Database = {
           stripe_subscription_id?: string | null
           tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_tags: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
           user_id?: string
         }
         Relationships: []
