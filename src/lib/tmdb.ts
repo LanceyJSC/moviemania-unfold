@@ -685,3 +685,31 @@ export interface ContentRatingsResponse {
 }
 
 export const tmdbService = new TMDBService();
+
+// Helper functions for direct usage
+export const getImageUrl = (path: string | null, size: string = 'w500'): string => {
+  if (!path) return '';
+  return `https://image.tmdb.org/t/p/${size}${path}`;
+};
+
+export const fetchMovieRecommendations = async (movieId: number): Promise<Movie[]> => {
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/recommendations?api_key=8265bd1679663a7ea12ac168da84d2e8`
+    );
+    const data = await response.json();
+    return data.results || [];
+  } catch (error) {
+    console.error('Error fetching recommendations:', error);
+    return [];
+  }
+};
+
+export const fetchMovieDetails = async (movieId: number): Promise<Movie | null> => {
+  try {
+    return await tmdbService.getMovieDetails(movieId);
+  } catch (error) {
+    console.error('Error fetching movie details:', error);
+    return null;
+  }
+};

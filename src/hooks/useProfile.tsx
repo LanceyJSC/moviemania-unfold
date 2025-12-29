@@ -3,11 +3,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { profileUpdateSchema, validateInput } from '@/lib/validation';
-interface Profile {
+export interface Profile {
   id: string;
   username: string;
   full_name?: string;
   avatar_url?: string;
+  theme_color?: string;
+  profile_effects?: string;
+  featured_badges?: string[];
 }
 
 export const useProfile = () => {
