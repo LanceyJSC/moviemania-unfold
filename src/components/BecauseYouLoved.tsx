@@ -143,13 +143,13 @@ export const BecauseYouLoved = () => {
   if (!isProUser || loading) {
     if (loading && isProUser) {
       return (
-        <div className="mb-12 pt-4">
-          <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
-            <div className="text-center mb-8">
-              <Skeleton className="h-10 w-64 mx-auto mb-4" />
-              <Skeleton className="h-4 w-48 mx-auto" />
+        <div className="mb-6 sm:mb-12">
+          <div className="bg-background rounded-2xl -mx-4 px-3 sm:px-4 py-4 sm:py-8">
+            <div className="text-center mb-4 sm:mb-8">
+              <Skeleton className="h-7 sm:h-10 w-48 sm:w-64 mx-auto mb-2 sm:mb-4" />
+              <Skeleton className="h-3 sm:h-4 w-36 sm:w-48 mx-auto" />
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
               ))}
@@ -173,24 +173,24 @@ export const BecauseYouLoved = () => {
 
   return (
     <>
-      <div className="mb-12 pt-4">
-        <div className="bg-background rounded-t-2xl rounded-b-2xl -mx-4 px-4 py-8">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Sparkles className="h-8 w-8 text-amber-500" />
-              <h2 className="font-cinematic text-3xl text-foreground tracking-wide">
+      <div className="mb-6 sm:mb-12">
+        <div className="bg-background rounded-2xl -mx-4 px-3 sm:px-4 py-4 sm:py-8">
+          <div className="text-center mb-4 sm:mb-8">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+              <Sparkles className="h-5 w-5 sm:h-8 sm:w-8 text-amber-500" />
+              <h2 className="font-cinematic text-lg sm:text-3xl text-foreground tracking-wide">
                 BECAUSE YOU LOVED
               </h2>
-              <Sparkles className="h-8 w-8 text-amber-500" />
+              <Sparkles className="h-5 w-5 sm:h-8 sm:w-8 text-amber-500" />
             </div>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground text-xs sm:text-base mb-2 sm:mb-4">
               Based on the {mediaTypeLabel}{' '}
               <span className="text-cinema-red font-medium">{primarySection.basedOn.title}</span>
             </p>
-            <div className="w-16 h-0.5 bg-amber-500 mx-auto"></div>
+            <div className="w-12 sm:w-16 h-0.5 bg-amber-500 mx-auto"></div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
             {displayedItems.map((item) => (
               <div key={`${item.mediaType}-${item.id}`}>
                 {item.mediaType === 'movie' ? (

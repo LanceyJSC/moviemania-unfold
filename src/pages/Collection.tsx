@@ -341,107 +341,107 @@ const Collection = () => {
       <MobileBrandHeader />
       <Navigation />
       
-      <div className="px-4 md:px-6 py-6 max-w-7xl mx-auto">
+      <div className="px-3 sm:px-4 md:px-6 py-4 sm:py-6 max-w-7xl mx-auto">
         {/* Stats Section - Filtered by media type */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6">
           {mediaFilter === 'all' && (
             <>
-              <Card className="p-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Eye className="h-4 w-4 text-cinema-gold" />
-                  <span className="text-xl font-bold text-foreground">
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
+                  <span className="text-base sm:text-xl font-bold text-foreground">
                     {(stats?.total_movies_watched || 0) + (stats?.total_tv_shows_watched || 0)}
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground">Total Watched</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Watched</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="text-xl font-bold text-foreground">
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="text-base sm:text-xl font-bold text-foreground">
                   {((stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0))}h
                 </div>
-                <div className="text-xs text-muted-foreground">Total Hours</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Hours</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
-                <div className="text-xs text-muted-foreground">Avg Rating</div>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Rating</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Trophy className="h-4 w-4 text-primary" />
-                  <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.level || 1}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">Level</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Level</div>
               </Card>
             </>
           )}
           {mediaFilter === 'movies' && (
             <>
-              <Card className="p-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Film className="h-4 w-4 text-cinema-red" />
-                  <span className="text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</span>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                  <Film className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-red" />
+                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">Movies Watched</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Movies</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="text-xl font-bold text-foreground">{stats?.total_hours_watched || 0}h</div>
-                <div className="text-xs text-muted-foreground">Movie Hours</div>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.total_hours_watched || 0}h</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Hours</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
-                <div className="text-xs text-muted-foreground">Avg Rating</div>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Rating</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Trophy className="h-4 w-4 text-primary" />
-                  <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.level || 1}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">Level</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Level</div>
               </Card>
             </>
           )}
           {mediaFilter === 'tv' && (
             <>
-              <Card className="p-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Tv className="h-4 w-4 text-primary" />
-                  <span className="text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                  <Tv className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">TV Shows Watched</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">TV Shows</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="text-xl font-bold text-foreground">{stats?.total_tv_hours_watched || 0}h</div>
-                <div className="text-xs text-muted-foreground">TV Hours</div>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.total_tv_hours_watched || 0}h</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Hours</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
-                <div className="text-xs text-muted-foreground">Avg Rating</div>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Rating</div>
               </Card>
-              <Card className="p-3 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Trophy className="h-4 w-4 text-primary" />
-                  <span className="text-xl font-bold text-foreground">{stats?.level || 1}</span>
+              <Card className="p-2 sm:p-3 text-center">
+                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.level || 1}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">Level</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Level</div>
               </Card>
             </>
           )}
         </div>
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
           <div>
-            <h1 className="text-xl font-bold">My Collection</h1>
-            <p className="text-muted-foreground text-xs">Your personal collection</p>
+            <h1 className="text-lg sm:text-xl font-bold">My Collection</h1>
+            <p className="text-muted-foreground text-[10px] sm:text-xs">Your personal collection</p>
           </div>
         </div>
 
         {/* Media Type Filter */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4">
           <Button
             size="sm"
             variant={mediaFilter === 'all' ? 'default' : 'outline'}
             onClick={() => setMediaFilter('all')}
-            className="text-xs h-10 touch-manipulation active:scale-95"
+            className="text-[10px] sm:text-xs h-8 sm:h-10 px-2 sm:px-3 touch-manipulation active:scale-95"
           >
             All
           </Button>
@@ -449,7 +449,7 @@ const Collection = () => {
             size="sm"
             variant={mediaFilter === 'movies' ? 'default' : 'outline'}
             onClick={() => setMediaFilter('movies')}
-            className="text-xs h-10 touch-manipulation active:scale-95"
+            className="text-[10px] sm:text-xs h-8 sm:h-10 px-2 sm:px-3 touch-manipulation active:scale-95"
           >
             <Film className="h-3 w-3 mr-1" />
             Movies
@@ -458,64 +458,64 @@ const Collection = () => {
             size="sm"
             variant={mediaFilter === 'tv' ? 'default' : 'outline'}
             onClick={() => setMediaFilter('tv')}
-            className="text-xs h-10 touch-manipulation active:scale-95"
+            className="text-[10px] sm:text-xs h-8 sm:h-10 px-2 sm:px-3 touch-manipulation active:scale-95"
           >
             <Tv className="h-3 w-3 mr-1" />
-            TV Shows
+            TV
           </Button>
         </div>
 
         <Tabs defaultValue="watchlist" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6 h-12">
-            <TabsTrigger value="watchlist" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
-              <Clock className="w-4 h-4" />
+          <TabsList className="grid w-full grid-cols-4 mb-4 sm:mb-6 h-10 sm:h-12">
+            <TabsTrigger value="watchlist" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Watchlist</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{getUnwatchedItems().length}</Badge>
+              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getUnwatchedItems().length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
-              <Heart className="w-4 h-4" />
+            <TabsTrigger value="favorites" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
+              <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Favorites</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{getFilteredFavorites().length}</Badge>
+              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getFilteredFavorites().length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="watched" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
-              <Eye className="w-4 h-4" />
+            <TabsTrigger value="watched" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
+              <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Watched</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{getWatchedItems().length}</Badge>
+              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getWatchedItems().length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="diary" className="flex items-center gap-1 text-xs sm:text-sm h-10 touch-manipulation">
-              <BookOpen className="w-4 h-4" />
+            <TabsTrigger value="diary" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
+              <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Diary</span>
-              <Badge variant="secondary" className="ml-1 text-xs">{getCombinedDiary().length}</Badge>
+              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getCombinedDiary().length}</Badge>
             </TabsTrigger>
           </TabsList>
 
           {/* Search Bar for adding movies */}
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <Input
                 placeholder="Search movies to add..."
                 value={movieSearchTerm}
                 onChange={(e) => setMovieSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleMovieSearch()}
-                className="pl-10"
+                className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm"
               />
             </div>
-            <Button onClick={handleMovieSearch} disabled={isSearching}>
-              {isSearching ? <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" /> : <Plus className="h-4 w-4" />}
+            <Button onClick={handleMovieSearch} disabled={isSearching} size="sm" className="h-9 sm:h-10 px-3">
+              {isSearching ? <div className="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-current border-t-transparent rounded-full" /> : <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
             </Button>
           </div>
 
           {/* Search Results */}
           {searchResults.length > 0 && (
-            <div className="border rounded-lg p-4 bg-card mb-6">
-              <h3 className="font-semibold mb-3">Search Results</h3>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="border rounded-lg p-3 sm:p-4 bg-card mb-4 sm:mb-6">
+              <h3 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Search Results</h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
                 {searchResults.slice(0, 6).map(movie => (
                   <div key={movie.id} className="text-center">
-                    <img src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`} alt={movie.title} className="w-full aspect-[2/3] object-cover rounded mb-2" />
-                    <p className="text-xs font-medium mb-2 line-clamp-2">{movie.title}</p>
-                    <Button size="sm" onClick={() => handleAddToWatchlist(movie)} className="w-full text-xs">Add</Button>
+                    <img src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`} alt={movie.title} className="w-full aspect-[2/3] object-cover rounded mb-1.5 sm:mb-2" />
+                    <p className="text-[10px] sm:text-xs font-medium mb-1.5 sm:mb-2 line-clamp-2">{movie.title}</p>
+                    <Button size="sm" onClick={() => handleAddToWatchlist(movie)} className="w-full text-[10px] sm:text-xs h-7 sm:h-8">Add</Button>
                   </div>
                 ))}
               </div>
