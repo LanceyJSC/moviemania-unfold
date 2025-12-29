@@ -87,10 +87,10 @@ export const Stats = () => {
         .eq('user_id', user.id)
         .gte('watched_date', twelveMonthsAgo.toISOString());
 
-      // Get all ratings for distribution
+      // Get ALL ratings for distribution and counts (includes both movies and TV)
       const { data: ratings } = await supabase
         .from('user_ratings')
-        .select('rating, media_type')
+        .select('rating, media_type, created_at')
         .eq('user_id', user.id)
         .not('rating', 'is', null);
 
@@ -107,7 +107,7 @@ export const Stats = () => {
         .eq('user_id', user.id)
         .single();
 
-      // Process monthly data
+      // Process monthly data from diary entries
       const monthlyMap = new Map<string, { movies: number; tvShows: number; hours: number }>();
       
       // Initialize last 6 months
@@ -132,6 +132,30 @@ export const Stats = () => {
           const current = monthlyMap.get(monthKey)!;
           current.tvShows += 1;
           current.hours += (entry.runtime || 45) / 60;
+        }
+      });
+
+      // Also add ratings activity to monthly chart (use created_at as fallback)
+      ratings?.forEach(rating => {
+        const createdAt = rating.created_at;
+        if (createdAt) {
+          const ratingDate = new Date(createdAt);
+          if (ratingDate >= twelveMonthsAgo) {
+            const monthKey = format(ratingDate, 'MMM');
+            if (monthlyMap.has(monthKey)) {
+              const current = monthlyMap.get(monthKey)!;
+              // Only add if not already counted in diary
+              if (rating.media_type === 'movie') {
+                // Check if movie diary is empty, then count from ratings
+                if (!movieDiary || movieDiary.length === 0) {
+                  current.movies += 1;
+                  current.hours += 2; // Assume 2 hours for movies
+                }
+              } else if (rating.media_type === 'tv') {
+                // TV ratings don't add to episode count (tv_diary has episodes)
+              }
+            }
+          }
         }
       });
 
@@ -166,15 +190,29 @@ export const Stats = () => {
         setGenreData(genreDataArray);
       }
 
-      // Process rating distribution (1-5 scale)
+      // Process rating distribution (1-5 scale) - include ALL ratings
       const ratingMap = new Map<number, number>();
       for (let i = 1; i <= 5; i++) {
         ratingMap.set(i, 0);
       }
       
+      // Add ratings from user_ratings table
       ratings?.forEach(r => {
         if (r.rating && r.rating >= 1 && r.rating <= 5) {
           ratingMap.set(r.rating, (ratingMap.get(r.rating) || 0) + 1);
+        }
+      });
+
+      // Also add ratings from diary entries if they have ratings
+      movieDiary?.forEach(m => {
+        if (m.rating && m.rating >= 1 && m.rating <= 5) {
+          ratingMap.set(m.rating, (ratingMap.get(m.rating) || 0) + 1);
+        }
+      });
+
+      tvDiary?.forEach(t => {
+        if (t.rating && t.rating >= 1 && t.rating <= 5) {
+          ratingMap.set(t.rating, (ratingMap.get(t.rating) || 0) + 1);
         }
       });
 
@@ -182,11 +220,26 @@ export const Stats = () => {
         Array.from(ratingMap.entries()).map(([rating, count]) => ({ rating, count }))
       );
 
-      // Calculate totals
-      const totalMovies = movieDiary?.length || 0;
-      const totalTVEpisodes = tvDiary?.length || 0;
+      // Calculate totals - combine diary AND ratings
+      const movieDiaryCount = movieDiary?.length || 0;
+      const tvDiaryCount = tvDiary?.length || 0;
+      
+      // Count unique movies/TV from ratings that may not be in diary
+      const movieRatingsCount = ratings?.filter(r => r.media_type === 'movie').length || 0;
+      const tvRatingsCount = ratings?.filter(r => r.media_type === 'tv').length || 0;
+      
+      // Use the higher count between diary and ratings for each type
+      const totalMovies = Math.max(movieDiaryCount, movieRatingsCount);
+      const totalTVEpisodes = tvDiaryCount; // TV diary has episodes, ratings don't
+      
+      // Calculate hours from diary entries
       const movieHours = movieDiary?.reduce((sum, e) => sum + ((e.runtime || 120) / 60), 0) || 0;
       const tvHours = tvDiary?.reduce((sum, e) => sum + ((e.runtime || 45) / 60), 0) || 0;
+      
+      // If no movie diary but has movie ratings, estimate hours
+      const estimatedMovieHours = movieDiaryCount === 0 && movieRatingsCount > 0 
+        ? movieRatingsCount * 2 // Assume 2 hours per movie
+        : movieHours;
       
       const allRatings = ratings?.filter(r => r.rating).map(r => r.rating!) || [];
       const avgRating = allRatings.length > 0 
@@ -196,7 +249,7 @@ export const Stats = () => {
       setTotalStats({
         movies: totalMovies,
         tvShows: totalTVEpisodes,
-        totalHours: Math.round(movieHours + tvHours),
+        totalHours: Math.round(estimatedMovieHours + tvHours),
         avgRating: Math.round(avgRating * 10) / 10,
         streak: userStats?.watching_streak || 0,
         reviewsWritten: reviewsCount || 0
