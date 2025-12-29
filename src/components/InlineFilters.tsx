@@ -25,11 +25,9 @@ export interface FilterState {
   ratingRange: [number, number];
   runtimeRange: [number, number];
   sortBy: string;
-  mood: string[];
-  tone: string[];
+  mood: string;
+  tone: string;
   pacing: string;
-  era: string;
-  language: string;
 }
 
 interface InlineFiltersProps {
@@ -47,33 +45,35 @@ const GENRES = [
   { id: 53, name: "Thriller", emoji: "😱" },
 ];
 
-const MOODS = ["Feel-Good", "Intense", "Thought-Provoking", "Emotional", "Uplifting", "Dark", "Nostalgic", "Inspiring"];
-const TONES = ["Lighthearted", "Serious", "Satirical", "Suspenseful", "Romantic", "Gritty", "Whimsical"];
+// Mood maps to genre combinations for better TMDB results
+const MOOD_OPTIONS = [
+  { value: "any", label: "Any Mood" },
+  { value: "feel-good", label: "Feel-Good", genres: [35, 10751] }, // Comedy, Family
+  { value: "intense", label: "Intense", genres: [28, 53] }, // Action, Thriller
+  { value: "thought-provoking", label: "Thought-Provoking", genres: [18, 99] }, // Drama, Documentary
+  { value: "emotional", label: "Emotional", genres: [18, 10749] }, // Drama, Romance
+  { value: "uplifting", label: "Uplifting", genres: [35, 10751, 12] }, // Comedy, Family, Adventure
+  { value: "dark", label: "Dark", genres: [27, 53, 80] }, // Horror, Thriller, Crime
+  { value: "nostalgic", label: "Nostalgic", genres: [10751, 14] }, // Family, Fantasy
+  { value: "inspiring", label: "Inspiring", genres: [18, 36] }, // Drama, History
+];
+
+const TONE_OPTIONS = [
+  { value: "any", label: "Any Tone" },
+  { value: "lighthearted", label: "Lighthearted", genres: [35, 10751] }, // Comedy, Family
+  { value: "serious", label: "Serious", genres: [18, 36] }, // Drama, History
+  { value: "satirical", label: "Satirical", genres: [35] }, // Comedy
+  { value: "suspenseful", label: "Suspenseful", genres: [53, 9648] }, // Thriller, Mystery
+  { value: "romantic", label: "Romantic", genres: [10749] }, // Romance
+  { value: "gritty", label: "Gritty", genres: [80, 53] }, // Crime, Thriller
+  { value: "whimsical", label: "Whimsical", genres: [14, 16] }, // Fantasy, Animation
+];
+
 const PACING_OPTIONS = [
   { value: "any", label: "Any Pacing" },
   { value: "slow", label: "Slow Burn" },
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast-Paced" }
-];
-const ERA_OPTIONS = [
-  { value: "any", label: "Any Era" },
-  { value: "classic", label: "Classic (Pre-1970)" },
-  { value: "70s80s", label: "70s & 80s" },
-  { value: "90s00s", label: "90s & 2000s" },
-  { value: "modern", label: "Modern (2010+)" },
-  { value: "recent", label: "Recent (2020+)" }
-];
-const LANGUAGE_OPTIONS = [
-  { value: "any", label: "Any Language" },
-  { value: "en", label: "English" },
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "ja", label: "Japanese" },
-  { value: "ko", label: "Korean" },
-  { value: "zh", label: "Chinese" },
-  { value: "hi", label: "Hindi" },
-  { value: "it", label: "Italian" }
 ];
 
 export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
@@ -87,11 +87,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     ratingRange: [0, 10],
     runtimeRange: [0, 300],
     sortBy: "popularity.desc",
-    mood: [],
-    tone: [],
-    pacing: "any",
-    era: "any",
-    language: "any"
+    mood: "any",
+    tone: "any",
+    pacing: "any"
   });
 
   const updateFiltersLocally = (newFilters: Partial<FilterState>) => {
@@ -111,19 +109,6 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     navigate("/genres");
   };
 
-  const toggleMood = (mood: string) => {
-    const newMoods = filters.mood.includes(mood)
-      ? filters.mood.filter(m => m !== mood)
-      : [...filters.mood, mood];
-    updateFiltersLocally({ mood: newMoods });
-  };
-
-  const toggleTone = (tone: string) => {
-    const newTones = filters.tone.includes(tone)
-      ? filters.tone.filter(t => t !== tone)
-      : [...filters.tone, tone];
-    updateFiltersLocally({ tone: newTones });
-  };
 
   const clearFilters = () => {
     const resetFilters: FilterState = {
@@ -132,11 +117,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
       ratingRange: [0, 10],
       runtimeRange: [0, 300],
       sortBy: "popularity.desc",
-      mood: [],
-      tone: [],
-      pacing: "any",
-      era: "any",
-      language: "any"
+      mood: "any",
+      tone: "any",
+      pacing: "any"
     };
     setFilters(resetFilters);
     onFiltersChange(resetFilters);
@@ -144,11 +127,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
 
   const activeFilterCount = 
     filters.genres.length + 
-    filters.mood.length + 
-    filters.tone.length + 
+    (filters.mood !== "any" ? 1 : 0) + 
+    (filters.tone !== "any" ? 1 : 0) + 
     (filters.pacing !== "any" ? 1 : 0) + 
-    (filters.era !== "any" ? 1 : 0) + 
-    (filters.language !== "any" ? 1 : 0) +
     (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear() ? 1 : 0) +
     (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 ? 1 : 0);
 
@@ -268,105 +249,97 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           </Button>
         </div>
 
-        {/* Advanced Filters */}
-        <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-          <CollapsibleTrigger className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer py-1">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">Advanced Filters</span>
-            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", showAdvanced && "rotate-180")} />
-          </CollapsibleTrigger>
-          
-          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-            <div className="max-w-2xl mx-auto pt-6 space-y-6">
-              {/* Mood */}
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-3 text-center">Mood</h4>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {MOODS.map(mood => (
-                    <button
-                      key={mood}
-                      onClick={() => toggleMood(mood)}
-                      className={cn(
-                        "py-1.5 px-3 rounded-full text-sm font-medium transition-all duration-200 active:scale-95",
-                        filters.mood.includes(mood) 
-                          ? "bg-primary text-primary-foreground" 
-                          : "bg-card/80 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
-                      )}
-                    >
-                      {mood}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tone */}
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-3 text-center">Tone</h4>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {TONES.map(tone => (
-                    <button
-                      key={tone}
-                      onClick={() => toggleTone(tone)}
-                      className={cn(
-                        "py-1.5 px-3 rounded-full text-sm font-medium transition-all duration-200 active:scale-95",
-                        filters.tone.includes(tone) 
-                          ? "bg-primary text-primary-foreground" 
-                          : "bg-card/80 border border-border/50 text-foreground hover:bg-card hover:border-primary/50"
-                      )}
-                    >
-                      {tone}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dropdowns */}
-              <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-center">Pacing</label>
-                  <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
-                    <SelectTrigger className="h-9 bg-card/80 border-border/50 rounded-full text-sm">
-                      <SelectValue placeholder="Any Pacing" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PACING_OPTIONS.map(option => (
-                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-center">Era</label>
-                  <Select value={filters.era} onValueChange={(value) => updateFiltersLocally({ era: value })}>
-                    <SelectTrigger className="h-9 bg-card/80 border-border/50 rounded-full text-sm">
-                      <SelectValue placeholder="Any Era" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ERA_OPTIONS.map(option => (
-                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-center">Language</label>
-                  <Select value={filters.language} onValueChange={(value) => updateFiltersLocally({ language: value })}>
-                    <SelectTrigger className="h-9 bg-card/80 border-border/50 rounded-full text-sm">
-                      <SelectValue placeholder="Any Language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGE_OPTIONS.map(option => (
-                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+        {/* Advanced Filters - Mood, Tone, Pacing */}
+        <div className="max-w-xl mx-auto space-y-3 mb-5">
+          {/* Mood */}
+          <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Mood</span>
+              <span className="text-sm text-primary font-semibold">
+                {MOOD_OPTIONS.find(m => m.value === filters.mood)?.label || "Any Mood"}
+              </span>
             </div>
-          </CollapsibleContent>
-        </Collapsible>
+            <div className="flex flex-wrap gap-1.5">
+              {MOOD_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => updateFiltersLocally({ mood: option.value })}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
+                    filters.mood === option.value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tone */}
+          <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Tone</span>
+              <span className="text-sm text-primary font-semibold">
+                {TONE_OPTIONS.find(t => t.value === filters.tone)?.label || "Any Tone"}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {TONE_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => updateFiltersLocally({ tone: option.value })}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
+                    filters.tone === option.value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Pacing */}
+          <div className="bg-card/60 rounded-lg border border-border/50 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Pacing</span>
+              <span className="text-sm text-primary font-semibold">
+                {PACING_OPTIONS.find(p => p.value === filters.pacing)?.label || "Any Pacing"}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {PACING_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => updateFiltersLocally({ pacing: option.value })}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
+                    filters.pacing === option.value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Discover Button */}
+        <div className="max-w-xs mx-auto">
+          <Button 
+            onClick={handleDiscover}
+            className="w-full h-9 rounded-lg text-sm font-semibold"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Discover Movies
+          </Button>
+        </div>
       </section>
     </div>
   );

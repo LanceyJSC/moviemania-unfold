@@ -21,11 +21,9 @@ export interface FilterState {
   ratingRange: [number, number];
   runtimeRange: [number, number];
   sortBy: string;
-  mood: string[];
-  tone: string[];
+  mood: string;
+  tone: string;
   pacing: string;
-  era: string;
-  language: string;
 }
 
 interface MobileInlineFiltersProps {
@@ -61,11 +59,9 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
     ratingRange: [0, 10],
     runtimeRange: [0, 300],
     sortBy: "popularity.desc",
-    mood: [],
-    tone: [],
-    pacing: "any",
-    era: "any",
-    language: "any"
+    mood: "any",
+    tone: "any",
+    pacing: "any"
   });
 
   // Store filters locally without triggering search immediately
@@ -111,11 +107,9 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
     ratingRange: [number, number];
     runtimeRange: [number, number];
     sortBy: string;
-    mood: string[];
-    tone: string[];
+    mood: string;
+    tone: string;
     pacing: string;
-    era: string;
-    language: string;
   }) => {
     const updated: FilterState = {
       ...filters,
@@ -126,18 +120,14 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
       mood: proFilters.mood,
       tone: proFilters.tone,
       pacing: proFilters.pacing,
-      era: proFilters.era,
-      language: proFilters.language,
     };
     setFilters(updated);
   };
 
   const activeFilterCount = 
-    filters.mood.length + 
-    filters.tone.length + 
+    (filters.mood !== "any" ? 1 : 0) + 
+    (filters.tone !== "any" ? 1 : 0) + 
     (filters.pacing !== "any" ? 1 : 0) + 
-    (filters.era !== "any" ? 1 : 0) + 
-    (filters.language !== "any" ? 1 : 0) +
     (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear() ? 1 : 0) +
     (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 ? 1 : 0) +
     (filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300 ? 1 : 0);
@@ -271,7 +261,7 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground text-sm">More Options</p>
-                <p className="text-xs text-muted-foreground">Mood, Tone, Pacing, Era</p>
+                <p className="text-xs text-muted-foreground">Mood, Tone, Pacing</p>
               </div>
             </div>
             <div className="flex items-center gap-1.5">

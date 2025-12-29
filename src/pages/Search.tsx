@@ -146,22 +146,46 @@ const Search = () => {
         discoverParams.genre = filters.genres[0];
       }
       
-      // Handle era filter - convert to year range (takes priority over manual year range)
-      if (filters.era && filters.era !== 'any') {
-        const currentYear = new Date().getFullYear();
-        const eraRanges: { [key: string]: [number, number] } = {
-          'classic': [1900, 1969],
-          '70s80s': [1970, 1989],
-          '90s00s': [1990, 2009],
-          'modern': [2010, currentYear],
-          'recent': [2020, currentYear]
-        };
-        const eraRange = eraRanges[filters.era];
-        if (eraRange) {
-          discoverParams.yearFrom = eraRange[0];
-          discoverParams.yearTo = eraRange[1];
+      // Map mood to genre IDs for better filtering
+      const moodGenreMap: { [key: string]: number[] } = {
+        'feel-good': [35, 10751], // Comedy, Family
+        'intense': [28, 53], // Action, Thriller
+        'thought-provoking': [18, 99], // Drama, Documentary
+        'emotional': [18, 10749], // Drama, Romance
+        'uplifting': [35, 10751, 12], // Comedy, Family, Adventure
+        'dark': [27, 53, 80], // Horror, Thriller, Crime
+        'nostalgic': [10751, 14], // Family, Fantasy
+        'inspiring': [18, 36], // Drama, History
+      };
+      
+      // Map tone to genre IDs
+      const toneGenreMap: { [key: string]: number[] } = {
+        'lighthearted': [35, 10751], // Comedy, Family
+        'serious': [18, 36], // Drama, History
+        'satirical': [35], // Comedy
+        'suspenseful': [53, 9648], // Thriller, Mystery
+        'romantic': [10749], // Romance
+        'gritty': [80, 53], // Crime, Thriller
+        'whimsical': [14, 16], // Fantasy, Animation
+      };
+      
+      // Apply mood genre if set and no explicit genre selected
+      if (filters.mood && filters.mood !== 'any' && !discoverParams.genre) {
+        const moodGenres = moodGenreMap[filters.mood];
+        if (moodGenres && moodGenres.length > 0) {
+          discoverParams.genre = moodGenres[0];
         }
-      } else if (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear()) {
+      }
+      
+      // Apply tone genre if set and no explicit genre selected
+      if (filters.tone && filters.tone !== 'any' && !discoverParams.genre) {
+        const toneGenres = toneGenreMap[filters.tone];
+        if (toneGenres && toneGenres.length > 0) {
+          discoverParams.genre = toneGenres[0];
+        }
+      }
+      
+      if (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear()) {
         discoverParams.yearFrom = filters.yearRange[0];
         discoverParams.yearTo = filters.yearRange[1];
       }
@@ -174,10 +198,6 @@ const Search = () => {
       if (filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300) {
         discoverParams.runtimeFrom = filters.runtimeRange[0];
         discoverParams.runtimeTo = filters.runtimeRange[1];
-      }
-      
-      if (filters.language && filters.language !== 'any') {
-        discoverParams.language = filters.language;
       }
       
       // Handle pacing filter - map to runtime ranges
