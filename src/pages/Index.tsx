@@ -13,6 +13,7 @@ import { FallbackHomepage } from "@/components/FallbackHomepage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { SurpriseMe } from "@/components/SurpriseMe";
 
 const Index = () => {
   const [hasError, setHasError] = useState(false);
@@ -69,6 +70,10 @@ const Index = () => {
           <div className="px-4 2xl:px-6 pt-2 pb-32 2xl:pb-12 space-y-8 max-w-7xl mx-auto">
             <ErrorBoundary>
               <BecauseYouLoved />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <SurpriseMe variant="card" />
             </ErrorBoundary>
 
             <ErrorBoundary>
