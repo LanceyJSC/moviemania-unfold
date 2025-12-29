@@ -87,6 +87,17 @@ export const ProUpgradeModal = ({ isOpen, onClose, feature, description }: ProUp
           >
             Maybe Later
           </Button>
+          
+          <Button
+            variant="link"
+            onClick={() => {
+              onClose();
+              window.location.href = '/pro';
+            }}
+            className="w-full text-amber-500 hover:text-amber-400"
+          >
+            Learn more about Pro
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
