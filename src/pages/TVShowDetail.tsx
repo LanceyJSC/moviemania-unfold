@@ -15,6 +15,7 @@ import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
 import { SeasonProgressCard } from "@/components/SeasonProgressCard";
 import { WatchProviders } from "@/components/WatchProviders";
+import { TagSelector } from "@/components/TagSelector";
 import { SimilarContent } from "@/components/SimilarContent";
 import { useDiary } from "@/hooks/useDiary";
 import { useAuth } from "@/hooks/useAuth";
@@ -319,6 +320,11 @@ const TVShowDetail = () => {
               <span className="text-xs">Reviews</span>
             </Link>
           </Button>
+        </div>
+
+        {/* Tag Selector - Pro Feature */}
+        <div className="mb-4">
+          <TagSelector movieId={tvShowId} mediaType="tv" variant="inline" />
         </div>
 
         {/* Rating Comparison Card */}

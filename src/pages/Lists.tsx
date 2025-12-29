@@ -7,11 +7,16 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { List, Globe, Lock, Heart } from "lucide-react";
+import { List, Globe, Lock, Heart, Sparkles, Zap, Lock as LockIcon } from "lucide-react";
 import { CreateListModal } from "@/components/CreateListModal";
 import { useUserLists } from "@/hooks/useUserLists";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useSmartLists, SMART_LIST_TEMPLATES } from "@/hooks/useSmartLists";
+import { useSubscription } from "@/hooks/useSubscription";
+import { ProBadge } from "@/components/ProBadge";
+import { ProUpgradeModal } from "@/components/ProUpgradeModal";
+import { Button } from "@/components/ui/button";
 
 interface PublicList {
   id: string;
@@ -30,9 +35,13 @@ interface PublicList {
 const Lists = () => {
   const { user } = useAuth();
   const { lists: myLists, loading: myListsLoading } = useUserLists();
+  const { smartLists, loading: smartListsLoading, createSmartList } = useSmartLists();
+  const { isProUser } = useSubscription();
   const [publicLists, setPublicLists] = useState<PublicList[]>([]);
   const [loadingPublic, setLoadingPublic] = useState(true);
   const [activeTab, setActiveTab] = useState(user ? "my-lists" : "popular");
+  const [showProModal, setShowProModal] = useState(false);
+  const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPublicLists();
@@ -125,6 +134,13 @@ const Lists = () => {
             {user && (
               <TabsTrigger value="my-lists">My Lists</TabsTrigger>
             )}
+            {user && (
+              <TabsTrigger value="smart" className="flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3" />
+                Smart
+                {!isProUser && <LockIcon className="h-3 w-3 text-muted-foreground" />}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="popular">Popular</TabsTrigger>
             <TabsTrigger value="recent">Recent</TabsTrigger>
           </TabsList>
@@ -151,6 +167,100 @@ const Lists = () => {
                   {myLists.map((list) => (
                     <ListCard key={list.id} list={list as PublicList} />
                   ))}
+                </div>
+              )}
+            </TabsContent>
+          )}
+
+          {user && (
+            <TabsContent value="smart">
+              {!isProUser ? (
+                <Card className="p-8 text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                      <Sparkles className="h-8 w-8 text-amber-500" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 flex items-center justify-center gap-2">
+                    Smart Lists
+                    <ProBadge size="sm" />
+                  </h3>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    Auto-populated lists that update based on your activity
+                  </p>
+                  <Button onClick={() => setShowProModal(true)} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                    Unlock Smart Lists
+                  </Button>
+                </Card>
+              ) : smartListsLoading ? (
+                <div className="grid gap-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i} className="p-4">
+                      <Skeleton className="h-5 w-48 mb-2" />
+                      <Skeleton className="h-4 w-full" />
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Existing Smart Lists */}
+                  {smartLists.length > 0 && (
+                    <div className="grid gap-3">
+                      {smartLists.map((list) => (
+                        <Card key={list.id} className="p-4 hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center flex-shrink-0">
+                              <Zap className="h-5 w-5 text-amber-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-foreground">{list.name}</h3>
+                              {list.description && (
+                                <p className="text-sm text-muted-foreground truncate">{list.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Smart List Templates */}
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3">Create from Template</h3>
+                    <div className="grid gap-3">
+                      {SMART_LIST_TEMPLATES.map((template) => (
+                        <Card 
+                          key={template.name} 
+                          className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={async () => {
+                            if (smartLists.some(l => l.name === template.name)) return;
+                            setCreatingTemplate(template.name);
+                            await createSmartList(template.name, template.description, template.criteria);
+                            setCreatingTemplate(null);
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                              <Sparkles className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-foreground">{template.name}</h3>
+                              <p className="text-sm text-muted-foreground truncate">{template.description}</p>
+                            </div>
+                            {smartLists.some(l => l.name === template.name) ? (
+                              <span className="text-xs text-muted-foreground">Created</span>
+                            ) : creatingTemplate === template.name ? (
+                              <span className="text-xs text-amber-500">Creating...</span>
+                            ) : (
+                              <Button variant="ghost" size="sm" className="text-amber-500">
+                                Create
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </TabsContent>
@@ -205,6 +315,13 @@ const Lists = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <ProUpgradeModal
+        isOpen={showProModal}
+        onClose={() => setShowProModal(false)}
+        feature="Smart Lists"
+        description="Auto-populated lists that update based on your watching activity and ratings."
+      />
 
       <Navigation />
     </div>

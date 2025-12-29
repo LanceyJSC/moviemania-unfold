@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
+import { SurpriseMe } from "@/components/SurpriseMe";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -150,10 +152,11 @@ export const Recommendations = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <DesktopHeader />
       <MobileHeader title="For You" />
       
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-0 2xl:top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-4 p-4">
           <button
             onClick={() => navigate(-1)}
@@ -165,7 +168,10 @@ export const Recommendations = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Surprise Me - Pro Feature */}
+        <SurpriseMe variant="card" className="mb-6" />
+
         {!user && (
           <Card className="bg-card border-border mb-6">
             <CardContent className="p-4">

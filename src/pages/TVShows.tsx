@@ -4,6 +4,7 @@ import { Tv, Star, Calendar, TrendingUp, Play } from "lucide-react";
 import { TVGrid } from "@/components/TVGrid";
 import { InlineGenreFilter } from "@/components/InlineGenreFilter";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
+import { MoodDiscovery } from "@/components/MoodDiscovery";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileBrandHeader } from "@/components/MobileBrandHeader";
@@ -88,6 +89,9 @@ const TVShows = () => {
                 })}
               </div>
             </div>
+
+            {/* Mood Discovery - Pro Only */}
+            <MoodDiscovery variant="pills" className="mb-2" />
 
             {/* Genre Filter - Pro Only */}
             <InlineGenreFilter
