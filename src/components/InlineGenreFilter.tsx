@@ -1,15 +1,8 @@
-import { useState, useRef } from "react";
-import { ChevronRight, Crown, Lock, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, ChevronUp, Crown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 
 interface Genre {
   id: number;
@@ -77,10 +70,10 @@ export const InlineGenreFilter = ({
   initialExpanded = false,
   showTitle = true
 }: InlineGenreFilterProps) => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(initialExpanded);
   
   const genres = mediaType === 'tv' ? TV_GENRES : MOVIE_GENRES;
+  const displayedGenres = isExpanded ? genres : genres.slice(0, 6);
 
   const handleGenreClick = (genreId: number) => {
     if (!isProUser) {
@@ -102,13 +95,13 @@ export const InlineGenreFilter = ({
   // Pro locked state
   if (!isProUser) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         {showTitle && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-foreground">Explore by Genre</h3>
-              <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0">
-                <Crown className="w-2.5 h-2.5 mr-0.5" />
+              <h3 className="font-semibold text-foreground">Explore by Genre</h3>
+              <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs">
+                <Crown className="w-3 h-3 mr-1" />
                 PRO
               </Badge>
             </div>
@@ -116,25 +109,27 @@ export const InlineGenreFilter = ({
         )}
         
         <div className="relative">
-          <div className="flex gap-1.5 overflow-hidden blur-sm opacity-40 pointer-events-none">
-            {genres.slice(0, 8).map((genre) => (
-              <div
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 blur-sm opacity-50 pointer-events-none">
+            {genres.slice(0, 6).map((genre) => (
+              <Button
                 key={genre.id}
-                className="flex-shrink-0 px-2.5 py-1.5 rounded-full bg-card/80 border border-border/50 flex items-center gap-1"
+                variant="outline"
+                size="sm"
+                className="h-auto py-2 px-3 rounded-xl bg-card/60 border-border/50"
               >
-                <span className="text-sm">{genre.emoji}</span>
-                <span className="text-xs text-foreground">{genre.name}</span>
-              </div>
+                <span className="mr-1">{genre.emoji}</span>
+                <span className="text-xs truncate">{genre.name}</span>
+              </Button>
             ))}
           </div>
           
           <div className="absolute inset-0 flex items-center justify-center">
             <Button
               onClick={onUpgradeClick}
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
+              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
               size="sm"
             >
-              <Lock className="w-3.5 h-3.5 mr-1.5" />
+              <Lock className="w-4 h-4 mr-2" />
               Unlock Genre Filter
             </Button>
           </div>
@@ -144,109 +139,63 @@ export const InlineGenreFilter = ({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {showTitle && (
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-foreground">Explore by Genre</h3>
-          <div className="flex items-center gap-1.5">
+          <h3 className="font-semibold text-foreground">Explore by Genre</h3>
+          <div className="flex items-center gap-2">
             {selectedGenres.length > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearGenres}
-                className="text-xs text-muted-foreground hover:text-foreground h-6 px-2"
+                className="text-xs text-muted-foreground hover:text-foreground h-7 px-2"
               >
                 Clear ({selectedGenres.length})
               </Button>
             )}
-            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-              <DrawerTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-primary h-6 px-2"
-                >
-                  View All <ChevronRight className="w-3 h-3 ml-0.5" />
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-h-[85vh]">
-                <DrawerHeader className="pb-2">
-                  <DrawerTitle className="flex items-center justify-between">
-                    <span>All Genres</span>
-                    {selectedGenres.length > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearGenres}
-                        className="text-xs text-muted-foreground"
-                      >
-                        Clear All
-                      </Button>
-                    )}
-                  </DrawerTitle>
-                </DrawerHeader>
-                <div className="px-4 pb-8 grid grid-cols-2 gap-2 overflow-y-auto">
-                  {genres.map((genre) => {
-                    const isSelected = selectedGenres.includes(genre.id);
-                    return (
-                      <button
-                        key={genre.id}
-                        onClick={() => handleGenreClick(genre.id)}
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all duration-200 text-left",
-                          isSelected 
-                            ? "bg-cinema-red text-white" 
-                            : "bg-card/80 border border-border/50 hover:bg-card"
-                        )}
-                      >
-                        <span className="text-lg">{genre.emoji}</span>
-                        <span className="text-sm font-medium truncate">{genre.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </DrawerContent>
-            </Drawer>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-xs text-primary h-7 px-2"
+            >
+              {isExpanded ? (
+                <>Show Less <ChevronUp className="w-3 h-3 ml-1" /></>
+              ) : (
+                <>View All <ChevronDown className="w-3 h-3 ml-1" /></>
+              )}
+            </Button>
           </div>
         </div>
       )}
       
-      {/* Horizontal scrolling genre pills */}
-      <div 
-        ref={scrollRef}
-        className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {genres.slice(0, 10).map((genre) => {
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+        {displayedGenres.map((genre) => {
           const isSelected = selectedGenres.includes(genre.id);
           return (
-            <button
+            <Button
               key={genre.id}
+              variant={isSelected ? "default" : "outline"}
+              size="sm"
               onClick={() => handleGenreClick(genre.id)}
               className={cn(
-                "flex-shrink-0 px-2.5 py-1.5 rounded-full flex items-center gap-1 transition-all duration-200 touch-manipulation active:scale-95",
+                "h-auto py-2 px-3 rounded-xl transition-all duration-200 active:scale-95",
                 isSelected 
-                  ? "bg-cinema-red text-white shadow-sm" 
-                  : "bg-card/80 border border-border/50 text-foreground hover:bg-card hover:border-border"
+                  ? "bg-cinema-red text-white border-cinema-red shadow-md" 
+                  : "bg-card/60 border-border/50 hover:bg-card/80 hover:border-primary/50"
               )}
             >
-              <span className="text-sm">{genre.emoji}</span>
-              <span className="text-xs font-medium whitespace-nowrap">{genre.name}</span>
-            </button>
+              <span className="mr-1">{genre.emoji}</span>
+              <span className="text-xs truncate">{genre.name}</span>
+            </Button>
           );
         })}
-        <button
-          onClick={() => setIsDrawerOpen(true)}
-          className="flex-shrink-0 px-2.5 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 transition-all duration-200 touch-manipulation active:scale-95 hover:bg-primary/20"
-        >
-          <span className="text-xs font-medium">More</span>
-          <ChevronRight className="w-3 h-3" />
-        </button>
       </div>
       
       {/* Selected genres pills */}
       {selectedGenres.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {selectedGenres.map(genreId => {
             const genre = genres.find(g => g.id === genreId);
             if (!genre) return null;
@@ -254,11 +203,10 @@ export const InlineGenreFilter = ({
               <Badge
                 key={genreId}
                 variant="secondary"
-                className="bg-cinema-red/15 text-cinema-red border-cinema-red/30 cursor-pointer hover:bg-cinema-red/25 text-xs px-2 py-0.5"
+                className="bg-cinema-red/20 text-cinema-red border-cinema-red/30 cursor-pointer hover:bg-cinema-red/30"
                 onClick={() => handleGenreClick(genreId)}
               >
-                {genre.emoji} {genre.name}
-                <X className="w-3 h-3 ml-1" />
+                {genre.emoji} {genre.name} ×
               </Badge>
             );
           })}

@@ -90,10 +90,7 @@ const Movies = () => {
             </div>
 
             {/* Mood Discovery - Pro Only */}
-            <MoodDiscovery className="pt-1" />
-
-            {/* Divider */}
-            <div className="h-px bg-border/50 my-1" />
+            <MoodDiscovery variant="pills" className="mb-2" />
 
             {/* Genre Filter - Pro Only */}
             <InlineGenreFilter
