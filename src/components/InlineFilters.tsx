@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Search, Sparkles, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -157,88 +157,76 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Genre Section */}
-      <section>
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <span className="text-xl">🎬</span>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">Explore by Genre</h3>
-              <p className="text-sm text-muted-foreground">Quick access to popular genres</p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleViewAllGenres}
-            className="text-primary hover:text-primary/80 hover:bg-primary/5"
-          >
-            View All Genres
-          </Button>
+      <section className="text-center">
+        <div className="mb-8">
+          <h3 className="font-cinematic text-2xl text-foreground tracking-wide mb-2">EXPLORE BY GENRE</h3>
+          <p className="text-muted-foreground">Jump into your favorite category</p>
         </div>
         
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto mb-4">
           {GENRES.map((genre) => (
             <button
               key={genre.id}
               onClick={() => handleGenreClick(genre.id)}
-              className="group flex items-center gap-3 p-4 rounded-xl bg-card hover:bg-card/80 border border-border/40 hover:border-primary/30 transition-all duration-200"
+              className="group relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-card hover:bg-card/80 border border-border/40 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
             >
-              <span className="text-2xl group-hover:scale-110 transition-transform">{genre.emoji}</span>
-              <span className="font-medium text-foreground">{genre.name}</span>
+              <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{genre.emoji}</span>
+              <span className="font-medium text-foreground text-lg">{genre.name}</span>
             </button>
           ))}
         </div>
+        
+        <Button
+          variant="link"
+          onClick={handleViewAllGenres}
+          className="text-primary hover:text-primary/80"
+        >
+          View All Genres →
+        </Button>
       </section>
 
       {/* Filters Section */}
-      <section className="bg-card rounded-2xl border border-border/40 overflow-hidden">
-        <div className="p-6 border-b border-border/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <SlidersHorizontal className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-foreground">Discovery Filters</h3>
-                <p className="text-sm text-muted-foreground">
-                  {activeFilterCount > 0 ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active` : 'Refine your search'}
-                </p>
-              </div>
-            </div>
-            {activeFilterCount > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
-                Reset All
-              </Button>
-            )}
-          </div>
+      <section className="text-center">
+        <div className="mb-8">
+          <h3 className="font-cinematic text-2xl text-foreground tracking-wide mb-2">REFINE YOUR SEARCH</h3>
+          <p className="text-muted-foreground">
+            {activeFilterCount > 0 
+              ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active` 
+              : 'Use filters to find exactly what you want'}
+          </p>
+          {activeFilterCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-primary hover:text-primary/80 mt-2">
+              Reset All Filters
+            </Button>
+          )}
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Range Sliders */}
-          <div className="grid grid-cols-3 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">Year Range</label>
-                <span className="text-sm text-primary font-medium">{filters.yearRange[0]} – {filters.yearRange[1]}</span>
-              </div>
-              <Slider
-                value={filters.yearRange}
-                onValueChange={(value) => updateFiltersLocally({ yearRange: value as [number, number] })}
-                min={1900}
-                max={new Date().getFullYear()}
-                step={1}
-                className="w-full"
-              />
+        {/* Slider Filters - Stacked Layout */}
+        <div className="max-w-3xl mx-auto space-y-8 mb-10">
+          {/* Year Range */}
+          <div className="bg-card rounded-2xl border border-border/40 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-lg font-medium text-foreground">Year Range</span>
+              <span className="text-lg text-primary font-semibold">{filters.yearRange[0]} – {filters.yearRange[1]}</span>
             </div>
+            <Slider
+              value={filters.yearRange}
+              onValueChange={(value) => updateFiltersLocally({ yearRange: value as [number, number] })}
+              min={1900}
+              max={new Date().getFullYear()}
+              step={1}
+              className="w-full"
+            />
+          </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">Rating</label>
-                <span className="text-sm text-primary font-medium">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</span>
+          {/* Rating and Runtime side by side */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-card rounded-2xl border border-border/40 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-lg font-medium text-foreground">Rating</span>
+                <span className="text-lg text-primary font-semibold">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</span>
               </div>
               <Slider
                 value={filters.ratingRange}
@@ -250,10 +238,10 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               />
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">Runtime</label>
-                <span className="text-sm text-primary font-medium">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</span>
+            <div className="bg-card rounded-2xl border border-border/40 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-lg font-medium text-foreground">Runtime</span>
+                <span className="text-lg text-primary font-semibold">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</span>
               </div>
               <Slider
                 value={filters.runtimeRange}
@@ -265,41 +253,43 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               />
             </div>
           </div>
+        </div>
 
-          {/* Discover Button */}
+        {/* Discover Button */}
+        <div className="max-w-md mx-auto mb-8">
           <Button 
             onClick={handleDiscover}
-            className="w-full h-12 rounded-xl text-base font-medium"
+            className="w-full h-14 rounded-2xl text-lg font-semibold"
             size="lg"
           >
-            <Search className="h-5 w-5 mr-2" />
+            <Search className="h-5 w-5 mr-3" />
             Discover Movies
           </Button>
+        </div>
 
-          {/* Advanced Filters */}
-          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger className="w-full">
-              <div className="flex items-center justify-center gap-2 w-full py-3 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                <Sparkles className="h-4 w-4" />
-                <span className="text-sm font-medium">Advanced Filters</span>
-                <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showAdvanced && "rotate-180")} />
-              </div>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent className="pt-4 space-y-6 overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+        {/* Advanced Filters */}
+        <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+          <CollapsibleTrigger className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer py-2">
+            <Sparkles className="h-4 w-4" />
+            <span className="text-sm font-medium">Advanced Filters</span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", showAdvanced && "rotate-180")} />
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+            <div className="max-w-4xl mx-auto pt-8 space-y-10">
               {/* Mood */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-foreground">Mood</label>
-                <div className="flex flex-wrap gap-2">
+              <div>
+                <h4 className="text-lg font-medium text-foreground mb-5">Mood</h4>
+                <div className="flex flex-wrap justify-center gap-3">
                   {MOODS.map(mood => (
                     <button
                       key={mood}
                       onClick={() => toggleMood(mood)}
                       className={cn(
-                        "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                        "px-6 py-3 rounded-full text-base font-medium transition-all duration-200",
                         filters.mood.includes(mood) 
-                          ? "bg-primary text-primary-foreground shadow-md" 
-                          : "bg-muted/50 text-foreground hover:bg-muted border border-border/50"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                          : "bg-card text-foreground hover:bg-card/80 border border-border/50 hover:border-primary/40"
                       )}
                     >
                       {mood}
@@ -309,18 +299,18 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               </div>
 
               {/* Tone */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-foreground">Tone</label>
-                <div className="flex flex-wrap gap-2">
+              <div>
+                <h4 className="text-lg font-medium text-foreground mb-5">Tone</h4>
+                <div className="flex flex-wrap justify-center gap-3">
                   {TONES.map(tone => (
                     <button
                       key={tone}
                       onClick={() => toggleTone(tone)}
                       className={cn(
-                        "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                        "px-6 py-3 rounded-full text-base font-medium transition-all duration-200",
                         filters.tone.includes(tone) 
-                          ? "bg-primary text-primary-foreground shadow-md" 
-                          : "bg-muted/50 text-foreground hover:bg-muted border border-border/50"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                          : "bg-card text-foreground hover:bg-card/80 border border-border/50 hover:border-primary/40"
                       )}
                     >
                       {tone}
@@ -330,11 +320,11 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
               </div>
 
               {/* Dropdowns */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Pacing</label>
+              <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto">
+                <div className="text-left">
+                  <label className="block text-sm font-medium text-muted-foreground mb-3 text-center">Pacing</label>
                   <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
-                    <SelectTrigger className="h-11 bg-muted/30 border-border/50 rounded-xl">
+                    <SelectTrigger className="h-12 bg-card border-border/50 rounded-xl text-center">
                       <SelectValue placeholder="Any Pacing" />
                     </SelectTrigger>
                     <SelectContent>
@@ -345,10 +335,10 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Era</label>
+                <div className="text-left">
+                  <label className="block text-sm font-medium text-muted-foreground mb-3 text-center">Era</label>
                   <Select value={filters.era} onValueChange={(value) => updateFiltersLocally({ era: value })}>
-                    <SelectTrigger className="h-11 bg-muted/30 border-border/50 rounded-xl">
+                    <SelectTrigger className="h-12 bg-card border-border/50 rounded-xl text-center">
                       <SelectValue placeholder="Any Era" />
                     </SelectTrigger>
                     <SelectContent>
@@ -359,10 +349,10 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Language</label>
+                <div className="text-left">
+                  <label className="block text-sm font-medium text-muted-foreground mb-3 text-center">Language</label>
                   <Select value={filters.language} onValueChange={(value) => updateFiltersLocally({ language: value })}>
-                    <SelectTrigger className="h-11 bg-muted/30 border-border/50 rounded-xl">
+                    <SelectTrigger className="h-12 bg-card border-border/50 rounded-xl text-center">
                       <SelectValue placeholder="Any Language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -373,9 +363,9 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                   </Select>
                 </div>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </section>
     </div>
   );
