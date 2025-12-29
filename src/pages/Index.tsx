@@ -14,11 +14,17 @@ import { FallbackHomepage } from "@/components/FallbackHomepage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { BecauseYouLoved } from "@/components/BecauseYouLoved";
+import { SurpriseMe } from "@/components/SurpriseMe";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Index = () => {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { isProUser } = useSubscription();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -83,6 +89,22 @@ const Index = () => {
             <ErrorBoundary>
               <FreshPicks />
             </ErrorBoundary>
+
+            {/* Pro Discovery Features */}
+            {user && isProUser && (
+              <ErrorBoundary>
+                <BecauseYouLoved />
+              </ErrorBoundary>
+            )}
+
+            {/* Surprise Me Card for Pro users */}
+            {user && (
+              <ErrorBoundary>
+                <div className="flex justify-center">
+                  <SurpriseMe variant="card" className="w-full max-w-sm" />
+                </div>
+              </ErrorBoundary>
+            )}
             
             <ErrorBoundary>
               <LatestTrailers />
