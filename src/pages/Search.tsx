@@ -140,9 +140,8 @@ const Search = () => {
         page: 1
       };
       
-      if (filters.genres && filters.genres.length > 0) {
-        discoverParams.genre = filters.genres.join(',');
-      }
+      // Build genre list from explicit selection + mood/tone mappings
+      let genreIds: number[] = [...(filters.genres || [])];
       
       // Map mood to genre IDs for better filtering
       const moodGenreMap: { [key: string]: number[] } = {
@@ -167,38 +166,47 @@ const Search = () => {
         'whimsical': [14, 16], // Fantasy, Animation
       };
       
-      // Apply mood genre if set and no explicit genre selected
-      if (filters.mood && filters.mood !== 'any' && !discoverParams.genre) {
+      // Add mood genres if set
+      if (filters.mood && filters.mood !== 'any') {
         const moodGenres = moodGenreMap[filters.mood];
-        if (moodGenres && moodGenres.length > 0) {
-          discoverParams.genre = moodGenres[0];
+        if (moodGenres) {
+          genreIds = [...genreIds, ...moodGenres];
         }
       }
       
-      // Apply tone genre if set and no explicit genre selected
-      if (filters.tone && filters.tone !== 'any' && !discoverParams.genre) {
+      // Add tone genres if set
+      if (filters.tone && filters.tone !== 'any') {
         const toneGenres = toneGenreMap[filters.tone];
-        if (toneGenres && toneGenres.length > 0) {
-          discoverParams.genre = toneGenres[0];
+        if (toneGenres) {
+          genreIds = [...genreIds, ...toneGenres];
         }
       }
       
+      // Remove duplicates and set genre param
+      if (genreIds.length > 0) {
+        const uniqueGenres = [...new Set(genreIds)];
+        discoverParams.genre = uniqueGenres.join(',');
+      }
+      
+      // Apply year range filter
       if (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear()) {
         discoverParams.yearFrom = filters.yearRange[0];
         discoverParams.yearTo = filters.yearRange[1];
       }
       
+      // Apply rating filter
       if (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10) {
         discoverParams.voteAverageFrom = filters.ratingRange[0];
         discoverParams.voteAverageTo = filters.ratingRange[1];
       }
       
+      // Apply runtime filter (only if not using pacing)
       if (filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300) {
         discoverParams.runtimeFrom = filters.runtimeRange[0];
         discoverParams.runtimeTo = filters.runtimeRange[1];
       }
       
-      // Handle pacing filter - map to runtime ranges
+      // Handle pacing filter - override runtime if set
       if (filters.pacing && filters.pacing !== 'any') {
         const pacingRanges: { [key: string]: [number, number] } = {
           'slow': [150, 300],
@@ -206,7 +214,7 @@ const Search = () => {
           'fast': [60, 100]
         };
         const pacingRange = pacingRanges[filters.pacing];
-        if (pacingRange && !discoverParams.runtimeFrom) {
+        if (pacingRange) {
           discoverParams.runtimeFrom = pacingRange[0];
           discoverParams.runtimeTo = pacingRange[1];
         }
@@ -214,7 +222,9 @@ const Search = () => {
 
       // Fetch based on active tab
       const pagePromises = [];
-      for (let page = 1; page <= 25; page++) {
+      const pagesToFetch = activeTab === 'all' ? 15 : 25; // Fewer pages for 'all' since we fetch both
+      
+      for (let page = 1; page <= pagesToFetch; page++) {
         if (activeTab === 'tv') {
           pagePromises.push(tmdbService.discoverTV({ ...discoverParams, page }));
         } else if (activeTab === 'movies') {
@@ -227,14 +237,22 @@ const Search = () => {
       }
       
       const allResults = await Promise.all(pagePromises);
-      const combinedResults = allResults.flatMap(result => result.results);
+      const combinedResults = allResults.flatMap(result => result.results || []);
       
-      // Sort combined results by popularity for 'all' tab
-      if (activeTab === 'all') {
-        combinedResults.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
-      }
+      // Deduplicate results by id (movies and TV can have same numeric IDs, so include type)
+      const seen = new Set<string>();
+      const uniqueResults = combinedResults.filter((item: any) => {
+        const type = item.title ? 'movie' : 'tv';
+        const key = `${type}-${item.id}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
       
-      setFilterResults(combinedResults);
+      // Sort by popularity
+      uniqueResults.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
+      
+      setFilterResults(uniqueResults);
     } catch (error) {
       console.error("Filter search failed:", error);
     } finally {
