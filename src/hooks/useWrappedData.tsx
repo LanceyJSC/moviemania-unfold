@@ -167,33 +167,74 @@ export const useWrappedData = (period: WrappedPeriod) => {
 
       const { data: ratings } = await ratingsQuery;
 
-      // Calculate stats
-      const totalMovies = movieDiary?.length || 0;
+      // Calculate stats - combine diary entries AND ratings
+      const movieDiaryCount = movieDiary?.length || 0;
       const totalEpisodes = tvDiary?.length || 0;
+
+      // Count movies from ratings (in case no diary entries)
+      const movieRatingsCount = ratings?.filter(r => r.media_type === 'movie').length || 0;
+      const tvRatingsCount = ratings?.filter(r => r.media_type === 'tv').length || 0;
+      
+      // Use the higher count between diary and ratings for movies
+      const totalMovies = Math.max(movieDiaryCount, movieRatingsCount);
 
       // Calculate total hours
       const movieHours = movieDiary?.reduce((acc, m) => acc + (m.runtime || 120) / 60, 0) || 0;
       const tvHours = tvDiary?.reduce((acc, t) => acc + (t.runtime || 45) / 60, 0) || 0;
-      const totalHours = Math.round(movieHours + tvHours);
+      
+      // If no movie diary but has movie ratings, estimate hours
+      const estimatedMovieHours = movieDiaryCount === 0 && movieRatingsCount > 0 
+        ? movieRatingsCount * 2 // Assume 2 hours per movie
+        : movieHours;
+      
+      const totalHours = Math.round(estimatedMovieHours + tvHours);
 
-      // Get top movie (highest rated)
+      // Get top movie - first from diary, then from ratings
+      let topMovie: TopContent | null = null;
       const topMovieEntry = movieDiary?.find(m => m.rating);
-      const topMovie: TopContent | null = topMovieEntry ? {
-        id: topMovieEntry.movie_id,
-        title: topMovieEntry.movie_title,
-        poster: topMovieEntry.movie_poster,
-        rating: topMovieEntry.rating || 0,
-        runtime: topMovieEntry.runtime
-      } : null;
+      if (topMovieEntry) {
+        topMovie = {
+          id: topMovieEntry.movie_id,
+          title: topMovieEntry.movie_title,
+          poster: topMovieEntry.movie_poster,
+          rating: topMovieEntry.rating || 0,
+          runtime: topMovieEntry.runtime
+        };
+      } else {
+        // Fall back to ratings if no diary entries
+        const topMovieRating = ratings?.find(r => r.media_type === 'movie' && r.rating);
+        if (topMovieRating) {
+          topMovie = {
+            id: topMovieRating.movie_id,
+            title: topMovieRating.movie_title,
+            poster: topMovieRating.movie_poster,
+            rating: topMovieRating.rating || 0
+          };
+        }
+      }
 
-      // Get top TV show
+      // Get top TV show - first from diary, then from ratings
+      let topTVShow: TopContent | null = null;
       const topTVEntry = tvDiary?.find(t => t.rating);
-      const topTVShow: TopContent | null = topTVEntry ? {
-        id: topTVEntry.tv_id,
-        title: topTVEntry.tv_title,
-        poster: topTVEntry.tv_poster,
-        rating: topTVEntry.rating || 0
-      } : null;
+      if (topTVEntry) {
+        topTVShow = {
+          id: topTVEntry.tv_id,
+          title: topTVEntry.tv_title,
+          poster: topTVEntry.tv_poster,
+          rating: topTVEntry.rating || 0
+        };
+      } else {
+        // Fall back to ratings if no diary entries
+        const topTVRating = ratings?.find(r => r.media_type === 'tv' && r.rating);
+        if (topTVRating) {
+          topTVShow = {
+            id: topTVRating.movie_id,
+            title: topTVRating.movie_title,
+            poster: topTVRating.movie_poster,
+            rating: topTVRating.rating || 0
+          };
+        }
+      }
 
       // Get highest rated from ratings table
       const highestRated = ratings?.[0];
@@ -204,36 +245,53 @@ export const useWrappedData = (period: WrappedPeriod) => {
         rating: highestRated.rating || 0
       } : null;
 
-      // Calculate average rating
+      // Calculate average rating from ALL sources
       const allRatings = [
         ...(movieDiary?.filter(m => m.rating).map(m => m.rating!) || []),
         ...(tvDiary?.filter(t => t.rating).map(t => t.rating!) || []),
         ...(ratings?.filter(r => r.rating).map(r => r.rating!) || [])
       ];
-      const averageRating = allRatings.length > 0 
-        ? Number((allRatings.reduce((a, b) => a + b, 0) / allRatings.length).toFixed(1))
+      // Deduplicate by using only ratings table if both sources have same items
+      const uniqueRatings = ratings?.filter(r => r.rating).map(r => r.rating!) || allRatings;
+      const averageRating = uniqueRatings.length > 0 
+        ? Number((uniqueRatings.reduce((a, b) => a + b, 0) / uniqueRatings.length).toFixed(1))
         : 0;
 
-      // Recent movies for display
-      const recentMovies: TopContent[] = (movieDiary?.slice(0, 5) || []).map(m => ({
-        id: m.movie_id,
-        title: m.movie_title,
-        poster: m.movie_poster,
-        rating: m.rating || 0,
-        runtime: m.runtime
-      }));
+      // Recent movies for display - combine diary and ratings
+      let recentMovies: TopContent[] = [];
+      if (movieDiary && movieDiary.length > 0) {
+        recentMovies = movieDiary.slice(0, 5).map(m => ({
+          id: m.movie_id,
+          title: m.movie_title,
+          poster: m.movie_poster,
+          rating: m.rating || 0,
+          runtime: m.runtime
+        }));
+      } else {
+        // Use ratings if no diary
+        recentMovies = (ratings?.filter(r => r.media_type === 'movie').slice(0, 5) || []).map(r => ({
+          id: r.movie_id,
+          title: r.movie_title,
+          poster: r.movie_poster,
+          rating: r.rating || 0
+        }));
+      }
 
       // Fetch actor/director data from TMDB for watched movies (limit to avoid too many requests)
       const actorCounts: Record<string, PersonData> = {};
       const directorCounts: Record<string, PersonData> = {};
       const genreCounts: Record<string, number> = {};
       
-      const moviesToFetch = (movieDiary || []).slice(0, 20); // Limit to 20 movies
+      // Prefer movie diary, but fall back to ratings if diary is empty
+      const moviesToFetch = (movieDiary && movieDiary.length > 0) 
+        ? movieDiary.slice(0, 20) 
+        : (ratings?.filter(r => r.media_type === 'movie').slice(0, 20) || []);
       
       await Promise.all(
-        moviesToFetch.map(async (movie) => {
+        moviesToFetch.map(async (movie: any) => {
           try {
-            const details = await tmdbService.getMovieDetails(movie.movie_id);
+            const movieId = movie.movie_id;
+            const details = await tmdbService.getMovieDetails(movieId);
             
             // Count actors (top 5 from each movie)
             details.credits?.cast?.slice(0, 5).forEach(actor => {
