@@ -300,7 +300,7 @@ export const MobileInlineFilters = ({ onFiltersChange, activeTab = 'all' }: Mobi
             Discover
           </Button>
           
-          <SurpriseMe variant="button" className="w-full h-12 rounded-xl text-base" mediaType={activeTab} />
+          <SurpriseMe variant="button" className="w-full h-12 rounded-xl text-base" mediaType={activeTab} filters={filters} />
         </div>
       </div>
 

@@ -342,7 +342,7 @@ export const InlineFilters = ({ onFiltersChange, activeTab = 'all' }: InlineFilt
             Discover
           </Button>
           
-          <SurpriseMe variant="button" className="w-full h-12 rounded-lg" mediaType={activeTab} />
+          <SurpriseMe variant="button" className="w-full h-12 rounded-lg" mediaType={activeTab} filters={filters} />
         </div>
       </section>
     </div>
