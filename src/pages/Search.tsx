@@ -234,17 +234,13 @@ const Search = () => {
   const showProDiscovery = isProUser && !searchTerm && !genreParam;
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background">
       <DesktopHeader />
       <MobileBrandHeader />
       
-      {/* Hero Search Section */}
-      <div className="relative overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_70%)]" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 2xl:px-6 pt-8 pb-6">
+      <div className="px-4 2xl:px-6 pb-32 2xl:pb-12 space-y-6 max-w-7xl mx-auto">
+        {/* Hero Search Section */}
+        <div className="relative overflow-hidden pt-6">
           {/* Title */}
           {!searchTerm && !genreParam && filterResults.length === 0 && (
             <div className="text-center mb-8">
@@ -284,11 +280,9 @@ const Search = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Media Type Tabs - Always visible */}
-      <div className="px-4 2xl:px-6 py-4 max-w-7xl mx-auto">
-        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30 max-w-2xl">
+        {/* Media Type Tabs - Always visible */}
+        <div className="flex gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-1.5 border border-border/30 max-w-2xl mx-auto">
           <Button
             variant={activeTab === 'all' ? 'default' : 'ghost'}
             size="sm"
@@ -316,27 +310,26 @@ const Search = () => {
             TV Shows
           </Button>
         </div>
-      </div>
 
-      {/* Genre Header for Pro users */}
-      {isProUser && genreParam && !searchTerm && (
-        <div className="max-w-7xl mx-auto px-4 2xl:px-6 py-6">
-          <div className="flex items-center gap-4">
-            <div className="h-8 w-1 bg-primary rounded-full" />
-            <div>
-              <h2 className="text-2xl font-cinematic text-foreground tracking-wide">
-                {getGenreName(genreParam).toUpperCase()} MOVIES
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Explore the best in {getGenreName(genreParam).toLowerCase()}
-              </p>
+        {/* Genre Header for Pro users */}
+        {isProUser && genreParam && !searchTerm && (
+          <div className="py-6">
+            <div className="flex items-center gap-4">
+              <div className="h-8 w-1 bg-primary rounded-full" />
+              <div>
+                <h2 className="text-2xl font-cinematic text-foreground tracking-wide">
+                  {getGenreName(genreParam).toUpperCase()} MOVIES
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Explore the best in {getGenreName(genreParam).toLowerCase()}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 2xl:px-6">
+        {/* Main Content Area */}
+        <div>
         
         {/* Empty State for FREE users */}
         {showEmptyState && !isProUser && (
@@ -460,6 +453,7 @@ const Search = () => {
             )}
           </div>
         )}
+        </div>
       </div>
       
       <Navigation />
