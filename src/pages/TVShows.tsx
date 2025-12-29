@@ -89,7 +89,10 @@ const TVShows = () => {
             </div>
 
             {/* Mood Discovery - Pro Only */}
-            <MoodDiscovery variant="pills" className="mb-2" />
+            <MoodDiscovery className="pt-1" />
+
+            {/* Divider */}
+            <div className="h-px bg-border/50 my-1" />
 
             {/* Genre Filter - Pro Only */}
             <InlineGenreFilter
