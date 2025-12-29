@@ -325,7 +325,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             className="w-full h-10 rounded-lg text-sm font-semibold"
           >
             <Search className="h-4 w-4 mr-2" />
-            Discover Movies
+            Discover
           </Button>
         </div>
       </section>
