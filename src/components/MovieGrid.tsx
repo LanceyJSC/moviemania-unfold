@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { tmdbService } from "@/lib/tmdb";
@@ -8,9 +7,17 @@ import { MovieCard } from "@/components/MovieCard";
 interface MovieGridProps {
   title: string;
   category: "all" | "popular" | "now_playing" | "upcoming" | "top_rated";
+  genre?: number | null;
+  genres?: number[];
 }
 
-const fetchMovies = async (category: string, page: number) => {
+const fetchMovies = async (category: string, page: number, genre?: number | null, genres?: number[]) => {
+  // If genre filter is provided, use discover endpoint
+  if (genre || (genres && genres.length > 0)) {
+    const genreString = genre ? genre.toString() : genres!.join(',');
+    return tmdbService.discoverMovies({ genre: genreString, page, sortBy: 'popularity.desc' });
+  }
+  
   let response;
   switch (category) {
     case "all":
@@ -34,7 +41,7 @@ const fetchMovies = async (category: string, page: number) => {
   return response;
 };
 
-export const MovieGrid = ({ title, category }: MovieGridProps) => {
+export const MovieGrid = ({ title, category, genre, genres }: MovieGridProps) => {
   const [additionalMovies, setAdditionalMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -44,22 +51,25 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<() => void>();
 
+  // Create cache key that includes genre
+  const genreKey = genre || (genres && genres.length > 0 ? genres.join(',') : null);
+
   // Use React Query for caching - 24 hour cache for TMDB data
   const { data, isLoading } = useQuery({
-    queryKey: ['movies', category, 1],
-    queryFn: () => fetchMovies(category, 1),
+    queryKey: ['movies', category, 1, genreKey],
+    queryFn: () => fetchMovies(category, 1, genre, genres),
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  // Reset pagination when category changes
+  // Reset pagination when category or genre changes
   useEffect(() => {
     setPage(1);
     setAdditionalMovies([]);
     setHasMore(true);
-  }, [category]);
+  }, [category, genreKey]);
 
   // Update hasMore when initial data loads
   useEffect(() => {
@@ -81,7 +91,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     const nextPage = page + 1;
     
     try {
-      const response = await fetchMovies(category, nextPage);
+      const response = await fetchMovies(category, nextPage, genre, genres);
       setAdditionalMovies(prev => [...prev, ...response.results]);
       setHasMore(nextPage < response.total_pages);
       setPage(nextPage);
@@ -90,7 +100,7 @@ export const MovieGrid = ({ title, category }: MovieGridProps) => {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [category, page, hasMore, isLoading, isLoadingMore]);
+  }, [category, page, hasMore, isLoading, isLoadingMore, genre, genres]);
 
   // Keep ref updated with latest loadMore
   useEffect(() => {

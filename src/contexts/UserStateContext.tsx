@@ -337,6 +337,54 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
             is_public: true
           }, { onConflict: 'user_id,movie_id' });
 
+        // SYNC: Also update diary entry with the rating if one exists
+        if (mediaType === 'movie') {
+          // Check if movie diary entry exists
+          const { data: existingDiary } = await supabase
+            .from('movie_diary')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('movie_id', movieId)
+            .maybeSingle();
+          
+          if (existingDiary) {
+            // Update the rating in the diary
+            await supabase
+              .from('movie_diary')
+              .update({ rating })
+              .eq('id', existingDiary.id);
+          } else {
+            // Create a diary entry for the rated movie (watched today)
+            await supabase
+              .from('movie_diary')
+              .insert({
+                user_id: user.id,
+                movie_id: movieId,
+                movie_title: movieTitle,
+                movie_poster: moviePoster,
+                rating: rating,
+                watched_date: new Date().toISOString().split('T')[0],
+                is_public: true
+              });
+          }
+        } else {
+          // TV show - update tv_diary if entry exists
+          const { data: existingTVDiary } = await supabase
+            .from('tv_diary')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('tv_id', movieId)
+            .maybeSingle();
+          
+          if (existingTVDiary) {
+            await supabase
+              .from('tv_diary')
+              .update({ rating })
+              .eq('id', existingTVDiary.id);
+          }
+          // Note: We don't auto-create TV diary entries since they need season/episode info
+        }
+
         // Remove from watchlist since it's now watched/rated
         await supabase
           .from('enhanced_watchlist_items')
@@ -353,6 +401,9 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         
         // Invalidate the average rating query so it updates immediately
         queryClient.invalidateQueries({ queryKey: ['average-user-rating', movieId, mediaType] });
+        // Also invalidate diary queries
+        queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
+        queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
         
         await logActivity('rated', { id: movieId, title: movieTitle, poster: moviePoster }, { rating, media_type: mediaType });
       }
