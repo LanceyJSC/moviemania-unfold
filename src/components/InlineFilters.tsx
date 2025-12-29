@@ -238,18 +238,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
           </div>
         </div>
 
-        {/* Discover Button */}
-        <div className="max-w-xs mx-auto mb-5">
-          <Button 
-            onClick={handleDiscover}
-            className="w-full h-9 rounded-lg text-sm font-semibold"
-          >
-            <Search className="h-4 w-4 mr-2" />
-            Discover Movies
-          </Button>
-        </div>
-
-        {/* Advanced Filters - Mood, Tone, Pacing */}
+        {/* Advanced Filters - Mood, Tone, Pacing (using Select dropdowns like sliders) */}
         <div className="max-w-xl mx-auto space-y-3 mb-5">
           {/* Mood */}
           <div className="bg-card/60 rounded-lg border border-border/50 p-3">
@@ -259,22 +248,16 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                 {MOOD_OPTIONS.find(m => m.value === filters.mood)?.label || "Any Mood"}
               </span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {MOOD_OPTIONS.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => updateFiltersLocally({ mood: option.value })}
-                  className={cn(
-                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
-                    filters.mood === option.value
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <Select value={filters.mood} onValueChange={(value) => updateFiltersLocally({ mood: value })}>
+              <SelectTrigger className="h-9 bg-muted/40 border-border/30">
+                <SelectValue placeholder="Any Mood" />
+              </SelectTrigger>
+              <SelectContent>
+                {MOOD_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Tone */}
@@ -285,22 +268,16 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                 {TONE_OPTIONS.find(t => t.value === filters.tone)?.label || "Any Tone"}
               </span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {TONE_OPTIONS.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => updateFiltersLocally({ tone: option.value })}
-                  className={cn(
-                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
-                    filters.tone === option.value
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <Select value={filters.tone} onValueChange={(value) => updateFiltersLocally({ tone: value })}>
+              <SelectTrigger className="h-9 bg-muted/40 border-border/30">
+                <SelectValue placeholder="Any Tone" />
+              </SelectTrigger>
+              <SelectContent>
+                {TONE_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Pacing */}
@@ -311,30 +288,24 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
                 {PACING_OPTIONS.find(p => p.value === filters.pacing)?.label || "Any Pacing"}
               </span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {PACING_OPTIONS.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => updateFiltersLocally({ pacing: option.value })}
-                  className={cn(
-                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
-                    filters.pacing === option.value
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
+              <SelectTrigger className="h-9 bg-muted/40 border-border/30">
+                <SelectValue placeholder="Any Pacing" />
+              </SelectTrigger>
+              <SelectContent>
+                {PACING_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Discover Button */}
+        {/* Discover Button - Single instance */}
         <div className="max-w-xs mx-auto">
           <Button 
             onClick={handleDiscover}
-            className="w-full h-9 rounded-lg text-sm font-semibold"
+            className="w-full h-10 rounded-lg text-sm font-semibold"
           >
             <Search className="h-4 w-4 mr-2" />
             Discover Movies
