@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -179,9 +179,9 @@ export const BecauseYouLoved = () => {
         </div>
       </div>
 
-      {/* See More Modal */}
+      {/* See More Modal - List view with details */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Sparkles className="h-5 w-5 text-amber-500" />
@@ -189,7 +189,7 @@ export const BecauseYouLoved = () => {
               <span className="text-cinema-red">{activeSection?.basedOn.title}</span>
             </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
+          <div className="space-y-3 mt-4">
             {activeSection?.recommendations.map((movie) => (
               <button
                 key={movie.id}
@@ -197,19 +197,33 @@ export const BecauseYouLoved = () => {
                   setShowModal(false);
                   navigate(`/movie/${movie.id}`);
                 }}
-                className="group relative aspect-[2/3] rounded-lg overflow-hidden bg-card border border-border/50 hover:border-cinema-red/50 transition-all"
+                className="w-full flex items-center gap-4 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-cinema-red/50 hover:bg-card transition-all text-left"
               >
                 <img
                   src={tmdbService.getPosterUrl(movie.poster_path, 'w300')}
                   alt={movie.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  className="w-16 h-24 object-cover rounded-md flex-shrink-0"
                   loading="lazy"
                 />
-                {movie.vote_average > 0 && (
-                  <div className="absolute bottom-1 right-1 bg-black/70 text-xs px-1.5 py-0.5 rounded text-amber-400 font-medium">
-                    {movie.vote_average.toFixed(1)}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground truncate">{movie.title}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3.5 w-3.5 text-cinema-gold fill-current" />
+                      <span className="text-sm text-foreground">{movie.vote_average.toFixed(1)}</span>
+                    </div>
+                    {movie.release_date && (
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(movie.release_date).getFullYear()}
+                      </span>
+                    )}
                   </div>
-                )}
+                  {movie.overview && (
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
+                      {movie.overview}
+                    </p>
+                  )}
+                </div>
               </button>
             ))}
           </div>
