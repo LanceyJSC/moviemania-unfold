@@ -85,9 +85,9 @@ export const BecauseYouLoved = () => {
       return (
         <div className="space-y-6">
           <Skeleton className="h-8 w-64" />
-          <div className="flex gap-3 overflow-hidden">
+        <div className="flex gap-3 overflow-hidden">
             {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="w-28 h-40 flex-shrink-0 rounded-lg" />
+              <Skeleton key={i} className="w-32 h-48 flex-shrink-0 rounded-lg" />
             ))}
           </div>
         </div>
@@ -118,7 +118,7 @@ export const BecauseYouLoved = () => {
                 onClick={() => navigate(`/movie/${movie.id}`)}
                 className="flex-shrink-0 group relative"
               >
-                <div className="w-28 h-40 rounded-lg overflow-hidden bg-card border border-border/50 group-hover:border-cinema-red/50 transition-all">
+                <div className="w-32 h-48 rounded-lg overflow-hidden bg-card border border-border/50 group-hover:border-cinema-red/50 transition-all">
                   {movie.poster_path ? (
                     <img
                       src={getImageUrl(movie.poster_path, 'w185')}
@@ -139,7 +139,7 @@ export const BecauseYouLoved = () => {
             ))}
             <button
               onClick={() => navigate('/recommendations')}
-              className="flex-shrink-0 w-28 h-40 rounded-lg border border-dashed border-border/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-cinema-red/50 hover:text-foreground transition-colors"
+              className="flex-shrink-0 w-32 h-48 rounded-lg border border-dashed border-border/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-cinema-red/50 hover:text-foreground transition-colors"
             >
               <ChevronRight className="h-6 w-6" />
               <span className="text-xs">See More</span>
