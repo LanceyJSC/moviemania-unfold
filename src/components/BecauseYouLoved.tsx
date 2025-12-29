@@ -99,12 +99,7 @@ export const BecauseYouLoved = () => {
               <Skeleton className="h-10 w-64 mx-auto mb-4" />
               <Skeleton className="h-4 w-48 mx-auto" />
             </div>
-            <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg" />
-              ))}
-            </div>
-            <div className="hidden 2xl:grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
               ))}
@@ -142,19 +137,9 @@ export const BecauseYouLoved = () => {
             <div className="w-16 h-0.5 bg-amber-500 mx-auto"></div>
           </div>
 
-          {/* Mobile: Horizontal scroll */}
-          <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
             {displayedMovies.map((movie) => (
-              <div key={movie.id} className="flex-shrink-0">
-                <MovieCard movie={tmdbService.formatMovieForCard(movie)} />
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop: Grid layout */}
-          <div className="hidden 2xl:grid grid-cols-6 gap-4">
-            {displayedMovies.map((movie) => (
-              <div key={`desktop-${movie.id}`}>
+              <div key={movie.id}>
                 <MovieCard 
                   movie={tmdbService.formatMovieForCard(movie)} 
                   variant="grid"

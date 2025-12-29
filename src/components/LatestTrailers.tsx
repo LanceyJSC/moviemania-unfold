@@ -175,26 +175,18 @@ export const LatestTrailers = () => {
 
         {/* Trailers Grid */}
         {loading ? (
-          <>
-            <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-32 h-48 bg-muted animate-pulse rounded-lg" />
-              ))}
-            </div>
-            <div className="hidden 2xl:grid grid-cols-6 gap-4">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
-              ))}
-            </div>
-          </>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
+            ))}
+          </div>
         ) : (
           <>
-            {/* Mobile: Horizontal scroll */}
-            <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-4 2xl:hidden">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
               {displayedItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex-shrink-0 group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer w-32 h-48 rounded-lg"
+                  className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 cursor-pointer aspect-[2/3] rounded-lg"
                   onClick={() => handlePlayTrailer(item)}
                 >
                   <div className="w-full h-full relative">
@@ -208,11 +200,6 @@ export const LatestTrailers = () => {
                     <div className="absolute inset-0 rounded-lg">
                       <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent rounded-lg" />
                       <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent rounded-lg" />
-                    </div>
-                    
-                    <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 rounded-lg">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent rounded-lg" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent rounded-lg" />
                     </div>
                     
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
@@ -233,56 +220,6 @@ export const LatestTrailers = () => {
                       <div className="absolute top-2 left-2 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
                         <Star className="h-3 w-3 text-cinema-gold fill-current" />
                         <span className="text-foreground font-semibold text-xs">{item.vote_average.toFixed(1)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Desktop: Grid layout */}
-            <div className="hidden 2xl:grid grid-cols-6 gap-4">
-              {displayedItems.map((item) => (
-                <div
-                  key={`desktop-${item.id}`}
-                  className="group relative overflow-hidden bg-card border-border hover:border-cinema-red transition-all duration-300 transform hover:scale-105 hover:shadow-glow cursor-pointer aspect-[2/3] rounded-lg"
-                  onClick={() => handlePlayTrailer(item)}
-                >
-                  <div className="w-full h-full relative">
-                    <img
-                      src={tmdbService.getPosterUrl(item.poster_path, 'w500')}
-                      alt={getItemTitle(item)}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 rounded-lg"
-                      loading="lazy"
-                    />
-                    
-                    <div className="absolute inset-0 rounded-lg">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/20 via-cinema-black/10 to-transparent rounded-lg" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/30 via-transparent to-transparent rounded-lg" />
-                    </div>
-                    
-                    <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 rounded-lg">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/30 via-cinema-black/15 to-transparent rounded-lg" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/40 via-transparent to-transparent rounded-lg" />
-                    </div>
-                    
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
-                      <div className="flex flex-col items-center space-y-2">
-                        <Button
-                          size="sm"
-                          className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground p-3"
-                        >
-                          <Play className="h-6 w-6 fill-current" />
-                        </Button>
-                        <span className="text-white font-medium text-sm text-center px-2">
-                          Play Trailer
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {item.vote_average > 0 && (
-                      <div className="absolute top-3 left-3 bg-cinema-black/80 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-cinema-gold fill-current" />
-                        <span className="text-foreground font-semibold text-sm">{item.vote_average.toFixed(1)}</span>
                       </div>
                     )}
                   </div>
