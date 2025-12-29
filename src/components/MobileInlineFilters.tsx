@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Star, Clock, Crown, Lock, ChevronRight, X, Check } from "lucide-react";
+import { Calendar, Star, Clock, Crown, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -12,9 +12,7 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { ProUpgradeModal } from "./ProUpgradeModal";
 import { MobileAdvancedFilters } from "./MobileAdvancedFilters";
-import { useSubscription } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
 
 export interface FilterState {
@@ -34,7 +32,6 @@ interface MobileInlineFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
 }
 
-// Genre cards with TMDB IDs
 const GENRES = [
   { id: 28, name: "Action", emoji: "💥" },
   { id: 35, name: "Comedy", emoji: "😂" },
@@ -48,14 +45,12 @@ const GENRES = [
 
 type SliderType = "year" | "rating" | "runtime" | null;
 
+// This component is ONLY rendered for Pro users - no internal Pro checks needed
 export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProps) => {
   const navigate = useNavigate();
-  const { isProUser, loading } = useSubscription();
-  const [showProModal, setShowProModal] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [activeSlider, setActiveSlider] = useState<SliderType>(null);
   
-  // Temp values for slider sheets
   const [tempYearRange, setTempYearRange] = useState<[number, number]>([1900, new Date().getFullYear()]);
   const [tempRatingRange, setTempRatingRange] = useState<[number, number]>([0, 10]);
   const [tempRuntimeRange, setTempRuntimeRange] = useState<[number, number]>([0, 300]);
@@ -80,27 +75,14 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
   };
 
   const handleGenreClick = (genreId: number) => {
-    if (!isProUser) {
-      setShowProModal(true);
-      return;
-    }
     navigate(`/search?genre=${genreId}`);
   };
 
   const handleViewAllGenres = () => {
-    if (!isProUser) {
-      setShowProModal(true);
-      return;
-    }
     navigate("/genres");
   };
 
   const openSliderSheet = (type: SliderType) => {
-    if (!isProUser) {
-      setShowProModal(true);
-      return;
-    }
-    // Set temp values to current filter values
     if (type === "year") setTempYearRange(filters.yearRange);
     if (type === "rating") setTempRatingRange(filters.ratingRange);
     if (type === "runtime") setTempRuntimeRange(filters.runtimeRange);
@@ -118,8 +100,6 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
     setActiveSlider(null);
   };
 
-  // MobileAdvancedFilters uses string[] for genres, we use number[]
-  // So we only take the non-genre filters from the advanced filters modal
   const handleProFiltersChange = (proFilters: {
     genres: string[];
     yearRange: [number, number];
@@ -149,12 +129,11 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
   };
 
   const activeFilterCount = 
-    filters.genres.length + 
     filters.mood.length + 
     filters.tone.length + 
-    (filters.pacing && filters.pacing !== "any" ? 1 : 0) + 
-    (filters.era && filters.era !== "any" ? 1 : 0) + 
-    (filters.language && filters.language !== "any" ? 1 : 0) +
+    (filters.pacing !== "any" ? 1 : 0) + 
+    (filters.era !== "any" ? 1 : 0) + 
+    (filters.language !== "any" ? 1 : 0) +
     (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear() ? 1 : 0) +
     (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 ? 1 : 0) +
     (filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300 ? 1 : 0);
@@ -163,22 +142,15 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
   const isRatingModified = filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10;
   const isRuntimeModified = filters.runtimeRange[0] > 0 || filters.runtimeRange[1] < 300;
 
-  if (loading) {
-    return null;
-  }
-
   return (
     <>
       <div className="space-y-5">
-        {/* Explore by Genre Section */}
+        {/* Explore by Genre */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-cinematic text-base tracking-wide text-foreground uppercase flex items-center gap-2">
-                Explore by Genre
-                {!isProUser && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-              </h3>
-            </div>
+            <h3 className="font-cinematic text-base tracking-wide text-foreground uppercase">
+              Explore by Genre
+            </h3>
             <Button
               variant="ghost"
               size="sm"
@@ -189,23 +161,15 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
             </Button>
           </div>
           
-          {/* Horizontally Scrollable Genre Pills */}
           <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
             <div className="flex gap-2.5 pb-1">
               {GENRES.map((genre) => (
                 <button
                   key={genre.id}
                   onClick={() => handleGenreClick(genre.id)}
-                  className={cn(
-                    "flex items-center gap-1.5 py-2.5 px-4 rounded-full whitespace-nowrap",
-                    "bg-card border border-border/60",
-                    "hover:bg-card/80 hover:border-primary/50",
-                    "active:scale-95 transition-all duration-150",
-                    "min-h-[44px] text-sm font-medium",
-                    !isProUser && "opacity-70"
-                  )}
+                  className="flex items-center gap-1.5 py-2.5 px-4 rounded-full whitespace-nowrap bg-card border border-border/60 hover:bg-card/80 hover:border-primary/50 active:scale-95 transition-all min-h-[44px] text-sm font-medium"
                 >
-                  <span role="img" aria-label={genre.name} className="text-base">{genre.emoji}</span>
+                  <span className="text-base">{genre.emoji}</span>
                   <span className="text-foreground">{genre.name}</span>
                 </button>
               ))}
@@ -213,30 +177,23 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           </div>
         </div>
 
-        {/* Filter Cards Section */}
+        {/* Filter Cards */}
         <div className="space-y-3">
           {/* Year Range Card */}
           <button
             onClick={() => openSliderSheet("year")}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl",
-              "bg-card border transition-colors",
-              isYearModified ? "border-primary/50" : "border-border/50",
-              "active:bg-card/80 touch-manipulation"
+              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
+              isYearModified ? "border-primary/50" : "border-border/50"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-10 h-10 rounded-lg flex items-center justify-center",
-                isYearModified ? "bg-primary/20" : "bg-muted"
-              )}>
+              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", isYearModified ? "bg-primary/20" : "bg-muted")}>
                 <Calendar className={cn("h-5 w-5", isYearModified ? "text-primary" : "text-muted-foreground")} />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground">Year Range</p>
-                <p className="text-sm text-muted-foreground">
-                  {filters.yearRange[0]} – {filters.yearRange[1]}
-                </p>
+                <p className="text-sm text-muted-foreground">{filters.yearRange[0]} – {filters.yearRange[1]}</p>
               </div>
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -246,24 +203,17 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           <button
             onClick={() => openSliderSheet("rating")}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl",
-              "bg-card border transition-colors",
-              isRatingModified ? "border-primary/50" : "border-border/50",
-              "active:bg-card/80 touch-manipulation"
+              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
+              isRatingModified ? "border-primary/50" : "border-border/50"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-10 h-10 rounded-lg flex items-center justify-center",
-                isRatingModified ? "bg-primary/20" : "bg-muted"
-              )}>
+              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", isRatingModified ? "bg-primary/20" : "bg-muted")}>
                 <Star className={cn("h-5 w-5", isRatingModified ? "text-primary" : "text-muted-foreground")} />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground">Rating</p>
-                <p className="text-sm text-muted-foreground">
-                  {filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}
-                </p>
+                <p className="text-sm text-muted-foreground">{filters.ratingRange[0].toFixed(1)} – {filters.ratingRange[1].toFixed(1)}</p>
               </div>
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -273,24 +223,17 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           <button
             onClick={() => openSliderSheet("runtime")}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl",
-              "bg-card border transition-colors",
-              isRuntimeModified ? "border-primary/50" : "border-border/50",
-              "active:bg-card/80 touch-manipulation"
+              "w-full flex items-center justify-between p-4 rounded-xl bg-card border transition-colors active:bg-card/80",
+              isRuntimeModified ? "border-primary/50" : "border-border/50"
             )}
           >
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-10 h-10 rounded-lg flex items-center justify-center",
-                isRuntimeModified ? "bg-primary/20" : "bg-muted"
-              )}>
+              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", isRuntimeModified ? "bg-primary/20" : "bg-muted")}>
                 <Clock className={cn("h-5 w-5", isRuntimeModified ? "text-primary" : "text-muted-foreground")} />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground">Runtime</p>
-                <p className="text-sm text-muted-foreground">
-                  {filters.runtimeRange[0]} – {filters.runtimeRange[1]} min
-                </p>
+                <p className="text-sm text-muted-foreground">{filters.runtimeRange[0]} – {filters.runtimeRange[1]} min</p>
               </div>
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -298,33 +241,16 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
 
           {/* Pro Filters Card */}
           <button
-            onClick={() => {
-              if (!isProUser) {
-                setShowProModal(true);
-                return;
-              }
-              setShowAdvancedFilters(true);
-            }}
-            className={cn(
-              "w-full flex items-center justify-between p-4 rounded-xl",
-              "bg-gradient-to-r from-amber-500/10 to-orange-500/10",
-              "border border-amber-500/30",
-              "active:from-amber-500/15 active:to-orange-500/15",
-              "touch-manipulation transition-colors"
-            )}
+            onClick={() => setShowAdvancedFilters(true)}
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 active:from-amber-500/15 active:to-orange-500/15 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
                 <Crown className="h-5 w-5 text-amber-500" />
               </div>
               <div className="text-left">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-foreground">Pro Filters</p>
-                  {!isProUser && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Mood • Tone • Pacing • Era
-                </p>
+                <p className="font-medium text-foreground">More Filters</p>
+                <p className="text-sm text-muted-foreground">Mood • Tone • Pacing • Era</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -348,24 +274,19 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
               Year Range
             </DrawerTitle>
           </DrawerHeader>
-          <div className="px-6 py-4 space-y-8">
-            {/* Value Display */}
+          <div className="px-6 py-4 space-y-6">
             <div className="flex justify-center gap-4 text-center">
               <div className="bg-muted/50 rounded-xl px-6 py-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">From</p>
+                <p className="text-xs text-muted-foreground uppercase">From</p>
                 <p className="text-2xl font-bold text-foreground">{tempYearRange[0]}</p>
               </div>
-              <div className="flex items-center">
-                <span className="text-muted-foreground">—</span>
-              </div>
+              <div className="flex items-center"><span className="text-muted-foreground">—</span></div>
               <div className="bg-muted/50 rounded-xl px-6 py-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">To</p>
+                <p className="text-xs text-muted-foreground uppercase">To</p>
                 <p className="text-2xl font-bold text-foreground">{tempYearRange[1]}</p>
               </div>
             </div>
-            
-            {/* Large Touch-Friendly Slider */}
-            <div className="px-2 py-6">
+            <div className="px-2 py-4">
               <Slider
                 value={tempYearRange}
                 onValueChange={(value) => setTempYearRange(value as [number, number])}
@@ -376,15 +297,12 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
                 className="w-full"
               />
             </div>
-            
-            {/* Quick Presets */}
             <div className="flex flex-wrap gap-2 justify-center">
               {[
                 { label: "All Time", range: [1900, new Date().getFullYear()] as [number, number] },
                 { label: "2020s", range: [2020, new Date().getFullYear()] as [number, number] },
                 { label: "2010s", range: [2010, 2019] as [number, number] },
                 { label: "2000s", range: [2000, 2009] as [number, number] },
-                { label: "Classics", range: [1900, 1989] as [number, number] },
               ].map((preset) => (
                 <Button
                   key={preset.label}
@@ -405,13 +323,10 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           </div>
           <DrawerFooter className="flex-row gap-3 pt-0">
             <DrawerClose asChild>
-              <Button variant="outline" className="flex-1 h-12">
-                Cancel
-              </Button>
+              <Button variant="outline" className="flex-1 h-12">Cancel</Button>
             </DrawerClose>
             <Button onClick={applySliderValue} className="flex-1 h-12">
-              <Check className="h-4 w-4 mr-2" />
-              Apply
+              <Check className="h-4 w-4 mr-2" />Apply
             </Button>
           </DrawerFooter>
         </DrawerContent>
@@ -426,24 +341,19 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
               Rating Range
             </DrawerTitle>
           </DrawerHeader>
-          <div className="px-6 py-4 space-y-8">
-            {/* Value Display */}
+          <div className="px-6 py-4 space-y-6">
             <div className="flex justify-center gap-4 text-center">
               <div className="bg-muted/50 rounded-xl px-6 py-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Min</p>
+                <p className="text-xs text-muted-foreground uppercase">Min</p>
                 <p className="text-2xl font-bold text-foreground">{tempRatingRange[0].toFixed(1)}</p>
               </div>
-              <div className="flex items-center">
-                <span className="text-muted-foreground">—</span>
-              </div>
+              <div className="flex items-center"><span className="text-muted-foreground">—</span></div>
               <div className="bg-muted/50 rounded-xl px-6 py-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Max</p>
+                <p className="text-xs text-muted-foreground uppercase">Max</p>
                 <p className="text-2xl font-bold text-foreground">{tempRatingRange[1].toFixed(1)}</p>
               </div>
             </div>
-            
-            {/* Large Touch-Friendly Slider */}
-            <div className="px-2 py-6">
+            <div className="px-2 py-4">
               <Slider
                 value={tempRatingRange}
                 onValueChange={(value) => setTempRatingRange(value as [number, number])}
@@ -454,8 +364,6 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
                 className="w-full"
               />
             </div>
-            
-            {/* Quick Presets */}
             <div className="flex flex-wrap gap-2 justify-center">
               {[
                 { label: "Any", range: [0, 10] as [number, number] },
@@ -482,13 +390,10 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           </div>
           <DrawerFooter className="flex-row gap-3 pt-0">
             <DrawerClose asChild>
-              <Button variant="outline" className="flex-1 h-12">
-                Cancel
-              </Button>
+              <Button variant="outline" className="flex-1 h-12">Cancel</Button>
             </DrawerClose>
             <Button onClick={applySliderValue} className="flex-1 h-12">
-              <Check className="h-4 w-4 mr-2" />
-              Apply
+              <Check className="h-4 w-4 mr-2" />Apply
             </Button>
           </DrawerFooter>
         </DrawerContent>
@@ -503,24 +408,19 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
               Runtime
             </DrawerTitle>
           </DrawerHeader>
-          <div className="px-6 py-4 space-y-8">
-            {/* Value Display */}
+          <div className="px-6 py-4 space-y-6">
             <div className="flex justify-center gap-4 text-center">
               <div className="bg-muted/50 rounded-xl px-6 py-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Min</p>
+                <p className="text-xs text-muted-foreground uppercase">Min</p>
                 <p className="text-2xl font-bold text-foreground">{tempRuntimeRange[0]} min</p>
               </div>
-              <div className="flex items-center">
-                <span className="text-muted-foreground">—</span>
-              </div>
+              <div className="flex items-center"><span className="text-muted-foreground">—</span></div>
               <div className="bg-muted/50 rounded-xl px-6 py-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Max</p>
+                <p className="text-xs text-muted-foreground uppercase">Max</p>
                 <p className="text-2xl font-bold text-foreground">{tempRuntimeRange[1]} min</p>
               </div>
             </div>
-            
-            {/* Large Touch-Friendly Slider */}
-            <div className="px-2 py-6">
+            <div className="px-2 py-4">
               <Slider
                 value={tempRuntimeRange}
                 onValueChange={(value) => setTempRuntimeRange(value as [number, number])}
@@ -531,14 +431,12 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
                 className="w-full"
               />
             </div>
-            
-            {/* Quick Presets */}
             <div className="flex flex-wrap gap-2 justify-center">
               {[
                 { label: "Any", range: [0, 300] as [number, number] },
-                { label: "Short (<90min)", range: [0, 90] as [number, number] },
-                { label: "Standard", range: [90, 150] as [number, number] },
-                { label: "Long (150+)", range: [150, 300] as [number, number] },
+                { label: "< 90 min", range: [0, 90] as [number, number] },
+                { label: "90-120 min", range: [90, 120] as [number, number] },
+                { label: "2+ hours", range: [120, 300] as [number, number] },
               ].map((preset) => (
                 <Button
                   key={preset.label}
@@ -559,30 +457,20 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
           </div>
           <DrawerFooter className="flex-row gap-3 pt-0">
             <DrawerClose asChild>
-              <Button variant="outline" className="flex-1 h-12">
-                Cancel
-              </Button>
+              <Button variant="outline" className="flex-1 h-12">Cancel</Button>
             </DrawerClose>
             <Button onClick={applySliderValue} className="flex-1 h-12">
-              <Check className="h-4 w-4 mr-2" />
-              Apply
+              <Check className="h-4 w-4 mr-2" />Apply
             </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
 
-      {/* Advanced Pro Filters Full Screen */}
+      {/* Advanced Filters Modal */}
       <MobileAdvancedFilters
-        onFiltersChange={handleProFiltersChange}
         isOpen={showAdvancedFilters}
         onToggle={() => setShowAdvancedFilters(false)}
-      />
-
-      <ProUpgradeModal
-        isOpen={showProModal}
-        onClose={() => setShowProModal(false)}
-        feature="Advanced Discovery"
-        description="Unlock powerful filters like Mood, Tone, Pacing, Era, and Language to discover your perfect movie match."
+        onFiltersChange={handleProFiltersChange}
       />
     </>
   );

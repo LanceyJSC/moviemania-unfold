@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Crown, Lock } from "lucide-react";
+import { ChevronDown, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,9 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ProUpgradeModal } from "./ProUpgradeModal";
 import { MobileInlineFilters } from "./MobileInlineFilters";
-import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +37,6 @@ interface InlineFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
 }
 
-// Genre cards with TMDB IDs
 const GENRES = [
   { id: 28, name: "Action", emoji: "💥" },
   { id: 35, name: "Comedy", emoji: "😂" },
@@ -49,7 +46,6 @@ const GENRES = [
   { id: 12, name: "Adventure", emoji: "🗺️" },
 ];
 
-// Pro-only filter options
 const MOODS = ["Feel-Good", "Intense", "Thought-Provoking", "Emotional", "Uplifting", "Dark", "Nostalgic", "Inspiring"];
 const TONES = ["Lighthearted", "Serious", "Satirical", "Suspenseful", "Romantic", "Gritty", "Whimsical"];
 const PACING_OPTIONS = [
@@ -78,11 +74,10 @@ const LANGUAGE_OPTIONS = [
   { value: "it", label: "Italian" }
 ];
 
+// This component is ONLY rendered for Pro users - no internal Pro checks needed
 export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { isProUser, loading } = useSubscription();
-  const [showProModal, setShowProModal] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   
   const [filters, setFilters] = useState<FilterState>({
@@ -105,45 +100,25 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   };
 
   const handleGenreClick = (genreId: number) => {
-    if (!isProUser) {
-      setShowProModal(true);
-      return;
-    }
     navigate(`/search?genre=${genreId}`);
   };
 
   const handleViewAllGenres = () => {
-    if (!isProUser) {
-      setShowProModal(true);
-      return;
-    }
     navigate("/genres");
   };
 
-  const handleProFilterClick = (callback: () => void) => {
-    if (!isProUser) {
-      setShowProModal(true);
-      return;
-    }
-    callback();
-  };
-
   const toggleMood = (mood: string) => {
-    handleProFilterClick(() => {
-      const newMoods = filters.mood.includes(mood)
-        ? filters.mood.filter(m => m !== mood)
-        : [...filters.mood, mood];
-      updateFilters({ mood: newMoods });
-    });
+    const newMoods = filters.mood.includes(mood)
+      ? filters.mood.filter(m => m !== mood)
+      : [...filters.mood, mood];
+    updateFilters({ mood: newMoods });
   };
 
   const toggleTone = (tone: string) => {
-    handleProFilterClick(() => {
-      const newTones = filters.tone.includes(tone)
-        ? filters.tone.filter(t => t !== tone)
-        : [...filters.tone, tone];
-      updateFilters({ tone: newTones });
-    });
+    const newTones = filters.tone.includes(tone)
+      ? filters.tone.filter(t => t !== tone)
+      : [...filters.tone, tone];
+    updateFilters({ tone: newTones });
   };
 
   const clearFilters = () => {
@@ -167,16 +142,11 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     filters.genres.length + 
     filters.mood.length + 
     filters.tone.length + 
-    (filters.pacing && filters.pacing !== "any" ? 1 : 0) + 
-    (filters.era && filters.era !== "any" ? 1 : 0) + 
-    (filters.language && filters.language !== "any" ? 1 : 0) +
+    (filters.pacing !== "any" ? 1 : 0) + 
+    (filters.era !== "any" ? 1 : 0) + 
+    (filters.language !== "any" ? 1 : 0) +
     (filters.yearRange[0] > 1900 || filters.yearRange[1] < new Date().getFullYear() ? 1 : 0) +
     (filters.ratingRange[0] > 0 || filters.ratingRange[1] < 10 ? 1 : 0);
-
-  // Show loading state
-  if (loading) {
-    return null;
-  }
 
   // Render mobile version on mobile devices
   if (isMobile) {
@@ -184,265 +154,204 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
   }
 
   return (
-    <>
-      <div className="space-y-8">
-        {/* Explore by Genre Section - Clean Card */}
-        <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <span className="text-xl">🎬</span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-foreground">Explore by Genre</h3>
-                <p className="text-sm text-muted-foreground">Find your perfect movie</p>
-              </div>
-              {!isProUser && <Lock className="h-4 w-4 text-muted-foreground ml-2" />}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleViewAllGenres}
-              className="text-primary border-primary/30 hover:bg-primary/10"
-            >
-              View All Genres
-            </Button>
+    <div className="space-y-6">
+      {/* Explore by Genre */}
+      <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/40 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🎬</span>
+            <h3 className="font-semibold text-lg text-foreground">Explore by Genre</h3>
           </div>
-          
-          <div className="flex flex-wrap gap-3">
-            {GENRES.map((genre) => (
-              <button
-                key={genre.id}
-                onClick={() => handleGenreClick(genre.id)}
-                className={cn(
-                  "flex items-center gap-2 py-2.5 px-4 rounded-xl",
-                  "bg-background/80 border border-border/60",
-                  "hover:bg-primary/10 hover:border-primary/40 hover:shadow-md",
-                  "transition-all duration-200 active:scale-[0.98]",
-                  !isProUser && "opacity-70"
-                )}
-              >
-                <span className="text-lg" role="img" aria-label={genre.name}>{genre.emoji}</span>
-                <span className="font-medium text-foreground">{genre.name}</span>
-              </button>
-            ))}
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleViewAllGenres}
+            className="text-primary hover:text-primary/80"
+          >
+            View All
+          </Button>
         </div>
-
-        {/* Pro Discovery Filters - Premium Card */}
-        <div className="bg-gradient-to-br from-amber-500/5 via-card/60 to-orange-500/5 backdrop-blur-sm rounded-2xl border border-amber-500/20 p-6 shadow-sm">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-                <Crown className="h-5 w-5 text-amber-500" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg text-foreground">Pro Discovery Filters</h3>
-                  {!isProUser && <Lock className="h-4 w-4 text-muted-foreground" />}
-                </div>
-                <p className="text-sm text-muted-foreground">Fine-tune your search with advanced options</p>
-              </div>
-              {activeFilterCount > 0 && (
-                <Badge className="ml-2 bg-amber-500/20 text-amber-600 border-amber-500/30">
-                  {activeFilterCount} active
-                </Badge>
-              )}
-            </div>
-            {activeFilterCount > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={clearFilters} 
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Clear All
-              </Button>
-            )}
-          </div>
-
-          {/* Slider Filters - Clean Grid */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
-            {/* Year Range Card */}
-            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-muted-foreground">Year</span>
-                <span className="text-sm font-semibold text-foreground bg-muted/50 px-2 py-0.5 rounded">
-                  {filters.yearRange[0]} - {filters.yearRange[1]}
-                </span>
-              </div>
-              <Slider
-                value={filters.yearRange}
-                onValueChange={(value) => handleProFilterClick(() => updateFilters({ yearRange: value as [number, number] }))}
-                min={1900}
-                max={new Date().getFullYear()}
-                step={1}
-                className={cn("w-full", !isProUser && "opacity-60")}
-              />
-            </div>
-
-            {/* Rating Range Card */}
-            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-muted-foreground">Rating</span>
-                <span className="text-sm font-semibold text-foreground bg-muted/50 px-2 py-0.5 rounded">
-                  {filters.ratingRange[0].toFixed(1)} - {filters.ratingRange[1].toFixed(1)}
-                </span>
-              </div>
-              <Slider
-                value={filters.ratingRange}
-                onValueChange={(value) => handleProFilterClick(() => updateFilters({ ratingRange: value as [number, number] }))}
-                min={0}
-                max={10}
-                step={0.5}
-                className={cn("w-full", !isProUser && "opacity-60")}
-              />
-            </div>
-
-            {/* Runtime Range Card */}
-            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-muted-foreground">Runtime</span>
-                <span className="text-sm font-semibold text-foreground bg-muted/50 px-2 py-0.5 rounded">
-                  {filters.runtimeRange[0]} - {filters.runtimeRange[1]} min
-                </span>
-              </div>
-              <Slider
-                value={filters.runtimeRange}
-                onValueChange={(value) => handleProFilterClick(() => updateFilters({ runtimeRange: value as [number, number] }))}
-                min={0}
-                max={300}
-                step={15}
-                className={cn("w-full", !isProUser && "opacity-60")}
-              />
-            </div>
-          </div>
-
-          {/* Advanced Pro Filters */}
-          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger className="w-full">
-              <div className="flex items-center justify-center gap-2 w-full h-11 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/15 hover:to-orange-500/15 border border-amber-500/20 rounded-xl cursor-pointer transition-all hover:shadow-sm">
-                <span className="text-sm font-medium text-foreground">More Discovery Options</span>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", showAdvanced && "rotate-180")} />
-              </div>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent className="pt-6 space-y-6">
-              {/* Mood Section */}
-              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-                <label className="text-sm font-medium text-foreground mb-3 block">Mood</label>
-                <div className="flex flex-wrap gap-2">
-                  {MOODS.map(mood => (
-                    <button
-                      key={mood}
-                      onClick={() => toggleMood(mood)}
-                      className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                        !isProUser && "opacity-60",
-                        filters.mood.includes(mood) 
-                          ? "bg-amber-500 text-white shadow-md" 
-                          : "bg-muted/50 text-foreground hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30"
-                      )}
-                    >
-                      {mood}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tone Section */}
-              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-                <label className="text-sm font-medium text-foreground mb-3 block">Tone</label>
-                <div className="flex flex-wrap gap-2">
-                  {TONES.map(tone => (
-                    <button
-                      key={tone}
-                      onClick={() => toggleTone(tone)}
-                      className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                        !isProUser && "opacity-60",
-                        filters.tone.includes(tone) 
-                          ? "bg-amber-500 text-white shadow-md" 
-                          : "bg-muted/50 text-foreground hover:bg-amber-500/10 border border-transparent hover:border-amber-500/30"
-                      )}
-                    >
-                      {tone}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dropdowns Row */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-                  <label className="text-sm font-medium text-foreground mb-2 block">Pacing</label>
-                  <Select 
-                    value={filters.pacing} 
-                    onValueChange={(value) => handleProFilterClick(() => updateFilters({ pacing: value }))}
-                  >
-                    <SelectTrigger className={cn("h-11 bg-background border-border/50", !isProUser && "opacity-60")}>
-                      <SelectValue placeholder="Any Pacing" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      {PACING_OPTIONS.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-                  <label className="text-sm font-medium text-foreground mb-2 block">Era</label>
-                  <Select 
-                    value={filters.era} 
-                    onValueChange={(value) => handleProFilterClick(() => updateFilters({ era: value }))}
-                  >
-                    <SelectTrigger className={cn("h-11 bg-background border-border/50", !isProUser && "opacity-60")}>
-                      <SelectValue placeholder="Any Era" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      {ERA_OPTIONS.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="bg-background/50 rounded-xl p-4 border border-border/30">
-                  <label className="text-sm font-medium text-foreground mb-2 block">Language</label>
-                  <Select 
-                    value={filters.language} 
-                    onValueChange={(value) => handleProFilterClick(() => updateFilters({ language: value }))}
-                  >
-                    <SelectTrigger className={cn("h-11 bg-background border-border/50", !isProUser && "opacity-60")}>
-                      <SelectValue placeholder="Any Language" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      {LANGUAGE_OPTIONS.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+        
+        <div className="flex flex-wrap gap-3">
+          {GENRES.map((genre) => (
+            <button
+              key={genre.id}
+              onClick={() => handleGenreClick(genre.id)}
+              className="flex items-center gap-2 py-2.5 px-4 rounded-xl bg-background/80 border border-border/60 hover:bg-primary/10 hover:border-primary/40 transition-all"
+            >
+              <span className="text-lg">{genre.emoji}</span>
+              <span className="font-medium text-foreground">{genre.name}</span>
+            </button>
+          ))}
         </div>
       </div>
 
-      <ProUpgradeModal
-        isOpen={showProModal}
-        onClose={() => setShowProModal(false)}
-        feature="Advanced Discovery"
-        description="Unlock powerful filters like Mood, Tone, Pacing, Era, and Language to discover your perfect movie match."
-      />
-    </>
+      {/* Pro Discovery Filters */}
+      <div className="bg-gradient-to-br from-amber-500/5 via-card/60 to-orange-500/5 backdrop-blur-sm rounded-2xl border border-amber-500/20 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Crown className="h-5 w-5 text-amber-500" />
+            <h3 className="font-semibold text-lg text-foreground">Pro Discovery Filters</h3>
+            {activeFilterCount > 0 && (
+              <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">
+                {activeFilterCount} active
+              </Badge>
+            )}
+          </div>
+          {activeFilterCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+              Clear All
+            </Button>
+          )}
+        </div>
+
+        {/* Slider Filters */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-muted-foreground">Year</span>
+              <span className="text-sm font-semibold text-foreground">{filters.yearRange[0]} - {filters.yearRange[1]}</span>
+            </div>
+            <Slider
+              value={filters.yearRange}
+              onValueChange={(value) => updateFilters({ yearRange: value as [number, number] })}
+              min={1900}
+              max={new Date().getFullYear()}
+              step={1}
+              className="w-full"
+            />
+          </div>
+
+          <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-muted-foreground">Rating</span>
+              <span className="text-sm font-semibold text-foreground">{filters.ratingRange[0].toFixed(1)} - {filters.ratingRange[1].toFixed(1)}</span>
+            </div>
+            <Slider
+              value={filters.ratingRange}
+              onValueChange={(value) => updateFilters({ ratingRange: value as [number, number] })}
+              min={0}
+              max={10}
+              step={0.5}
+              className="w-full"
+            />
+          </div>
+
+          <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-muted-foreground">Runtime</span>
+              <span className="text-sm font-semibold text-foreground">{filters.runtimeRange[0]} - {filters.runtimeRange[1]} min</span>
+            </div>
+            <Slider
+              value={filters.runtimeRange}
+              onValueChange={(value) => updateFilters({ runtimeRange: value as [number, number] })}
+              min={0}
+              max={300}
+              step={15}
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        {/* Advanced Filters Collapsible */}
+        <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+          <CollapsibleTrigger className="w-full">
+            <div className="flex items-center justify-center gap-2 w-full h-10 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 rounded-xl cursor-pointer transition-all">
+              <span className="text-sm font-medium text-foreground">More Options</span>
+              <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", showAdvanced && "rotate-180")} />
+            </div>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="pt-6 space-y-5">
+            {/* Mood */}
+            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+              <label className="text-sm font-medium text-foreground mb-3 block">Mood</label>
+              <div className="flex flex-wrap gap-2">
+                {MOODS.map(mood => (
+                  <button
+                    key={mood}
+                    onClick={() => toggleMood(mood)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                      filters.mood.includes(mood) 
+                        ? "bg-amber-500 text-white" 
+                        : "bg-muted/50 text-foreground hover:bg-amber-500/10"
+                    )}
+                  >
+                    {mood}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tone */}
+            <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+              <label className="text-sm font-medium text-foreground mb-3 block">Tone</label>
+              <div className="flex flex-wrap gap-2">
+                {TONES.map(tone => (
+                  <button
+                    key={tone}
+                    onClick={() => toggleTone(tone)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                      filters.tone.includes(tone) 
+                        ? "bg-amber-500 text-white" 
+                        : "bg-muted/50 text-foreground hover:bg-amber-500/10"
+                    )}
+                  >
+                    {tone}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Dropdowns */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                <label className="text-sm font-medium text-foreground mb-2 block">Pacing</label>
+                <Select value={filters.pacing} onValueChange={(value) => updateFilters({ pacing: value })}>
+                  <SelectTrigger className="h-10 bg-background border-border/50">
+                    <SelectValue placeholder="Any Pacing" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PACING_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                <label className="text-sm font-medium text-foreground mb-2 block">Era</label>
+                <Select value={filters.era} onValueChange={(value) => updateFilters({ era: value })}>
+                  <SelectTrigger className="h-10 bg-background border-border/50">
+                    <SelectValue placeholder="Any Era" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ERA_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-background/50 rounded-xl p-4 border border-border/30">
+                <label className="text-sm font-medium text-foreground mb-2 block">Language</label>
+                <Select value={filters.language} onValueChange={(value) => updateFilters({ language: value })}>
+                  <SelectTrigger className="h-10 bg-background border-border/50">
+                    <SelectValue placeholder="Any Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGE_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+    </div>
   );
 };
