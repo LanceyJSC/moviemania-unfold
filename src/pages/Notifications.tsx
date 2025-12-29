@@ -1,5 +1,6 @@
 import { Navigation } from '@/components/Navigation';
 import { DesktopHeader } from '@/components/DesktopHeader';
+import { MobileHeader } from '@/components/MobileHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -67,9 +68,11 @@ const Notifications = () => {
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12">
       <DesktopHeader />
-      {/* Header */}
-      <div className="sticky top-0 2xl:top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between p-4">
+      <MobileHeader title="Notifications" />
+      
+      {/* Desktop Header Actions */}
+      <div className="hidden 2xl:block sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
             {unreadCount > 0 && (
@@ -98,6 +101,28 @@ const Notifications = () => {
               <Settings className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+      </div>
+      
+      {/* Mobile Actions */}
+      <div className="2xl:hidden flex items-center justify-between px-4 py-2 border-b border-border">
+        {unreadCount > 0 && (
+          <Badge variant="destructive" className="rounded-full text-xs">
+            {unreadCount} unread
+          </Badge>
+        )}
+        <div className="flex gap-2 ml-auto">
+          {unreadCount > 0 && (
+            <Button
+              onClick={markAllAsRead}
+              size="sm"
+              variant="outline"
+              className="text-xs h-8"
+            >
+              <CheckCheck className="h-3.5 w-3.5 mr-1" />
+              Mark All
+            </Button>
+          )}
         </div>
       </div>
 
