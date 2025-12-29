@@ -27,9 +27,9 @@ export const DesktopHeader = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <img src="/sceneburn-icon.png" alt="SceneBurn" className="h-10 w-10 rounded-lg" />
-          <h1 className="font-cinematic text-2xl tracking-wider text-foreground">
+          <span className="font-cinematic text-2xl tracking-wider text-foreground">
             SCENE<span className="text-cinema-red">BURN</span>
-          </h1>
+          </span>
         </Link>
 
         {/* Navigation */}
