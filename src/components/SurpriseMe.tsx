@@ -214,11 +214,11 @@ export const SurpriseMe = ({ variant = 'button', className, mediaType = 'all' }:
             ) : media ? (
               <div className="relative">
                 {media.backdrop_path && (
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative aspect-video overflow-hidden">
                     <img
                       src={getImageUrl(media.backdrop_path, 'w780')}
                       alt={media.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
                   </div>
@@ -321,11 +321,11 @@ export const SurpriseMe = ({ variant = 'button', className, mediaType = 'all' }:
           ) : media ? (
             <div className="relative">
               {media.backdrop_path && (
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative aspect-video overflow-hidden">
                   <img
                     src={getImageUrl(media.backdrop_path, 'w780')}
                     alt={media.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
                 </div>
