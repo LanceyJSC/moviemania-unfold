@@ -120,11 +120,11 @@ const Lists = () => {
       <DesktopHeader />
       <MobileHeader title="Lists" />
       
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <List className="h-8 w-8 text-cinema-red" />
-            <h1 className="font-cinematic text-2xl text-foreground">Lists</h1>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-3 pb-8">
+        <div className="flex items-center justify-between mb-4 2xl:mb-6">
+          <div className="flex items-center gap-2">
+            <List className="h-6 w-6 2xl:h-8 2xl:w-8 text-cinema-red" />
+            <h1 className="font-cinematic text-xl 2xl:text-2xl text-foreground">Lists</h1>
           </div>
           {user && <CreateListModal />}
         </div>

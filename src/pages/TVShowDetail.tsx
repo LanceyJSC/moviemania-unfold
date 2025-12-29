@@ -247,77 +247,77 @@ const TVShowDetail = () => {
       </div>
 
       {/* Action Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 2xl:py-6">
         {/* Watch Trailer Button */}
-        <div className="mb-4">
+        <div className="mb-3">
           {trailerKey ? (
             <Button 
-              className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]"
+              className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-2.5 text-sm h-11"
               onClick={handleWatchTrailer}
             >
               <Play className="mr-2 h-4 w-4" />
               Watch Trailer
             </Button>
           ) : (
-            <Button className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-3 text-sm min-h-[44px]" disabled>
+            <Button className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-2.5 text-sm h-11" disabled>
               <Play className="mr-2 h-4 w-4" />
               No Trailer
             </Button>
           )}
         </div>
 
-        {/* Action Buttons with Labels */}
-        <div className="grid grid-cols-5 gap-2 mb-6">
+        {/* Action Buttons with Labels - Compact on mobile */}
+        <div className="grid grid-cols-5 gap-1.5 mb-4 2xl:mb-6">
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
             }`}
             onClick={() => requireAuth(() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv'))}
           >
-            <Heart className={`h-5 w-5 ${isTVShowLiked ? 'fill-current' : ''}`} />
-            <span className="text-xs">Like</span>
+            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowLiked ? 'fill-current' : ''}`} />
+            <span className="text-[10px] 2xl:text-xs">Like</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
             }`}
             onClick={() => requireAuth(() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv'))}
           >
-            <Plus className="h-5 w-5" />
-            <span className="text-xs">Watchlist</span>
+            <Plus className="h-4 w-4 2xl:h-5 2xl:w-5" />
+            <span className="text-[10px] 2xl:text-xs">List</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''
             }`}
             onClick={() => requireAuth(() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv'))}
           >
-            <Eye className={`h-5 w-5 ${isTVShowWatched ? 'fill-current' : ''}`} />
-            <span className="text-xs">Watched</span>
+            <Eye className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowWatched ? 'fill-current' : ''}`} />
+            <span className="text-[10px] 2xl:text-xs">Seen</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className="flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
             onClick={() => requireAuth(() => setShowLogModal(true))}
           >
-            <BookOpen className="h-5 w-5" />
-            <span className="text-xs">Log</span>
+            <BookOpen className="h-4 w-4 2xl:h-5 2xl:w-5" />
+            <span className="text-[10px] 2xl:text-xs">Log</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className="flex flex-col items-center gap-1 h-auto py-3 border-border hover:bg-card"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
             asChild
           >
             <Link to={`/tv/${tvShowId}/reviews`}>
-              <MessageCircle className="h-5 w-5" />
-              <span className="text-xs">Reviews</span>
+              <MessageCircle className="h-4 w-4 2xl:h-5 2xl:w-5" />
+              <span className="text-[10px] 2xl:text-xs">Reviews</span>
             </Link>
           </Button>
         </div>

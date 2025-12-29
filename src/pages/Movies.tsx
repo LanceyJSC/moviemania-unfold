@@ -61,9 +61,9 @@ const Movies = () => {
         <FeaturedHero type="movie" />
 
         <div className="relative">
-          <div className="px-4 2xl:px-6 pt-2 pb-32 2xl:pb-12 space-y-6 max-w-7xl mx-auto">
-            <div className="sticky top-0 2xl:top-16 z-40 bg-background/95 backdrop-blur-sm py-4">
-              <div className="flex justify-between space-x-1">
+          <div className="px-4 2xl:px-6 pt-2 pb-32 2xl:pb-12 space-y-4 2xl:space-y-6 max-w-7xl mx-auto">
+            <div className="sticky top-0 2xl:top-16 z-40 bg-background/95 backdrop-blur-sm py-3 2xl:py-4">
+              <div className="flex gap-1.5">
                 {filterButtons.map((filter) => {
                   const Icon = filter.icon;
                   return (
@@ -71,20 +71,18 @@ const Movies = () => {
                        key={filter.id}
                        variant={activeFilter === filter.id ? "default" : "outline"}
                        size="sm"
-                       className={`flex-1 h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-xl touch-target focus-ring ${
+                       className={`flex-1 h-9 2xl:h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-lg 2xl:rounded-xl touch-manipulation ${
                          activeFilter === filter.id 
                            ? "bg-cinema-red text-white shadow-md" 
                            : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
                        }`}
                        onClick={() => {
                          setActiveFilter(filter.id);
-                         setSelectedGenres([]); // Clear genre filter when changing category
+                         setSelectedGenres([]);
                        }}
                      >
-                      <div className="flex flex-col items-center">
-                        <Icon className="h-3 w-3 mb-0.5" />
-                        <span className="text-xs leading-none">{filter.label}</span>
-                      </div>
+                      <Icon className="h-3.5 w-3.5 2xl:mr-1" />
+                      <span className="hidden 2xl:inline text-xs">{filter.label}</span>
                     </Button>
                   );
                 })}
