@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Crown } from "lucide-react";
+import { ChevronDown, Crown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -93,10 +93,15 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     language: "any"
   });
 
-  const updateFilters = (newFilters: Partial<FilterState>) => {
+  // Store filters locally without triggering search immediately
+  const updateFiltersLocally = (newFilters: Partial<FilterState>) => {
     const updated = { ...filters, ...newFilters };
     setFilters(updated);
-    onFiltersChange(updated);
+  };
+
+  // Trigger the actual search
+  const handleDiscover = () => {
+    onFiltersChange(filters);
   };
 
   const handleGenreClick = (genreId: number) => {
@@ -111,14 +116,14 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
     const newMoods = filters.mood.includes(mood)
       ? filters.mood.filter(m => m !== mood)
       : [...filters.mood, mood];
-    updateFilters({ mood: newMoods });
+    updateFiltersLocally({ mood: newMoods });
   };
 
   const toggleTone = (tone: string) => {
     const newTones = filters.tone.includes(tone)
       ? filters.tone.filter(t => t !== tone)
       : [...filters.tone, tone];
-    updateFilters({ tone: newTones });
+    updateFiltersLocally({ tone: newTones });
   };
 
   const clearFilters = () => {
@@ -214,7 +219,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             </div>
             <Slider
               value={filters.yearRange}
-              onValueChange={(value) => updateFilters({ yearRange: value as [number, number] })}
+              onValueChange={(value) => updateFiltersLocally({ yearRange: value as [number, number] })}
               min={1900}
               max={new Date().getFullYear()}
               step={1}
@@ -229,7 +234,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             </div>
             <Slider
               value={filters.ratingRange}
-              onValueChange={(value) => updateFilters({ ratingRange: value as [number, number] })}
+              onValueChange={(value) => updateFiltersLocally({ ratingRange: value as [number, number] })}
               min={0}
               max={10}
               step={0.5}
@@ -244,7 +249,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             </div>
             <Slider
               value={filters.runtimeRange}
-              onValueChange={(value) => updateFilters({ runtimeRange: value as [number, number] })}
+              onValueChange={(value) => updateFiltersLocally({ runtimeRange: value as [number, number] })}
               min={0}
               max={300}
               step={15}
@@ -252,6 +257,16 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             />
           </div>
         </div>
+
+        {/* Discover Button */}
+        <Button 
+          onClick={handleDiscover}
+          className="w-full h-12 rounded-xl text-base font-medium"
+          size="lg"
+        >
+          <Search className="h-5 w-5 mr-2" />
+          Discover Movies
+        </Button>
 
         {/* Advanced Filters Collapsible */}
         <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
@@ -309,7 +324,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-background/50 rounded-xl p-4 border border-border/30">
                 <label className="text-sm font-medium text-foreground mb-2 block">Pacing</label>
-                <Select value={filters.pacing} onValueChange={(value) => updateFilters({ pacing: value })}>
+                <Select value={filters.pacing} onValueChange={(value) => updateFiltersLocally({ pacing: value })}>
                   <SelectTrigger className="h-10 bg-background border-border/50">
                     <SelectValue placeholder="Any Pacing" />
                   </SelectTrigger>
@@ -323,7 +338,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
 
               <div className="bg-background/50 rounded-xl p-4 border border-border/30">
                 <label className="text-sm font-medium text-foreground mb-2 block">Era</label>
-                <Select value={filters.era} onValueChange={(value) => updateFilters({ era: value })}>
+                <Select value={filters.era} onValueChange={(value) => updateFiltersLocally({ era: value })}>
                   <SelectTrigger className="h-10 bg-background border-border/50">
                     <SelectValue placeholder="Any Era" />
                   </SelectTrigger>
@@ -337,7 +352,7 @@ export const InlineFilters = ({ onFiltersChange }: InlineFiltersProps) => {
 
               <div className="bg-background/50 rounded-xl p-4 border border-border/30">
                 <label className="text-sm font-medium text-foreground mb-2 block">Language</label>
-                <Select value={filters.language} onValueChange={(value) => updateFilters({ language: value })}>
+                <Select value={filters.language} onValueChange={(value) => updateFiltersLocally({ language: value })}>
                   <SelectTrigger className="h-10 bg-background border-border/50">
                     <SelectValue placeholder="Any Language" />
                   </SelectTrigger>

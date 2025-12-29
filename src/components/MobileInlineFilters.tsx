@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Star, Clock, Crown, ChevronRight, Check } from "lucide-react";
+import { Calendar, Star, Clock, Crown, ChevronRight, Check, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -68,10 +68,15 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
     language: "any"
   });
 
-  const updateFilters = (newFilters: Partial<FilterState>) => {
+  // Store filters locally without triggering search immediately
+  const updateFiltersLocally = (newFilters: Partial<FilterState>) => {
     const updated = { ...filters, ...newFilters };
     setFilters(updated);
-    onFiltersChange(updated);
+  };
+
+  // Trigger the actual search
+  const handleDiscover = () => {
+    onFiltersChange(filters);
   };
 
   const handleGenreClick = (genreId: number) => {
@@ -91,11 +96,11 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
 
   const applySliderValue = () => {
     if (activeSlider === "year") {
-      updateFilters({ yearRange: tempYearRange });
+      updateFiltersLocally({ yearRange: tempYearRange });
     } else if (activeSlider === "rating") {
-      updateFilters({ ratingRange: tempRatingRange });
+      updateFiltersLocally({ ratingRange: tempRatingRange });
     } else if (activeSlider === "runtime") {
-      updateFilters({ runtimeRange: tempRuntimeRange });
+      updateFiltersLocally({ runtimeRange: tempRuntimeRange });
     }
     setActiveSlider(null);
   };
@@ -125,7 +130,6 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
       language: proFilters.language,
     };
     setFilters(updated);
-    onFiltersChange(updated);
   };
 
   const activeFilterCount = 
@@ -262,6 +266,16 @@ export const MobileInlineFilters = ({ onFiltersChange }: MobileInlineFiltersProp
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </div>
           </button>
+
+          {/* Discover Button */}
+          <Button 
+            onClick={handleDiscover}
+            className="w-full h-14 rounded-xl text-base font-medium mt-4"
+            size="lg"
+          >
+            <Search className="h-5 w-5 mr-2" />
+            Discover Movies
+          </Button>
         </div>
       </div>
 
