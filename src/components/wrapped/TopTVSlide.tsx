@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Star, Tv } from 'lucide-react';
+import { Flame, Tv } from 'lucide-react';
 
 interface TopTVSlideProps {
   tvShow: {
@@ -100,8 +100,8 @@ export const TopTVSlide: React.FC<TopTVSlideProps> = ({ tvShow }) => {
         }`}
       >
         <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-full px-4 py-2 border border-blue-500/30">
-          <Star className="h-5 w-5 text-blue-400 fill-blue-400" />
-          <span className="text-xl font-bold text-foreground">{tvShow.rating}/10</span>
+          <Flame className="h-5 w-5 text-cinema-red fill-cinema-red" />
+          <span className="text-xl font-bold text-foreground">{tvShow.rating}/5</span>
         </div>
       </div>
 

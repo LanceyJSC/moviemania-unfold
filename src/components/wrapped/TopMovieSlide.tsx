@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Star, Trophy } from 'lucide-react';
+import { Flame, Trophy } from 'lucide-react';
 
 interface TopMovieSlideProps {
   movie: {
@@ -114,8 +114,8 @@ export const TopMovieSlide: React.FC<TopMovieSlideProps> = ({ movie, label = "Yo
           showDetails ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
         }`}
       >
-        <Star className="h-5 w-5 text-cinema-gold fill-cinema-gold" />
-        <span className="text-xl font-bold text-foreground">{movie.rating}/10</span>
+        <Flame className="h-5 w-5 text-cinema-red fill-cinema-red" />
+        <span className="text-xl font-bold text-foreground">{movie.rating}/5</span>
       </div>
     </div>
   );
