@@ -253,7 +253,7 @@ class TMDBService {
     return this.fetchFromTMDB(`/search/person?query=${encodeURIComponent(query)}&page=${page}`);
   }
 
-  // Enhanced search that includes filmography from crew/people searches
+  // Enhanced search that includes filmography from people searches (actors, directors, etc.)
   async searchWithCrew(query: string): Promise<{ results: (Movie | TVShow)[], people: Person[] }> {
     try {
       // Fetch both multi search and person search in parallel
@@ -267,62 +267,54 @@ class TMDBService {
         (item: any) => item.media_type === 'movie' || item.media_type === 'tv'
       ) as (Movie | TVShow)[];
 
-      // Find people (directors, producers, writers, etc.) from person search
+      // Get all matched people (actors, directors, etc.)
       const people = personResults.results || [];
       
-      // For relevant people (not just actors), fetch their full credits
-      const crewPeople = people.filter(
-        (p: any) => p.known_for_department && 
-        ['Directing', 'Writing', 'Production', 'Creator'].includes(p.known_for_department)
-      ).slice(0, 3); // Limit to top 3 crew matches
+      // Take top matched people to fetch their filmography
+      const topPeople = people.slice(0, 5);
 
-      // Fetch detailed credits for crew people
-      const crewCreditsPromises = crewPeople.map(async (person: any) => {
+      // Fetch combined credits for each person (includes both cast AND crew work)
+      const creditsPromises = topPeople.map(async (person: any) => {
         try {
-          const details = await this.getPersonDetails(person.id);
-          const movieCredits = details.movie_credits?.cast || [];
-          const tvCredits = details.tv_credits?.cast || [];
-          
-          // Also get crew credits (for directors, producers, writers)
-          const response = await this.fetchFromTMDB<{ crew: any[] }>(`/person/${person.id}/combined_credits`);
+          const response = await this.fetchFromTMDB<{ cast: any[], crew: any[] }>(`/person/${person.id}/combined_credits`);
+          const castCredits = response.cast || [];
           const crewCredits = response.crew || [];
+          
+          // Combine cast and crew credits
+          const allCredits = [...castCredits, ...crewCredits];
           
           return {
             person,
-            movies: [...movieCredits, ...crewCredits.filter((c: any) => c.media_type === 'movie')],
-            tvShows: [...tvCredits, ...crewCredits.filter((c: any) => c.media_type === 'tv')]
+            credits: allCredits
           };
         } catch (e) {
-          return { person, movies: [], tvShows: [] };
+          console.error(`Failed to fetch credits for person ${person.id}:`, e);
+          // Fallback to known_for if available
+          return { 
+            person, 
+            credits: person.known_for || [] 
+          };
         }
       });
 
-      const crewCredits = await Promise.all(crewCreditsPromises);
+      const allCredits = await Promise.all(creditsPromises);
       
       // Combine and deduplicate results
       const seenIds = new Set(mediaResults.map((m: any) => `${m.media_type || (m.title ? 'movie' : 'tv')}-${m.id}`));
       const allResults = [...mediaResults];
 
-      // Add crew filmography to results
-      crewCredits.forEach(({ movies, tvShows }) => {
-        movies.forEach((m: any) => {
-          const key = `movie-${m.id}`;
-          if (!seenIds.has(key) && m.poster_path) {
+      // Add filmography from matched people
+      allCredits.forEach(({ credits }) => {
+        credits.forEach((item: any) => {
+          const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
+          const key = `${mediaType}-${item.id}`;
+          
+          if (!seenIds.has(key) && item.poster_path) {
             seenIds.add(key);
             allResults.push({
-              ...m,
-              media_type: 'movie'
-            } as Movie);
-          }
-        });
-        tvShows.forEach((t: any) => {
-          const key = `tv-${t.id}`;
-          if (!seenIds.has(key) && t.poster_path) {
-            seenIds.add(key);
-            allResults.push({
-              ...t,
-              media_type: 'tv'
-            } as TVShow);
+              ...item,
+              media_type: mediaType
+            } as Movie | TVShow);
           }
         });
       });
@@ -331,7 +323,7 @@ class TMDBService {
       allResults.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
 
       return {
-        results: allResults.slice(0, 40), // Limit to 40 results
+        results: allResults.slice(0, 50), // Limit to 50 results
         people: people.slice(0, 5) // Return top 5 matched people
       };
     } catch (error) {
