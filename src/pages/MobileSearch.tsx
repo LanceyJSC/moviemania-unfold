@@ -54,7 +54,7 @@ const Search = () => {
       try {
         // Use enhanced search that includes director/producer filmography
         const { results } = await tmdbService.searchWithCrew(debouncedSearchTerm);
-        setSearchResults(results.slice(0, 30));
+        setSearchResults(results); // No slice - show all results
       } catch (error) {
         console.error("Search failed:", error);
       } finally {
