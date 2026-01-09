@@ -270,8 +270,9 @@ class TMDBService {
       // Get all matched people (actors, directors, etc.)
       const people = personResults.results || [];
       
-      // Take top matched people to fetch their filmography
-      const topPeople = people.slice(0, 5);
+      // If we have a strong person match (first result is likely who user is searching for)
+      // fetch their FULL filmography
+      const topPeople = people.slice(0, 3); // Top 3 matched people
 
       // Fetch combined credits for each person (includes both cast AND crew work)
       const creditsPromises = topPeople.map(async (person: any) => {
@@ -280,7 +281,7 @@ class TMDBService {
           const castCredits = response.cast || [];
           const crewCredits = response.crew || [];
           
-          // Combine cast and crew credits
+          // Combine cast and crew credits - no limits
           const allCredits = [...castCredits, ...crewCredits];
           
           return {
@@ -303,13 +304,14 @@ class TMDBService {
       const seenIds = new Set(mediaResults.map((m: any) => `${m.media_type || (m.title ? 'movie' : 'tv')}-${m.id}`));
       const allResults = [...mediaResults];
 
-      // Add filmography from matched people
+      // Add ALL filmography from matched people - no limits
       allCredits.forEach(({ credits }) => {
         credits.forEach((item: any) => {
           const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
           const key = `${mediaType}-${item.id}`;
           
-          if (!seenIds.has(key) && item.poster_path) {
+          // Include items even without poster for completeness
+          if (!seenIds.has(key)) {
             seenIds.add(key);
             allResults.push({
               ...item,
@@ -319,12 +321,12 @@ class TMDBService {
         });
       });
 
-      // Sort by popularity
+      // Sort by popularity (most popular first)
       allResults.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
 
       return {
-        results: allResults.slice(0, 50), // Limit to 50 results
-        people: people.slice(0, 5) // Return top 5 matched people
+        results: allResults, // Return ALL results - no limit
+        people: people.slice(0, 5)
       };
     } catch (error) {
       console.error('Enhanced search failed:', error);
