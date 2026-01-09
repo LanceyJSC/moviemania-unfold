@@ -248,6 +248,105 @@ class TMDBService {
     return this.fetchFromTMDB(`/search/multi?query=${encodeURIComponent(query)}&page=${page}`);
   }
 
+  // Search for people (actors, directors, producers, crew)
+  async searchPerson(query: string, page: number = 1): Promise<TMDBResponse<Person & { known_for?: (Movie | TVShow)[] }>> {
+    return this.fetchFromTMDB(`/search/person?query=${encodeURIComponent(query)}&page=${page}`);
+  }
+
+  // Enhanced search that includes filmography from crew/people searches
+  async searchWithCrew(query: string): Promise<{ results: (Movie | TVShow)[], people: Person[] }> {
+    try {
+      // Fetch both multi search and person search in parallel
+      const [multiResults, personResults] = await Promise.all([
+        this.searchMulti(query),
+        this.searchPerson(query)
+      ]);
+
+      // Filter multi results to only movies and TV shows
+      const mediaResults = multiResults.results.filter(
+        (item: any) => item.media_type === 'movie' || item.media_type === 'tv'
+      ) as (Movie | TVShow)[];
+
+      // Find people (directors, producers, writers, etc.) from person search
+      const people = personResults.results || [];
+      
+      // For relevant people (not just actors), fetch their full credits
+      const crewPeople = people.filter(
+        (p: any) => p.known_for_department && 
+        ['Directing', 'Writing', 'Production', 'Creator'].includes(p.known_for_department)
+      ).slice(0, 3); // Limit to top 3 crew matches
+
+      // Fetch detailed credits for crew people
+      const crewCreditsPromises = crewPeople.map(async (person: any) => {
+        try {
+          const details = await this.getPersonDetails(person.id);
+          const movieCredits = details.movie_credits?.cast || [];
+          const tvCredits = details.tv_credits?.cast || [];
+          
+          // Also get crew credits (for directors, producers, writers)
+          const response = await this.fetchFromTMDB<{ crew: any[] }>(`/person/${person.id}/combined_credits`);
+          const crewCredits = response.crew || [];
+          
+          return {
+            person,
+            movies: [...movieCredits, ...crewCredits.filter((c: any) => c.media_type === 'movie')],
+            tvShows: [...tvCredits, ...crewCredits.filter((c: any) => c.media_type === 'tv')]
+          };
+        } catch (e) {
+          return { person, movies: [], tvShows: [] };
+        }
+      });
+
+      const crewCredits = await Promise.all(crewCreditsPromises);
+      
+      // Combine and deduplicate results
+      const seenIds = new Set(mediaResults.map((m: any) => `${m.media_type || (m.title ? 'movie' : 'tv')}-${m.id}`));
+      const allResults = [...mediaResults];
+
+      // Add crew filmography to results
+      crewCredits.forEach(({ movies, tvShows }) => {
+        movies.forEach((m: any) => {
+          const key = `movie-${m.id}`;
+          if (!seenIds.has(key) && m.poster_path) {
+            seenIds.add(key);
+            allResults.push({
+              ...m,
+              media_type: 'movie'
+            } as Movie);
+          }
+        });
+        tvShows.forEach((t: any) => {
+          const key = `tv-${t.id}`;
+          if (!seenIds.has(key) && t.poster_path) {
+            seenIds.add(key);
+            allResults.push({
+              ...t,
+              media_type: 'tv'
+            } as TVShow);
+          }
+        });
+      });
+
+      // Sort by popularity
+      allResults.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
+
+      return {
+        results: allResults.slice(0, 40), // Limit to 40 results
+        people: people.slice(0, 5) // Return top 5 matched people
+      };
+    } catch (error) {
+      console.error('Enhanced search failed:', error);
+      // Fallback to basic search
+      const basic = await this.searchMulti(query);
+      return {
+        results: basic.results.filter((item: any) => 
+          item.media_type === 'movie' || item.media_type === 'tv'
+        ) as (Movie | TVShow)[],
+        people: []
+      };
+    }
+  }
+
   // Genre methods
   async getGenres(): Promise<{ genres: { id: number; name: string }[] }> {
     return this.fetchFromTMDB(`/genre/movie/list`);

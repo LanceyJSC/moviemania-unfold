@@ -60,7 +60,7 @@ const Search = () => {
     handleGenreSearch();
   }, [genreParam, isProUser]);
 
-  // Handle text-based search
+  // Handle text-based search with crew/director support
   useEffect(() => {
     const searchContent = async () => {
       if (!debouncedSearchTerm) {
@@ -72,15 +72,22 @@ const Search = () => {
 
       setIsSearching(true);
       try {
-        let results;
+        // Use enhanced search that includes director/producer filmography
+        const { results } = await tmdbService.searchWithCrew(debouncedSearchTerm);
+        
+        // Filter by active tab if needed
+        let filteredResults = results;
         if (activeTab === 'movies') {
-          results = await tmdbService.searchMovies(debouncedSearchTerm);
+          filteredResults = results.filter((item: any) => 
+            item.media_type === 'movie' || item.title
+          );
         } else if (activeTab === 'tv') {
-          results = await tmdbService.searchTVShows(debouncedSearchTerm);
-        } else {
-          results = await tmdbService.searchMulti(debouncedSearchTerm);
+          filteredResults = results.filter((item: any) => 
+            item.media_type === 'tv' || item.name
+          );
         }
-        setSearchResults(results.results);
+        
+        setSearchResults(filteredResults);
       } catch (error) {
         console.error("Search failed:", error);
       } finally {
