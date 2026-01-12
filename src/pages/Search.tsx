@@ -22,6 +22,7 @@ const Search = () => {
   
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [matchedPeople, setMatchedPeople] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'movies' | 'tv'>('all');
   const [showProModal, setShowProModal] = useState(false);
@@ -66,6 +67,7 @@ const Search = () => {
       if (!debouncedSearchTerm) {
         if (!genreParam) {
           setSearchResults([]);
+          setMatchedPeople([]);
         }
         return;
       }
@@ -73,7 +75,7 @@ const Search = () => {
       setIsSearching(true);
       try {
         // Use enhanced search that includes director/producer filmography
-        const { results } = await tmdbService.searchWithCrew(debouncedSearchTerm);
+        const { results, people } = await tmdbService.searchWithCrew(debouncedSearchTerm);
         
         // Filter by active tab if needed
         let filteredResults = results;
@@ -88,6 +90,7 @@ const Search = () => {
         }
         
         setSearchResults(filteredResults);
+        setMatchedPeople(people || []);
       } catch (error) {
         console.error("Search failed:", error);
       } finally {
@@ -100,6 +103,7 @@ const Search = () => {
 
   const clearSearch = () => {
     setSearchTerm("");
+    setMatchedPeople([]);
     if (!genreParam) {
       setSearchResults([]);
     }
@@ -448,7 +452,43 @@ const Search = () => {
 
         {/* Search Results - Optimized grid for mobile */}
         {(searchTerm || genreParam) && (
-          <div className="py-4 2xl:py-6">
+          <div className="py-4 2xl:py-6 space-y-6">
+            {/* Matched People Section */}
+            {!isSearching && matchedPeople.length > 0 && searchTerm && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-6 w-1 bg-primary rounded-full" />
+                  <h2 className="text-lg font-semibold text-foreground">People</h2>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                  {matchedPeople.map((person: any) => (
+                    <button
+                      key={person.id}
+                      onClick={() => navigate(`/actor/${person.id}`)}
+                      className="flex-shrink-0 text-center group"
+                    >
+                      <div className="w-24 h-24 2xl:w-28 2xl:h-28 rounded-full overflow-hidden bg-muted mb-2 ring-2 ring-transparent group-hover:ring-primary transition-all">
+                        {person.profile_path ? (
+                          <img
+                            src={`https://image.tmdb.org/t/p/w185${person.profile_path}`}
+                            alt={person.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground text-2xl font-semibold">
+                            {person.name?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-foreground truncate w-24 2xl:w-28">{person.name}</p>
+                      <p className="text-xs text-muted-foreground truncate w-24 2xl:w-28">{person.known_for_department}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Media Results */}
             {isSearching ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
@@ -456,14 +496,14 @@ const Search = () => {
                   <p className="text-sm text-muted-foreground">Searching...</p>
                 </div>
               </div>
-            ) : !hasResults ? (
+            ) : !hasResults && matchedPeople.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <SearchIcon className="h-7 w-7 text-muted-foreground/50" />
                 </div>
                 <p className="text-sm text-muted-foreground">No results for "{searchTerm || getGenreName(genreParam)}"</p>
               </div>
-            ) : (
+            ) : hasResults && (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-6 w-1 bg-primary rounded-full" />
