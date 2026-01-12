@@ -17,6 +17,7 @@ const Search = () => {
   
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [matchedPeople, setMatchedPeople] = useState<any[]>([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingTVShows, setTrendingTVShows] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -47,14 +48,16 @@ const Search = () => {
     const searchContent = async () => {
       if (!debouncedSearchTerm) {
         setSearchResults([]);
+        setMatchedPeople([]);
         return;
       }
 
       setIsSearching(true);
       try {
         // Use enhanced search that includes director/producer filmography
-        const { results } = await tmdbService.searchWithCrew(debouncedSearchTerm);
+        const { results, people } = await tmdbService.searchWithCrew(debouncedSearchTerm);
         setSearchResults(results); // No slice - show all results
+        setMatchedPeople(people || []); // Store matched people
       } catch (error) {
         console.error("Search failed:", error);
       } finally {
@@ -167,45 +170,80 @@ const Search = () => {
       <div className="px-4 py-6 space-y-8">
         {/* Search Results */}
         {searchTerm ? (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-foreground">
-                {isSearching ? "Searching..." : `Results for "${searchTerm}"`}
-              </h2>
-              {filteredResults.length > 0 && (
-                <span className="text-sm text-muted-foreground">
-                  {filteredResults.length} found
-                </span>
-              )}
-            </div>
-            
-            {isSearching ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="aspect-[2/3] bg-muted rounded-2xl" />
-                    <div className="mt-2 space-y-1">
-                      <div className="h-4 bg-muted rounded w-3/4" />
-                      <div className="h-3 bg-muted rounded w-1/2" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : filteredResults.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {filteredResults.map((item) => 
-                  item.media_type === 'movie' ? renderMovieCard(item) : renderTVCard(item)
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <SearchIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-medium text-foreground mb-2">No results found</h3>
-                <p className="text-sm text-muted-foreground">
-                  Try searching with different keywords
-                </p>
+          <div className="space-y-6">
+            {/* Matched People Section */}
+            {!isSearching && matchedPeople.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-foreground mb-3">People</h3>
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                  {matchedPeople.map((person: any) => (
+                    <button
+                      key={person.id}
+                      onClick={() => navigate(`/actor/${person.id}`)}
+                      className="flex-shrink-0 text-center group"
+                    >
+                      <div className="w-20 h-20 rounded-full overflow-hidden bg-muted mb-2 ring-2 ring-transparent group-hover:ring-primary transition-all">
+                        {person.profile_path ? (
+                          <img
+                            src={`https://image.tmdb.org/t/p/w185${person.profile_path}`}
+                            alt={person.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground text-2xl font-semibold">
+                            {person.name?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs font-medium text-foreground truncate w-20">{person.name}</p>
+                      <p className="text-xs text-muted-foreground truncate w-20">{person.known_for_department}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
+            
+            {/* Media Results */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-foreground">
+                  {isSearching ? "Searching..." : `Results for "${searchTerm}"`}
+                </h2>
+                {filteredResults.length > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    {filteredResults.length} found
+                  </span>
+                )}
+              </div>
+              
+              {isSearching ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="aspect-[2/3] bg-muted rounded-2xl" />
+                      <div className="mt-2 space-y-1">
+                        <div className="h-4 bg-muted rounded w-3/4" />
+                        <div className="h-3 bg-muted rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : filteredResults.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {filteredResults.map((item) => 
+                    item.media_type === 'movie' ? renderMovieCard(item) : renderTVCard(item)
+                  )}
+                </div>
+              ) : matchedPeople.length === 0 && (
+                <div className="text-center py-12">
+                  <SearchIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-medium text-foreground mb-2">No results found</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Try searching with different keywords
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           /* Trending Content */
