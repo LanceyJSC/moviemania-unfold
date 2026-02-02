@@ -134,46 +134,54 @@ const NewsArticle = () => {
           )}
         </header>
 
-        {/* Divider */}
-        <div className="border-t border-border mb-8" />
-
-        {/* Article Content or Read Original */}
-        {article.content ? (
-          <div className="prose prose-lg prose-invert max-w-none 
-            prose-headings:text-foreground prose-headings:font-semibold
-            prose-p:text-foreground/90 prose-p:leading-relaxed">
-            <ReactMarkdown>{article.content}</ReactMarkdown>
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground mb-6">
-              {article.excerpt}
-            </p>
-            {article.source_url && (
-              <Button asChild size="lg" className="gap-2">
+        {/* Main Call to Action - Read Full Article */}
+        {article.source_url && (
+          <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-8 mb-8">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-foreground mb-3">
+                Continue Reading
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+                This is a summary from {article.source_name}. Read the complete story with all the details on their website.
+              </p>
+              <Button asChild size="lg" className="gap-2 text-lg px-8 py-6">
                 <a href={article.source_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-5 w-5" />
                   Read Full Article on {article.source_name}
                 </a>
               </Button>
-            )}
+            </div>
           </div>
         )}
 
-        {/* Source Link */}
+        {/* Summary Content */}
+        {article.content && (
+          <>
+            <div className="mb-4">
+              <Badge variant="secondary" className="text-xs">Summary</Badge>
+            </div>
+            <div className="prose prose-lg prose-invert max-w-none 
+              prose-headings:text-foreground prose-headings:font-semibold
+              prose-p:text-foreground/90 prose-p:leading-relaxed">
+              <ReactMarkdown>{article.content}</ReactMarkdown>
+            </div>
+          </>
+        )}
+
+        {/* Bottom CTA */}
         {article.source_url && (
-          <div className="mt-12 pt-8 border-t border-border">
-            <p className="text-sm text-muted-foreground mb-3">
-              Originally published on {article.source_name || "the source"}
+          <div className="mt-12 pt-8 border-t border-border text-center">
+            <p className="text-muted-foreground mb-4">
+              Want the full story?
             </p>
-            <Button asChild variant="outline" className="gap-2">
+            <Button asChild size="lg" variant="outline" className="gap-2">
               <a
                 href={article.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <ExternalLink className="h-4 w-4" />
-                Read original article
+                Read complete article on {article.source_name}
               </a>
             </Button>
           </div>
