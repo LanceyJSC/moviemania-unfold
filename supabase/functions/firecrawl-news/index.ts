@@ -34,54 +34,60 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate request
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey) {
       throw new Error("Supabase configuration not found");
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    // Verify user is admin
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: claimsError } = await supabase.auth.getClaims(token);
+    // Check if this is a scheduled cron call (uses anon key in Authorization)
+    const authHeader = req.headers.get("Authorization");
+    const isCronCall = authHeader === `Bearer ${supabaseAnonKey}`;
     
-    if (claimsError || !claims?.claims?.sub) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // For non-cron calls, verify admin access
+    if (!isCronCall) {
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
       });
+
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claims, error: claimsError } = await supabase.auth.getClaims(token);
+      
+      if (claimsError || !claims?.claims?.sub) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const userId = claims.claims.sub;
+
+      // Check admin role
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .single();
+
+      if (roleError || !roleData) {
+        return new Response(JSON.stringify({ error: "Admin access required" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
-    const userId = claims.claims.sub;
-
-    // Check admin role
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .single();
-
-    if (roleError || !roleData) {
-      return new Response(JSON.stringify({ error: "Admin access required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    console.log(`Fetching entertainment news via Firecrawl (cron: ${isCronCall})...`);
 
     // Get Firecrawl API key
     const firecrawlApiKey = Deno.env.get("FIRECRAWL_API_KEY");
@@ -95,8 +101,6 @@ Deno.serve(async (req) => {
         }
       );
     }
-
-    console.log("Fetching entertainment news via Firecrawl...");
 
     // Build search query with news sources
     const searchQuery = `movie OR "TV show" news ${NEWS_SOURCES.join(" OR ")}`;
@@ -147,7 +151,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Process and save articles
+    // Process articles
     const articles = [];
     for (const result of searchData.data) {
       if (!result.title || !result.url) continue;
@@ -221,14 +225,23 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Insert articles into database using service role for insert
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!serviceRoleKey) {
-      throw new Error("Service role key not configured");
-    }
-
+    // Use service role client for database operations
     const adminSupabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // Delete ALL existing articles first (replace with fresh content)
+    const { error: deleteError } = await adminSupabase
+      .from("news_articles")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000"); // Delete all rows
+
+    if (deleteError) {
+      console.error("Error deleting old articles:", deleteError);
+      // Continue anyway - we still want to insert new articles
+    } else {
+      console.log("Deleted all old articles");
+    }
+
+    // Insert new articles
     const { data: insertedArticles, error: insertError } = await adminSupabase
       .from("news_articles")
       .insert(articles)
@@ -250,7 +263,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Imported ${insertedArticles?.length || 0} articles as drafts`,
+        message: `Replaced news with ${insertedArticles?.length || 0} fresh articles`,
         imported: insertedArticles?.length || 0,
         articles: insertedArticles,
       }),
