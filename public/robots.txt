@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://www.sceneburn.com/sitemap.xml
+Sitemap: https://sceneburn.com/sitemap.xml
