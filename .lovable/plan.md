@@ -1,59 +1,123 @@
 
+# Entertainment News Aggregator with Firecrawl
 
-# Fix: Make Sitemap Accessible from Your Domain
-
-Google Search Console requires the sitemap to be hosted on the **same domain** as your website. Currently, the dynamic sitemap is hosted at a backend URL which Google won't accept.
+## Overview
+Create a dedicated **News** section that automatically fetches and displays the latest movie and TV news from major entertainment sources using Firecrawl. This keeps "News" separate from "Blog" (which can remain for original editorial content).
 
 ---
 
-## The Solution
+## What We'll Build
 
-We have two options, and I recommend **Option 1** for simplicity:
+### 1. New Database Table: `news_articles`
+A dedicated table for scraped news content, separate from `blog_posts`:
 
-### Option 1: Use the Static Sitemap (Recommended)
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | uuid | Primary key |
+| `title` | text | Article headline |
+| `excerpt` | text | Short summary |
+| `content` | text | Full article content (markdown) |
+| `source_url` | text | Original article URL |
+| `source_name` | text | Publication name (Variety, Deadline, etc.) |
+| `featured_image` | text | Article image URL |
+| `published_at` | timestamp | When scraped/published |
+| `created_at` | timestamp | When added to database |
+| `status` | text | 'draft' or 'published' |
 
-Your site already has a static sitemap at `public/sitemap.xml` which we updated earlier. This file is served directly from your domain.
+### 2. New Pages
+- **`/news`** - Public news listing page showing all published articles
+- **`/news/:slug`** - Individual news article page
 
-**What to submit to Google Search Console:**
+### 3. Edge Function: `firecrawl-news`
+Backend function that:
+1. Searches for latest movie/TV news via Firecrawl
+2. Scrapes content from top entertainment sources
+3. Extracts title, content, and images
+4. Saves as draft articles for admin review
+
+### 4. Admin Panel Updates
+Add a "News" tab with:
+- "Fetch Latest News" button to trigger scraping
+- List of fetched/imported articles
+- One-click publish functionality
+
+### 5. Navigation Updates
+- Add "News" link to mobile navigation (Newspaper icon)
+- Add "News" link to desktop header
+- Update sitemap to include `/news`
+
+---
+
+## Architecture
+
+```text
++------------------+     +-------------------+     +------------------+
+|  Admin Dashboard | --> |  firecrawl-news   | --> |  news_articles   |
+|  "Fetch News"    |     |  Edge Function    |     |  table           |
++------------------+     +-------------------+     +------------------+
+                                 |
+                                 v
+                         +------------------+
+                         |  Firecrawl API   |
+                         +------------------+
+                                 |
+                                 v
+                   +-------------------------------+
+                   |  Entertainment News Sources   |
+                   |  Variety, Deadline, THR, etc  |
+                   +-------------------------------+
 ```
-https://www.sceneburn.com/sitemap.xml
-```
-
-**What I'll update:**
-- `public/robots.txt` - Change the Sitemap directive to point to your domain's sitemap
-
-This is the simplest solution and works immediately.
 
 ---
 
-### Option 2: Create a Sitemap Proxy Route (Advanced)
+## Files to Create
 
-Create a client-side route that fetches the dynamic sitemap and returns it. However, this is more complex and may have crawling limitations.
+| File | Purpose |
+|------|---------|
+| `supabase/functions/firecrawl-news/index.ts` | Scrape news via Firecrawl |
+| `src/pages/News.tsx` | Public news listing page |
+| `src/pages/NewsArticle.tsx` | Individual article page |
+| `src/hooks/useNews.tsx` | React Query hooks for news data |
+| `src/components/NewsCard.tsx` | News article card component |
+
+## Files to Modify
+
+| File | Changes |
+|------|---------|
+| `supabase/config.toml` | Register new edge function |
+| `src/App.tsx` | Add /news routes |
+| `src/pages/Admin.tsx` | Add News tab with fetch functionality |
+| `src/components/Navigation.tsx` | Add News link to mobile nav |
+| `src/components/DesktopHeader.tsx` | Add News link to desktop nav |
+| `public/sitemap.xml` | Add /news page |
 
 ---
 
-## Files to Update
+## User Experience
 
-| File | Change |
-|------|--------|
-| `public/robots.txt` | Update Sitemap line to `https://www.sceneburn.com/sitemap.xml` |
+### For Visitors
+1. Click "News" in navigation
+2. See latest entertainment headlines with images
+3. Click article to read full story
+4. Each article shows source attribution
+
+### For Admin
+1. Go to Admin > News tab
+2. Click "Fetch Latest News"
+3. Review scraped articles
+4. Publish approved articles with one click
 
 ---
 
-## After This Change
-
-1. Submit `https://www.sceneburn.com/sitemap.xml` to Google Search Console
-2. Google will accept it because it's on your domain
-3. The static sitemap already contains all your main pages
+## News Sources (Configurable)
+- Variety
+- Deadline
+- The Hollywood Reporter
+- Entertainment Weekly
+- Screen Rant
+- Collider
 
 ---
 
-## Trade-off Note
-
-The static sitemap contains 12 main pages but not the dynamic movie/TV show pages. However, Google will discover those through:
-- Internal links on your site
-- The Schema.org structured data on each page
-- User traffic patterns
-
-For most sites, this is sufficient for good SEO coverage.
-
+## First Step Required
+Before implementation, I'll need to connect the Firecrawl connector to provide the API key for web scraping.
