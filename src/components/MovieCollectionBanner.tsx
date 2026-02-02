@@ -47,7 +47,7 @@ export const MovieCollectionBanner = ({ collectionId, currentMovieId }: MovieCol
   const progressPercent = totalCount > 0 ? (watchedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="relative rounded-xl overflow-hidden mb-6">
+    <div className="relative rounded-xl overflow-hidden mb-6 w-full max-w-full">
       {/* Background */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
@@ -62,7 +62,7 @@ export const MovieCollectionBanner = ({ collectionId, currentMovieId }: MovieCol
       </div>
 
       {/* Content */}
-      <div className="relative p-4">
+      <div className="relative p-4 w-full max-w-full overflow-hidden">
         <div className="flex items-center gap-2 mb-2">
           <Film className="h-4 w-4 text-cinema-gold" />
           <span className="text-xs text-cinema-gold font-semibold uppercase tracking-wider">Part of Collection</span>
@@ -84,29 +84,31 @@ export const MovieCollectionBanner = ({ collectionId, currentMovieId }: MovieCol
           </div>
         </div>
 
-        {/* Movie posters */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {collection.parts.map((movie) => (
-            <Link 
-              key={movie.id} 
-              to={`/movie/${movie.id}`}
-              className={`flex-shrink-0 relative ${movie.id === currentMovieId ? 'ring-2 ring-cinema-gold rounded-md' : ''}`}
-            >
-              <img
-                src={tmdbService.getPosterUrl(movie.poster_path, 'w300')}
-                alt={movie.title}
-                className="w-14 h-20 object-cover rounded-md"
-              />
-              {isWatched(movie.id) && (
-                <div className="absolute inset-0 bg-green-600/50 rounded-md flex items-center justify-center">
-                  <Check className="h-4 w-4 text-white" />
-                </div>
-              )}
-              {movie.id === currentMovieId && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-cinema-gold rounded-full" />
-              )}
-            </Link>
-          ))}
+        {/* Movie posters - contained within banner */}
+        <div className="w-full max-w-full overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 pb-2">
+            {collection.parts.map((movie) => (
+              <Link 
+                key={movie.id} 
+                to={`/movie/${movie.id}`}
+                className={`flex-shrink-0 relative ${movie.id === currentMovieId ? 'ring-2 ring-cinema-gold rounded-md' : ''}`}
+              >
+                <img
+                  src={tmdbService.getPosterUrl(movie.poster_path, 'w300')}
+                  alt={movie.title}
+                  className="w-14 h-20 object-cover rounded-md"
+                />
+                {isWatched(movie.id) && (
+                  <div className="absolute inset-0 bg-green-600/50 rounded-md flex items-center justify-center">
+                    <Check className="h-4 w-4 text-white" />
+                  </div>
+                )}
+                {movie.id === currentMovieId && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-cinema-gold rounded-full" />
+                )}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>
