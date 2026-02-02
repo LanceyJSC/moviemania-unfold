@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sceneburn.com/</loc>
+    <loc>https://www.sceneburn.com/</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/movies</loc>
+    <loc>https://www.sceneburn.com/movies</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/tv-shows</loc>
+    <loc>https://www.sceneburn.com/tv-shows</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/search</loc>
+    <loc>https://www.sceneburn.com/search</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/genres</loc>
+    <loc>https://www.sceneburn.com/genres</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/lists</loc>
+    <loc>https://www.sceneburn.com/lists</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/activity</loc>
+    <loc>https://www.sceneburn.com/activity</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/recommendations</loc>
+    <loc>https://www.sceneburn.com/recommendations</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/stats</loc>
+    <loc>https://www.sceneburn.com/stats</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/achievements</loc>
+    <loc>https://www.sceneburn.com/achievements</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/pro</loc>
+    <loc>https://www.sceneburn.com/pro</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://sceneburn.com/auth</loc>
+    <loc>https://www.sceneburn.com/auth</loc>
     <lastmod>2025-01-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
