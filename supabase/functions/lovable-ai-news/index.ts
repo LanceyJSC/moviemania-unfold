@@ -22,6 +22,9 @@ const RSS_FEEDS = [
   { url: "https://www.hollywoodreporter.com/feed/", source: "The Hollywood Reporter" },
   { url: "https://collider.com/feed/", source: "Collider" },
   { url: "https://screenrant.com/feed/", source: "Screen Rant" },
+  { url: "https://www.indiewire.com/feed/", source: "IndieWire" },
+  { url: "https://ew.com/feed/", source: "Entertainment Weekly" },
+  { url: "https://www.ign.com/articles.rss", source: "IGN" },
 ];
 
 // Parse RSS XML to extract items with full content
@@ -29,7 +32,7 @@ function parseRssXml(xml: string, source: string): RssItem[] {
   const items: RssItem[] = [];
   const itemMatches = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
   
-  for (const itemXml of itemMatches.slice(0, 3)) {
+  for (const itemXml of itemMatches.slice(0, 5)) {
     try {
       // Extract title
       const titleMatch = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) ||
@@ -224,7 +227,7 @@ serve(async (req) => {
         const dateB = new Date(b.pubDate).getTime() || 0;
         return dateB - dateA;
       })
-      .slice(0, 10);
+      .slice(0, 20);
 
     console.log(`Processing ${sortedItems.length} quality articles`);
 

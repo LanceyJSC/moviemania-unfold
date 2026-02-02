@@ -42,10 +42,12 @@ export const FeaturedNewsCard = ({ article }: FeaturedNewsCardProps) => {
             src={article.featured_image}
             alt={article.title}
             className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
           />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/50" />
-        )}
+        ) : null}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-secondary/30" />
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />

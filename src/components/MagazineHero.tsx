@@ -42,10 +42,12 @@ export const MagazineHero = ({ article }: MagazineHeroProps) => {
             src={article.featured_image}
             alt={article.title}
             className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
           />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5" />
-        )}
+        ) : null}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-secondary/40" />
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />

@@ -12,10 +12,10 @@ import { usePublishedNews } from "@/hooks/useNews";
 const News = () => {
   const { data: articles, isLoading, error } = usePublishedNews();
 
-  // Split articles into hero, featured, and grid
+  // Split articles into hero, featured, and grid sections
   const heroArticle = articles?.[0];
-  const featuredArticles = articles?.slice(1, 3) || [];
-  const gridArticles = articles?.slice(3) || [];
+  const featuredArticles = articles?.slice(1, 5) || [];
+  const gridArticles = articles?.slice(5) || [];
 
   return (
     <div className="min-h-screen bg-background pb-24 2xl:pb-0">
@@ -76,9 +76,9 @@ const News = () => {
             {/* Hero Article */}
             {heroArticle && <MagazineHero article={heroArticle} />}
 
-            {/* Featured Articles (2 columns) */}
+            {/* Featured Articles (2x2 grid) */}
             {featuredArticles.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {featuredArticles.map((article) => (
                   <FeaturedNewsCard key={article.id} article={article} />
                 ))}
@@ -88,10 +88,10 @@ const News = () => {
             {/* Grid Articles */}
             {gridArticles.length > 0 && (
               <>
-                <div className="border-t border-border pt-8">
-                  <h2 className="text-xl font-semibold text-foreground mb-6">More Stories</h2>
+                <div className="border-t border-border pt-8 mt-4">
+                  <h2 className="text-xl font-semibold text-foreground mb-6">Latest Headlines</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {gridArticles.map((article) => (
                     <NewsCard key={article.id} article={article} />
                   ))}
