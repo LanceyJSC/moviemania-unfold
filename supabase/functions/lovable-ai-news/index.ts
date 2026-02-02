@@ -197,6 +197,63 @@ function generateExcerpt(content: string, maxLength: number = 300): string {
   return excerpt || content.substring(0, maxLength);
 }
 
+// Fetch full article content using Firecrawl
+async function fetchFullArticle(url: string): Promise<string | null> {
+  const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+  
+  if (!FIRECRAWL_API_KEY) {
+    console.log("No Firecrawl API key, skipping full article fetch");
+    return null;
+  }
+  
+  try {
+    const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${FIRECRAWL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: url,
+        formats: ["markdown"],
+        onlyMainContent: true,
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error(`Firecrawl error for ${url}: ${response.status}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (data.success && data.data?.markdown) {
+      // Clean up the markdown content
+      let content = data.data.markdown;
+      
+      // Remove common unwanted patterns
+      content = content
+        .replace(/\[.*?\]\(javascript:.*?\)/g, '') // Remove javascript links
+        .replace(/!\[.*?\]\(.*?\)/g, '') // Remove image markdown
+        .replace(/\n{3,}/g, '\n\n') // Reduce multiple newlines
+        .replace(/^[\s\S]*?(?=\n\n)/m, '') // Remove first paragraph if it looks like nav
+        .trim();
+      
+      // Limit to reasonable length (about 8000 chars)
+      if (content.length > 8000) {
+        content = content.substring(0, 8000) + '...';
+      }
+      
+      return content;
+    }
+    
+    return null;
+  } catch (e) {
+    console.error(`Error fetching full article from ${url}:`, e);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -242,7 +299,7 @@ serve(async (req) => {
     
     console.log(`Fetched ${allItems.length} total items from RSS feeds`);
 
-    // Sort by date (newest first) and take top 10
+    // Sort by date (newest first) and take top 15
     const sortedItems = allItems
       .filter(item => item.title && item.description.length > 100)
       .sort((a, b) => {
@@ -250,20 +307,21 @@ serve(async (req) => {
         const dateB = new Date(b.pubDate).getTime() || 0;
         return dateB - dateA;
       })
-      .slice(0, 20);
+      .slice(0, 15);
 
-    console.log(`Processing ${sortedItems.length} quality articles`);
+    console.log(`Processing ${sortedItems.length} quality articles with full content fetch`);
 
     let insertedCount = 0;
     
     for (const item of sortedItems) {
       try {
-        // Store more content for richer articles (up to 5000 chars)
-        const content = item.description.length > 5000 
-          ? item.description.substring(0, 5000) + '...'
-          : item.description;
+        // Fetch full article content using Firecrawl
+        console.log(`Fetching full content for: ${item.title.substring(0, 40)}...`);
+        const fullContent = await fetchFullArticle(item.link);
         
-        const excerpt = generateExcerpt(item.description, 350);
+        // Use full content if available, otherwise use RSS excerpt
+        const content = fullContent || item.description;
+        const excerpt = generateExcerpt(fullContent || item.description, 350);
         
         const slug = item.title
           .toLowerCase()
@@ -289,19 +347,19 @@ serve(async (req) => {
           console.error(`Error inserting "${item.title}":`, insertError);
         } else {
           insertedCount++;
-          console.log(`Inserted: ${item.title.substring(0, 50)}...`);
+          console.log(`Inserted: ${item.title.substring(0, 50)}... (${content.length} chars)`);
         }
       } catch (e) {
         console.error(`Error processing ${item.title}:`, e);
       }
     }
 
-    console.log(`Successfully inserted ${insertedCount} articles`);
+    console.log(`Successfully inserted ${insertedCount} articles with full content`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Fetched and saved ${insertedCount} news articles`,
+        message: `Fetched and saved ${insertedCount} news articles with full content`,
         count: insertedCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
