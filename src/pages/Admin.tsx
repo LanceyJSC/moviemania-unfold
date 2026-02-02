@@ -1,23 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Users, Film, Tv, Star, Clock, Calendar, TrendingUp, Activity, UserPlus, FileText, Plus, Edit, Trash2, Eye, Newspaper } from "lucide-react";
+import { Shield, Users, Film, Tv, Star, Calendar, TrendingUp, Activity, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileHeader } from "@/components/MobileHeader";
-import { BlogEditor } from "@/components/BlogEditor";
 import { AdminNewsTab } from "@/components/admin/AdminNewsTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdminBlogPosts, BlogPost } from "@/hooks/useBlogPosts";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface UserStats {
   totalUsers: number;
@@ -48,11 +45,11 @@ interface DailySignup {
   count: number;
 }
 
-const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))"];
+
 
 const Admin = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   
   const [userStats, setUserStats] = useState<UserStats | null>(null);
@@ -60,10 +57,6 @@ const Admin = () => {
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [dailySignups, setDailySignups] = useState<DailySignup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showBlogEditor, setShowBlogEditor] = useState(false);
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  
-  const { data: blogPosts, isLoading: blogLoading, refetch: refetchBlogPosts } = useAdminBlogPosts();
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) {
@@ -217,34 +210,8 @@ const Admin = () => {
     );
   }
 
-  const handleEditPost = (post: BlogPost) => {
-    setEditingPost(post);
-    setShowBlogEditor(true);
-  };
-
-  const handleNewPost = () => {
-    setEditingPost(null);
-    setShowBlogEditor(true);
-  };
-
-  const handleCloseBlogEditor = () => {
-    setShowBlogEditor(false);
-    setEditingPost(null);
-  };
-
   if (!isAdmin) {
     return null;
-  }
-
-  // Show blog editor as a full-screen overlay
-  if (showBlogEditor) {
-    return (
-      <BlogEditor 
-        post={editingPost} 
-        onClose={handleCloseBlogEditor}
-        onSave={() => refetchBlogPosts()}
-      />
-    );
   }
 
   return (
@@ -264,12 +231,11 @@ const Admin = () => {
           </div>
         </div>
 
-        {/* Tabs for Dashboard and Blog */}
+        {/* Tabs for Dashboard and News */}
         <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="news">News</TabsTrigger>
-            <TabsTrigger value="blog">Blog Posts</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -471,79 +437,6 @@ const Admin = () => {
             <AdminNewsTab />
           </TabsContent>
 
-          {/* Blog Posts Tab */}
-          <TabsContent value="blog" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Blog Posts</h2>
-              <Button onClick={handleNewPost} className="gap-2">
-                <Plus className="h-4 w-4" />
-                New Post
-              </Button>
-            </div>
-
-            {blogLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <Skeleton key={i} className="h-24 rounded-xl" />
-                ))}
-              </div>
-            ) : blogPosts && blogPosts.length > 0 ? (
-              <div className="space-y-4">
-                {blogPosts.map((post) => (
-                  <Card key={post.id} className="bg-card/60 border-border/50">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium text-foreground truncate">{post.title}</h3>
-                            <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
-                              {post.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
-                            {post.excerpt || 'No excerpt'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {post.published_at 
-                              ? `Published ${format(new Date(post.published_at), 'MMM d, yyyy')}`
-                              : `Created ${format(new Date(post.created_at), 'MMM d, yyyy')}`
-                            }
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {post.status === 'published' && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleEditPost(post)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">No blog posts yet</p>
-                <Button onClick={handleNewPost}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create your first post
-                </Button>
-              </div>
-            )}
-          </TabsContent>
         </Tabs>
       </div>
 

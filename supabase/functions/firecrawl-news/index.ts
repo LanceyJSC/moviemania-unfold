@@ -190,7 +190,8 @@ Deno.serve(async (req) => {
         source_url: result.url,
         source_name: sourceName,
         featured_image: result.ogImage || null,
-        status: "draft",
+        status: "published",
+        published_at: new Date().toISOString(),
       });
     }
 

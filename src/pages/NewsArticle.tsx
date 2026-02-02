@@ -22,7 +22,7 @@ const NewsArticle = () => {
         <MobileHeader title="News" />
         <div className="max-w-4xl mx-auto px-4 2xl:px-6 pt-4 pb-8 2xl:pt-24 space-y-6">
           <Skeleton className="h-8 w-32" />
-          <Skeleton className="aspect-video rounded-xl" />
+          <Skeleton className="aspect-[21/9] rounded-2xl" />
           <Skeleton className="h-10 w-3/4" />
           <Skeleton className="h-4 w-1/2" />
           <div className="space-y-3">
@@ -94,14 +94,16 @@ const NewsArticle = () => {
           </Link>
         </Button>
 
-        {/* Featured Image */}
+        {/* Hero Image - Larger format */}
         {article.featured_image && (
-          <div className="aspect-video rounded-xl overflow-hidden mb-6">
+          <div className="relative aspect-[21/9] rounded-2xl overflow-hidden mb-8">
             <img
               src={article.featured_image}
               alt={article.title}
               className="w-full h-full object-cover"
             />
+            {/* Subtle gradient overlay at bottom */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
           </div>
         )}
 
@@ -109,7 +111,7 @@ const NewsArticle = () => {
         <header className="mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             {article.source_name && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge className="bg-primary text-primary-foreground gap-1">
                 <Building2 className="h-3 w-3" />
                 {article.source_name}
               </Badge>
@@ -121,30 +123,57 @@ const NewsArticle = () => {
               </div>
             )}
           </div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-cinematic text-foreground leading-tight">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-cinematic text-foreground leading-tight">
             {article.title}
           </h1>
           {article.excerpt && (
-            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+            <p className="mt-6 text-xl text-muted-foreground leading-relaxed">
               {article.excerpt}
             </p>
           )}
         </header>
 
+        {/* Divider */}
+        <div className="border-t border-border mb-8" />
+
         {/* Article Content */}
         {article.content && (
-          <div className="prose prose-invert max-w-none">
-            {article.content.split("\n").map((paragraph, index) => (
-              <p key={index} className="text-foreground/90 leading-relaxed mb-4">
-                {paragraph}
-              </p>
-            ))}
+          <div className="prose prose-lg prose-invert max-w-none">
+            {article.content.split("\n").map((paragraph, index) => {
+              // Skip empty paragraphs
+              if (!paragraph.trim()) return null;
+              
+              // Handle markdown-style headers
+              if (paragraph.startsWith("# ")) {
+                return (
+                  <h2 key={index} className="text-2xl font-semibold text-foreground mt-8 mb-4">
+                    {paragraph.replace("# ", "")}
+                  </h2>
+                );
+              }
+              if (paragraph.startsWith("## ")) {
+                return (
+                  <h3 key={index} className="text-xl font-semibold text-foreground mt-6 mb-3">
+                    {paragraph.replace("## ", "")}
+                  </h3>
+                );
+              }
+              
+              return (
+                <p key={index} className="text-foreground/90 leading-relaxed mb-4 text-lg">
+                  {paragraph}
+                </p>
+              );
+            })}
           </div>
         )}
 
         {/* Source Link */}
         {article.source_url && (
-          <div className="mt-8 pt-6 border-t border-border">
+          <div className="mt-12 pt-8 border-t border-border">
+            <p className="text-sm text-muted-foreground mb-3">
+              Originally published on {article.source_name || "the source"}
+            </p>
             <Button asChild variant="outline" className="gap-2">
               <a
                 href={article.source_url}
