@@ -6,25 +6,105 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Entertainment news sources to search
-const NEWS_SOURCES = [
-  "site:variety.com",
-  "site:deadline.com",
-  "site:hollywoodreporter.com",
-  "site:ew.com",
-  "site:screenrant.com",
-  "site:collider.com",
-];
-
 // Generate a URL-friendly slug from title
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9\\s-]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .slice(0, 100)
     .replace(/-$/, "");
+}
+
+// Check if URL is an actual article (not a homepage or category page)
+function isArticleUrl(url: string): boolean {
+  try {
+    const urlObj = new URL(url);
+    const path = urlObj.pathname;
+    
+    // Reject homepage and category pages
+    if (path === "/" || path === "") return false;
+    if (path.match(/^\/(v\/)?[a-z-]+\/?$/i)) return false; // /film/, /movies/, /tv/
+    if (path.match(/^\/tag\//)) return false;
+    if (path.match(/^\/category\//)) return false;
+    
+    // Articles usually have dates or IDs in the URL
+    if (path.match(/\/\d{4}\/\d{2}\//)) return true; // /2026/02/
+    if (path.match(/-\d{5,}/)) return true; // article ID like -11897109
+    if (path.match(/\/[a-z-]+-[a-z-]+-\d+/)) return true; // slug with ID
+    
+    // If path has multiple segments, likely an article
+    const segments = path.split("/").filter(s => s.length > 0);
+    return segments.length >= 2;
+  } catch {
+    return false;
+  }
+}
+
+// Check if title looks like a real article (not a category page title)
+function isArticleTitle(title: string): boolean {
+  const genericTitles = [
+    "box office",
+    "film",
+    "movies",
+    "tv news",
+    "entertainment news",
+    "entertainment weekly",
+    "the hollywood reporter",
+    "variety",
+    "deadline",
+    "screen rant",
+    "collider",
+  ];
+  
+  const lowerTitle = title.toLowerCase().trim();
+  
+  // Reject if title is just a source name or generic category
+  for (const generic of genericTitles) {
+    if (lowerTitle === generic || lowerTitle.startsWith(generic + ":") || lowerTitle.startsWith(generic + " -")) {
+      return false;
+    }
+  }
+  
+  // Article titles should be reasonably long
+  if (title.length < 20) return false;
+  
+  return true;
+}
+
+// Clean markdown content - remove navigation, links, and formatting artifacts
+function cleanContent(content: string | null): string | null {
+  if (!content) return null;
+  
+  // Remove skip links and navigation
+  let cleaned = content.replace(/\[Skip to[^\]]*\]\([^)]*\)/gi, "");
+  
+  // Remove markdown images
+  cleaned = cleaned.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
+  
+  // Remove markdown links but keep text
+  cleaned = cleaned.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+  
+  // Remove escaped characters
+  cleaned = cleaned.replace(/\\\\/g, "");
+  cleaned = cleaned.replace(/\\([_*`])/g, "$1");
+  
+  // Remove excessive newlines
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
+  
+  // Remove lines that are just numbers or single characters
+  cleaned = cleaned
+    .split("\n")
+    .filter(line => {
+      const trimmed = line.trim();
+      if (trimmed.match(/^\d+$/)) return false;
+      if (trimmed.length === 1) return false;
+      return true;
+    })
+    .join("\n");
+  
+  return cleaned.trim() || null;
 }
 
 Deno.serve(async (req) => {
@@ -102,10 +182,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build search query with news sources
-    const searchQuery = `movie OR "TV show" news ${NEWS_SOURCES.join(" OR ")}`;
+    // Search for ACTUAL news articles with specific terms that indicate real articles
+    const searchQuery = `("new movie" OR "trailer released" OR "cast announced" OR "box office" OR "review" OR "premiere") (movie OR film OR TV show) 2026`;
 
-    // Search for news using Firecrawl with image extraction
+    console.log("Search query:", searchQuery);
+
+    // Search for news using Firecrawl
     const searchResponse = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
       headers: {
@@ -114,10 +196,10 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         query: searchQuery,
-        limit: 10,
+        limit: 20, // Get more to filter
         tbs: "qdr:d", // Last 24 hours
         scrapeOptions: {
-          formats: ["markdown", "html"],
+          formats: ["markdown"],
           onlyMainContent: true,
         },
       }),
@@ -138,7 +220,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Found ${searchData.data?.length || 0} news results`);
+    console.log(`Found ${searchData.data?.length || 0} raw results`);
 
     if (!searchData.data || searchData.data.length === 0) {
       return new Response(
@@ -151,10 +233,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Process articles
+    // Process and filter articles
     const articles = [];
     for (const result of searchData.data) {
       if (!result.title || !result.url) continue;
+      
+      // Filter out non-article pages
+      if (!isArticleUrl(result.url)) {
+        console.log(`Skipping non-article URL: ${result.url}`);
+        continue;
+      }
+      
+      if (!isArticleTitle(result.title)) {
+        console.log(`Skipping generic title: ${result.title}`);
+        continue;
+      }
 
       // Extract source name from URL
       let sourceName = "Unknown";
@@ -168,6 +261,9 @@ Deno.serve(async (req) => {
           "ew.com": "Entertainment Weekly",
           "screenrant.com": "Screen Rant",
           "collider.com": "Collider",
+          "ign.com": "IGN",
+          "thewrap.com": "The Wrap",
+          "indiewire.com": "IndieWire",
         };
         sourceName = sourceMap[hostname] || hostname;
       } catch {
@@ -179,38 +275,36 @@ Deno.serve(async (req) => {
       const timestamp = Date.now().toString(36);
       const slug = `${baseSlug}-${timestamp}`;
 
-      // Extract excerpt from description or markdown
-      const excerpt =
-        result.description ||
-        (result.markdown ? result.markdown.slice(0, 200) + "..." : null);
+      // Clean the excerpt
+      const rawExcerpt = result.description || 
+        (result.markdown ? result.markdown.slice(0, 300) : null);
+      const excerpt = rawExcerpt ? cleanContent(rawExcerpt)?.slice(0, 200) + "..." : null;
 
-      // Get content from markdown
-      const content = result.markdown || null;
+      // Clean the content
+      const content = cleanContent(result.markdown);
 
-      // Extract image from various possible sources
+      // Get image - prefer og:image from metadata
       let imageUrl = null;
-      
-      // Try ogImage first (OpenGraph image)
       if (result.metadata?.ogImage) {
         imageUrl = result.metadata.ogImage;
-      } 
-      // Try og:image from metadata
-      else if (result.metadata?.["og:image"]) {
+      } else if (result.metadata?.["og:image"]) {
         imageUrl = result.metadata["og:image"];
-      }
-      // Try image field directly
-      else if (result.image) {
+      } else if (result.image) {
         imageUrl = result.image;
       }
-      // Try to extract first image from HTML content
-      else if (result.html) {
-        const imgMatch = result.html.match(/<img[^>]+src=["']([^"']+)["']/i);
-        if (imgMatch && imgMatch[1] && !imgMatch[1].includes('data:')) {
-          imageUrl = imgMatch[1];
+      
+      // Skip if image looks like a generic site logo/placeholder
+      if (imageUrl) {
+        const lowerImg = imageUrl.toLowerCase();
+        if (lowerImg.includes("icon-512") || 
+            lowerImg.includes("placeholder") || 
+            lowerImg.includes("og-img") ||
+            lowerImg.includes("social/sr-")) {
+          imageUrl = null;
         }
       }
-      
-      console.log(`Article "${result.title}" - Image: ${imageUrl || 'none found'}`);
+
+      console.log(`✓ Valid article: "${result.title}" - Image: ${imageUrl || 'none'}`);
 
       articles.push({
         slug,
@@ -225,6 +319,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    console.log(`Filtered to ${articles.length} valid articles`);
+
+    if (articles.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "No valid articles found after filtering",
+          imported: 0,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Use service role client for database operations
     const adminSupabase = createClient(supabaseUrl, serviceRoleKey);
 
@@ -232,11 +339,10 @@ Deno.serve(async (req) => {
     const { error: deleteError } = await adminSupabase
       .from("news_articles")
       .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000"); // Delete all rows
+      .neq("id", "00000000-0000-0000-0000-000000000000");
 
     if (deleteError) {
       console.error("Error deleting old articles:", deleteError);
-      // Continue anyway - we still want to insert new articles
     } else {
       console.log("Deleted all old articles");
     }
