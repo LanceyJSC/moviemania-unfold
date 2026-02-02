@@ -35,9 +35,9 @@ export const MagazineHero = ({ article }: MagazineHeroProps) => {
 
   return (
     <Link to={`/news/${article.slug}`} className="block group">
-      <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden">
+      <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 via-accent/20 to-secondary/30">
         {/* Background Image */}
-        {article.featured_image ? (
+        {article.featured_image && (
           <img
             src={article.featured_image}
             alt={article.title}
@@ -46,11 +46,10 @@ export const MagazineHero = ({ article }: MagazineHeroProps) => {
               e.currentTarget.style.display = 'none';
             }}
           />
-        ) : null}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-secondary/40" />
+        )}
         
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        {/* Gradient Overlay - always visible */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         
         {/* Content */}
         <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
