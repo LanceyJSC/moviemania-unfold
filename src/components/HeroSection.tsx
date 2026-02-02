@@ -227,7 +227,7 @@ export const HeroSection = () => {
 
   return (
     <>
-      <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
+      <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6 w-full max-w-full overflow-x-hidden">
         <div 
           className="relative text-foreground overflow-hidden group md:rounded-2xl aspect-video"
           onMouseEnter={() => setIsPaused(true)}
