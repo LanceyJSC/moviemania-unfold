@@ -6,5 +6,5 @@ verify_jwt = false
 [functions.generate-sitemap]
 verify_jwt = false
 
-[functions.firecrawl-news]
+[functions.lovable-ai-news]
 verify_jwt = false
