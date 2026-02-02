@@ -6,12 +6,94 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface NewsArticle {
+interface RssItem {
   title: string;
-  summary: string;
-  source_name: string;
-  source_url: string;
-  image_url?: string;
+  link: string;
+  description: string;
+  pubDate: string;
+  image?: string;
+  source: string;
+}
+
+// RSS feeds from major entertainment news sources
+const RSS_FEEDS = [
+  { url: "https://variety.com/feed/", source: "Variety" },
+  { url: "https://deadline.com/feed/", source: "Deadline" },
+  { url: "https://www.hollywoodreporter.com/feed/", source: "The Hollywood Reporter" },
+  { url: "https://collider.com/feed/", source: "Collider" },
+  { url: "https://screenrant.com/feed/", source: "Screen Rant" },
+];
+
+// Parse RSS XML to extract items
+function parseRssXml(xml: string, source: string): RssItem[] {
+  const items: RssItem[] = [];
+  
+  // Extract all <item> elements
+  const itemMatches = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
+  
+  for (const itemXml of itemMatches.slice(0, 5)) { // Take first 5 from each feed
+    try {
+      // Extract title
+      const titleMatch = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) ||
+                         itemXml.match(/<title>(.*?)<\/title>/i);
+      const title = titleMatch ? decodeHtmlEntities(titleMatch[1].trim()) : "";
+      
+      // Extract link
+      const linkMatch = itemXml.match(/<link>(.*?)<\/link>/i) ||
+                        itemXml.match(/<link><!\[CDATA\[(.*?)\]\]><\/link>/i);
+      const link = linkMatch ? linkMatch[1].trim() : "";
+      
+      // Extract description/summary
+      const descMatch = itemXml.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/is) ||
+                        itemXml.match(/<description>(.*?)<\/description>/is);
+      let description = descMatch ? descMatch[1].trim() : "";
+      // Clean HTML from description
+      description = description.replace(/<[^>]*>/g, "").trim();
+      description = decodeHtmlEntities(description);
+      // Limit to 2-3 sentences
+      description = description.split(/[.!?]/).slice(0, 3).join(". ").trim();
+      if (description && !description.endsWith(".")) description += ".";
+      
+      // Extract pubDate
+      const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/i);
+      const pubDate = dateMatch ? dateMatch[1].trim() : "";
+      
+      // Extract image from media:content, enclosure, or content
+      let image = "";
+      const mediaMatch = itemXml.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
+                         itemXml.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i) ||
+                         itemXml.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*type=["']image/i) ||
+                         itemXml.match(/<image><url>(.*?)<\/url>/i) ||
+                         itemXml.match(/src=["'](https?:\/\/[^"']+\.(jpg|jpeg|png|webp)[^"']*)["']/i);
+      if (mediaMatch) {
+        image = mediaMatch[1];
+      }
+      
+      if (title && link) {
+        items.push({ title, link, description, pubDate, image, source });
+      }
+    } catch (e) {
+      console.error("Error parsing RSS item:", e);
+    }
+  }
+  
+  return items;
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8216;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&#8211;/g, "–")
+    .replace(/&#8212;/g, "—")
+    .replace(/&nbsp;/g, " ");
 }
 
 serve(async (req) => {
@@ -20,11 +102,6 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
@@ -34,137 +111,52 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    console.log("Fetching entertainment news using Lovable AI...");
+    console.log("Fetching entertainment news from RSS feeds...");
 
-    // Call Lovable AI Gateway to get entertainment news
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `You are an entertainment news curator specializing in movies and TV shows. 
-Your task is to provide the latest entertainment news stories with clean, professional summaries.
-Focus on major news from sources like Variety, Deadline, The Hollywood Reporter, Entertainment Weekly, and similar outlets.
-Always provide accurate, factual information with proper source attribution.`,
+    // Fetch all RSS feeds in parallel
+    const feedPromises = RSS_FEEDS.map(async (feed) => {
+      try {
+        const response = await fetch(feed.url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; SceneBurn/1.0)",
+            "Accept": "application/rss+xml, application/xml, text/xml",
           },
-          {
-            role: "user",
-            content: `Find and summarize the 8 most recent and important movie and TV entertainment news stories from today or this week.
-
-For each story, provide:
-1. A complete, clear headline (no truncation)
-2. A 2-3 sentence summary that captures the key information
-3. The source name (e.g., Variety, Deadline, THR)
-4. The source URL where the story can be found
-5. An image URL if one is prominently featured with the story
-
-Focus on:
-- New movie/TV announcements and casting news
-- Streaming platform updates
-- Box office and ratings news
-- Industry developments
-- Celebrity news related to film/TV projects
-
-Avoid:
-- Gossip or tabloid content
-- Extremely old news
-- Duplicate stories`,
-          },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "return_news_articles",
-              description: "Return structured news articles data",
-              parameters: {
-                type: "object",
-                properties: {
-                  articles: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        title: {
-                          type: "string",
-                          description: "Complete headline of the news story",
-                        },
-                        summary: {
-                          type: "string",
-                          description: "2-3 sentence summary of the story",
-                        },
-                        source_name: {
-                          type: "string",
-                          description: "Name of the news source (e.g., Variety, Deadline)",
-                        },
-                        source_url: {
-                          type: "string",
-                          description: "URL to the original article",
-                        },
-                        image_url: {
-                          type: "string",
-                          description: "URL to the featured image if available",
-                        },
-                      },
-                      required: ["title", "summary", "source_name", "source_url"],
-                      additionalProperties: false,
-                    },
-                  },
-                },
-                required: ["articles"],
-                additionalProperties: false,
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "return_news_articles" } },
-      }),
+        });
+        
+        if (!response.ok) {
+          console.error(`Failed to fetch ${feed.source}: ${response.status}`);
+          return [];
+        }
+        
+        const xml = await response.text();
+        return parseRssXml(xml, feed.source);
+      } catch (e) {
+        console.error(`Error fetching ${feed.source}:`, e);
+        return [];
+      }
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        console.error("Rate limited by Lovable AI");
-        return new Response(
-          JSON.stringify({ success: false, error: "Rate limits exceeded, please try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        console.error("Payment required for Lovable AI");
-        return new Response(
-          JSON.stringify({ success: false, error: "AI usage limit reached. Please add credits to your workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const errorText = await response.text();
-      console.error("Lovable AI error:", response.status, errorText);
-      throw new Error(`AI request failed with status ${response.status}`);
-    }
+    const feedResults = await Promise.all(feedPromises);
+    const allItems = feedResults.flat();
+    
+    console.log(`Fetched ${allItems.length} total items from RSS feeds`);
 
-    const aiResponse = await response.json();
-    console.log("AI response received");
+    // Sort by date (newest first) and take top 10
+    const sortedItems = allItems
+      .filter(item => item.title && item.description)
+      .sort((a, b) => {
+        const dateA = new Date(a.pubDate).getTime() || 0;
+        const dateB = new Date(b.pubDate).getTime() || 0;
+        return dateB - dateA;
+      })
+      .slice(0, 10);
 
-    // Extract articles from tool call response
-    const toolCall = aiResponse.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall || toolCall.function.name !== "return_news_articles") {
-      throw new Error("Unexpected AI response format");
-    }
+    console.log(`Processing ${sortedItems.length} articles`);
 
-    const articlesData = JSON.parse(toolCall.function.arguments);
-    const articles: NewsArticle[] = articlesData.articles || [];
-
-    console.log(`Received ${articles.length} articles from AI`);
-
-    // Generate slugs and insert into database
+    // Insert articles into database
     let insertedCount = 0;
-    for (const article of articles) {
-      const slug = article.title
+    for (const item of sortedItems) {
+      const slug = item.title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
@@ -173,21 +165,21 @@ Avoid:
       const uniqueSlug = `${slug}-${Date.now().toString(36)}`;
 
       const { error: insertError } = await supabase.from("news_articles").insert({
-        title: article.title,
+        title: item.title,
         slug: uniqueSlug,
-        excerpt: article.summary,
-        content: article.summary,
-        source_name: article.source_name,
-        source_url: article.source_url,
-        featured_image: article.image_url || null,
+        excerpt: item.description,
+        content: item.description,
+        source_name: item.source,
+        source_url: item.link,
+        featured_image: item.image || null,
         status: "draft",
       });
 
       if (insertError) {
-        console.error(`Error inserting article "${article.title}":`, insertError);
+        console.error(`Error inserting article "${item.title}":`, insertError);
       } else {
         insertedCount++;
-        console.log(`Inserted: ${article.title}`);
+        console.log(`Inserted: ${item.title}`);
       }
     }
 
@@ -196,7 +188,7 @@ Avoid:
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Fetched and saved ${insertedCount} news articles`,
+        message: `Fetched and saved ${insertedCount} news articles from RSS feeds`,
         count: insertedCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
