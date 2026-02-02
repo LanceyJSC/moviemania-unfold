@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, User, LogIn, Film, Tv, LayoutGrid } from "lucide-react";
+import { Home, Search, User, LogIn, Film, Tv, LayoutGrid, Newspaper } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileContext } from "@/contexts/ProfileContext";
 
@@ -14,18 +14,20 @@ export const Navigation = () => {
     ? (profile.username.length > 8 ? profile.username.slice(0, 8) : profile.username)
     : "Profile";
   
-  // Mobile nav limited to 5 items for proper fit on all screen sizes
   const navItems = user ? [
     { path: "/", icon: Home, label: "Home" },
-    { path: "/search", icon: Search, label: "Search" },
     { path: "/movies", icon: Film, label: "Movies" },
+    { path: "/tv-shows", icon: Tv, label: "TV" },
+    { path: "/news", icon: Newspaper, label: "News" },
+    { path: "/search", icon: Search, label: "Search" },
     { path: "/collection", icon: LayoutGrid, label: "Collection" },
     { path: "/profile", icon: User, label: profileLabel }
   ] : [
     { path: "/", icon: Home, label: "Home" },
-    { path: "/search", icon: Search, label: "Search" },
     { path: "/movies", icon: Film, label: "Movies" },
     { path: "/tv-shows", icon: Tv, label: "TV" },
+    { path: "/news", icon: Newspaper, label: "News" },
+    { path: "/search", icon: Search, label: "Search" },
     { path: "/auth", icon: LogIn, label: "Sign In" }
   ];
 
@@ -48,12 +50,12 @@ export const Navigation = () => {
             <Link 
               key={item.path} 
               to={item.path}
-              className={`flex flex-col items-center justify-center py-2 min-w-0 min-h-[56px] touch-manipulation active:scale-95 ${
+              className={`flex flex-col items-center justify-center py-1.5 min-w-0 min-h-[48px] touch-manipulation active:scale-95 ${
                 isActive ? 'text-cinema-red' : 'text-white/70'
               }`}
             >
-              <Icon className="h-6 w-6 mb-1 flex-shrink-0" />
-              <span className="text-[10px] font-medium text-center whitespace-nowrap">
+              <Icon className="h-5 w-5 mb-0.5 flex-shrink-0" />
+              <span className="text-[9px] font-medium text-center whitespace-nowrap truncate max-w-[48px]">
                 {item.label}
               </span>
             </Link>
