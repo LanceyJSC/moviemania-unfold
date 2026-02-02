@@ -21,7 +21,7 @@ export const SEOHead = ({
   modifiedTime,
   author
 }: SEOHeadProps) => {
-  const siteUrl = 'https://sceneburn.app';
+  const siteUrl = 'https://www.sceneburn.com';
   const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
   const truncatedDescription = description.length > 155 
     ? description.substring(0, 152) + '...' 
