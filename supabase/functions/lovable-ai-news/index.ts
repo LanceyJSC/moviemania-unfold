@@ -15,16 +15,16 @@ interface RssItem {
   source: string;
 }
 
-// RSS feeds from major entertainment news sources (verified working feeds)
+// RSS feeds from major entertainment news sources (only feeds that reliably include images)
 const RSS_FEEDS = [
   { url: "https://variety.com/feed/", source: "Variety" },
   { url: "https://deadline.com/feed/", source: "Deadline" },
-  { url: "https://www.hollywoodreporter.com/feed/", source: "The Hollywood Reporter" },
   { url: "https://collider.com/feed/", source: "Collider" },
   { url: "https://screenrant.com/feed/", source: "Screen Rant" },
-  { url: "https://www.indiewire.com/feed/", source: "IndieWire" },
   { url: "https://movieweb.com/feed/", source: "MovieWeb" },
   { url: "https://www.slashfilm.com/feed/", source: "SlashFilm" },
+  { url: "https://www.cbr.com/feed/", source: "CBR" },
+  { url: "https://www.denofgeek.com/feed/", source: "Den of Geek" },
 ];
 
 // Parse RSS XML to extract items with full content
@@ -104,7 +104,8 @@ function parseRssXml(xml: string, source: string): RssItem[] {
         if (urlMatch) image = urlMatch[0];
       }
       
-      if (title && link && content.length > 50) {
+      // Only include articles that have an image - skip those without
+      if (title && link && content.length > 50 && image) {
         items.push({ 
           title, 
           link, 
