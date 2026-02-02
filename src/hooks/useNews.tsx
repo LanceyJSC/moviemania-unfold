@@ -135,15 +135,13 @@ export const useDeleteNews = () => {
   });
 };
 
-// Fetch news from Firecrawl
+// Fetch news using Lovable AI (free)
 export const useFetchNews = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("firecrawl-news", {
-        body: { action: "fetch" },
-      });
+      const { data, error } = await supabase.functions.invoke("lovable-ai-news");
 
       if (error) throw error;
       return data;

@@ -19,6 +19,7 @@ export const Navigation = () => {
     { path: "/movies", icon: Film, label: "Movies" },
     { path: "/tv-shows", icon: Tv, label: "TV" },
     { path: "/news", icon: Newspaper, label: "News" },
+    { path: "/search", icon: Search, label: "Search" },
     { path: "/collection", icon: LayoutGrid, label: "Collection" },
     { path: "/profile", icon: User, label: profileLabel }
   ] : [
