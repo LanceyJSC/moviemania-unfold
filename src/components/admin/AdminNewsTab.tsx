@@ -1,60 +1,13 @@
-import { useState } from "react";
 import { format } from "date-fns";
-import {
-  Newspaper,
-  Download,
-  Eye,
-  Trash2,
-  Loader2,
-} from "lucide-react";
+import { Newspaper, Eye, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import {
-  useAdminNews,
-  useFetchNews,
-  useDeleteNews,
-} from "@/hooks/useNews";
+import { Badge } from "@/components/ui/badge";
+import { useAdminNews } from "@/hooks/useNews";
 
 export const AdminNewsTab = () => {
   const { data: articles, isLoading } = useAdminNews();
-  const fetchNews = useFetchNews();
-  const deleteNews = useDeleteNews();
-
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const handleFetchNews = async () => {
-    try {
-      const result = await fetchNews.mutateAsync();
-      toast.success(result.message || "News fetched and published successfully");
-    } catch (error) {
-      console.error("Error fetching news:", error);
-      toast.error("Failed to fetch news. Make sure Firecrawl is connected.");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    try {
-      await deleteNews.mutateAsync(deleteId);
-      toast.success("Article deleted");
-      setDeleteId(null);
-    } catch (error) {
-      console.error("Error deleting:", error);
-      toast.error("Failed to delete article");
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -63,22 +16,32 @@ export const AdminNewsTab = () => {
         <div>
           <h2 className="text-lg font-semibold text-foreground">News Articles</h2>
           <p className="text-sm text-muted-foreground">
-            Articles are automatically published when fetched
+            Automatically updated at 5:00 AM and 4:00 PM UTC daily
           </p>
         </div>
-        <Button
-          onClick={handleFetchNews}
-          disabled={fetchNews.isPending}
-          className="gap-2"
-        >
-          {fetchNews.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="h-4 w-4" />
-          )}
-          Fetch Latest News
-        </Button>
+        <Badge variant="outline" className="gap-2">
+          <Clock className="h-3 w-3" />
+          Auto-sync enabled
+        </Badge>
       </div>
+
+      {/* Schedule Info */}
+      <Card className="bg-primary/5 border-primary/20">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Clock className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-medium text-foreground text-sm">Automatic News Sync</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                News is automatically fetched from Variety, Deadline, THR, Entertainment Weekly, 
+                Screen Rant, and Collider twice daily. Old articles are replaced with fresh content.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Loading State */}
       {isLoading && (
@@ -92,6 +55,9 @@ export const AdminNewsTab = () => {
       {/* Articles List */}
       {articles && articles.length > 0 && (
         <div className="space-y-4">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Current Articles ({articles.length})
+          </h3>
           {articles.map((article) => (
             <Card key={article.id} className="bg-card/60 border-border/50">
               <CardContent className="p-4">
@@ -115,8 +81,8 @@ export const AdminNewsTab = () => {
                         <span>•</span>
                         <span>
                           {article.published_at 
-                            ? format(new Date(article.published_at), "MMM d, yyyy")
-                            : format(new Date(article.created_at), "MMM d, yyyy")
+                            ? format(new Date(article.published_at), "MMM d, yyyy 'at' h:mm a")
+                            : format(new Date(article.created_at), "MMM d, yyyy 'at' h:mm a")
                           }
                         </span>
                       </div>
@@ -127,27 +93,16 @@ export const AdminNewsTab = () => {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        window.open(`/news/${article.slug}`, "_blank")
-                      }
-                      title="View"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeleteId(article.id)}
-                      className="text-destructive hover:text-destructive"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                      window.open(`/news/${article.slug}`, "_blank")
+                    }
+                    title="View"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -159,39 +114,12 @@ export const AdminNewsTab = () => {
       {articles && articles.length === 0 && (
         <div className="text-center py-12">
           <Newspaper className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground mb-4">No news articles yet</p>
-          <Button onClick={handleFetchNews} disabled={fetchNews.isPending}>
-            {fetchNews.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Download className="h-4 w-4 mr-2" />
-            )}
-            Fetch your first news
-          </Button>
+          <p className="text-muted-foreground mb-2">No news articles yet</p>
+          <p className="text-sm text-muted-foreground">
+            Articles will appear automatically at the next scheduled sync
+          </p>
         </div>
       )}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Article</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this article? This action cannot
-              be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
