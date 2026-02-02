@@ -47,12 +47,18 @@ export const NewsCard = ({ article }: NewsCardProps) => {
               src={article.featured_image}
               alt={article.title}
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-              <span className="text-4xl font-cinematic text-primary/30">S</span>
+          ) : null}
+          <div className={`w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 flex items-center justify-center absolute inset-0 ${article.featured_image ? 'hidden' : ''}`}>
+            <div className="text-center">
+              <span className="text-5xl font-cinematic text-primary/40">📰</span>
+              <p className="text-xs text-muted-foreground mt-2 px-4 line-clamp-2">{article.source_name}</p>
             </div>
-          )}
+          </div>
         </div>
         
         <CardContent className="p-4">
