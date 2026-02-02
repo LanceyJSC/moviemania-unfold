@@ -12,10 +12,15 @@ import { usePublishedNews } from "@/hooks/useNews";
 const News = () => {
   const { data: articles, isLoading, error } = usePublishedNews();
 
+  // Prioritize articles with images for hero/featured spots
+  const articlesWithImages = articles?.filter(a => a.featured_image) || [];
+  const articlesWithoutImages = articles?.filter(a => !a.featured_image) || [];
+  const sortedArticles = [...articlesWithImages, ...articlesWithoutImages];
+  
   // Split articles into hero, featured, and grid sections
-  const heroArticle = articles?.[0];
-  const featuredArticles = articles?.slice(1, 5) || [];
-  const gridArticles = articles?.slice(5) || [];
+  const heroArticle = sortedArticles[0];
+  const featuredArticles = sortedArticles.slice(1, 5);
+  const gridArticles = sortedArticles.slice(5);
 
   return (
     <div className="min-h-screen bg-background pb-24 2xl:pb-0">

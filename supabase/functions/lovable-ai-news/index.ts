@@ -15,7 +15,7 @@ interface RssItem {
   source: string;
 }
 
-// RSS feeds from major entertainment news sources
+// RSS feeds from major entertainment news sources (verified working feeds)
 const RSS_FEEDS = [
   { url: "https://variety.com/feed/", source: "Variety" },
   { url: "https://deadline.com/feed/", source: "Deadline" },
@@ -23,8 +23,8 @@ const RSS_FEEDS = [
   { url: "https://collider.com/feed/", source: "Collider" },
   { url: "https://screenrant.com/feed/", source: "Screen Rant" },
   { url: "https://www.indiewire.com/feed/", source: "IndieWire" },
-  { url: "https://ew.com/feed/", source: "Entertainment Weekly" },
-  { url: "https://www.ign.com/articles.rss", source: "IGN" },
+  { url: "https://movieweb.com/feed/", source: "MovieWeb" },
+  { url: "https://www.slashfilm.com/feed/", source: "SlashFilm" },
 ];
 
 // Parse RSS XML to extract items with full content
@@ -67,20 +67,42 @@ function parseRssXml(xml: string, source: string): RssItem[] {
       const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/i);
       const pubDate = dateMatch ? dateMatch[1].trim() : "";
       
-      // Extract image from multiple sources
+      // Extract image from multiple sources - try ALL methods
       let image = "";
-      const mediaMatch = itemXml.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
-                         itemXml.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i) ||
-                         itemXml.match(/<enclosure[^>]*url=["']([^"']+\.(jpg|jpeg|png|webp)[^"]*)["']/i) ||
-                         itemXml.match(/<image><url>(.*?)<\/url>/i);
       
-      // Also try to find image in content
-      if (!image && content) {
-        const imgMatch = fullContent.match(/src=["'](https?:\/\/[^"']+\.(jpg|jpeg|png|webp)[^"']*)["']/i);
+      // Method 1: media:content with url attribute
+      const mediaContentMatch = itemXml.match(/<media:content[^>]*url=["']([^"']+)["']/i);
+      if (mediaContentMatch) image = mediaContentMatch[1];
+      
+      // Method 2: media:thumbnail
+      if (!image) {
+        const thumbMatch = itemXml.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i);
+        if (thumbMatch) image = thumbMatch[1];
+      }
+      
+      // Method 3: enclosure tag (common in RSS)
+      if (!image) {
+        const enclosureMatch = itemXml.match(/<enclosure[^>]*url=["']([^"']+)["']/i);
+        if (enclosureMatch) image = enclosureMatch[1];
+      }
+      
+      // Method 4: Look for img tags in content:encoded
+      if (!image && fullContent) {
+        const imgMatch = fullContent.match(/<img[^>]*src=["'](https?:\/\/[^"']+)["']/i);
         if (imgMatch) image = imgMatch[1];
       }
       
-      if (mediaMatch) image = mediaMatch[1];
+      // Method 5: Look for image URLs in description
+      if (!image && description) {
+        const descImgMatch = description.match(/<img[^>]*src=["'](https?:\/\/[^"']+)["']/i);
+        if (descImgMatch) image = descImgMatch[1];
+      }
+      
+      // Method 6: Look for any URL ending in image extension
+      if (!image) {
+        const urlMatch = itemXml.match(/https?:\/\/[^"'\s<>]+\.(jpg|jpeg|png|webp)/i);
+        if (urlMatch) image = urlMatch[0];
+      }
       
       if (title && link && content.length > 50) {
         items.push({ 
@@ -162,10 +184,10 @@ function decodeHtmlEntities(text: string): string {
 }
 
 // Generate a clean excerpt from content
-function generateExcerpt(content: string, maxLength: number = 250): string {
-  // Get first 2-3 sentences
+function generateExcerpt(content: string, maxLength: number = 300): string {
+  // Get first 3-4 sentences for a richer excerpt
   const sentences = content.match(/[^.!?]+[.!?]+/g) || [];
-  let excerpt = sentences.slice(0, 3).join(' ').trim();
+  let excerpt = sentences.slice(0, 4).join(' ').trim();
   
   if (excerpt.length > maxLength) {
     excerpt = excerpt.substring(0, maxLength - 3) + '...';
@@ -235,12 +257,12 @@ serve(async (req) => {
     
     for (const item of sortedItems) {
       try {
-        // Truncate content to reasonable size for storage
-        const content = item.description.length > 2000 
-          ? item.description.substring(0, 2000) + '...'
+        // Store more content for richer articles (up to 5000 chars)
+        const content = item.description.length > 5000 
+          ? item.description.substring(0, 5000) + '...'
           : item.description;
         
-        const excerpt = generateExcerpt(item.description);
+        const excerpt = generateExcerpt(item.description, 350);
         
         const slug = item.title
           .toLowerCase()
