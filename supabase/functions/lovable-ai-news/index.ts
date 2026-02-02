@@ -197,63 +197,6 @@ function generateExcerpt(content: string, maxLength: number = 300): string {
   return excerpt || content.substring(0, maxLength);
 }
 
-// Fetch full article content using Firecrawl
-async function fetchFullArticle(url: string): Promise<string | null> {
-  const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
-  
-  if (!FIRECRAWL_API_KEY) {
-    console.log("No Firecrawl API key, skipping full article fetch");
-    return null;
-  }
-  
-  try {
-    const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: url,
-        formats: ["markdown"],
-        onlyMainContent: true,
-      }),
-    });
-    
-    if (!response.ok) {
-      console.error(`Firecrawl error for ${url}: ${response.status}`);
-      return null;
-    }
-    
-    const data = await response.json();
-    
-    if (data.success && data.data?.markdown) {
-      // Clean up the markdown content
-      let content = data.data.markdown;
-      
-      // Remove common unwanted patterns
-      content = content
-        .replace(/\[.*?\]\(javascript:.*?\)/g, '') // Remove javascript links
-        .replace(/!\[.*?\]\(.*?\)/g, '') // Remove image markdown
-        .replace(/\n{3,}/g, '\n\n') // Reduce multiple newlines
-        .replace(/^[\s\S]*?(?=\n\n)/m, '') // Remove first paragraph if it looks like nav
-        .trim();
-      
-      // Limit to reasonable length (about 8000 chars)
-      if (content.length > 8000) {
-        content = content.substring(0, 8000) + '...';
-      }
-      
-      return content;
-    }
-    
-    return null;
-  } catch (e) {
-    console.error(`Error fetching full article from ${url}:`, e);
-    return null;
-  }
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -309,19 +252,19 @@ serve(async (req) => {
       })
       .slice(0, 15);
 
-    console.log(`Processing ${sortedItems.length} quality articles with full content fetch`);
+    console.log(`Processing ${sortedItems.length} quality articles from RSS feeds`);
 
     let insertedCount = 0;
     
     for (const item of sortedItems) {
       try {
-        // Fetch full article content using Firecrawl
-        console.log(`Fetching full content for: ${item.title.substring(0, 40)}...`);
-        const fullContent = await fetchFullArticle(item.link);
+        // Use the full content from RSS content:encoded (already extracted in parseRssXml)
+        // Store up to 10000 chars for rich article content
+        const content = item.description.length > 10000 
+          ? item.description.substring(0, 10000) + '...'
+          : item.description;
         
-        // Use full content if available, otherwise use RSS excerpt
-        const content = fullContent || item.description;
-        const excerpt = generateExcerpt(fullContent || item.description, 350);
+        const excerpt = generateExcerpt(item.description, 350);
         
         const slug = item.title
           .toLowerCase()
@@ -347,19 +290,19 @@ serve(async (req) => {
           console.error(`Error inserting "${item.title}":`, insertError);
         } else {
           insertedCount++;
-          console.log(`Inserted: ${item.title.substring(0, 50)}... (${content.length} chars)`);
+          console.log(`Inserted: ${item.title.substring(0, 50)}... (${content.length} chars from RSS)`);
         }
       } catch (e) {
         console.error(`Error processing ${item.title}:`, e);
       }
     }
 
-    console.log(`Successfully inserted ${insertedCount} articles with full content`);
+    console.log(`Successfully inserted ${insertedCount} articles from RSS feeds`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Fetched and saved ${insertedCount} news articles with full content`,
+        message: `Fetched and saved ${insertedCount} news articles from RSS feeds`,
         count: insertedCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
