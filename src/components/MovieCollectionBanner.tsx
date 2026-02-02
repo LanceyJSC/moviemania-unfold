@@ -85,18 +85,18 @@ export const MovieCollectionBanner = ({ collectionId, currentMovieId }: MovieCol
         </div>
 
         {/* Movie posters - contained within banner */}
-        <div className="w-full max-w-full overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 pb-2">
+        <div className="w-full overflow-x-auto scrollbar-hide">
+          <div className="flex gap-3 pb-2">
             {collection.parts.map((movie) => (
               <Link 
                 key={movie.id} 
                 to={`/movie/${movie.id}`}
-                className={`flex-shrink-0 relative ${movie.id === currentMovieId ? 'ring-2 ring-cinema-gold rounded-md' : ''}`}
+                className="flex-shrink-0 relative"
               >
                 <img
                   src={tmdbService.getPosterUrl(movie.poster_path, 'w300')}
                   alt={movie.title}
-                  className="w-14 h-20 object-cover rounded-md"
+                  className={`w-14 h-20 object-cover rounded-md ${movie.id === currentMovieId ? 'border-2 border-cinema-gold' : ''}`}
                 />
                 {isWatched(movie.id) && (
                   <div className="absolute inset-0 bg-green-600/50 rounded-md flex items-center justify-center">
