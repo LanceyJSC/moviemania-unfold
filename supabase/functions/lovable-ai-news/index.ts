@@ -24,14 +24,12 @@ const RSS_FEEDS = [
   { url: "https://screenrant.com/feed/", source: "Screen Rant" },
 ];
 
-// Parse RSS XML to extract items
+// Parse RSS XML to extract items with full content
 function parseRssXml(xml: string, source: string): RssItem[] {
   const items: RssItem[] = [];
-  
-  // Extract all <item> elements
   const itemMatches = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
   
-  for (const itemXml of itemMatches.slice(0, 5)) { // Take first 5 from each feed
+  for (const itemXml of itemMatches.slice(0, 3)) {
     try {
       // Extract title
       const titleMatch = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) ||
@@ -43,34 +41,53 @@ function parseRssXml(xml: string, source: string): RssItem[] {
                         itemXml.match(/<link><!\[CDATA\[(.*?)\]\]><\/link>/i);
       const link = linkMatch ? linkMatch[1].trim() : "";
       
-      // Extract description/summary
-      const descMatch = itemXml.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/is) ||
-                        itemXml.match(/<description>(.*?)<\/description>/is);
+      // Extract FULL content from content:encoded (most RSS feeds include this)
+      let fullContent = "";
+      const contentMatch = itemXml.match(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/i) ||
+                           itemXml.match(/<content:encoded>([\s\S]*?)<\/content:encoded>/i);
+      if (contentMatch) {
+        fullContent = contentMatch[1];
+      }
+      
+      // Fallback to description
+      const descMatch = itemXml.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/i) ||
+                        itemXml.match(/<description>([\s\S]*?)<\/description>/i);
       let description = descMatch ? descMatch[1].trim() : "";
-      // Clean HTML from description
-      description = description.replace(/<[^>]*>/g, "").trim();
-      description = decodeHtmlEntities(description);
-      // Limit to 2-3 sentences
-      description = description.split(/[.!?]/).slice(0, 3).join(". ").trim();
-      if (description && !description.endsWith(".")) description += ".";
+      
+      // Use full content if available, otherwise use description
+      let content = fullContent || description;
+      
+      // Clean HTML and extract text
+      content = cleanHtmlContent(content);
       
       // Extract pubDate
       const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/i);
       const pubDate = dateMatch ? dateMatch[1].trim() : "";
       
-      // Extract image from media:content, enclosure, or content
+      // Extract image from multiple sources
       let image = "";
       const mediaMatch = itemXml.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
                          itemXml.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i) ||
-                         itemXml.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*type=["']image/i) ||
-                         itemXml.match(/<image><url>(.*?)<\/url>/i) ||
-                         itemXml.match(/src=["'](https?:\/\/[^"']+\.(jpg|jpeg|png|webp)[^"']*)["']/i);
-      if (mediaMatch) {
-        image = mediaMatch[1];
+                         itemXml.match(/<enclosure[^>]*url=["']([^"']+\.(jpg|jpeg|png|webp)[^"]*)["']/i) ||
+                         itemXml.match(/<image><url>(.*?)<\/url>/i);
+      
+      // Also try to find image in content
+      if (!image && content) {
+        const imgMatch = fullContent.match(/src=["'](https?:\/\/[^"']+\.(jpg|jpeg|png|webp)[^"']*)["']/i);
+        if (imgMatch) image = imgMatch[1];
       }
       
-      if (title && link) {
-        items.push({ title, link, description, pubDate, image, source });
+      if (mediaMatch) image = mediaMatch[1];
+      
+      if (title && link && content.length > 50) {
+        items.push({ 
+          title, 
+          link, 
+          description: content,
+          pubDate, 
+          image, 
+          source 
+        });
       }
     } catch (e) {
       console.error("Error parsing RSS item:", e);
@@ -78,6 +95,46 @@ function parseRssXml(xml: string, source: string): RssItem[] {
   }
   
   return items;
+}
+
+function cleanHtmlContent(html: string): string {
+  // Remove script and style tags with content
+  let text = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+  text = text.replace(/<style[\s\S]*?<\/style>/gi, '');
+  
+  // Convert common HTML to readable text
+  text = text.replace(/<br\s*\/?>/gi, '\n');
+  text = text.replace(/<\/p>/gi, '\n\n');
+  text = text.replace(/<\/h[1-6]>/gi, '\n\n');
+  text = text.replace(/<li>/gi, '• ');
+  text = text.replace(/<\/li>/gi, '\n');
+  
+  // Remove all remaining HTML tags
+  text = text.replace(/<[^>]+>/g, '');
+  
+  // Decode HTML entities
+  text = decodeHtmlEntities(text);
+  
+  // Clean up whitespace
+  text = text.replace(/\n{3,}/g, '\n\n');
+  text = text.replace(/[ \t]+/g, ' ');
+  text = text.trim();
+  
+  // Remove common boilerplate phrases
+  const boilerplatePatterns = [
+    /Continue reading.*$/i,
+    /Read more.*$/i,
+    /Click here.*$/i,
+    /Subscribe.*newsletter.*$/i,
+    /Sign up.*$/i,
+    /The post .* appeared first on.*$/i,
+  ];
+  
+  for (const pattern of boilerplatePatterns) {
+    text = text.replace(pattern, '');
+  }
+  
+  return text.trim();
 }
 
 function decodeHtmlEntities(text: string): string {
@@ -93,7 +150,25 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&#8221;/g, '"')
     .replace(/&#8211;/g, "–")
     .replace(/&#8212;/g, "—")
-    .replace(/&nbsp;/g, " ");
+    .replace(/&#038;/g, "&")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#x27;/g, "'")
+    .replace(/&hellip;/g, "...")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–");
+}
+
+// Generate a clean excerpt from content
+function generateExcerpt(content: string, maxLength: number = 250): string {
+  // Get first 2-3 sentences
+  const sentences = content.match(/[^.!?]+[.!?]+/g) || [];
+  let excerpt = sentences.slice(0, 3).join(' ').trim();
+  
+  if (excerpt.length > maxLength) {
+    excerpt = excerpt.substring(0, maxLength - 3) + '...';
+  }
+  
+  return excerpt || content.substring(0, maxLength);
 }
 
 serve(async (req) => {
@@ -118,8 +193,8 @@ serve(async (req) => {
       try {
         const response = await fetch(feed.url, {
           headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; SceneBurn/1.0)",
-            "Accept": "application/rss+xml, application/xml, text/xml",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/rss+xml, application/xml, text/xml, */*",
           },
         });
         
@@ -143,7 +218,7 @@ serve(async (req) => {
 
     // Sort by date (newest first) and take top 10
     const sortedItems = allItems
-      .filter(item => item.title && item.description)
+      .filter(item => item.title && item.description.length > 100)
       .sort((a, b) => {
         const dateA = new Date(a.pubDate).getTime() || 0;
         const dateB = new Date(b.pubDate).getTime() || 0;
@@ -151,35 +226,47 @@ serve(async (req) => {
       })
       .slice(0, 10);
 
-    console.log(`Processing ${sortedItems.length} articles`);
+    console.log(`Processing ${sortedItems.length} quality articles`);
 
-    // Insert articles into database
     let insertedCount = 0;
+    
     for (const item of sortedItems) {
-      const slug = item.title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .substring(0, 80);
+      try {
+        // Truncate content to reasonable size for storage
+        const content = item.description.length > 2000 
+          ? item.description.substring(0, 2000) + '...'
+          : item.description;
+        
+        const excerpt = generateExcerpt(item.description);
+        
+        const slug = item.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .substring(0, 80);
 
-      const uniqueSlug = `${slug}-${Date.now().toString(36)}`;
+        const uniqueSlug = `${slug}-${Date.now().toString(36)}`;
 
-      const { error: insertError } = await supabase.from("news_articles").insert({
-        title: item.title,
-        slug: uniqueSlug,
-        excerpt: item.description,
-        content: item.description,
-        source_name: item.source,
-        source_url: item.link,
-        featured_image: item.image || null,
-        status: "draft",
-      });
+        const { error: insertError } = await supabase.from("news_articles").insert({
+          title: item.title,
+          slug: uniqueSlug,
+          excerpt: excerpt,
+          content: content,
+          source_name: item.source,
+          source_url: item.link,
+          featured_image: item.image || null,
+          status: "published",
+          published_at: new Date().toISOString(),
+        });
 
-      if (insertError) {
-        console.error(`Error inserting article "${item.title}":`, insertError);
-      } else {
-        insertedCount++;
-        console.log(`Inserted: ${item.title}`);
+        if (insertError) {
+          console.error(`Error inserting "${item.title}":`, insertError);
+        } else {
+          insertedCount++;
+          console.log(`Inserted: ${item.title.substring(0, 50)}...`);
+        }
+      } catch (e) {
+        console.error(`Error processing ${item.title}:`, e);
       }
     }
 
@@ -188,7 +275,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Fetched and saved ${insertedCount} news articles from RSS feeds`,
+        message: `Fetched and saved ${insertedCount} news articles`,
         count: insertedCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
