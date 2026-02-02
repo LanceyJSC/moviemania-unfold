@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
     // Build search query with news sources
     const searchQuery = `movie OR "TV show" news ${NEWS_SOURCES.join(" OR ")}`;
 
-    // Search for news using Firecrawl
+    // Search for news using Firecrawl with image extraction
     const searchResponse = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
       headers: {
@@ -113,7 +113,8 @@ Deno.serve(async (req) => {
         limit: 10,
         tbs: "qdr:d", // Last 24 hours
         scrapeOptions: {
-          formats: ["markdown"],
+          formats: ["markdown", "html"],
+          onlyMainContent: true,
         },
       }),
     });
@@ -182,6 +183,31 @@ Deno.serve(async (req) => {
       // Get content from markdown
       const content = result.markdown || null;
 
+      // Extract image from various possible sources
+      let imageUrl = null;
+      
+      // Try ogImage first (OpenGraph image)
+      if (result.metadata?.ogImage) {
+        imageUrl = result.metadata.ogImage;
+      } 
+      // Try og:image from metadata
+      else if (result.metadata?.["og:image"]) {
+        imageUrl = result.metadata["og:image"];
+      }
+      // Try image field directly
+      else if (result.image) {
+        imageUrl = result.image;
+      }
+      // Try to extract first image from HTML content
+      else if (result.html) {
+        const imgMatch = result.html.match(/<img[^>]+src=["']([^"']+)["']/i);
+        if (imgMatch && imgMatch[1] && !imgMatch[1].includes('data:')) {
+          imageUrl = imgMatch[1];
+        }
+      }
+      
+      console.log(`Article "${result.title}" - Image: ${imageUrl || 'none found'}`);
+
       articles.push({
         slug,
         title: result.title,
@@ -189,7 +215,7 @@ Deno.serve(async (req) => {
         content,
         source_url: result.url,
         source_name: sourceName,
-        featured_image: result.ogImage || null,
+        featured_image: imageUrl,
         status: "published",
         published_at: new Date().toISOString(),
       });
