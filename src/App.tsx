@@ -42,6 +42,8 @@ import Admin from "./pages/Admin";
 import Pro from "./pages/Pro";
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
+import News from "./pages/News";
+import NewsArticle from "./pages/NewsArticle";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -105,6 +107,8 @@ const App = () => {
                           <Route path="/pro" element={<Pro />} />
                           <Route path="/blog" element={<Blog />} />
                           <Route path="/blog/:slug" element={<BlogArticle />} />
+                          <Route path="/news" element={<News />} />
+                          <Route path="/news/:slug" element={<NewsArticle />} />
                           <Route path="/auth" element={<Auth />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />

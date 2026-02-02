@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Users, Film, Tv, Star, Clock, Calendar, TrendingUp, Activity, UserPlus, FileText, Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Shield, Users, Film, Tv, Star, Clock, Calendar, TrendingUp, Activity, UserPlus, FileText, Plus, Edit, Trash2, Eye, Newspaper } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { Navigation } from "@/components/Navigation";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { MobileHeader } from "@/components/MobileHeader";
 import { BlogEditor } from "@/components/BlogEditor";
+import { AdminNewsTab } from "@/components/admin/AdminNewsTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminBlogPosts, BlogPost } from "@/hooks/useBlogPosts";
@@ -267,6 +268,7 @@ const Admin = () => {
         <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="news">News</TabsTrigger>
             <TabsTrigger value="blog">Blog Posts</TabsTrigger>
           </TabsList>
 
@@ -462,6 +464,11 @@ const Admin = () => {
             Refresh Data
           </Button>
         </div>
+          </TabsContent>
+
+          {/* News Tab */}
+          <TabsContent value="news">
+            <AdminNewsTab />
           </TabsContent>
 
           {/* Blog Posts Tab */}
