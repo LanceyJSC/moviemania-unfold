@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Newspaper } from "lucide-react";
 import type { NewsArticle } from "@/hooks/useNews";
 
 interface FeaturedNewsCardProps {
@@ -36,24 +36,30 @@ export const FeaturedNewsCard = ({ article }: FeaturedNewsCardProps) => {
   return (
     <Link to={`/news/${article.slug}`} className="block group">
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden">
-        {/* Background Image */}
-        {article.featured_image ? (
+        {/* Fallback Background - always visible as base layer */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-secondary/30">
+          <div className="absolute inset-0 flex items-center justify-center opacity-20">
+            <Newspaper className="h-16 w-16 text-primary" />
+          </div>
+        </div>
+        
+        {/* Background Image - overlays the fallback */}
+        {article.featured_image && (
           <img
             src={article.featured_image}
             alt={article.title}
-            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 z-10"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
           />
-        ) : null}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-secondary/30" />
+        )}
         
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent z-20" />
         
         {/* Content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-4">
+        <div className="absolute inset-0 flex flex-col justify-end p-4 z-30">
           <div className="flex items-center gap-2 mb-2">
             {article.source_name && (
               <Badge variant="secondary" className="text-xs flex items-center gap-1">
