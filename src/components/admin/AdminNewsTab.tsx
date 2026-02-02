@@ -5,13 +5,10 @@ import {
   Download,
   Eye,
   Trash2,
-  Check,
-  X,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -27,16 +24,12 @@ import { toast } from "sonner";
 import {
   useAdminNews,
   useFetchNews,
-  usePublishNews,
-  useUnpublishNews,
   useDeleteNews,
 } from "@/hooks/useNews";
 
 export const AdminNewsTab = () => {
   const { data: articles, isLoading } = useAdminNews();
   const fetchNews = useFetchNews();
-  const publishNews = usePublishNews();
-  const unpublishNews = useUnpublishNews();
   const deleteNews = useDeleteNews();
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -44,30 +37,10 @@ export const AdminNewsTab = () => {
   const handleFetchNews = async () => {
     try {
       const result = await fetchNews.mutateAsync();
-      toast.success(result.message || "News fetched successfully");
+      toast.success(result.message || "News fetched and published successfully");
     } catch (error) {
       console.error("Error fetching news:", error);
       toast.error("Failed to fetch news. Make sure Firecrawl is connected.");
-    }
-  };
-
-  const handlePublish = async (id: string) => {
-    try {
-      await publishNews.mutateAsync(id);
-      toast.success("Article published");
-    } catch (error) {
-      console.error("Error publishing:", error);
-      toast.error("Failed to publish article");
-    }
-  };
-
-  const handleUnpublish = async (id: string) => {
-    try {
-      await unpublishNews.mutateAsync(id);
-      toast.success("Article unpublished");
-    } catch (error) {
-      console.error("Error unpublishing:", error);
-      toast.error("Failed to unpublish article");
     }
   };
 
@@ -87,7 +60,12 @@ export const AdminNewsTab = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">News Articles</h2>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">News Articles</h2>
+          <p className="text-sm text-muted-foreground">
+            Articles are automatically published when fetched
+          </p>
+        </div>
         <Button
           onClick={handleFetchNews}
           disabled={fetchNews.isPending}
@@ -127,27 +105,19 @@ export const AdminNewsTab = () => {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-foreground truncate">
-                          {article.title}
-                        </h3>
-                        <Badge
-                          variant={
-                            article.status === "published"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {article.status}
-                        </Badge>
-                      </div>
+                      <h3 className="font-medium text-foreground truncate mb-1">
+                        {article.title}
+                      </h3>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         {article.source_name && (
                           <span>{article.source_name}</span>
                         )}
                         <span>•</span>
                         <span>
-                          {format(new Date(article.created_at), "MMM d, yyyy")}
+                          {article.published_at 
+                            ? format(new Date(article.published_at), "MMM d, yyyy")
+                            : format(new Date(article.created_at), "MMM d, yyyy")
+                          }
                         </span>
                       </div>
                       {article.excerpt && (
@@ -158,40 +128,16 @@ export const AdminNewsTab = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {article.status === "published" ? (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() =>
-                            window.open(`/news/${article.slug}`, "_blank")
-                          }
-                          title="View"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleUnpublish(article.id)}
-                          disabled={unpublishNews.isPending}
-                          title="Unpublish"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handlePublish(article.id)}
-                        disabled={publishNews.isPending}
-                        title="Publish"
-                        className="text-green-500 hover:text-green-600"
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
-                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        window.open(`/news/${article.slug}`, "_blank")
+                      }
+                      title="View"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
