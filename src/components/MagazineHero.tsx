@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Newspaper } from "lucide-react";
 import type { NewsArticle } from "@/hooks/useNews";
 
 interface MagazineHeroProps {
@@ -35,24 +35,31 @@ export const MagazineHero = ({ article }: MagazineHeroProps) => {
 
   return (
     <Link to={`/news/${article.slug}`} className="block group">
-      <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 via-accent/20 to-secondary/30">
-        {/* Background Image */}
+      <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden">
+        {/* Fallback Background - always visible as base layer */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-accent/30 to-secondary/40">
+          <div className="absolute inset-0 flex items-center justify-center opacity-30">
+            <Newspaper className="h-24 w-24 text-primary" />
+          </div>
+        </div>
+        
+        {/* Background Image - overlays the fallback */}
         {article.featured_image && (
           <img
             src={article.featured_image}
             alt={article.title}
-            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 z-10"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
           />
         )}
         
-        {/* Gradient Overlay - always visible */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+        {/* Gradient Overlay - always visible on top */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent z-20" />
         
         {/* Content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8 z-30">
           <div className="max-w-3xl">
             <div className="flex items-center gap-3 mb-3">
               {article.source_name && (
