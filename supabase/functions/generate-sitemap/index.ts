@@ -6,7 +6,7 @@ const corsHeaders = {
   'Content-Type': 'application/xml',
 };
 
-const SITE_URL = 'https://sceneburn.app';
+const SITE_URL = 'https://www.sceneburn.com';
 const TMDB_API_KEY = '8265bd1679663a7ea12ac168da84d2e8'; // Public TMDB API key
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;

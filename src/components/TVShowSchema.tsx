@@ -37,7 +37,7 @@ export const TVShowSchema = ({ tvShow, posterUrl }: TVShowSchemaProps) => {
       "worstRating": "0",
       "ratingCount": tvShow.vote_count
     } : undefined,
-    "url": `https://sceneburn.app/tv/${tvShow.id}`
+    "url": `https://www.sceneburn.com/tv/${tvShow.id}`
   };
 
   // Remove undefined values

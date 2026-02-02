@@ -24,7 +24,7 @@ export const ArticleSchema = ({
     "@type": "BlogPosting",
     "headline": title,
     "description": description,
-    "image": image || "https://sceneburn.app/sceneburn-logo.png",
+    "image": image || "https://www.sceneburn.com/sceneburn-logo.png",
     "datePublished": publishedTime,
     "dateModified": modifiedTime || publishedTime,
     "author": authorName ? {
@@ -39,14 +39,14 @@ export const ArticleSchema = ({
       "name": "SceneBurn",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://sceneburn.app/sceneburn-logo.png"
+        "url": "https://www.sceneburn.com/sceneburn-logo.png"
       }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://sceneburn.app/blog/${slug}`
+      "@id": `https://www.sceneburn.com/blog/${slug}`
     },
-    "url": `https://sceneburn.app/blog/${slug}`
+    "url": `https://www.sceneburn.com/blog/${slug}`
   };
 
   return (
