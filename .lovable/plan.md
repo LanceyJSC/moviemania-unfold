@@ -1,46 +1,75 @@
 
 
-# Fix: Use Existing TMDB API Key in Sitemap
+# Fix Domain: Update to www.sceneburn.com
 
-The sitemap edge function was incorrectly set up to require a secret, but your project already has a public TMDB API key that's safe to use.
-
----
-
-## The Problem
-
-The edge function `generate-sitemap` was looking for a `TMDB_API_KEY` secret that doesn't exist, when the same public key is already in your codebase.
+All SEO files currently reference the wrong domain (`sceneburn.app`). This needs to be changed to your actual domain (`www.sceneburn.com`) for Google to properly index your site.
 
 ---
 
-## The Solution
+## Why This Matters
 
-Update the edge function to use the existing public TMDB API key directly (since it's a publishable key, this is safe).
+Google uses canonical URLs and sitemap domains to understand where your content lives. If the URLs in your sitemap and meta tags don't match your actual domain, Google may:
+- Not index your pages correctly
+- Show the wrong URL in search results
+- Split your SEO authority between domains
 
 ---
 
-## File to Update
+## Files to Update
 
-**supabase/functions/generate-sitemap/index.ts**
+| File | Changes |
+|------|---------|
+| `index.html` | Update canonical URL, OG URL, and image URLs |
+| `src/components/SEOHead.tsx` | Change siteUrl constant |
+| `src/components/MovieSchema.tsx` | Update schema URL |
+| `src/components/TVShowSchema.tsx` | Update schema URL |
+| `src/components/ArticleSchema.tsx` | Update all URLs and image references |
+| `supabase/functions/generate-sitemap/index.ts` | Change SITE_URL constant |
+| `public/sitemap.xml` | Update all static URLs (backup file) |
 
-Change from:
-```typescript
-const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
+---
+
+## Specific Changes
+
+**index.html**:
+- `https://sceneburn.app` → `https://www.sceneburn.com`
+- Update canonical, og:url, og:image, twitter:image URLs
+
+**src/components/SEOHead.tsx**:
+```
+const siteUrl = 'https://www.sceneburn.com';
 ```
 
-To:
-```typescript
-const TMDB_API_KEY = '8265bd1679663a7ea12ac168da84d2e8'; // Public key from TMDB
+**src/components/MovieSchema.tsx**:
+```
+"url": `https://www.sceneburn.com/movie/${movie.id}`
 ```
 
+**src/components/TVShowSchema.tsx**:
+```
+"url": `https://www.sceneburn.com/tv/${tvShow.id}`
+```
+
+**src/components/ArticleSchema.tsx**:
+- Update all 4 occurrences of sceneburn.app to www.sceneburn.com
+
+**supabase/functions/generate-sitemap/index.ts**:
+```
+const SITE_URL = 'https://www.sceneburn.com';
+```
+
+**public/sitemap.xml**:
+- Update all 12 static page URLs
+
 ---
 
-## Why This Is Safe
+## After This Change
 
-TMDB's API keys are designed to be public. They identify your app but don't grant special permissions. The rate limiting is per-key, and TMDB expects these keys to be visible in client-side code.
+Once updated:
+1. All meta tags will point to your real domain
+2. The dynamic sitemap will generate correct URLs
+3. Schema.org data will reference your actual site
+4. Google will properly associate all content with www.sceneburn.com
 
----
-
-## Result
-
-After this change, the sitemap generator will work immediately without any additional configuration needed.
+You should then re-submit the sitemap to Google Search Console for your www.sceneburn.com property.
 
