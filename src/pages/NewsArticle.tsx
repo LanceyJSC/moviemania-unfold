@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ArrowLeft, ExternalLink, Calendar, Building2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -136,35 +137,26 @@ const NewsArticle = () => {
         {/* Divider */}
         <div className="border-t border-border mb-8" />
 
-        {/* Article Content */}
-        {article.content && (
-          <div className="prose prose-lg prose-invert max-w-none">
-            {article.content.split("\n").map((paragraph, index) => {
-              // Skip empty paragraphs
-              if (!paragraph.trim()) return null;
-              
-              // Handle markdown-style headers
-              if (paragraph.startsWith("# ")) {
-                return (
-                  <h2 key={index} className="text-2xl font-semibold text-foreground mt-8 mb-4">
-                    {paragraph.replace("# ", "")}
-                  </h2>
-                );
-              }
-              if (paragraph.startsWith("## ")) {
-                return (
-                  <h3 key={index} className="text-xl font-semibold text-foreground mt-6 mb-3">
-                    {paragraph.replace("## ", "")}
-                  </h3>
-                );
-              }
-              
-              return (
-                <p key={index} className="text-foreground/90 leading-relaxed mb-4 text-lg">
-                  {paragraph}
-                </p>
-              );
-            })}
+        {/* Article Content or Read Original */}
+        {article.content ? (
+          <div className="prose prose-lg prose-invert max-w-none 
+            prose-headings:text-foreground prose-headings:font-semibold
+            prose-p:text-foreground/90 prose-p:leading-relaxed">
+            <ReactMarkdown>{article.content}</ReactMarkdown>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-lg text-muted-foreground mb-6">
+              {article.excerpt}
+            </p>
+            {article.source_url && (
+              <Button asChild size="lg" className="gap-2">
+                <a href={article.source_url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-5 w-5" />
+                  Read Full Article on {article.source_name}
+                </a>
+              </Button>
+            )}
           </div>
         )}
 
