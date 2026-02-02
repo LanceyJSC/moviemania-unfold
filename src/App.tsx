@@ -70,50 +70,52 @@ const App = () => {
                 <ErrorBoundary>
                   <UserStateProvider>
                     <TrailerProvider>
-          
-                      <GlobalTrailerModal />
-                      <BrowserRouter>
-                        <ScrollToTop />
-                        <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/search" element={<Search />} />
-                          <Route path="/movies" element={<Movies />} />
-                          <Route path="/tv-shows" element={<TVShows />} />
-                          <Route path="/genres" element={<Genres />} />
-                          <Route path="/movie/:id/reviews" element={<MovieReviews />} />
-                          <Route path="/movie/:id/cast" element={<CastCrew />} />
-                          <Route path="/movie/:id" element={<MovieDetail />} />
-                          <Route path="/tv/:id/reviews" element={<TVShowReviews />} />
-                          <Route path="/tv/:id/cast" element={<CastCrew />} />
-                          <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
-                          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
-                          <Route path="/tv/:id" element={<TVShowDetail />} />
-                          <Route path="/actor/:id" element={<ActorDetail />} />
-                          <Route path="/category/:category" element={<CategoryPage />} />
-                          <Route path="/collection" element={<Collection />} />
-                          <Route path="/notifications" element={<Notifications />} />
-                          <Route path="/recommendations" element={<Recommendations />} />
-                          <Route path="/profile" element={<Profile />} />
-                          <Route path="/members" element={<Members />} />
-                          <Route path="/user/:username" element={<UserProfile />} />
-                          <Route path="/lists" element={<Lists />} />
-                          <Route path="/lists/:id" element={<ListDetail />} />
-                          <Route path="/activity" element={<Activity />} />
-                          <Route path="/my-reviews" element={<MyReviews />} />
-                          <Route path="/stats" element={<Stats />} />
-                          <Route path="/achievements" element={<Achievements />} />
-                          <Route path="/wrapped" element={<Wrapped />} />
-                          <Route path="/admin" element={<Admin />} />
-                          <Route path="/pro" element={<Pro />} />
-                          <Route path="/blog" element={<Blog />} />
-                          <Route path="/blog/:slug" element={<BlogArticle />} />
-                          <Route path="/news" element={<News />} />
-                          <Route path="/news/:slug" element={<NewsArticle />} />
-                          <Route path="/auth" element={<Auth />} />
-                          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </BrowserRouter>
+                      {/* Main app wrapper - prevents horizontal scroll on mobile */}
+                      <div className="w-full max-w-full overflow-x-hidden">
+                        <GlobalTrailerModal />
+                        <BrowserRouter>
+                          <ScrollToTop />
+                          <Routes>
+                            <Route path="/" element={<Index />} />
+                            <Route path="/search" element={<Search />} />
+                            <Route path="/movies" element={<Movies />} />
+                            <Route path="/tv-shows" element={<TVShows />} />
+                            <Route path="/genres" element={<Genres />} />
+                            <Route path="/movie/:id/reviews" element={<MovieReviews />} />
+                            <Route path="/movie/:id/cast" element={<CastCrew />} />
+                            <Route path="/movie/:id" element={<MovieDetail />} />
+                            <Route path="/tv/:id/reviews" element={<TVShowReviews />} />
+                            <Route path="/tv/:id/cast" element={<CastCrew />} />
+                            <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
+                            <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
+                            <Route path="/tv/:id" element={<TVShowDetail />} />
+                            <Route path="/actor/:id" element={<ActorDetail />} />
+                            <Route path="/category/:category" element={<CategoryPage />} />
+                            <Route path="/collection" element={<Collection />} />
+                            <Route path="/notifications" element={<Notifications />} />
+                            <Route path="/recommendations" element={<Recommendations />} />
+                            <Route path="/profile" element={<Profile />} />
+                            <Route path="/members" element={<Members />} />
+                            <Route path="/user/:username" element={<UserProfile />} />
+                            <Route path="/lists" element={<Lists />} />
+                            <Route path="/lists/:id" element={<ListDetail />} />
+                            <Route path="/activity" element={<Activity />} />
+                            <Route path="/my-reviews" element={<MyReviews />} />
+                            <Route path="/stats" element={<Stats />} />
+                            <Route path="/achievements" element={<Achievements />} />
+                            <Route path="/wrapped" element={<Wrapped />} />
+                            <Route path="/admin" element={<Admin />} />
+                            <Route path="/pro" element={<Pro />} />
+                            <Route path="/blog" element={<Blog />} />
+                            <Route path="/blog/:slug" element={<BlogArticle />} />
+                            <Route path="/news" element={<News />} />
+                            <Route path="/news/:slug" element={<NewsArticle />} />
+                            <Route path="/auth" element={<Auth />} />
+                            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </BrowserRouter>
+                      </div>
                     </TrailerProvider>
                   </UserStateProvider>
                 </ErrorBoundary>
