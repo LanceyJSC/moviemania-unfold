@@ -53,7 +53,7 @@ const TVShows = () => {
   }, [queryClient]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
       <DesktopHeader />
       <MobileBrandHeader />
       <PullToRefresh onRefresh={handleRefresh}>

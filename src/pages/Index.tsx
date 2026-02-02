@@ -59,7 +59,7 @@ const Index = () => {
 
   return (
     <ErrorBoundary fallback={<FallbackHomepage />}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
         <SEOHead 
           title="SceneBurn - Track, Rate & Discover Movies and TV Shows"
           description="Your personal movie and TV show tracker. Rate films, build watchlists, discover new favorites, and connect with fellow cinephiles."

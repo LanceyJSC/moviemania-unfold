@@ -63,7 +63,7 @@ export const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshP
   return (
     <div
       ref={containerRef}
-      className={cn("relative overflow-auto", className)}
+      className={cn("relative overflow-x-hidden overflow-y-auto w-full max-w-full", className)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
