@@ -9,6 +9,8 @@ import { TagSelector } from "@/components/TagSelector";
 import { WatchProviders } from "@/components/WatchProviders";
 import { SimilarContent } from "@/components/SimilarContent";
 import { MovieCollectionBanner } from "@/components/MovieCollectionBanner";
+import { SEOHead } from "@/components/SEOHead";
+import { MovieSchema } from "@/components/MovieSchema";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -150,8 +152,21 @@ const MovieDetail = () => {
     ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer', 'Director of Photography', 'Original Music Composer', 'Editor'].includes(person.job)
   ).slice(0, 12);
 
+  const seoDescription = movie.overview 
+    ? movie.overview.substring(0, 155) 
+    : `${title} (${releaseYear}) - Watch trailers, read reviews, and track on SceneBurn.`;
+
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <SEOHead 
+        title={`${title} (${releaseYear}) - SceneBurn`}
+        description={seoDescription}
+        image={posterUrl}
+        url={`/movie/${movieId}`}
+        type="movie"
+      />
+      <MovieSchema movie={movie as Movie} posterUrl={posterUrl} />
+      
       <DesktopHeader />
       <MobileHeader title={title} />
       
