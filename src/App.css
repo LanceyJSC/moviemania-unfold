@@ -1,5 +1,6 @@
-/* Reset default Vite styles - these were causing mobile layout issues */
+/* Minimal root styles - mobile first */
 #root {
   width: 100%;
   min-height: 100%;
+  overflow-x: hidden;
 }
