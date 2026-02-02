@@ -144,7 +144,7 @@ export const BecauseYouLoved = () => {
     if (loading && isProUser) {
       return (
         <div className="mb-6 sm:mb-12">
-          <div className="bg-background rounded-2xl -mx-4 px-3 sm:px-4 py-4 sm:py-8">
+          <div className="bg-background rounded-2xl py-4 sm:py-8">
             <div className="text-center mb-4 sm:mb-8">
               <Skeleton className="h-7 sm:h-10 w-48 sm:w-64 mx-auto mb-2 sm:mb-4" />
               <Skeleton className="h-3 sm:h-4 w-36 sm:w-48 mx-auto" />
@@ -177,7 +177,7 @@ export const BecauseYouLoved = () => {
   return (
     <>
       <div className="mb-6 sm:mb-12">
-        <div className="bg-background rounded-2xl -mx-4 px-3 sm:px-4 py-4 sm:py-8">
+        <div className="bg-background rounded-2xl py-4 sm:py-8">
           <div className="text-center mb-4 sm:mb-8">
             <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
               <Sparkles className="h-5 w-5 sm:h-8 sm:w-8 text-amber-500" />
