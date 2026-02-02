@@ -40,6 +40,8 @@ import CastCrew from "./pages/CastCrew";
 import Wrapped from "./pages/Wrapped";
 import Admin from "./pages/Admin";
 import Pro from "./pages/Pro";
+import Blog from "./pages/Blog";
+import BlogArticle from "./pages/BlogArticle";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -101,6 +103,8 @@ const App = () => {
                           <Route path="/wrapped" element={<Wrapped />} />
                           <Route path="/admin" element={<Admin />} />
                           <Route path="/pro" element={<Pro />} />
+                          <Route path="/blog" element={<Blog />} />
+                          <Route path="/blog/:slug" element={<BlogArticle />} />
                           <Route path="/auth" element={<Auth />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />

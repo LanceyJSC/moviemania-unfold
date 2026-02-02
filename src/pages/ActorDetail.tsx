@@ -6,6 +6,7 @@ import { MovieCard } from "@/components/MovieCard";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
+import { SEOHead } from "@/components/SEOHead";
 import { tmdbService, Person } from "@/lib/tmdb";
 
 const ActorDetail = () => {
@@ -94,8 +95,19 @@ const ActorDetail = () => {
   const allContent = [...formattedMovies, ...formattedTVShows]
     .sort((a, b) => new Date(b.release_date || '').getTime() - new Date(a.release_date || '').getTime());
 
+  const seoDescription = actor.biography 
+    ? actor.biography.substring(0, 155) 
+    : `${actor.name} - Known for ${actor.known_for_department}. View filmography on SceneBurn.`;
+
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <SEOHead 
+        title={`${actor.name} - SceneBurn`}
+        description={seoDescription}
+        image={profileUrl || undefined}
+        url={`/actor/${id}`}
+      />
+      
       <DesktopHeader />
       <MobileHeader title={actor.name} />
       

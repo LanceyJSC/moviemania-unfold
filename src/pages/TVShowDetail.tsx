@@ -17,6 +17,8 @@ import { SeasonProgressCard } from "@/components/SeasonProgressCard";
 import { WatchProviders } from "@/components/WatchProviders";
 import { TagSelector } from "@/components/TagSelector";
 import { SimilarContent } from "@/components/SimilarContent";
+import { SEOHead } from "@/components/SEOHead";
+import { TVShowSchema } from "@/components/TVShowSchema";
 import { useDiary } from "@/hooks/useDiary";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -166,8 +168,21 @@ const TVShowDetail = () => {
     ['Executive Producer', 'Producer', 'Writer', 'Creator', 'Director', 'Director of Photography', 'Original Music Composer'].includes(person.job)
   ).slice(0, 12);
 
+  const seoDescription = tvShow.overview 
+    ? tvShow.overview.substring(0, 155) 
+    : `${tvShow.name} (${releaseYear}) - Watch trailers, read reviews, and track on SceneBurn.`;
+
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <SEOHead 
+        title={`${tvShow.name} (${releaseYear}) - SceneBurn`}
+        description={seoDescription}
+        image={posterUrl}
+        url={`/tv/${tvShowId}`}
+        type="tv_show"
+      />
+      <TVShowSchema tvShow={tvShow} posterUrl={posterUrl} />
+      
       <DesktopHeader />
       <MobileHeader title={tvShow.name} />
       
