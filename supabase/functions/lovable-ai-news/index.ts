@@ -15,16 +15,26 @@ interface RssItem {
   source: string;
 }
 
-// RSS feeds from major entertainment news sources (only feeds that reliably include images)
+// RSS feeds specifically for movie and TV news (no general entertainment/music/gaming)
 const RSS_FEEDS = [
-  { url: "https://variety.com/feed/", source: "Variety" },
-  { url: "https://deadline.com/feed/", source: "Deadline" },
+  { url: "https://variety.com/v/film/feed/", source: "Variety Film" },
+  { url: "https://variety.com/v/tv/feed/", source: "Variety TV" },
+  { url: "https://deadline.com/category/film/feed/", source: "Deadline Film" },
+  { url: "https://deadline.com/category/tv/feed/", source: "Deadline TV" },
   { url: "https://collider.com/feed/", source: "Collider" },
-  { url: "https://screenrant.com/feed/", source: "Screen Rant" },
+  { url: "https://screenrant.com/movies/feed/", source: "Screen Rant Movies" },
+  { url: "https://screenrant.com/tv/feed/", source: "Screen Rant TV" },
   { url: "https://movieweb.com/feed/", source: "MovieWeb" },
   { url: "https://www.slashfilm.com/feed/", source: "SlashFilm" },
-  { url: "https://www.cbr.com/feed/", source: "CBR" },
-  { url: "https://www.denofgeek.com/feed/", source: "Den of Geek" },
+];
+
+// Keywords to ensure content is movie/TV related
+const MOVIE_TV_KEYWORDS = [
+  'movie', 'film', 'cinema', 'box office', 'trailer', 'sequel', 'prequel', 'remake',
+  'tv', 'television', 'series', 'season', 'episode', 'streaming', 'netflix', 'hbo', 
+  'disney', 'amazon prime', 'apple tv', 'hulu', 'paramount', 'peacock', 'max',
+  'actor', 'actress', 'director', 'cast', 'premiere', 'release', 'studio', 'warner',
+  'marvel', 'dc', 'star wars', 'franchise', 'blockbuster', 'oscar', 'emmy', 'golden globe'
 ];
 
 // Parse RSS XML to extract items with full content
@@ -104,8 +114,12 @@ function parseRssXml(xml: string, source: string): RssItem[] {
         if (urlMatch) image = urlMatch[0];
       }
       
-      // Only include articles that have an image - skip those without
-      if (title && link && content.length > 50 && image) {
+      // Check if content is movie/TV related using keywords
+      const combinedText = (title + ' ' + content).toLowerCase();
+      const isMovieTVRelated = MOVIE_TV_KEYWORDS.some(keyword => combinedText.includes(keyword));
+      
+      // Only include articles that have an image AND are movie/TV related
+      if (title && link && content.length > 50 && image && isMovieTVRelated) {
         items.push({ 
           title, 
           link, 
