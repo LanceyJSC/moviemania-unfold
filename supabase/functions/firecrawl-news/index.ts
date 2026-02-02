@@ -17,24 +17,44 @@ function generateSlug(title: string): string {
     .replace(/-$/, "");
 }
 
-// Check if URL is an actual article (not a homepage or category page)
-function isArticleUrl(url: string): boolean {
+// Allowed entertainment news domains
+const ALLOWED_DOMAINS = [
+  "variety.com",
+  "deadline.com",
+  "hollywoodreporter.com",
+  "ew.com",
+  "screenrant.com",
+  "collider.com",
+  "thewrap.com",
+  "indiewire.com",
+  "theguardian.com",
+  "forbes.com",
+  "rottentomatoes.com",
+];
+
+// Check if URL is from an allowed source and is an actual article
+function isValidArticleUrl(url: string): boolean {
   try {
     const urlObj = new URL(url);
+    const hostname = urlObj.hostname.replace("www.", "").replace("editorial.", "");
     const path = urlObj.pathname;
+    
+    // Must be from allowed domain
+    if (!ALLOWED_DOMAINS.some(d => hostname.includes(d))) {
+      return false;
+    }
     
     // Reject homepage and category pages
     if (path === "/" || path === "") return false;
-    if (path.match(/^\/(v\/)?[a-z-]+\/?$/i)) return false; // /film/, /movies/, /tv/
+    if (path.match(/^\/(v\/)?[a-z-]+\/?$/i)) return false;
     if (path.match(/^\/tag\//)) return false;
     if (path.match(/^\/category\//)) return false;
     
     // Articles usually have dates or IDs in the URL
-    if (path.match(/\/\d{4}\/\d{2}\//)) return true; // /2026/02/
-    if (path.match(/-\d{5,}/)) return true; // article ID like -11897109
-    if (path.match(/\/[a-z-]+-[a-z-]+-\d+/)) return true; // slug with ID
+    if (path.match(/\/\d{4}\/\d{2}\//)) return true;
+    if (path.match(/-\d{5,}/)) return true;
+    if (path.match(/\/[a-z-]+-[a-z-]+-\d+/)) return true;
     
-    // If path has multiple segments, likely an article
     const segments = path.split("/").filter(s => s.length > 0);
     return segments.length >= 2;
   } catch {
@@ -73,38 +93,113 @@ function isArticleTitle(title: string): boolean {
   return true;
 }
 
-// Clean markdown content - remove navigation, links, and formatting artifacts
+// Clean markdown content - remove navigation, ads, and junk aggressively
 function cleanContent(content: string | null): string | null {
   if (!content) return null;
   
-  // Remove skip links and navigation
-  let cleaned = content.replace(/\[Skip to[^\]]*\]\([^)]*\)/gi, "");
+  let cleaned = content;
   
-  // Remove markdown images
-  cleaned = cleaned.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
+  // Remove common junk patterns first
+  const junkPatterns = [
+    /\[Skip to[^\]]*\]\([^)]*\)/gi,
+    /!\[[^\]]*\]\([^)]*\)/g, // markdown images
+    /View image in fullscreen/gi,
+    /Photograph:\s*[^\n]+/gi,
+    /###?\s*(Related|More Stories)[^\n]*(\n[^\n#]*){0,3}/gi,
+    /Tap Here To Add[^\n]*/gi,
+    /Add as a preferred source[^\n]*/gi,
+    /Sign up for[^\n]*/gi,
+    /Get the .* App[^\n]*/gi,
+    /Reviews, Ratings, Watchlists[^\n]*/gi,
+    /Install\s*Install/gi,
+    /Facebook\s*Twitter\s*Instagram[^\n]*/gi,
+    /We value your privacy[^\n]*/gi,
+    /cookies? (and )?process personal data[^\n]*/gi,
+    /Please (login|signup|wait)[^\n]*/gi,
+    /Jump to content[^\n]*/gi,
+    /From Wikipedia[^\n]*/gi,
+    /Wiki Loves[^\n]*/gi,
+    /Help with translations[^\n]*/gi,
+    /\|\s*\|/g,
+    /Don't miss these/gi,
+    /YOUR NEXT READ/gi,
+    /Notice Message App/gi,
+    /Close\s*Close/gi,
+    /in [A-Z][a-z]+\.\s*$/gm,
+    /Share on (Facebook|X|LinkedIn|Pinterest|Reddit|Tumblr|Whats App)[^\n]*/gi,
+    /Send an Email[^\n]*/gi,
+    /Show additional share options[^\n]*/gi,
+    /Google Preferred[^\n]*/gi,
+    /Follow Sign Up[^\n]*/gi,
+    /Plus Icon[^\n]*/gi,
+    /View All[^\n]*/gi,
+    /Follow Author[^\n]*/gi,
+    /Forbes contributors[^\n]*/gi,
+    /## Live[^\n]*/gi,
+    /Courtesy of [^\n]*/gi,
+  ];
+  
+  for (const pattern of junkPatterns) {
+    cleaned = cleaned.replace(pattern, "");
+  }
   
   // Remove markdown links but keep text
   cleaned = cleaned.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
   
   // Remove escaped characters
   cleaned = cleaned.replace(/\\\\/g, "");
-  cleaned = cleaned.replace(/\\([_*`])/g, "$1");
+  cleaned = cleaned.replace(/\\([_*`\[\]])/g, "$1");
   
-  // Remove excessive newlines
-  cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
+  // Remove duplicate lines (like repeated captions)
+  const lines = cleaned.split("\n");
+  const uniqueLines: string[] = [];
+  const seenLines = new Set<string>();
+  for (const line of lines) {
+    const normalized = line.trim().toLowerCase();
+    if (normalized.length > 15 && seenLines.has(normalized)) continue;
+    if (normalized.length > 15) seenLines.add(normalized);
+    uniqueLines.push(line);
+  }
+  cleaned = uniqueLines.join("\n");
   
-  // Remove lines that are just numbers or single characters
+  // Find the main headline (first # heading) and extract content from there
+  const mainHeadingMatch = cleaned.match(/^#\s+[A-Z][^\n]{20,}/m);
+  if (mainHeadingMatch && mainHeadingMatch.index !== undefined) {
+    cleaned = cleaned.slice(mainHeadingMatch.index);
+  }
+  
+  // Remove lines that are junk
   cleaned = cleaned
     .split("\n")
     .filter(line => {
       const trimmed = line.trim();
+      if (!trimmed) return false;
       if (trimmed.match(/^\d+$/)) return false;
-      if (trimmed.length === 1) return false;
+      if (trimmed.length <= 5) return false;
+      if (trimmed.match(/^©/)) return false;
+      if (trimmed.match(/^\*+$/)) return false;
+      if (trimmed.match(/^[-_]{3,}$/)) return false;
+      if (trimmed.match(/^(Home|Login|Sign Up|Menu|Close|Install|Review)$/i)) return false;
+      if (trimmed.toLowerCase().includes("advertisement")) return false;
+      if (trimmed.toLowerCase().includes("sponsored")) return false;
+      if (trimmed.match(/^\s*-\s*(Home|Best|Watch|Upcoming|Share)/i)) return false;
+      if (trimmed.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}/i) && trimmed.length < 30) return false; // Standalone date
+      if (trimmed.match(/^By\s+[A-Z][a-z]+\s*,?$/i)) return false; // "By Monica," author lines
       return true;
     })
     .join("\n");
   
-  return cleaned.trim() || null;
+  // Remove excessive newlines
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
+  cleaned = cleaned.trim();
+  
+  // Reject if mostly movie title lists
+  const finalLines = cleaned.split("\n").filter(l => l.trim());
+  const italicLines = finalLines.filter(l => l.trim().startsWith("_") && l.trim().endsWith("_"));
+  if (italicLines.length > finalLines.length * 0.4) return null;
+  
+  // Must have substantial content
+  return cleaned.length > 200 ? cleaned : null;
 }
 
 Deno.serve(async (req) => {
@@ -238,9 +333,9 @@ Deno.serve(async (req) => {
     for (const result of searchData.data) {
       if (!result.title || !result.url) continue;
       
-      // Filter out non-article pages
-      if (!isArticleUrl(result.url)) {
-        console.log(`Skipping non-article URL: ${result.url}`);
+      // Filter out non-article pages and non-allowed sources
+      if (!isValidArticleUrl(result.url)) {
+        console.log(`Skipping invalid URL: ${result.url}`);
         continue;
       }
       
@@ -275,13 +370,12 @@ Deno.serve(async (req) => {
       const timestamp = Date.now().toString(36);
       const slug = `${baseSlug}-${timestamp}`;
 
-      // Clean the excerpt
-      const rawExcerpt = result.description || 
-        (result.markdown ? result.markdown.slice(0, 300) : null);
-      const excerpt = rawExcerpt ? cleanContent(rawExcerpt)?.slice(0, 200) + "..." : null;
-
-      // Clean the content
-      const content = cleanContent(result.markdown);
+      // Use clean description as excerpt - don't store messy scraped content
+      const excerpt = result.description ? result.description.slice(0, 300) : null;
+      
+      // Don't store full content - it's too messy from scraping
+      // Users will click through to read the original article
+      const content = null;
 
       // Get image - prefer og:image from metadata
       let imageUrl = null;
