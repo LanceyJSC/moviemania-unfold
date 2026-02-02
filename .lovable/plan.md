@@ -1,123 +1,138 @@
 
-# Entertainment News Aggregator with Firecrawl
+# Transform News into a Magazine-Style Experience
 
 ## Overview
-Create a dedicated **News** section that automatically fetches and displays the latest movie and TV news from major entertainment sources using Firecrawl. This keeps "News" separate from "Blog" (which can remain for original editorial content).
+Remove the Blog Posts section from admin and transform the News section into an automatic, visually-rich magazine experience with prominent images and no manual approval required.
 
 ---
 
-## What We'll Build
+## Changes Summary
 
-### 1. New Database Table: `news_articles`
-A dedicated table for scraped news content, separate from `blog_posts`:
+### 1. Remove Blog Posts from Admin
+Remove the "Blog Posts" tab from the Admin dashboard to simplify the interface. News becomes the primary content system.
 
-| Column | Type | Purpose |
-|--------|------|---------|
-| `id` | uuid | Primary key |
-| `title` | text | Article headline |
-| `excerpt` | text | Short summary |
-| `content` | text | Full article content (markdown) |
-| `source_url` | text | Original article URL |
-| `source_name` | text | Publication name (Variety, Deadline, etc.) |
-| `featured_image` | text | Article image URL |
-| `published_at` | timestamp | When scraped/published |
-| `created_at` | timestamp | When added to database |
-| `status` | text | 'draft' or 'published' |
-
-### 2. New Pages
-- **`/news`** - Public news listing page showing all published articles
-- **`/news/:slug`** - Individual news article page
-
-### 3. Edge Function: `firecrawl-news`
-Backend function that:
-1. Searches for latest movie/TV news via Firecrawl
-2. Scrapes content from top entertainment sources
-3. Extracts title, content, and images
-4. Saves as draft articles for admin review
-
-### 4. Admin Panel Updates
-Add a "News" tab with:
-- "Fetch Latest News" button to trigger scraping
-- List of fetched/imported articles
-- One-click publish functionality
-
-### 5. Navigation Updates
-- Add "News" link to mobile navigation (Newspaper icon)
-- Add "News" link to desktop header
-- Update sitemap to include `/news`
+| Component | Change |
+|-----------|--------|
+| `src/pages/Admin.tsx` | Remove Blog tab, BlogEditor imports, and related state/handlers |
 
 ---
 
-## Architecture
+### 2. Auto-Publish News (No Approval)
+Update the edge function to publish articles immediately instead of saving as drafts.
 
+| File | Change |
+|------|--------|
+| `supabase/functions/firecrawl-news/index.ts` | Change `status: "draft"` to `status: "published"` and add `published_at: new Date().toISOString()` |
+| `src/components/admin/AdminNewsTab.tsx` | Remove publish/unpublish buttons, simplify to just show articles and delete option |
+
+---
+
+### 3. Magazine-Style News Page
+Transform the `/news` page from a basic grid into a visually engaging magazine layout with:
+- **Hero article**: Large featured image with overlay text for the latest story
+- **Secondary articles**: Medium-sized cards with prominent images
+- **Article grid**: Remaining articles in an attractive layout
+- **Category badges**: Visual source indicators
+- **Better typography**: Magazine-style headlines and excerpts
+
+| File | Change |
+|------|--------|
+| `src/pages/News.tsx` | Complete redesign with hero section, featured layout, and magazine styling |
+| `src/components/NewsCard.tsx` | Enhanced design with larger images, better visual hierarchy |
+| `src/components/MagazineHero.tsx` | New component for the featured hero article |
+
+---
+
+### 4. Visual Enhancements for Article Pages
+Make individual articles more visually appealing with better image handling and typography.
+
+| File | Change |
+|------|--------|
+| `src/pages/NewsArticle.tsx` | Larger hero image, better content formatting, magazine-style layout |
+
+---
+
+## Visual Design
+
+### Magazine News Page Layout
 ```text
-+------------------+     +-------------------+     +------------------+
-|  Admin Dashboard | --> |  firecrawl-news   | --> |  news_articles   |
-|  "Fetch News"    |     |  Edge Function    |     |  table           |
-+------------------+     +-------------------+     +------------------+
-                                 |
-                                 v
-                         +------------------+
-                         |  Firecrawl API   |
-                         +------------------+
-                                 |
-                                 v
-                   +-------------------------------+
-                   |  Entertainment News Sources   |
-                   |  Variety, Deadline, THR, etc  |
-                   +-------------------------------+
++--------------------------------------------------+
+|  HERO ARTICLE (Full-width, large image)          |
+|  [Prominent Image with gradient overlay]         |
+|  Source Badge    Title                           |
+|  Excerpt text preview...                         |
++--------------------------------------------------+
+
++------------------------+  +------------------------+
+|  FEATURED ARTICLE      |  |  FEATURED ARTICLE      |
+|  [Large Image]         |  |  [Large Image]         |
+|  Source | Date         |  |  Source | Date         |
+|  Title                 |  |  Title                 |
++------------------------+  +------------------------+
+
++----------+  +----------+  +----------+  +----------+
+| Article  |  | Article  |  | Article  |  | Article  |
+| [Image]  |  | [Image]  |  | [Image]  |  | [Image]  |
+| Title    |  | Title    |  | Title    |  | Title    |
++----------+  +----------+  +----------+  +----------+
 ```
 
 ---
 
-## Files to Create
+## Technical Details
 
-| File | Purpose |
-|------|---------|
-| `supabase/functions/firecrawl-news/index.ts` | Scrape news via Firecrawl |
-| `src/pages/News.tsx` | Public news listing page |
-| `src/pages/NewsArticle.tsx` | Individual article page |
-| `src/hooks/useNews.tsx` | React Query hooks for news data |
-| `src/components/NewsCard.tsx` | News article card component |
+### Edge Function Change
+```typescript
+// Before
+status: "draft",
+
+// After  
+status: "published",
+published_at: new Date().toISOString(),
+```
+
+### Admin Simplification
+- Remove Blog tab entirely
+- News tab becomes simplified - just shows articles with delete option
+- "Fetch Latest News" button remains for manual refresh
+
+### News Page Redesign
+- First article becomes the hero with full-width image and overlay
+- Next 2 articles become secondary features with large images
+- Remaining articles in a 3-column grid
+- All images displayed prominently (not just as links)
+- Source badges with color coding
+- Hover effects and smooth transitions
+
+### NewsCard Enhancement
+- Larger image aspect ratio (16:9 hero, square for grid)
+- Better image loading with fallback
+- Gradient overlays for text readability
+- Hover animations
+
+---
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `supabase/config.toml` | Register new edge function |
-| `src/App.tsx` | Add /news routes |
-| `src/pages/Admin.tsx` | Add News tab with fetch functionality |
-| `src/components/Navigation.tsx` | Add News link to mobile nav |
-| `src/components/DesktopHeader.tsx` | Add News link to desktop nav |
-| `public/sitemap.xml` | Add /news page |
+| `src/pages/Admin.tsx` | Remove Blog tab, BlogEditor, and related code |
+| `src/pages/News.tsx` | Complete redesign as magazine layout |
+| `src/components/NewsCard.tsx` | Enhanced visual design |
+| `src/pages/NewsArticle.tsx` | Better image display and typography |
+| `supabase/functions/firecrawl-news/index.ts` | Auto-publish instead of draft |
+| `src/components/admin/AdminNewsTab.tsx` | Simplify UI (remove approve buttons) |
+
+## New Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/components/MagazineHero.tsx` | Hero article component with large image overlay |
 
 ---
 
-## User Experience
-
-### For Visitors
-1. Click "News" in navigation
-2. See latest entertainment headlines with images
-3. Click article to read full story
-4. Each article shows source attribution
-
-### For Admin
-1. Go to Admin > News tab
-2. Click "Fetch Latest News"
-3. Review scraped articles
-4. Publish approved articles with one click
-
----
-
-## News Sources (Configurable)
-- Variety
-- Deadline
-- The Hollywood Reporter
-- Entertainment Weekly
-- Screen Rant
-- Collider
-
----
-
-## First Step Required
-Before implementation, I'll need to connect the Firecrawl connector to provide the API key for web scraping.
+## Result
+- Clean admin with just Dashboard and News tabs
+- Fetched news appears immediately on the public site
+- Visually striking magazine-style news page with prominent images
+- Better reading experience on article pages
