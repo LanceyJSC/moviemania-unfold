@@ -52,6 +52,10 @@ export interface TVShow {
     cast: { id: number; name: string; character: string; profile_path: string | null }[];
     crew: { id: number; name: string; job: string; profile_path: string | null }[];
   };
+  aggregate_credits?: {
+    cast: { id: number; name: string; roles: { character: string; episode_count: number }[]; profile_path: string | null; total_episode_count: number }[];
+    crew: { id: number; name: string; jobs: { job: string; episode_count: number }[]; profile_path: string | null; total_episode_count: number }[];
+  };
   videos?: { results: { id: string; key: string; name: string; type: string; site: string; official?: boolean; published_at?: string }[] };
   seasons?: {
     id: number;
@@ -240,7 +244,7 @@ class TMDBService {
   }
 
   async getTVShowDetails(tvId: number, fresh: boolean = false): Promise<TVShow> {
-    return this.fetchFromTMDB(`/tv/${tvId}?append_to_response=credits,videos,images`, fresh);
+    return this.fetchFromTMDB(`/tv/${tvId}?append_to_response=aggregate_credits,videos,images`, fresh);
   }
 
   // Combined search

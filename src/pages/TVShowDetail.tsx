@@ -161,9 +161,26 @@ const TVShowDetail = () => {
   const releaseYear = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : 'TBA';
   const genres = tvShow.genres?.map(g => g.name).join(', ') || 'Unknown';
   
-  // Get full cast and crew for modal, limited for inline display
-  const fullCast = tvShow.credits?.cast || [];
-  const fullCrew = tvShow.credits?.crew || [];
+  // Transform aggregate_credits to standard format for modal compatibility
+  const aggregateCast = tvShow.aggregate_credits?.cast || [];
+  const aggregateCrew = tvShow.aggregate_credits?.crew || [];
+  
+  // Transform aggregate cast to standard format (pick primary role)
+  const fullCast = aggregateCast.map(person => ({
+    id: person.id,
+    name: person.name,
+    character: person.roles?.[0]?.character || 'Unknown',
+    profile_path: person.profile_path
+  }));
+  
+  // Transform aggregate crew to standard format (pick primary job)
+  const fullCrew = aggregateCrew.map(person => ({
+    id: person.id,
+    name: person.name,
+    job: person.jobs?.[0]?.job || 'Unknown',
+    profile_path: person.profile_path
+  }));
+  
   const cast = fullCast.slice(0, 10); // Show fewer inline, full in modal
   const creator = tvShow.created_by?.[0];
   const keyCrewMembers = fullCrew.filter(person => 
