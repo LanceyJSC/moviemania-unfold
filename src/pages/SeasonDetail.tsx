@@ -7,7 +7,7 @@ import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
-import { WatchProviders } from "@/components/WatchProviders";
+
 import { ActorCard } from "@/components/ActorCard";
 import { CrewCard } from "@/components/CrewCard";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
@@ -474,10 +474,6 @@ const SeasonDetail = () => {
         </div>
       )}
 
-      {/* Where to Watch */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
-        <WatchProviders mediaId={Number(id)} mediaType="tv" />
-      </div>
 
       {/* Season Rating - Auto-calculated from episode ratings - Always visible */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">

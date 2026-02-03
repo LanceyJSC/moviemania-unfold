@@ -10,7 +10,7 @@ import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
-import { WatchProviders } from "@/components/WatchProviders";
+
 import { ActorCard } from "@/components/ActorCard";
 import { CrewCard } from "@/components/CrewCard";
 import { tmdbService, TVShow as TMDBTVShow } from "@/lib/tmdb";
@@ -353,8 +353,6 @@ const EpisodeDetail = () => {
           </Button>
         </div>
 
-        {/* Where to Watch */}
-        <WatchProviders mediaId={tvId} mediaType="tv" />
 
         {/* Overview */}
         {episode.overview && (
