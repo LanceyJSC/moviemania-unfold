@@ -10,6 +10,7 @@ import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
+import { CastCrewModal } from "@/components/CastCrewModal";
 
 import { ActorCard } from "@/components/ActorCard";
 import { CrewCard } from "@/components/CrewCard";
@@ -60,6 +61,7 @@ const EpisodeDetail = () => {
   const [tvShow, setTVShow] = useState<TMDBTVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showCastCrewModal, setShowCastCrewModal] = useState(false);
   const [episodeRating, setEpisodeRating] = useState<number>(0);
   const [isWatched, setIsWatched] = useState(false);
   const { user } = useAuth();
@@ -362,70 +364,80 @@ const EpisodeDetail = () => {
           </div>
         )}
 
-        {/* Cast Section - Matching MovieDetail style */}
-        {episode.credits?.cast && episode.credits.cast.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">CAST</h2>
-            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
-              {episode.credits.cast.slice(0, 20).map((person) => (
-                <ActorCard 
-                  key={person.id} 
-                  actor={{
-                    id: person.id,
-                    name: person.name,
-                    character: person.character,
-                    profile_path: person.profile_path
-                  }} 
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Cast & Crew Section - Using aggregate_credits from TV show */}
+        {(() => {
+          // Transform aggregate_credits for the modal
+          const aggregateCast = tvShow.aggregate_credits?.cast || [];
+          const aggregateCrew = tvShow.aggregate_credits?.crew || [];
+          
+          const fullCast = aggregateCast.map(person => ({
+            id: person.id,
+            name: person.name,
+            character: person.roles?.[0]?.character || 'Unknown',
+            profile_path: person.profile_path
+          }));
+          
+          const fullCrew = aggregateCrew.map(person => ({
+            id: person.id,
+            name: person.name,
+            job: person.jobs?.[0]?.job || 'Unknown',
+            profile_path: person.profile_path
+          }));
+          
+          // Combine episode credits with show aggregate for display
+          const episodeCast = episode.credits?.cast || [];
+          const guestStars = episode.guest_stars || [];
+          const allEpisodeCast = [...episodeCast, ...guestStars];
+          const displayCast = allEpisodeCast.length > 0 ? allEpisodeCast.slice(0, 10) : fullCast.slice(0, 10);
+          
+          const keyCrewMembers = fullCrew.filter(person => 
+            ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer', 'Director of Photography', 'Original Music Composer', 'Editor'].includes(person.job)
+          ).slice(0, 8);
 
-        {/* Guest Stars Section - Matching MovieDetail style */}
-        {episode.guest_stars && episode.guest_stars.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">GUEST STARS</h2>
-            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
-              {episode.guest_stars.slice(0, 15).map((person) => (
-                <ActorCard 
-                  key={person.id} 
-                  actor={{
-                    id: person.id,
-                    name: person.name,
-                    character: person.character,
-                    profile_path: person.profile_path
-                  }} 
-                />
-              ))}
-            </div>
-          </div>
-        )}
+          return (
+            <>
+              {(displayCast.length > 0 || fullCast.length > 0) && (
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg 2xl:text-2xl font-cinematic text-foreground tracking-wide">CAST</h2>
+                    <Button 
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowCastCrewModal(true)}
+                      className="text-cinema-gold hover:text-cinema-gold/80 text-xs 2xl:text-sm font-medium touch-manipulation h-auto p-0"
+                    >
+                      View All ({fullCast.length}) →
+                    </Button>
+                  </div>
+                  <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-3">
+                    {displayCast.map((person) => (
+                      <ActorCard key={person.id} actor={person} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-        {/* Crew Section - Matching MovieDetail style */}
-        {episode.credits?.crew && episode.credits.crew.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">KEY CREW</h2>
-            <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
-              {episode.credits.crew
-                .filter((person, index, self) => 
-                  index === self.findIndex(p => p.id === person.id)
-                )
-                .slice(0, 10)
-                .map((person) => (
-                  <CrewCard 
-                    key={`${person.id}-${person.job}`} 
-                    person={{
-                      id: person.id,
-                      name: person.name,
-                      job: person.job,
-                      profile_path: person.profile_path
-                    }} 
-                  />
-                ))}
-            </div>
-          </div>
-        )}
+              {keyCrewMembers.length > 0 && (
+                <div>
+                  <h2 className="text-lg 2xl:text-2xl font-cinematic text-foreground mb-4 tracking-wide">KEY CREW</h2>
+                  <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-3">
+                    {keyCrewMembers.map((person) => (
+                      <CrewCard key={`${person.id}-${person.job}`} person={person} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <CastCrewModal
+                isOpen={showCastCrewModal}
+                onClose={() => setShowCastCrewModal(false)}
+                cast={fullCast}
+                crew={fullCrew}
+                title={`${tvShow.name} - S${seasonNum}E${episodeNum}`}
+              />
+            </>
+          );
+        })()}
 
         {/* Episode Reviews Section (Community) */}
         <div>
