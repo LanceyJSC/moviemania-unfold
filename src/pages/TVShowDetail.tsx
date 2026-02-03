@@ -14,11 +14,11 @@ import { SynopsisModal } from "@/components/SynopsisModal";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
 import { SeasonProgressCard } from "@/components/SeasonProgressCard";
-import { WatchProviders } from "@/components/WatchProviders";
 import { TagSelector } from "@/components/TagSelector";
 import { SimilarContent } from "@/components/SimilarContent";
 import { SEOHead } from "@/components/SEOHead";
 import { TVShowSchema } from "@/components/TVShowSchema";
+import { CastCrewModal } from "@/components/CastCrewModal";
 import { useDiary } from "@/hooks/useDiary";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -31,6 +31,7 @@ const TVShowDetail = () => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showSynopsis, setShowSynopsis] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showCastCrewModal, setShowCastCrewModal] = useState(false);
   // Using CSS-based responsive design instead of JS detection
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
   const {
@@ -160,13 +161,14 @@ const TVShowDetail = () => {
   const releaseYear = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : 'TBA';
   const genres = tvShow.genres?.map(g => g.name).join(', ') || 'Unknown';
   
-  // Show more cast and crew - TMDB returns full lists
-  const cast = tvShow.credits?.cast?.slice(0, 20) || [];
-  const crew = tvShow.credits?.crew || [];
+  // Get full cast and crew for modal, limited for inline display
+  const fullCast = tvShow.credits?.cast || [];
+  const fullCrew = tvShow.credits?.crew || [];
+  const cast = fullCast.slice(0, 10); // Show fewer inline, full in modal
   const creator = tvShow.created_by?.[0];
-  const keyCrewMembers = crew.filter(person => 
+  const keyCrewMembers = fullCrew.filter(person => 
     ['Executive Producer', 'Producer', 'Writer', 'Creator', 'Director', 'Director of Photography', 'Original Music Composer'].includes(person.job)
-  ).slice(0, 12);
+  ).slice(0, 8);
 
   const seoDescription = tvShow.overview 
     ? tvShow.overview.substring(0, 155) 
@@ -353,10 +355,6 @@ const TVShowDetail = () => {
           mediaPoster={tvShow.poster_path}
         />
 
-        {/* Where to Watch */}
-        <div className="mb-6">
-          <WatchProviders mediaId={tvShowId} mediaType="tv" />
-        </div>
 
         {/* Creator */}
         {creator && (
@@ -419,12 +417,14 @@ const TVShowDetail = () => {
               <h2 className="text-2xl font-cinematic text-foreground tracking-wide">
                 CAST
               </h2>
-              <Link 
-                to={`/tv/${tvShowId}/cast`}
-                className="text-cinema-gold hover:text-cinema-gold/80 text-sm font-medium touch-manipulation"
+              <Button 
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCastCrewModal(true)}
+                className="text-cinema-gold hover:text-cinema-gold/80 text-sm font-medium touch-manipulation h-auto p-0"
               >
-                View All Cast & Crew →
-              </Link>
+                View All ({fullCast.length}) →
+              </Button>
             </div>
             <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
               {cast.map((actor) => (
@@ -462,6 +462,15 @@ const TVShowDetail = () => {
         mediaPoster={tvShow.poster_path}
         mediaType="tv"
         initialRating={userRating}
+      />
+
+      {/* Cast & Crew Modal */}
+      <CastCrewModal
+        isOpen={showCastCrewModal}
+        onClose={() => setShowCastCrewModal(false)}
+        cast={fullCast}
+        crew={fullCrew}
+        title={tvShow.name}
       />
 
       <Navigation />

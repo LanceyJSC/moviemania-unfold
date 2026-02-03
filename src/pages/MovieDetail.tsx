@@ -6,7 +6,6 @@ import { FunFacts } from "@/components/FunFacts";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingComparisonCard } from "@/components/RatingComparisonCard";
 import { TagSelector } from "@/components/TagSelector";
-import { WatchProviders } from "@/components/WatchProviders";
 import { SimilarContent } from "@/components/SimilarContent";
 import { MovieCollectionBanner } from "@/components/MovieCollectionBanner";
 import { SEOHead } from "@/components/SEOHead";
@@ -21,6 +20,7 @@ import { tmdbService, Movie, TVShow, MovieWithCollection } from "@/lib/tmdb";
 import { useUserStateContext } from "@/contexts/UserStateContext";
 import { CrewCard } from "@/components/CrewCard";
 import { SynopsisModal } from "@/components/SynopsisModal";
+import { CastCrewModal } from "@/components/CastCrewModal";
 import { useAuth } from "@/hooks/useAuth";
 
 const MovieDetail = () => {
@@ -32,6 +32,7 @@ const MovieDetail = () => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showSynopsis, setShowSynopsis] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showCastCrewModal, setShowCastCrewModal] = useState(false);
   // Using CSS-based responsive design instead of JS detection
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
   const {
@@ -143,14 +144,15 @@ const MovieDetail = () => {
   const collectionInfo = !isTV ? (movie as MovieWithCollection).belongs_to_collection : null;
   
   // Fixed cast and crew data access
-  // Show more cast and crew - TMDB returns full lists
-  const cast = movie.credits?.cast?.slice(0, 20) || [];
-  const crew = movie.credits?.crew || [];
-  const director = crew.find(person => person.job === 'Director');
-  const producer = crew.find(person => person.job === 'Producer');
-  const keyCrewMembers = crew.filter(person => 
+  // Get full cast and crew for modal, limited for inline display
+  const fullCast = movie.credits?.cast || [];
+  const fullCrew = movie.credits?.crew || [];
+  const cast = fullCast.slice(0, 10); // Show fewer inline, full in modal
+  const director = fullCrew.find(person => person.job === 'Director');
+  const producer = fullCrew.find(person => person.job === 'Producer');
+  const keyCrewMembers = fullCrew.filter(person => 
     ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer', 'Director of Photography', 'Original Music Composer', 'Editor'].includes(person.job)
-  ).slice(0, 12);
+  ).slice(0, 8);
 
   const seoDescription = movie.overview 
     ? movie.overview.substring(0, 155) 
@@ -326,10 +328,6 @@ const MovieDetail = () => {
           mediaPoster={movie.poster_path}
         />
 
-        {/* Where to Watch */}
-        <div className="mb-6">
-          <WatchProviders mediaId={movieId} mediaType="movie" />
-        </div>
 
         {/* Movie Collection Banner */}
         {collectionInfo && (
@@ -386,12 +384,14 @@ const MovieDetail = () => {
               <h2 className="text-lg 2xl:text-2xl font-cinematic text-foreground tracking-wide">
                 CAST
               </h2>
-              <Link 
-                to={`/movie/${movieId}/cast`}
-                className="text-cinema-gold hover:text-cinema-gold/80 text-xs 2xl:text-sm font-medium touch-manipulation"
+              <Button 
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCastCrewModal(true)}
+                className="text-cinema-gold hover:text-cinema-gold/80 text-xs 2xl:text-sm font-medium touch-manipulation h-auto p-0"
               >
-                View All →
-              </Link>
+                View All ({fullCast.length}) →
+              </Button>
             </div>
             <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-3">
               {cast.map((actor) => (
@@ -430,6 +430,15 @@ const MovieDetail = () => {
         mediaPoster={movie.poster_path}
         mediaType="movie"
         initialRating={userRating}
+      />
+
+      {/* Cast & Crew Modal */}
+      <CastCrewModal
+        isOpen={showCastCrewModal}
+        onClose={() => setShowCastCrewModal(false)}
+        cast={fullCast}
+        crew={fullCrew}
+        title={title}
       />
 
       <Navigation />
