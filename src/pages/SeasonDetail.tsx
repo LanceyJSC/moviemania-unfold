@@ -7,6 +7,7 @@ import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { RatingInput } from "@/components/RatingInput";
+import { CastCrewModal } from "@/components/CastCrewModal";
 
 import { ActorCard } from "@/components/ActorCard";
 import { CrewCard } from "@/components/CrewCard";
@@ -45,6 +46,21 @@ interface Season {
   };
 }
 
+// Transformed cast/crew from aggregate_credits
+interface TransformedCast {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
+interface TransformedCrew {
+  id: number;
+  name: string;
+  job: string;
+  profile_path: string | null;
+}
+
 
 const SeasonDetail = () => {
   const { id, seasonNumber } = useParams<{ id: string; seasonNumber: string }>();
@@ -56,6 +72,7 @@ const SeasonDetail = () => {
   const [episodeRatings, setEpisodeRatings] = useState<Record<string, number>>({});
   const [seasonRating, setSeasonRating] = useState<number>(0);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showCastCrewModal, setShowCastCrewModal] = useState(false);
   const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
   const { user } = useAuth();
   const { tvDiary, refetchTVDiary } = useDiary();
@@ -503,50 +520,75 @@ const SeasonDetail = () => {
         </div>
       </div>
 
-      {/* Cast Section - Matching MovieDetail style */}
-      {season.credits?.cast && season.credits.cast.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
-          <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">CAST</h2>
-          <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
-            {season.credits.cast.slice(0, 20).map((person) => (
-              <ActorCard 
-                key={person.id} 
-                actor={{
-                  id: person.id,
-                  name: person.name,
-                  character: person.character,
-                  profile_path: person.profile_path
-                }} 
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Cast Section - Using aggregate_credits from TV show */}
+      {(() => {
+        // Transform aggregate_credits for the modal
+        const aggregateCast = tvShow.aggregate_credits?.cast || [];
+        const aggregateCrew = tvShow.aggregate_credits?.crew || [];
+        
+        const fullCast: TransformedCast[] = aggregateCast.map(person => ({
+          id: person.id,
+          name: person.name,
+          character: person.roles?.[0]?.character || 'Unknown',
+          profile_path: person.profile_path
+        }));
+        
+        const fullCrew: TransformedCrew[] = aggregateCrew.map(person => ({
+          id: person.id,
+          name: person.name,
+          job: person.jobs?.[0]?.job || 'Unknown',
+          profile_path: person.profile_path
+        }));
+        
+        const cast = fullCast.slice(0, 10);
+        const keyCrewMembers = fullCrew.filter(person => 
+          ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer', 'Director of Photography', 'Original Music Composer', 'Editor'].includes(person.job)
+        ).slice(0, 8);
 
-      {/* Crew Section - Matching MovieDetail style */}
-      {season.credits?.crew && season.credits.crew.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
-          <h2 className="text-2xl font-cinematic text-foreground mb-6 tracking-wide">KEY CREW</h2>
-          <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
-            {season.credits.crew
-              .filter((person, index, self) => 
-                index === self.findIndex(p => p.id === person.id)
-              )
-              .slice(0, 15)
-              .map((person) => (
-                <CrewCard 
-                  key={`${person.id}-${person.job}`} 
-                  person={{
-                    id: person.id,
-                    name: person.name,
-                    job: person.job,
-                    profile_path: person.profile_path
-                  }} 
-                />
-              ))}
-          </div>
-        </div>
-      )}
+        return (
+          <>
+            {fullCast.length > 0 && (
+              <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg 2xl:text-2xl font-cinematic text-foreground tracking-wide">CAST</h2>
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowCastCrewModal(true)}
+                    className="text-cinema-gold hover:text-cinema-gold/80 text-xs 2xl:text-sm font-medium touch-manipulation h-auto p-0"
+                  >
+                    View All ({fullCast.length}) →
+                  </Button>
+                </div>
+                <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-3">
+                  {cast.map((person) => (
+                    <ActorCard key={person.id} actor={person} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {keyCrewMembers.length > 0 && (
+              <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6">
+                <h2 className="text-lg 2xl:text-2xl font-cinematic text-foreground mb-4 tracking-wide">KEY CREW</h2>
+                <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-3">
+                  {keyCrewMembers.map((person) => (
+                    <CrewCard key={`${person.id}-${person.job}`} person={person} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <CastCrewModal
+              isOpen={showCastCrewModal}
+              onClose={() => setShowCastCrewModal(false)}
+              cast={fullCast}
+              crew={fullCrew}
+              title={`${tvShow.name} - ${season.name}`}
+            />
+          </>
+        );
+      })()}
 
       {/* Episodes Section */}
       <div className="container mx-auto px-4">
