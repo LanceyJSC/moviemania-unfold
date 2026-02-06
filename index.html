@@ -63,5 +63,43 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Structured Data for Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "SceneBurn",
+      "url": "https://www.sceneburn.com",
+      "description": "Track movies and TV shows you watch. Rate films, get personalized recommendations, create watchlists, and discover what to watch next.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.sceneburn.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Noscript fallback for search engine crawlers -->
+    <noscript>
+      <div style="max-width:800px;margin:0 auto;padding:40px 20px;font-family:sans-serif;">
+        <h1>SceneBurn - Track, Rate & Discover Movies and TV Shows</h1>
+        <p>Your personal movie and TV show tracker. Rate films, build watchlists, discover new favorites, and connect with fellow cinephiles.</p>
+        <nav>
+          <h2>Explore SceneBurn</h2>
+          <ul>
+            <li><a href="https://www.sceneburn.com/movies">Browse Movies</a></li>
+            <li><a href="https://www.sceneburn.com/tv-shows">Browse TV Shows</a></li>
+            <li><a href="https://www.sceneburn.com/genres">Explore Genres</a></li>
+            <li><a href="https://www.sceneburn.com/news">Entertainment News</a></li>
+            <li><a href="https://www.sceneburn.com/blog">Blog</a></li>
+            <li><a href="https://www.sceneburn.com/lists">User Lists</a></li>
+            <li><a href="https://www.sceneburn.com/recommendations">Recommendations</a></li>
+            <li><a href="https://www.sceneburn.com/members">Community Members</a></li>
+            <li><a href="https://www.sceneburn.com/search">Search</a></li>
+          </ul>
+        </nav>
+      </div>
+    </noscript>
   </body>
 </html>

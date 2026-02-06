@@ -1,8 +1,17 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /auth
+Disallow: /profile
+Disallow: /notifications
+Disallow: /my-reviews
+Disallow: /wrapped
+Disallow: /collection
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /auth
 
 User-agent: Twitterbot
 Allow: /
@@ -12,5 +21,7 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /auth
 
 Sitemap: https://www.sceneburn.com/sitemap.xml
