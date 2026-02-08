@@ -13,6 +13,7 @@ import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { tmdbService } from "@/lib/tmdb";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSubscription } from "@/hooks/useSubscription";
+import { SEOHead } from "@/components/SEOHead";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -277,6 +278,11 @@ const Search = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Search Movies & TV Shows | SceneBurn"
+        description="Search for any movie or TV show. Find ratings, reviews, trailers, and more on SceneBurn."
+        url="/search"
+      />
       <DesktopHeader />
       <MobileBrandHeader />
       

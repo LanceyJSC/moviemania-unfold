@@ -17,6 +17,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { ProBadge } from "@/components/ProBadge";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { Button } from "@/components/ui/button";
+import { SEOHead } from "@/components/SEOHead";
 
 interface PublicList {
   id: string;
@@ -117,6 +118,11 @@ const Lists = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 2xl:pb-12">
+      <SEOHead 
+        title="Movie & TV Show Lists - Curated Collections | SceneBurn"
+        description="Browse and create curated movie and TV show lists. Discover popular community lists and share your own favorites on SceneBurn."
+        url="/lists"
+      />
       <DesktopHeader />
       <MobileHeader title="Lists" />
       

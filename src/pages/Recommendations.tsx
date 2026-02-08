@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/Navigation";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import { SEOHead } from "@/components/SEOHead";
 import { SurpriseMe } from "@/components/SurpriseMe";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -153,6 +154,11 @@ export const Recommendations = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <SEOHead 
+        title="Personalized Movie Recommendations | SceneBurn"
+        description="Get personalized movie and TV show recommendations based on your ratings and favorites. Discover your next watch on SceneBurn."
+        url="/recommendations"
+      />
       <DesktopHeader />
       <MobileHeader title="For You" />
       

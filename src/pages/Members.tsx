@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Users } from "lucide-react";
 import { FollowButton } from "@/components/FollowButton";
+import { SEOHead } from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -58,6 +59,11 @@ const Members = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <SEOHead 
+        title="Community Members - Movie & TV Enthusiasts | SceneBurn"
+        description="Connect with fellow movie and TV show enthusiasts. Follow members, see their reviews, and discover what they're watching on SceneBurn."
+        url="/members"
+      />
       <MobileHeader title="Members" />
       
       <div className="px-4 pt-4 pb-8">

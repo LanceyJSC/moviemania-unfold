@@ -11,6 +11,7 @@ import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { SEOHead } from "@/components/SEOHead";
 import { useSubscription } from "@/hooks/useSubscription";
 
 const Movies = () => {
@@ -54,6 +55,11 @@ const Movies = () => {
 
   return (
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
+      <SEOHead 
+        title="Browse Movies - Popular, Now Playing & Upcoming | SceneBurn"
+        description="Discover popular movies, now playing in theaters, upcoming releases, and top rated films. Track and rate your favorites on SceneBurn."
+        url="/movies"
+      />
       <DesktopHeader />
       <MobileBrandHeader />
       <PullToRefresh onRefresh={handleRefresh}>
