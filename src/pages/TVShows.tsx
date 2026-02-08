@@ -10,6 +10,7 @@ import { FeaturedHero } from "@/components/FeaturedHero";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { SEOHead } from "@/components/SEOHead";
 import { useSubscription } from "@/hooks/useSubscription";
 
 const TVShows = () => {
@@ -53,6 +54,11 @@ const TVShows = () => {
 
   return (
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
+      <SEOHead 
+        title="Browse TV Shows - Popular, Airing Today & Top Rated | SceneBurn"
+        description="Explore popular TV shows, series airing today, on the air, and top rated shows. Track episodes and rate your favorites on SceneBurn."
+        url="/tv-shows"
+      />
       <DesktopHeader />
       <MobileBrandHeader />
       <PullToRefresh onRefresh={handleRefresh}>

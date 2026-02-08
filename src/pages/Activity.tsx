@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
+import { SEOHead } from "@/components/SEOHead";
 import { Card } from "@/components/ui/card";
 import { Activity as ActivityIcon, Users } from "lucide-react";
 import { ActivityFeed } from "@/components/ActivityFeed";
@@ -21,6 +22,11 @@ const Activity = () => {
 
   return (
     <>
+      <SEOHead 
+        title="Activity Feed - Latest Reviews & Ratings | SceneBurn"
+        description="See the latest movie ratings, reviews, and activity from the SceneBurn community."
+        url="/activity"
+      />
       <DesktopHeader />
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background pb-24 2xl:pb-12">
         <MobileHeader title="Activity" />

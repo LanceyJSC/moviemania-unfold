@@ -8,6 +8,7 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { MovieCard } from "@/components/MovieCard";
+import { SEOHead } from "@/components/SEOHead";
 import { tmdbService } from "@/lib/tmdb";
 
 const MOVIE_GENRES = [
@@ -110,6 +111,11 @@ export default function Genres() {
 
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12 overflow-y-auto">
+      <SEOHead 
+        title="Explore Genres - Action, Comedy, Horror, Sci-Fi & More | SceneBurn"
+        description="Browse movies and TV shows by genre. Find the best action, comedy, horror, sci-fi, drama, and more on SceneBurn."
+        url="/genres"
+      />
       <DesktopHeader />
       <MobileHeader title="Browse Genres" />
       
