@@ -7,6 +7,10 @@ Disallow: /notifications
 Disallow: /my-reviews
 Disallow: /wrapped
 Disallow: /collection
+Disallow: /activity
+Disallow: /recommendations
+Disallow: /stats
+Disallow: /achievements
 
 User-agent: Bingbot
 Allow: /
@@ -23,5 +27,9 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /auth
+Disallow: /activity
+Disallow: /recommendations
+Disallow: /stats
+Disallow: /achievements
 
 Sitemap: https://www.sceneburn.com/sitemap.xml
