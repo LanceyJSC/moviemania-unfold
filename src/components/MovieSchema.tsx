@@ -36,7 +36,7 @@ export const MovieSchema = ({ movie, posterUrl }: MovieSchemaProps) => {
       "ratingCount": movie.vote_count
     } : undefined,
     "duration": movie.runtime ? `PT${movie.runtime}M` : undefined,
-    "url": `https://www.sceneburn.com/movie/${movie.id}`
+    "url": `https://sceneburn.com/movie/${movie.id}`
   };
 
   // Remove undefined values
