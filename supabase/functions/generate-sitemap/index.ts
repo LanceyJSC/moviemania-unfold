@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://www.sceneburn.com',
+  'Access-Control-Allow-Origin': 'https://sceneburn.com',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Content-Type': 'application/xml',
 };
 
-const SITE_URL = 'https://www.sceneburn.com';
+const SITE_URL = 'https://sceneburn.com';
 const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY') || Deno.env.get('VITE_TMDB_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
