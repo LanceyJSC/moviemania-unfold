@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   Film, Tv, Star, Clock, Heart, Eye, 
-  Plus, Search, Trash2, Trophy, BookOpen
+  Plus, Search, Trophy, BookOpen, TrendingUp
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserStats } from '@/hooks/useUserStats';
-import { useDiary, MovieDiaryEntry, TVDiaryEntry } from '@/hooks/useDiary';
+import { useDiary } from '@/hooks/useDiary';
 import { useUserStateContext } from '@/contexts/UserStateContext';
 import { tmdbService, Movie } from '@/lib/tmdb';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
-const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
+
 
 type MediaFilter = 'all' | 'movies' | 'tv';
 
@@ -98,6 +98,7 @@ const Collection = () => {
       refetchDiary();
     }
   }, [user]);
+
   if (!user) {
     return (
       <div className="min-h-screen bg-background pb-24 2xl:pb-12">
@@ -250,7 +251,6 @@ const Collection = () => {
           source: 'diary'
         });
       }
-      // Removed: override logic that was incorrectly showing episode ratings as series ratings
     });
     
     let items = Array.from(watchedMap.values());
@@ -335,6 +335,14 @@ const Collection = () => {
 
   const isLoading = itemsLoading || favoritesLoading || ratedLoading || diaryLoading;
 
+  // Stats helpers
+  const totalWatched = (stats?.total_movies_watched || 0) + (stats?.total_tv_shows_watched || 0);
+  const totalHours = (stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0);
+  const level = stats?.level || 1;
+  const xp = stats?.experience_points || 0;
+  const xpForNextLevel = level * 20;
+  const xpProgress = Math.min((xp % xpForNextLevel) / xpForNextLevel * 100, 100);
+
   return (
     <div className="min-h-screen bg-background pb-24 2xl:pb-12">
       <DesktopHeader />
@@ -342,96 +350,68 @@ const Collection = () => {
       <Navigation />
       
       <div className="px-3 sm:px-4 md:px-6 py-4 sm:py-6 max-w-7xl mx-auto">
-        {/* Stats Section - Filtered by media type */}
-        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-          {mediaFilter === 'all' && (
-            <>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-gold" />
-                  <span className="text-base sm:text-xl font-bold text-foreground">
-                    {(stats?.total_movies_watched || 0) + (stats?.total_tv_shows_watched || 0)}
+        {/* Enhanced Stats Banner */}
+        <div className="relative rounded-xl overflow-hidden mb-5 sm:mb-6 bg-gradient-to-br from-primary/15 via-card to-cinema-red/10 border border-border">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+          <div className="relative p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground">My Collection</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">Your personal cinema journey</p>
+              </div>
+              <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full">
+                <Trophy className="h-4 w-4 text-primary" />
+                <span className="text-sm font-bold text-foreground">Level {level}</span>
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                  <Eye className="h-4 w-4 text-cinema-gold" />
+                  <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {mediaFilter === 'movies' ? (stats?.total_movies_watched || 0) : mediaFilter === 'tv' ? (stats?.total_tv_shows_watched || 0) : totalWatched}
                   </span>
                 </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Watched</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="text-base sm:text-xl font-bold text-foreground">
-                  {((stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0))}h
+                <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">Watched</span>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {mediaFilter === 'movies' ? (stats?.total_hours_watched || 0) : mediaFilter === 'tv' ? (stats?.total_tv_hours_watched || 0) : totalHours}
+                  </span>
                 </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Hours</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Rating</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.level || 1}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">Hours</span>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                  <Star className="h-4 w-4 fill-cinema-gold text-cinema-gold" />
+                  <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {stats?.average_rating?.toFixed(1) || '0.0'}
+                  </span>
                 </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Level</div>
-              </Card>
-            </>
-          )}
-          {mediaFilter === 'movies' && (
-            <>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                  <Film className="h-3 w-3 sm:h-4 sm:w-4 text-cinema-red" />
-                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.total_movies_watched || 0}</span>
-                </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Movies</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.total_hours_watched || 0}h</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Hours</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Rating</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.level || 1}</span>
-                </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Level</div>
-              </Card>
-            </>
-          )}
-          {mediaFilter === 'tv' && (
-            <>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                  <Tv className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.total_tv_shows_watched || 0}</span>
-                </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">TV Shows</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.total_tv_hours_watched || 0}h</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Hours</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="text-base sm:text-xl font-bold text-foreground">{stats?.average_rating?.toFixed(1) || '0.0'}</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Rating</div>
-              </Card>
-              <Card className="p-2 sm:p-3 text-center">
-                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                  <span className="text-base sm:text-xl font-bold text-foreground">{stats?.level || 1}</span>
-                </div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Level</div>
-              </Card>
-            </>
-          )}
-        </div>
+                <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">Avg Rating</span>
+              </div>
+            </div>
 
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold">My Collection</h1>
-            <p className="text-muted-foreground text-[10px] sm:text-xs">Your personal collection</p>
+            {/* Level Progress */}
+            <div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                <span className="flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Level {level} Progress
+                </span>
+                <span>{xp % xpForNextLevel}/{xpForNextLevel} XP</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-cinema-gold rounded-full transition-all duration-700"
+                  style={{ width: `${xpProgress}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -525,9 +505,9 @@ const Collection = () => {
           {/* Watchlist Tab */}
           <TabsContent value="watchlist" className="space-y-4">
             {isLoading ? (
-              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
             ) : getUnwatchedItems().length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {getUnwatchedItems().map(item => {
                   const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
                   
@@ -541,8 +521,8 @@ const Collection = () => {
                         poster={item.movie_poster}
                         onDelete={async () => { await removeItem(item.id); refetchUserState(); }}
                       >
-                        <p className="text-sm text-muted-foreground">
-                          Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Added {format(new Date(item.added_at), 'MMM d, yyyy')}
                         </p>
                       </TVShowCollectionCard>
                     );
@@ -558,18 +538,26 @@ const Collection = () => {
                       mediaType="movie"
                       onDelete={async () => { await removeItem(item.id); refetchUserState(); }}
                     >
-                      <p className="text-sm text-muted-foreground">
-                        Added {format(new Date(item.added_at), 'MMMM d, yyyy')}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Added {format(new Date(item.added_at), 'MMM d, yyyy')}
                       </p>
                     </CollectionMediaCard>
                   );
                 })}
               </div>
             ) : (
-              <Card className="p-8 text-center">
-                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No {mediaFilter === 'all' ? 'items' : mediaFilter} in your watchlist</p>
-                <p className="text-sm text-muted-foreground mt-2">Add movies/shows using the + button on their pages!</p>
+              <Card className="p-8 sm:p-12 text-center border-dashed">
+                <Clock className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-lg font-semibold text-foreground mb-1">Your watchlist is empty</p>
+                <p className="text-sm text-muted-foreground mb-5">Start building your watchlist by browsing movies and TV shows</p>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
+                    <Film className="h-4 w-4" /> Browse Movies
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
+                    <Tv className="h-4 w-4" /> Browse TV
+                  </Button>
+                </div>
               </Card>
             )}
           </TabsContent>
@@ -577,9 +565,9 @@ const Collection = () => {
           {/* Favorites Tab */}
           <TabsContent value="favorites" className="space-y-4">
             {isLoading ? (
-              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
             ) : getFilteredFavorites().length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {getFilteredFavorites().map(item => {
                   const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
                   
@@ -593,9 +581,9 @@ const Collection = () => {
                         poster={item.movie_poster}
                         onDelete={async () => { await removeFavorite(item.movie_id); refetchUserState(); }}
                       >
-                        <div className="flex items-center gap-1">
-                          <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
-                          <span className="text-sm text-muted-foreground">Favorited</span>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Heart className="h-3.5 w-3.5 text-cinema-red fill-cinema-red" />
+                          <span className="text-xs text-muted-foreground">Favorited</span>
                         </div>
                       </TVShowCollectionCard>
                     );
@@ -611,29 +599,37 @@ const Collection = () => {
                       mediaType="movie"
                       onDelete={async () => { await removeFavorite(item.movie_id); refetchUserState(); }}
                     >
-                      <div className="flex items-center gap-1">
-                        <Heart className="h-4 w-4 text-cinema-red fill-cinema-red" />
-                        <span className="text-sm text-muted-foreground">Favorited</span>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Heart className="h-3.5 w-3.5 text-cinema-red fill-cinema-red" />
+                        <span className="text-xs text-muted-foreground">Favorited</span>
                       </div>
                     </CollectionMediaCard>
                   );
                 })}
               </div>
             ) : (
-              <Card className="p-8 text-center">
-                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No favorite {mediaFilter === 'all' ? 'items' : mediaFilter} yet</p>
-                <p className="text-sm text-muted-foreground mt-2">Like movies/shows using the ❤️ button!</p>
+              <Card className="p-8 sm:p-12 text-center border-dashed">
+                <Heart className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-lg font-semibold text-foreground mb-1">No favorites yet</p>
+                <p className="text-sm text-muted-foreground mb-5">Like movies and TV shows to add them here</p>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
+                    <Film className="h-4 w-4" /> Browse Movies
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
+                    <Tv className="h-4 w-4" /> Browse TV
+                  </Button>
+                </div>
               </Card>
             )}
           </TabsContent>
 
-          {/* Watched Tab - Shows rated movies/tv and diary entries */}
+          {/* Watched Tab */}
           <TabsContent value="watched" className="space-y-4">
             {isLoading ? (
-              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
             ) : getWatchedItems().length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {getWatchedItems().map(item => {
                   if (item.media_type === 'tv') {
                     return (
@@ -645,10 +641,11 @@ const Collection = () => {
                         poster={item.movie_poster}
                         userRating={item.rating}
                         onDelete={() => deleteAllMediaData(item.movie_id, 'tv')}
+                        showWatchedOverlay
                       >
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4 text-cinema-gold" />
-                          <span className="text-sm text-muted-foreground">Watched</span>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Eye className="h-3.5 w-3.5 text-cinema-gold" />
+                          <span className="text-xs text-muted-foreground">Watched</span>
                         </div>
                       </TVShowCollectionCard>
                     );
@@ -663,30 +660,39 @@ const Collection = () => {
                       mediaType="movie"
                       userRating={item.rating}
                       onDelete={() => deleteAllMediaData(item.movie_id, 'movie')}
+                      showWatchedOverlay
                     >
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-4 w-4 text-cinema-gold" />
-                        <span className="text-sm text-muted-foreground">Watched</span>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Eye className="h-3.5 w-3.5 text-cinema-gold" />
+                        <span className="text-xs text-muted-foreground">Watched</span>
                       </div>
                     </CollectionMediaCard>
                   );
                 })}
               </div>
             ) : (
-              <Card className="p-8 text-center">
-                <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No watched {mediaFilter === 'all' ? 'items' : mediaFilter} yet</p>
-                <p className="text-sm text-muted-foreground mt-2">Rate movies/shows using the ⭐ rating to mark them as watched!</p>
+              <Card className="p-8 sm:p-12 text-center border-dashed">
+                <Eye className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-lg font-semibold text-foreground mb-1">Nothing watched yet</p>
+                <p className="text-sm text-muted-foreground mb-5">Rate movies and TV shows to mark them as watched</p>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
+                    <Film className="h-4 w-4" /> Browse Movies
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
+                    <Tv className="h-4 w-4" /> Browse TV
+                  </Button>
+                </div>
               </Card>
             )}
           </TabsContent>
 
-          {/* Diary Tab - Combined Movies and TV */}
+          {/* Diary Tab */}
           <TabsContent value="diary" className="space-y-4">
             {isLoading ? (
-              <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
             ) : getCombinedDiary().length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {getCombinedDiary().map(entry => {
                   const isMovie = entry.type === 'movie';
                   const id = isMovie ? (entry as any).movie_id : (entry as any).tv_id;
@@ -721,13 +727,12 @@ const Collection = () => {
                       onDelete={() => deleteDiaryEntry((entry as any).movie_id, 'movie')}
                       onEdit={() => handleEditDiaryEntry(entry, 'movie')}
                     >
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-1.5">
                         {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
                       </p>
                       {entry.notes && (
-                        <div className="flex items-start gap-1 mt-1">
-                          <BookOpen className="h-3 w-3 mt-0.5 shrink-0 text-primary" />
-                          <p className="text-sm text-muted-foreground line-clamp-2"><span className="text-primary font-medium">Review:</span> {entry.notes}</p>
+                        <div className="mt-2 pl-3 border-l-2 border-primary/30">
+                          <p className="text-xs text-muted-foreground line-clamp-2 italic">"{entry.notes}"</p>
                         </div>
                       )}
                     </CollectionMediaCard>
@@ -735,10 +740,18 @@ const Collection = () => {
                 })}
               </div>
             ) : (
-              <Card className="p-8 text-center">
-                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No diary entries yet</p>
-                <p className="text-sm text-muted-foreground mt-2">Use the Log button on movie/TV pages to track when you watched!</p>
+              <Card className="p-8 sm:p-12 text-center border-dashed">
+                <BookOpen className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-lg font-semibold text-foreground mb-1">No diary entries yet</p>
+                <p className="text-sm text-muted-foreground mb-5">Log when you watched movies and TV shows with notes and ratings</p>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
+                    <Film className="h-4 w-4" /> Browse Movies
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
+                    <Tv className="h-4 w-4" /> Browse TV
+                  </Button>
+                </div>
               </Card>
             )}
           </TabsContent>

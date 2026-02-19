@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Tv, Star, Trash2, Pencil, ChevronDown, ChevronUp, BookOpen, Flame } from 'lucide-react';
+import { Tv, Star, Trash2, Pencil, ChevronDown, BookOpen, Flame, Check } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -37,6 +38,7 @@ interface TVShowCollectionCardProps {
   onEdit?: () => void;
   children?: React.ReactNode;
   defaultExpanded?: boolean;
+  showWatchedOverlay?: boolean;
 }
 
 interface SeasonReview {
@@ -55,14 +57,16 @@ interface EpisodeReview {
 }
 
 export const TVShowCollectionCard = ({
-  id,
+  id: _id,
   tvId,
   title,
   poster,
   userRating,
   onDelete,
   onEdit,
-  defaultExpanded = false
+  children,
+  defaultExpanded: _defaultExpanded = false,
+  showWatchedOverlay = false,
 }: TVShowCollectionCardProps) => {
   const { user } = useAuth();
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
@@ -75,6 +79,9 @@ export const TVShowCollectionCard = ({
   const [seasonCount, setSeasonCount] = useState(0);
   const [episodeCount, setEpisodeCount] = useState(0);
   const [seriesNotes, setSeriesNotes] = useState<string | null>(null);
+  const [firstAirYear, setFirstAirYear] = useState<string | null>(null);
+  const [genres, setGenres] = useState<string[]>([]);
+  const [overview, setOverview] = useState<string | null>(null);
 
   // Load counts on mount
   useEffect(() => {
@@ -113,9 +120,10 @@ export const TVShowCollectionCard = ({
       try {
         const details = await tmdbService.getTVShowDetails(tvId);
         setTmdbRating(details.vote_average);
-        if (details.name) {
-          setShowTitle(details.name);
-        }
+        if (details.name) setShowTitle(details.name);
+        setFirstAirYear(details.first_air_date?.split('-')[0] || null);
+        setGenres((details.genres || []).slice(0, 2).map((g: any) => g.name));
+        setOverview(details.overview || null);
       } catch (error) {
         console.error('Failed to fetch TMDB data:', error);
       }
@@ -237,31 +245,48 @@ export const TVShowCollectionCard = ({
 
   return (
     <>
-      <Card className="p-4">
-        <div className="flex gap-4">
-          <Link to={`/tv/${tvId}`}>
+      <Card className="p-3 sm:p-4 hover:bg-accent/5 transition-colors">
+        <div className="flex gap-3 sm:gap-4">
+          <Link to={`/tv/${tvId}`} className="relative shrink-0">
             {poster ? (
-              <img src={getPosterUrl(poster) || ''} alt={title} className="w-16 h-24 object-cover rounded" />
+              <img src={getPosterUrl(poster) || ''} alt={title} className="w-20 h-28 object-cover rounded-md shadow-sm" />
             ) : (
-              <div className="w-16 h-24 bg-muted rounded flex items-center justify-center">
-                <Tv className="h-6 w-6 text-muted-foreground" />
+              <div className="w-20 h-28 bg-muted rounded-md flex items-center justify-center">
+                <Tv className="h-7 w-7 text-muted-foreground" />
+              </div>
+            )}
+            {showWatchedOverlay && (
+              <div className="absolute inset-0 bg-green-600/40 rounded-md flex items-center justify-center">
+                <Check className="h-5 w-5 text-white" />
               </div>
             )}
           </Link>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <Tv className="h-4 w-4 text-primary shrink-0" />
-              <Link to={`/tv/${tvId}`} className="font-semibold hover:underline line-clamp-1">
+            <div className="flex items-center gap-1.5">
+              <Tv className="h-3.5 w-3.5 text-primary shrink-0" />
+              <Link to={`/tv/${tvId}`} className="font-semibold text-sm hover:underline line-clamp-1">
                 {showTitle}
               </Link>
             </div>
 
-            <div className="flex items-center gap-3 mt-1">
+            {/* Year & Genres */}
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              {firstAirYear && (
+                <span className="text-xs text-muted-foreground">{firstAirYear}</span>
+              )}
+              {genres.map(genre => (
+                <Badge key={genre} variant="secondary" className="text-[10px] h-4 px-1.5 py-0">
+                  {genre}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3 mt-1.5">
               {tmdbRating !== null && (
                 <div className="flex items-center gap-1">
                   <Star className="h-3.5 w-3.5 fill-cinema-gold text-cinema-gold" />
-                  <span className="text-sm text-muted-foreground">{tmdbRating.toFixed(1)}</span>
+                  <span className="text-xs text-muted-foreground">{tmdbRating.toFixed(1)}</span>
                 </div>
               )}
               {displayRating && displayRating > 0 && (
@@ -273,22 +298,37 @@ export const TVShowCollectionCard = ({
             </div>
 
             {(seasonCount > 0 || episodeCount > 0) && (
-              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                {seasonCount > 0 && <span>{seasonCount} {seasonCount === 1 ? 'Season' : 'Seasons'}</span>}
-                {seasonCount > 0 && episodeCount > 0 && <span>•</span>}
-                {episodeCount > 0 && <span>{episodeCount} {episodeCount === 1 ? 'Episode' : 'Episodes'}</span>}
+              <div className="flex items-center gap-1.5 mt-1.5">
+                {seasonCount > 0 && (
+                  <Badge variant="outline" className="text-[10px] h-4 px-1.5 py-0">
+                    {seasonCount} {seasonCount === 1 ? 'Season' : 'Seasons'}
+                  </Badge>
+                )}
+                {episodeCount > 0 && (
+                  <Badge variant="outline" className="text-[10px] h-4 px-1.5 py-0">
+                    {episodeCount} {episodeCount === 1 ? 'Ep' : 'Eps'}
+                  </Badge>
+                )}
               </div>
             )}
+
+            {/* Overview */}
+            {overview && (
+              <p className="text-[11px] text-muted-foreground line-clamp-1 mt-1">{overview}</p>
+            )}
+
+            {/* Children content */}
+            {children}
 
             {/* View Details Button */}
             <Button
               variant="outline"
               size="sm"
               onClick={handleShowDetails}
-              className="mt-2 h-10 px-4 text-xs touch-manipulation active:scale-95"
+              className="mt-2 h-8 px-3 text-xs touch-manipulation active:scale-95"
             >
-              <ChevronDown className="h-4 w-4" />
-              View your ratings & reviews
+              <ChevronDown className="h-3.5 w-3.5" />
+              View ratings & reviews
             </Button>
           </div>
 
@@ -298,9 +338,9 @@ export const TVShowCollectionCard = ({
                 variant="ghost"
                 size="icon"
                 onClick={onEdit}
-                className="text-muted-foreground hover:text-foreground h-10 w-10 touch-manipulation"
+                className="text-muted-foreground hover:text-foreground h-9 w-9 touch-manipulation"
               >
-                <Pencil className="h-5 w-5" />
+                <Pencil className="h-4 w-4" />
               </Button>
             )}
             <AlertDialog>
