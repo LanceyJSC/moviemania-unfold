@@ -96,7 +96,7 @@ const TVShows = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFiltersModal(true)}
-                  className={`h-9 2xl:h-10 px-3 text-xs font-medium transition-all duration-200 active:scale-95 rounded-lg 2xl:rounded-xl touch-manipulation ${
+                  className={`flex-1 h-9 2xl:h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-lg 2xl:rounded-xl touch-manipulation ${
                     selectedGenres.length > 0
                       ? "bg-cinema-gold text-cinema-black border-cinema-gold"
                       : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
