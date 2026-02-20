@@ -19,6 +19,12 @@ import { tmdbService } from '@/lib/tmdb';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
+const getPosterUrl = (posterPath: string | null): string | null => {
+  if (!posterPath) return null;
+  if (posterPath.startsWith('http')) return posterPath;
+  return `${IMAGE_BASE}${posterPath}`;
+};
+
 interface CollectionMediaCardProps {
   id: string;
   movieId: number;
@@ -77,11 +83,11 @@ export const CollectionMediaCard = ({
   return (
     <Card className="p-3 sm:p-4 hover:bg-accent/5 transition-colors">
       <div className="flex gap-3 sm:gap-4">
-        <Link to={linkPath} className="relative shrink-0">
+        <Link to={linkPath} className="relative shrink-0 w-20">
           {poster ? (
-            <img src={`${IMAGE_BASE}${poster}`} alt={title} className="w-20 h-28 object-cover rounded-md shadow-sm" />
+            <img src={getPosterUrl(poster) || ''} alt={title} className="w-20 aspect-[2/3] object-cover rounded-md shadow-sm" />
           ) : (
-            <div className="w-20 h-28 bg-muted rounded-md flex items-center justify-center">
+            <div className="w-20 aspect-[2/3] bg-muted rounded-md flex items-center justify-center">
               {mediaType === 'tv' ? <Tv className="h-7 w-7 text-muted-foreground" /> : <Film className="h-7 w-7 text-muted-foreground" />}
             </div>
           )}
