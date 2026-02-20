@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Tv, Star, Trash2, Pencil, ChevronDown, BookOpen, Flame, Check } from 'lucide-react';
+import { Tv, Star, Trash2, Pencil, ChevronDown, BookOpen, Flame } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -249,15 +249,10 @@ export const TVShowCollectionCard = ({
         <div className="flex gap-3 sm:gap-4">
           <Link to={`/tv/${tvId}`} className="relative shrink-0">
             {poster ? (
-              <img src={getPosterUrl(poster) || ''} alt={title} className="w-[72px] h-[108px] object-cover rounded-md shadow-sm" />
+              <img src={getPosterUrl(poster) || ''} alt={title} className="w-24 h-36 object-cover rounded-md shadow-sm" />
             ) : (
-              <div className="w-[72px] h-[108px] bg-muted rounded-md flex items-center justify-center">
-                <Tv className="h-7 w-7 text-muted-foreground" />
-              </div>
-            )}
-            {showWatchedOverlay && (
-              <div className="absolute bottom-1 right-1 bg-primary rounded-full p-0.5">
-                <Check className="h-3 w-3 text-primary-foreground" />
+              <div className="w-24 h-36 bg-muted rounded-md flex items-center justify-center">
+                <Tv className="h-8 w-8 text-muted-foreground" />
               </div>
             )}
           </Link>
