@@ -247,11 +247,11 @@ export const TVShowCollectionCard = ({
     <>
       <Card className="p-3 sm:p-4 hover:bg-accent/5 transition-colors">
         <div className="flex gap-3 sm:gap-4">
-          <Link to={`/tv/${tvId}`} className="relative shrink-0">
+          <Link to={`/tv/${tvId}`} className="relative shrink-0 w-20">
             {poster ? (
-              <img src={getPosterUrl(poster) || ''} alt={title} className="w-20 h-28 object-cover rounded-md shadow-sm" />
+              <img src={getPosterUrl(poster) || ''} alt={title} className="w-20 aspect-[2/3] object-cover rounded-md shadow-sm" />
             ) : (
-              <div className="w-20 h-28 bg-muted rounded-md flex items-center justify-center">
+              <div className="w-20 aspect-[2/3] bg-muted rounded-md flex items-center justify-center">
                 <Tv className="h-7 w-7 text-muted-foreground" />
               </div>
             )}
