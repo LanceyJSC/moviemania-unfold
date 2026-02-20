@@ -83,17 +83,17 @@ export const CollectionMediaCard = ({
   return (
     <Card className="p-3 sm:p-4 hover:bg-accent/5 transition-colors">
       <div className="flex gap-3 sm:gap-4">
-        <Link to={linkPath} className="relative shrink-0 w-20">
+        <Link to={linkPath} className="relative shrink-0">
           {poster ? (
-            <img src={getPosterUrl(poster) || ''} alt={title} className="w-20 aspect-[2/3] object-cover rounded-md shadow-sm" />
+            <img src={getPosterUrl(poster) || ''} alt={title} className="w-[72px] h-[108px] object-cover rounded-md shadow-sm" />
           ) : (
-            <div className="w-20 aspect-[2/3] bg-muted rounded-md flex items-center justify-center">
+            <div className="w-[72px] h-[108px] bg-muted rounded-md flex items-center justify-center">
               {mediaType === 'tv' ? <Tv className="h-7 w-7 text-muted-foreground" /> : <Film className="h-7 w-7 text-muted-foreground" />}
             </div>
           )}
           {showWatchedOverlay && (
-            <div className="absolute inset-0 bg-green-600/40 rounded-md flex items-center justify-center">
-              <Check className="h-5 w-5 text-white" />
+            <div className="absolute bottom-1 right-1 bg-primary rounded-full p-0.5">
+              <Check className="h-3 w-3 text-primary-foreground" />
             </div>
           )}
         </Link>
