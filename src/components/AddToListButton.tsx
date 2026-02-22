@@ -44,9 +44,9 @@ export const AddToListButton = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={variant} size={size} className={`touch-manipulation active:scale-95 min-h-[44px] ${className}`}>
-          <ListPlus className="h-4 w-4 mr-2" />
-          Add to List
+        <Button variant={variant} size={size} className={`touch-manipulation active:scale-95 ${className}`}>
+          <ListPlus className="h-4 w-4 2xl:h-5 2xl:w-5" />
+          <span className="text-[10px] 2xl:text-xs">Lists</span>
         </Button>
       </DialogTrigger>
       <DialogContent>

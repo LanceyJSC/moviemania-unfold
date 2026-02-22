@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, Film, Trash2, MessageCircle } from 'lucide-react';
+import { Flame, Film, Tv, Trash2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { MobileFilterPills } from '@/components/MobileFilterPills';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,12 @@ import {
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w92';
 const flameColors = ['text-amber-500', 'text-orange-500', 'text-orange-600', 'text-red-500', 'text-red-600'];
 
+const reviewFilterOptions = [
+  { value: 'all', label: 'All' },
+  { value: 'movie', label: 'Movies' },
+  { value: 'tv', label: 'TV Shows' },
+];
+
 interface Review {
   id: string;
   movie_id: number;
@@ -34,14 +41,24 @@ interface Review {
   media_type: string | null;
 }
 
-export const CollectionReviewsList = () => {
+interface CollectionReviewsListProps {
+  onCountChange?: (count: number) => void;
+}
+
+export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListProps) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [mediaTypeFilter, setMediaTypeFilter] = useState('all');
+
   useEffect(() => {
     if (user) fetchReviews();
   }, [user]);
+
+  useEffect(() => {
+    onCountChange?.(reviews.length);
+  }, [reviews.length, onCountChange]);
 
   const fetchReviews = async () => {
     if (!user) return;
@@ -90,9 +107,23 @@ export const CollectionReviewsList = () => {
     );
   }
 
+  const filteredReviews = mediaTypeFilter === 'all'
+    ? reviews
+    : reviews.filter(r => r.media_type === mediaTypeFilter);
+
   return (
-    <div className="space-y-2">
-      {reviews.map(review => {
+    <div className="space-y-3">
+      <MobileFilterPills
+        options={reviewFilterOptions}
+        selectedValue={mediaTypeFilter}
+        onSelect={setMediaTypeFilter}
+      />
+      {filteredReviews.length === 0 && reviews.length > 0 ? (
+        <Card className="p-6 text-center border-dashed">
+          <p className="text-sm text-muted-foreground">No {mediaTypeFilter === 'movie' ? 'movie' : 'TV show'} reviews yet</p>
+        </Card>
+      ) : null}
+      {filteredReviews.map(review => {
         const posterUrl = review.movie_poster
           ? review.movie_poster.startsWith('http') ? review.movie_poster : `${IMAGE_BASE}${review.movie_poster}`
           : null;
@@ -112,7 +143,14 @@ export const CollectionReviewsList = () => {
             </Link>
             <div className="flex-1 min-w-0">
               <Link to={`/${review.media_type === 'tv' ? 'tv' : 'movie'}/${review.movie_id}/reviews`} className="hover:underline">
-                <p className="text-sm font-medium text-foreground truncate">{review.movie_title}</p>
+                <div className="flex items-center gap-1.5">
+                  {review.media_type === 'tv' ? (
+                    <Tv className="h-3 w-3 text-muted-foreground shrink-0" />
+                  ) : (
+                    <Film className="h-3 w-3 text-muted-foreground shrink-0" />
+                  )}
+                  <p className="text-sm font-medium text-foreground truncate">{review.movie_title}</p>
+                </div>
               </Link>
               {review.rating != null && review.rating > 0 && (
                 <div className="flex items-center gap-0.5 mt-0.5">
