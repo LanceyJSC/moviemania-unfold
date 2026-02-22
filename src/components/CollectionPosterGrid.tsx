@@ -1,4 +1,4 @@
-import { Flame, Film, Tv } from 'lucide-react';
+import { Flame, Film, Tv, Heart, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
@@ -28,6 +28,8 @@ export interface PosterGridItem {
   watchedDate?: string | null;
   onDelete?: () => void;
   onEdit?: () => void;
+  isLiked?: boolean;
+  isRewatch?: boolean;
 }
 
 interface CollectionPosterGridProps {
@@ -62,7 +64,22 @@ export const CollectionPosterGrid = ({ items }: CollectionPosterGridProps) => {
                   )}
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              {/* Hover overlay with title (desktop only) */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors hidden sm:flex items-end opacity-0 group-hover:opacity-100">
+                <p className="text-white text-xs font-medium p-2 line-clamp-2 w-full">{item.title}</p>
+              </div>
+              {/* Liked heart badge */}
+              {item.isLiked && (
+                <div className="absolute bottom-1.5 left-1.5">
+                  <Heart className="h-4 w-4 fill-cinema-red text-cinema-red drop-shadow" />
+                </div>
+              )}
+              {/* Rewatch indicator */}
+              {item.isRewatch && (
+                <div className="absolute top-1.5 right-1.5 bg-black/50 rounded-full p-0.5">
+                  <RotateCcw className="h-3 w-3 text-white" />
+                </div>
+              )}
             </div>
             {/* Flame rating below poster */}
             <div className="mt-1 flex items-center gap-0.5 min-h-[18px]">

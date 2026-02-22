@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Film, Tv, Star, Clock, Heart, Eye, 
@@ -26,6 +26,9 @@ import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
 import { CollectionPosterGrid, PosterGridItem } from '@/components/CollectionPosterGrid';
 import { DiaryTable, DiaryItem } from '@/components/DiaryTable';
 import { LogMediaModal } from '@/components/LogMediaModal';
+import { CollectionReviewsList } from '@/components/CollectionReviewsList';
+import { CollectionListsGrid } from '@/components/CollectionListsGrid';
+import { DiaryHeatmap } from '@/components/DiaryHeatmap';
 import {
   Select,
   SelectContent,
@@ -111,6 +114,17 @@ const Collection = () => {
       refetchDiary();
     }
   }, [user]);
+
+  // Liked movie IDs set for badge
+  const likedSet = useMemo(() => new Set(favorites.map(f => f.movie_id)), [favorites]);
+
+  // Rewatch set: movies appearing more than once in diary
+  const rewatchSet = useMemo(() => {
+    const counts: Record<number, number> = {};
+    movieDiary.forEach(e => { counts[e.movie_id] = (counts[e.movie_id] || 0) + 1; });
+    tvDiary.forEach(e => { counts[e.tv_id] = (counts[e.tv_id] || 0) + 1; });
+    return new Set(Object.entries(counts).filter(([, c]) => c > 1).map(([id]) => Number(id)));
+  }, [movieDiary, tvDiary]);
 
   if (!user) {
     return (
@@ -353,6 +367,8 @@ const Collection = () => {
       mediaType: getMediaType(item),
       userRating: item.rating,
       onDelete: getDeleteFn ? getDeleteFn(item) : undefined,
+      isLiked: likedSet.has(item.movie_id),
+      isRewatch: rewatchSet.has(item.movie_id),
     }));
   };
 
@@ -640,28 +656,38 @@ const Collection = () => {
         </div>
 
         <Tabs defaultValue="watchlist" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4 sm:mb-6 h-10 sm:h-12">
-            <TabsTrigger value="watchlist" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Watchlist</span>
-              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getUnwatchedItems().length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
-              <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Favorites</span>
-              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getFilteredFavorites().length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="watched" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
-              <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Watched</span>
-              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getWatchedItems().length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="diary" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-1 sm:px-2">
-              <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Diary</span>
-              <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getCombinedDiary().length}</Badge>
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-3 px-3 mb-4 sm:mb-6">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-6 h-10 sm:h-12">
+              <TabsTrigger value="watchlist" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Watchlist</span>
+                <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getUnwatchedItems().length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
+                <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Favorites</span>
+                <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getFilteredFavorites().length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="watched" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Watched</span>
+                <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getWatchedItems().length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="diary" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
+                <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Diary</span>
+                <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getCombinedDiary().length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="reviews" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
+                <Star className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Reviews</span>
+              </TabsTrigger>
+              <TabsTrigger value="lists" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
+                <Film className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Lists</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Search Bar */}
           <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
@@ -764,16 +790,29 @@ const Collection = () => {
             {isLoading ? (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />)}</div>
             ) : getCombinedDiary().length > 0 ? (
-              viewMode === 'grid' ? (
-                <div className="bg-card rounded-xl border border-border overflow-hidden">
-                  <DiaryTable items={toDiaryItems(getCombinedDiary())} />
-                </div>
-              ) : (
-                renderListView(getCombinedDiary(), 'diary')
-              )
+              <>
+                <DiaryHeatmap movieDiary={movieDiary} tvDiary={tvDiary} />
+                {viewMode === 'grid' ? (
+                  <div className="bg-card rounded-xl border border-border overflow-hidden">
+                    <DiaryTable items={toDiaryItems(getCombinedDiary())} />
+                  </div>
+                ) : (
+                  renderListView(getCombinedDiary(), 'diary')
+                )}
+              </>
             ) : (
               renderEmptyState(<BookOpen className="h-14 w-14" />, 'No diary entries yet', 'Log when you watched movies and TV shows with notes and ratings')
             )}
+          </TabsContent>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="space-y-4">
+            <CollectionReviewsList />
+          </TabsContent>
+
+          {/* Lists Tab */}
+          <TabsContent value="lists" className="space-y-4">
+            <CollectionListsGrid />
           </TabsContent>
         </Tabs>
       </div>
