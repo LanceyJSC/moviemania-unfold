@@ -208,8 +208,9 @@ export const LogMediaModal = ({
             movie_poster: mediaPoster,
             rating: rating > 0 ? rating : null,
             review_text: notes,
-            is_spoiler: isSpoiler
-          }, {
+            is_spoiler: isSpoiler,
+            media_type: mediaType
+          } as any, {
             onConflict: 'user_id,movie_id'
           });
 

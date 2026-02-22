@@ -887,6 +887,7 @@ export type Database = {
           created_at: string
           id: string
           is_spoiler: boolean | null
+          media_type: string | null
           movie_id: number
           movie_poster: string | null
           movie_title: string
@@ -899,6 +900,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_spoiler?: boolean | null
+          media_type?: string | null
           movie_id: number
           movie_poster?: string | null
           movie_title: string
@@ -911,6 +913,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_spoiler?: boolean | null
+          media_type?: string | null
           movie_id?: number
           movie_poster?: string | null
           movie_title?: string

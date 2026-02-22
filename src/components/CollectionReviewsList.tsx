@@ -31,6 +31,7 @@ interface Review {
   review_text: string | null;
   created_at: string;
   is_spoiler: boolean | null;
+  media_type: string | null;
 }
 
 export const CollectionReviewsList = () => {
@@ -98,7 +99,7 @@ export const CollectionReviewsList = () => {
 
         return (
           <div key={review.id} className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors">
-            <Link to={`/movie/${review.movie_id}`} className="shrink-0">
+            <Link to={`/${review.media_type === 'tv' ? 'tv' : 'movie'}/${review.movie_id}/reviews`} className="shrink-0">
               <div className="w-12 h-[72px] rounded overflow-hidden bg-muted">
                 {posterUrl ? (
                   <img src={posterUrl} alt="" className="w-full h-full object-cover" />
@@ -110,7 +111,7 @@ export const CollectionReviewsList = () => {
               </div>
             </Link>
             <div className="flex-1 min-w-0">
-              <Link to={`/movie/${review.movie_id}`} className="hover:underline">
+              <Link to={`/${review.media_type === 'tv' ? 'tv' : 'movie'}/${review.movie_id}/reviews`} className="hover:underline">
                 <p className="text-sm font-medium text-foreground truncate">{review.movie_title}</p>
               </Link>
               {review.rating != null && review.rating > 0 && (
