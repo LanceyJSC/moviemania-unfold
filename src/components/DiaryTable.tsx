@@ -1,20 +1,17 @@
-import { useState } from 'react';
-import { Star, Heart, BookOpen, Pencil, Trash2, Film, Tv } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Flame, Heart, BookOpen, Pencil, Film, Tv, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CollectionDetailDrawer } from '@/components/CollectionDetailDrawer';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/w92';
+
+const flameColors = [
+  'text-amber-500',
+  'text-orange-500',
+  'text-orange-600',
+  'text-red-500',
+  'text-red-600',
+];
 
 const getPosterUrl = (posterPath: string | null): string | null => {
   if (!posterPath) return null;
@@ -71,6 +68,15 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const grouped = groupByMonth(items);
 
+  // Detect rewatches: movies that appear more than once
+  const rewatchSet = useMemo(() => {
+    const counts: Record<number, number> = {};
+    items.forEach(item => {
+      counts[item.movieId] = (counts[item.movieId] || 0) + 1;
+    });
+    return new Set(Object.entries(counts).filter(([, c]) => c > 1).map(([id]) => Number(id)));
+  }, [items]);
+
   const handleTap = (item: DiaryItem) => {
     setSelectedItem(item);
     setDrawerOpen(true);
@@ -79,11 +85,10 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
   return (
     <>
       {/* Table header */}
-      <div className="hidden sm:grid sm:grid-cols-[80px_40px_1fr_60px_100px_40px_40px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium border-b border-border">
+      <div className="hidden sm:grid sm:grid-cols-[80px_40px_1fr_100px_40px_40px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium border-b border-border">
         <span>Month</span>
         <span>Day</span>
         <span>Film</span>
-        <span>Year</span>
         <span>Rating</span>
         <span className="text-center">Review</span>
         <span></span>
@@ -95,7 +100,7 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
             {group.entries.map((entry, idx) => {
               const d = new Date(entry.watchedDate);
               const day = d.getDate().toString().padStart(2, '0');
-              const releaseYear = ''; // Will show from title or could be fetched
+              const isRewatch = rewatchSet.has(entry.movieId);
 
               return (
                 <button
@@ -105,7 +110,6 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
                 >
                   {/* Mobile layout */}
                   <div className="sm:hidden flex items-center gap-3 px-3 py-2.5">
-                    {/* Month badge - only on first entry */}
                     <div className="w-12 shrink-0">
                       {idx === 0 && (
                         <div className="bg-primary/10 rounded-lg p-1.5 text-center">
@@ -115,7 +119,6 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
                       )}
                     </div>
                     <div className="text-lg font-light text-muted-foreground w-8 text-right">{day}</div>
-                    {/* Poster */}
                     <div className="w-9 h-[52px] rounded overflow-hidden bg-muted shrink-0">
                       {entry.poster ? (
                         <img src={getPosterUrl(entry.poster) || ''} alt="" className="w-full h-full object-cover" />
@@ -126,16 +129,17 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{entry.title}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium text-foreground truncate">{entry.title}</p>
+                        {isRewatch && <RotateCcw className="h-3 w-3 text-primary shrink-0" />}
+                      </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         {entry.userRating != null && entry.userRating > 0 && (
                           <div className="flex items-center gap-0.5">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
+                            {Array.from({ length: entry.userRating }).map((_, i) => (
+                              <Flame
                                 key={i}
-                                className={`h-2.5 w-2.5 ${
-                                  i < entry.userRating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground/30'
-                                }`}
+                                className={`h-2.5 w-2.5 fill-current ${flameColors[i] || flameColors[4]}`}
                               />
                             ))}
                           </div>
@@ -146,7 +150,7 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
                   </div>
 
                   {/* Desktop layout */}
-                  <div className="hidden sm:grid sm:grid-cols-[80px_40px_1fr_60px_100px_40px_40px] gap-2 items-center px-3 py-2.5">
+                  <div className="hidden sm:grid sm:grid-cols-[80px_40px_1fr_100px_40px_40px] gap-2 items-center px-3 py-2.5">
                     <div>
                       {idx === 0 && (
                         <div className="bg-primary/10 rounded-lg p-1.5 text-center inline-block">
@@ -167,16 +171,14 @@ export const DiaryTable = ({ items }: DiaryTableProps) => {
                         )}
                       </div>
                       <span className="text-sm font-medium text-foreground truncate">{entry.title}</span>
+                      {isRewatch && <RotateCcw className="h-3 w-3 text-primary shrink-0" />}
                     </div>
-                    <span className="text-xs text-muted-foreground"></span>
                     <div className="flex items-center gap-0.5">
                       {entry.userRating != null && entry.userRating > 0 ? (
-                        Array.from({ length: 5 }).map((_, i) => (
-                          <Star
+                        Array.from({ length: entry.userRating }).map((_, i) => (
+                          <Flame
                             key={i}
-                            className={`h-3 w-3 ${
-                              i < entry.userRating! ? 'fill-cinema-gold text-cinema-gold' : 'text-muted-foreground/30'
-                            }`}
+                            className={`h-3 w-3 fill-current ${flameColors[i] || flameColors[4]}`}
                           />
                         ))
                       ) : null}
