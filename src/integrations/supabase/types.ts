@@ -885,6 +885,7 @@ export type Database = {
       user_reviews: {
         Row: {
           created_at: string
+          episode_number: number | null
           id: string
           is_spoiler: boolean | null
           media_type: string | null
@@ -893,11 +894,13 @@ export type Database = {
           movie_title: string
           rating: number | null
           review_text: string | null
+          season_number: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          episode_number?: number | null
           id?: string
           is_spoiler?: boolean | null
           media_type?: string | null
@@ -906,11 +909,13 @@ export type Database = {
           movie_title: string
           rating?: number | null
           review_text?: string | null
+          season_number?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          episode_number?: number | null
           id?: string
           is_spoiler?: boolean | null
           media_type?: string | null
@@ -919,6 +924,7 @@ export type Database = {
           movie_title?: string
           rating?: number | null
           review_text?: string | null
+          season_number?: number | null
           updated_at?: string
           user_id?: string
         }
