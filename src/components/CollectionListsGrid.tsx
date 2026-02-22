@@ -75,7 +75,7 @@ export const CollectionListsGrid = () => {
             return (
               <Link
                 key={list.id}
-                to={`/list/${list.id}`}
+                to={`/lists/${list.id}`}
                 className="group block rounded-lg overflow-hidden border border-border bg-card hover:shadow-md transition-shadow"
               >
                 <div className="aspect-[4/3] bg-muted grid grid-cols-2 grid-rows-2 gap-px overflow-hidden">
