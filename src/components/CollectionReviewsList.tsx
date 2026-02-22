@@ -26,7 +26,8 @@ const flameColors = ['text-amber-500', 'text-orange-500', 'text-orange-600', 'te
 const reviewFilterOptions = [
   { value: 'all', label: 'All' },
   { value: 'movie', label: 'Movies' },
-  { value: 'tv', label: 'TV Shows' },
+  { value: 'tv-show', label: 'TV Shows' },
+  { value: 'episode', label: 'Episodes' },
 ];
 
 interface Review {
@@ -39,6 +40,8 @@ interface Review {
   created_at: string;
   is_spoiler: boolean | null;
   media_type: string | null;
+  season_number: number | null;
+  episode_number: number | null;
 }
 
 interface CollectionReviewsListProps {
@@ -109,7 +112,11 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
 
   const filteredReviews = mediaTypeFilter === 'all'
     ? reviews
-    : reviews.filter(r => r.media_type === mediaTypeFilter);
+    : mediaTypeFilter === 'episode'
+      ? reviews.filter(r => r.media_type === 'tv' && r.episode_number != null)
+      : mediaTypeFilter === 'tv-show'
+        ? reviews.filter(r => r.media_type === 'tv' && r.episode_number == null)
+        : reviews.filter(r => r.media_type === mediaTypeFilter);
 
   return (
     <div className="space-y-3">
@@ -120,7 +127,9 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
       />
       {filteredReviews.length === 0 && reviews.length > 0 ? (
         <Card className="p-6 text-center border-dashed">
-          <p className="text-sm text-muted-foreground">No {mediaTypeFilter === 'movie' ? 'movie' : 'TV show'} reviews yet</p>
+          <p className="text-sm text-muted-foreground">
+            No {mediaTypeFilter === 'movie' ? 'movie' : mediaTypeFilter === 'episode' ? 'episode' : 'TV show'} reviews yet
+          </p>
         </Card>
       ) : null}
       {filteredReviews.map(review => {
@@ -150,6 +159,11 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
                     <Film className="h-3 w-3 text-muted-foreground shrink-0" />
                   )}
                   <p className="text-sm font-medium text-foreground truncate">{review.movie_title}</p>
+                  {review.episode_number != null && review.season_number != null && (
+                    <span className="text-[10px] text-muted-foreground shrink-0 bg-muted px-1.5 py-0.5 rounded">
+                      S{review.season_number}E{review.episode_number}
+                    </span>
+                  )}
                 </div>
               </Link>
               {review.rating != null && review.rating > 0 && (

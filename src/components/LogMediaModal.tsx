@@ -209,7 +209,9 @@ export const LogMediaModal = ({
             rating: rating > 0 ? rating : null,
             review_text: notes,
             is_spoiler: isSpoiler,
-            media_type: mediaType
+            media_type: mediaType,
+            season_number: seasonNumber || null,
+            episode_number: episodeNumber || null,
           } as any, {
             onConflict: 'user_id,movie_id'
           });
