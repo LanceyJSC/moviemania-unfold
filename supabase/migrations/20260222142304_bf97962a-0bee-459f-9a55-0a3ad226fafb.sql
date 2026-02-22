@@ -1,0 +1,1 @@
+ALTER TABLE public.user_reviews ADD COLUMN media_type text DEFAULT 'movie';
