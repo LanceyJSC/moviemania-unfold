@@ -1,63 +1,80 @@
 
 
-# Collection Page Redesign
+# Letterboxd-Style Collection Page Enhancements
 
-## Current Issues
-- Cards are plain and text-heavy with small 64x96px poster thumbnails
-- Stats section uses tiny, cramped cards with minimal visual hierarchy
-- No visual distinction between tabs -- all content looks the same
-- Cards lack genre tags, release year, or runtime context
-- Diary entries don't show enough detail at a glance
-- The layout feels like a simple list rather than a curated personal collection
+Here's what's currently missing compared to Letterboxd, and what we can add to close the gap:
 
-## Proposed Changes
+---
 
-### 1. Enhanced Stats Header
-- Replace the cramped 4-column grid with a visually rich banner
-- Add a gradient background with subtle cinema styling
-- Larger typography for key numbers with animated counters feel
-- Add a visual progress bar showing level progress (e.g., "Level 3 -- 12/20 to next level")
+## 1. Reviews Tab
+Letterboxd has a dedicated "Reviews" section showing all your written reviews in a clean list. Currently, reviews are buried inside the Diary tab.
 
-### 2. Larger, Richer Media Cards
-- Increase poster size from w-16 h-24 (64x96) to w-20 h-28 (80x112) for better visual presence
-- Add release year and genre tags below the title
-- Show a brief overview/tagline fetched from TMDB (1-line, truncated)
-- Add the "Added on" or "Watched on" date more prominently
-- For watched items: show a subtle green checkmark overlay on the poster
-- For diary entries: show the review snippet more prominently with a styled quote block
+- Add a 5th tab called "Reviews" with a speech bubble icon
+- Show each review with: poster thumbnail, title, flame rating, review text, and date
+- Include edit and delete actions on each review
 
-### 3. Desktop Grid Layout
-- On desktop (md+), switch from stacked list to a 2-column grid layout for cards
-- This uses the wider screen estate much better and reduces scrolling
-- Mobile stays as single-column stacked list
+## 2. Lists Tab
+Letterboxd prominently features your custom lists. You already have a Lists system (`useUserLists`) but it's not on the Collection page.
 
-### 4. Improved Tab Visual Design
-- Add item counts more prominently in each tab
-- Show an icon + count summary strip below the tabs (e.g., "23 Movies, 8 TV Shows")
+- Add a 6th tab called "Lists" with a layers/stack icon
+- Show all user-created lists as cards with cover art (first 4 posters as a mini-grid)
+- Include a "Create New List" button
+- Tapping a list navigates to the existing `/list/:id` page
 
-### 5. Empty States
-- Make empty states more inviting with larger icons and a direct CTA button linking to Movies/TV Shows browse pages
+## 3. Poster Hover Overlay (Desktop)
+On Letterboxd, hovering a poster shows quick-action icons (rate, like, add to watchlist) without navigating away.
+
+- On desktop hover, show a semi-transparent overlay with 3 icon buttons: flame rating, heart (favorite), and bookmark (watchlist)
+- On mobile, keep the current tap-to-navigate behavior
+
+## 4. "Liked" Heart Badge on Posters
+Letterboxd shows a small green heart on posters you've liked/favorited.
+
+- Check if each poster item is in the user's favorites
+- If yes, show a small flame-colored heart icon in the bottom-left corner of the poster
+
+## 5. Diary Calendar/Heatmap View
+Letterboxd shows a contribution-graph-style heatmap of your viewing activity.
+
+- Add a small calendar heatmap above or below the Diary tab content
+- Show intensity by number of films logged per day (light to dark shading)
+- Clicking a day filters the diary to that date
+
+## 6. Genre and Decade Filters
+Letterboxd lets you filter your collection by genre and release decade.
+
+- Add a "Genre" dropdown filter next to the existing sort/rating filters
+- Add a "Decade" dropdown (2020s, 2010s, 2000s, etc.)
+- These require fetching genre/year data from TMDB for each item (can be cached)
+
+## 7. Rewatch Indicator
+Letterboxd marks entries where a film was rewatched with a small circular arrow icon.
+
+- In the Diary table, if a movie appears more than once, show a rewatch icon
+- On poster grid items, show a small rewatch badge if logged multiple times
+
+---
 
 ## Technical Details
 
-### Files to modify:
+### New Components
+- `src/components/CollectionReviewsList.tsx` - Reviews tab content
+- `src/components/CollectionListsGrid.tsx` - Lists tab content  
+- `src/components/DiaryHeatmap.tsx` - Calendar heatmap for diary
+- `src/components/PosterOverlay.tsx` - Hover overlay with quick actions
 
-**src/pages/Collection.tsx**
-- Redesign the stats section with a gradient banner component
-- Add `md:grid md:grid-cols-2` to the card container divs for desktop 2-column layout
-- Enhance empty state cards with browse CTAs
+### Modified Files
+- `src/pages/Collection.tsx` - Add Reviews, Lists tabs; add genre/decade filters; integrate heatmap
+- `src/components/CollectionPosterGrid.tsx` - Add hover overlay, liked badge, rewatch indicator
+- `src/components/DiaryTable.tsx` - Add rewatch indicator, switch from stars to flames
 
-**src/components/CollectionMediaCard.tsx**
-- Increase poster size to w-20 h-28
-- Fetch and display release year and genre from TMDB (add to existing useEffect)
-- Add a 1-line overview/tagline
-- Style the children content area (dates, reviews) with better spacing
-- Add watched overlay on poster when applicable
+### Data Requirements
+- Reviews data: already available via `user_reviews` table
+- Lists data: already available via `useUserLists` hook
+- Favorites lookup: already available via `useFavorites` hook
+- Genre/year data: will need to store or fetch from TMDB per item (can use existing cached data)
+- Rewatch detection: count diary entries per movie_id
 
-**src/components/TVShowCollectionCard.tsx**
-- Match the same poster size increase (w-20 h-28)
-- Add network/first air date info from the existing TMDB fetch
-- Better visual styling for season/episode counts (use badges instead of plain text)
-
-### No database changes required -- all enhancements use existing data plus TMDB API info already being fetched.
+### No database changes needed
+All data already exists in the current schema. This is purely a frontend enhancement.
 
