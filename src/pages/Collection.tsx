@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Film, Tv, Star, Clock, Heart, Eye, 
-  Plus, Search, Trophy, BookOpen, TrendingUp
+  Plus, Search, Trophy, BookOpen, TrendingUp,
+  LayoutGrid, List
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
@@ -22,15 +23,24 @@ import { MobileBrandHeader } from '@/components/MobileBrandHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { CollectionMediaCard } from '@/components/CollectionMediaCard';
 import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
+import { CollectionPosterGrid, PosterGridItem } from '@/components/CollectionPosterGrid';
+import { DiaryTable, DiaryItem } from '@/components/DiaryTable';
 import { LogMediaModal } from '@/components/LogMediaModal';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
-
-
 type MediaFilter = 'all' | 'movies' | 'tv';
+type ViewMode = 'grid' | 'list';
+type SortOption = 'recent' | 'rating' | 'title';
 
 const Collection = () => {
   const navigate = useNavigate();
@@ -47,6 +57,9 @@ const Collection = () => {
   const [ratedMovies, setRatedMovies] = useState<any[]>([]);
   const [ratedLoading, setRatedLoading] = useState(true);
   const [mediaFilter, setMediaFilter] = useState<MediaFilter>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [sortOption, setSortOption] = useState<SortOption>('recent');
+  const [ratingFilter, setRatingFilter] = useState<string>('all');
   
   // Edit diary entry state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -68,7 +81,7 @@ const Collection = () => {
     }
   }, [user, movieDiary.length, tvDiary.length, ratedMovies.length, diaryLoading, ratedLoading]);
 
-  // Load rated movies (watched) - also refresh when watchedItems changes or diary updates
+  // Load rated movies (watched)
   useEffect(() => {
     const loadRatedMovies = async () => {
       if (!user) {
@@ -115,11 +128,9 @@ const Collection = () => {
     );
   }
 
-  // Helper function to delete all data for a movie/TV show (used for Watched tab)
+  // Helper function to delete all data for a movie/TV show
   const deleteAllMediaData = async (mediaId: number, mediaType: 'movie' | 'tv') => {
     if (!user) return;
-    
-    // Delete from all related tables
     await Promise.all([
       supabase.from('user_ratings').delete().eq('movie_id', mediaId).eq('user_id', user.id),
       supabase.from('ratings').delete().eq('movie_id', mediaId).eq('user_id', user.id),
@@ -131,8 +142,6 @@ const Collection = () => {
         ? supabase.from('tv_diary').delete().eq('tv_id', mediaId).eq('user_id', user.id)
         : supabase.from('movie_diary').delete().eq('movie_id', mediaId).eq('user_id', user.id),
     ]);
-    
-    // Refresh data
     const { data } = await supabase
       .from('user_ratings')
       .select('*')
@@ -145,18 +154,15 @@ const Collection = () => {
     await recalculateStats();
   };
 
-  // Helper function to delete ONLY diary notes/review (keeps watched status)
+  // Helper function to delete ONLY diary notes/review
   const deleteDiaryEntry = async (mediaId: number, mediaType: 'movie' | 'tv') => {
     if (!user) return;
-    
-    // Only delete diary entry and user review, keep watched status (user_ratings)
     await Promise.all([
       supabase.from('user_reviews').delete().eq('movie_id', mediaId).eq('user_id', user.id),
       mediaType === 'tv' 
         ? supabase.from('tv_diary').delete().eq('tv_id', mediaId).eq('user_id', user.id)
         : supabase.from('movie_diary').delete().eq('movie_id', mediaId).eq('user_id', user.id),
     ]);
-    
     queryClient.invalidateQueries({ queryKey: ['community-reviews', mediaId] });
     refetchDiary();
   };
@@ -188,25 +194,46 @@ const Collection = () => {
     }
   };
 
+  // Sorting helper
+  const sortItems = <T extends { movie_title?: string; title?: string; rating?: number | null; userRating?: number | null; added_at?: string; created_at?: string }>(items: T[]): T[] => {
+    return [...items].sort((a, b) => {
+      if (sortOption === 'title') {
+        const titleA = (a as any).movie_title || (a as any).title || '';
+        const titleB = (b as any).movie_title || (b as any).title || '';
+        return titleA.localeCompare(titleB);
+      }
+      if (sortOption === 'rating') {
+        const rA = (a as any).rating || (a as any).userRating || 0;
+        const rB = (b as any).rating || (b as any).userRating || 0;
+        return rB - rA;
+      }
+      return 0; // 'recent' keeps original order
+    });
+  };
+
+  // Rating filter helper
+  const filterByRating = <T extends { rating?: number | null }>(items: T[]): T[] => {
+    if (ratingFilter === 'all') return items;
+    const r = parseInt(ratingFilter);
+    return items.filter(i => (i as any).rating === r || (i as any).userRating === r);
+  };
+
   const getUnwatchedItems = () => {
-    const unwatched = items.filter(item => !item.watched_at);
-    if (mediaFilter === 'movies') return unwatched.filter(item => (item as any).media_type !== 'tv');
-    if (mediaFilter === 'tv') return unwatched.filter(item => (item as any).media_type === 'tv');
-    return unwatched;
+    let unwatched = items.filter(item => !item.watched_at);
+    if (mediaFilter === 'movies') unwatched = unwatched.filter(item => (item as any).media_type !== 'tv');
+    if (mediaFilter === 'tv') unwatched = unwatched.filter(item => (item as any).media_type === 'tv');
+    return sortItems(unwatched);
   };
 
   const getFilteredFavorites = () => {
-    if (mediaFilter === 'movies') return favorites.filter(item => (item as any).media_type !== 'tv');
-    if (mediaFilter === 'tv') return favorites.filter(item => (item as any).media_type === 'tv');
-    return favorites;
+    let fav = [...favorites];
+    if (mediaFilter === 'movies') fav = fav.filter(item => (item as any).media_type !== 'tv');
+    if (mediaFilter === 'tv') fav = fav.filter(item => (item as any).media_type === 'tv');
+    return sortItems(fav);
   };
 
-  // Combine rated items with diary entries for "Watched" - diary entries are also watched
   const getWatchedItems = () => {
-    // Create a map to deduplicate by movie_id
     const watchedMap = new Map<number, any>();
-    
-    // Add rated items
     ratedMovies.forEach(item => {
       watchedMap.set(item.movie_id, {
         id: item.id,
@@ -218,8 +245,6 @@ const Collection = () => {
         source: 'rating'
       });
     });
-    
-    // Add movie diary entries (if not already rated)
     movieDiary.forEach(entry => {
       if (!watchedMap.has(entry.movie_id)) {
         watchedMap.set(entry.movie_id, {
@@ -232,13 +257,10 @@ const Collection = () => {
           source: 'diary'
         });
       } else if (entry.rating && entry.rating > (watchedMap.get(entry.movie_id)?.rating || 0)) {
-        // Update rating if diary has higher rating
         const existing = watchedMap.get(entry.movie_id);
         watchedMap.set(entry.movie_id, { ...existing, rating: entry.rating });
       }
     });
-    
-    // Add TV diary entries ONLY if not already rated at series level (don't override series ratings with episode ratings)
     tvDiary.forEach(entry => {
       if (!watchedMap.has(entry.tv_id)) {
         watchedMap.set(entry.tv_id, {
@@ -246,56 +268,42 @@ const Collection = () => {
           movie_id: entry.tv_id,
           movie_title: entry.tv_title,
           movie_poster: entry.tv_poster,
-          rating: null, // Don't use episode/season rating as series rating
+          rating: null,
           media_type: 'tv',
           source: 'diary'
         });
       }
     });
-    
-    let items = Array.from(watchedMap.values());
-    
-    if (mediaFilter === 'movies') items = items.filter(item => item.media_type !== 'tv');
-    if (mediaFilter === 'tv') items = items.filter(item => item.media_type === 'tv');
-    
-    return items;
+    let result = Array.from(watchedMap.values());
+    if (mediaFilter === 'movies') result = result.filter(item => item.media_type !== 'tv');
+    if (mediaFilter === 'tv') result = result.filter(item => item.media_type === 'tv');
+    result = filterByRating(result);
+    return sortItems(result);
   };
 
-  // Diary shows ONLY entries that have notes/reviews written
   const getCombinedDiary = () => {
-    // Create a map to deduplicate by movie_id/tv_id, preferring entries with notes
     const diaryMap = new Map<string, any>();
-    
-    // Add movie diary entries that have notes
     movieDiary.filter(entry => entry.notes && entry.notes.trim()).forEach(entry => {
       const key = `movie-${entry.movie_id}`;
       const existing = diaryMap.get(key);
-      // Prefer most recent entry with notes
       if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
         diaryMap.set(key, { ...entry, type: 'movie' as const });
       }
     });
-    
-    // Add TV diary entries that have notes (group by show)
     const tvShowMap = new Map<number, any>();
     tvDiary.filter(entry => entry.notes && entry.notes.trim()).forEach(entry => {
       const existing = tvShowMap.get(entry.tv_id);
-      // Keep the most recent entry with notes
       if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
         tvShowMap.set(entry.tv_id, { ...entry, type: 'tv' as const });
       }
     });
-    
     tvShowMap.forEach((entry, tvId) => {
       diaryMap.set(`tv-${tvId}`, entry);
     });
-    
-    let items = Array.from(diaryMap.values());
-    
-    if (mediaFilter === 'movies') items = items.filter(item => item.type === 'movie');
-    if (mediaFilter === 'tv') items = items.filter(item => item.type === 'tv');
-    
-    return items.sort((a, b) =>
+    let result = Array.from(diaryMap.values());
+    if (mediaFilter === 'movies') result = result.filter(item => item.type === 'movie');
+    if (mediaFilter === 'tv') result = result.filter(item => item.type === 'tv');
+    return result.sort((a, b) =>
       new Date(b.watched_date).getTime() - new Date(a.watched_date).getTime()
     );
   };
@@ -335,6 +343,38 @@ const Collection = () => {
 
   const isLoading = itemsLoading || favoritesLoading || ratedLoading || diaryLoading;
 
+  // Convert items to PosterGridItem format
+  const toGridItems = (items: any[], getMediaType: (item: any) => 'movie' | 'tv', getDeleteFn?: (item: any) => () => void): PosterGridItem[] => {
+    return items.map(item => ({
+      id: item.id,
+      movieId: item.movie_id,
+      title: item.movie_title,
+      poster: item.movie_poster,
+      mediaType: getMediaType(item),
+      userRating: item.rating,
+      onDelete: getDeleteFn ? getDeleteFn(item) : undefined,
+    }));
+  };
+
+  // Convert diary entries to DiaryItem format
+  const toDiaryItems = (entries: any[]): DiaryItem[] => {
+    return entries.map(entry => {
+      const isMovie = entry.type === 'movie';
+      return {
+        id: entry.id,
+        movieId: isMovie ? entry.movie_id : entry.tv_id,
+        title: isMovie ? entry.movie_title : entry.tv_title,
+        poster: isMovie ? entry.movie_poster : entry.tv_poster,
+        mediaType: entry.type as 'movie' | 'tv',
+        userRating: entry.rating,
+        notes: entry.notes,
+        watchedDate: entry.watched_date,
+        onDelete: () => deleteDiaryEntry(isMovie ? entry.movie_id : entry.tv_id, entry.type),
+        onEdit: () => handleEditDiaryEntry(entry, entry.type),
+      };
+    });
+  };
+
   // Stats helpers
   const totalWatched = (stats?.total_movies_watched || 0) + (stats?.total_tv_shows_watched || 0);
   const totalHours = (stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0);
@@ -342,6 +382,129 @@ const Collection = () => {
   const xp = stats?.experience_points || 0;
   const xpForNextLevel = level * 20;
   const xpProgress = Math.min((xp % xpForNextLevel) / xpForNextLevel * 100, 100);
+
+  const renderEmptyState = (icon: React.ReactNode, title: string, description: string) => (
+    <Card className="p-8 sm:p-12 text-center border-dashed">
+      <div className="mx-auto mb-4 text-muted-foreground/50">{icon}</div>
+      <p className="text-lg font-semibold text-foreground mb-1">{title}</p>
+      <p className="text-sm text-muted-foreground mb-5">{description}</p>
+      <div className="flex gap-3 justify-center">
+        <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
+          <Film className="h-4 w-4" /> Browse Movies
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
+          <Tv className="h-4 w-4" /> Browse TV
+        </Button>
+      </div>
+    </Card>
+  );
+
+  // Render list view (existing cards) for a tab
+  const renderListView = (items: any[], tab: 'watchlist' | 'favorites' | 'watched' | 'diary') => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {items.map(item => {
+          const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
+
+          if (tab === 'diary') {
+            const isMovie = item.type === 'movie';
+            const id = isMovie ? item.movie_id : item.tv_id;
+            const title = isMovie ? item.movie_title : item.tv_title;
+            const poster = isMovie ? item.movie_poster : item.tv_poster;
+
+            if (!isMovie) {
+              return (
+                <TVShowCollectionCard
+                  key={item.id}
+                  id={item.id}
+                  tvId={id}
+                  title={title}
+                  poster={poster}
+                  userRating={item.rating}
+                  defaultExpanded={true}
+                  onDelete={() => deleteDiaryEntry(item.tv_id, 'tv')}
+                  onEdit={() => handleEditDiaryEntry(item, 'tv')}
+                />
+              );
+            }
+            return (
+              <CollectionMediaCard
+                key={item.id}
+                id={item.id}
+                movieId={id}
+                title={title}
+                poster={poster}
+                mediaType="movie"
+                userRating={item.rating}
+                onDelete={() => deleteDiaryEntry(item.movie_id, 'movie')}
+                onEdit={() => handleEditDiaryEntry(item, 'movie')}
+              >
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  {format(new Date(item.watched_date), 'MMMM d, yyyy')}
+                </p>
+                {item.notes && (
+                  <div className="mt-2 pl-3 border-l-2 border-primary/30">
+                    <p className="text-xs text-muted-foreground line-clamp-2 italic">"{item.notes}"</p>
+                  </div>
+                )}
+              </CollectionMediaCard>
+            );
+          }
+
+          if (itemMediaType === 'tv') {
+            return (
+              <TVShowCollectionCard
+                key={item.id || `${item.source}-${item.movie_id}`}
+                id={item.id}
+                tvId={item.movie_id}
+                title={item.movie_title}
+                poster={item.movie_poster}
+                userRating={item.rating}
+                onDelete={tab === 'watchlist' ? async () => { await removeItem(item.id); refetchUserState(); }
+                  : tab === 'favorites' ? async () => { await removeFavorite(item.movie_id); refetchUserState(); }
+                  : () => deleteAllMediaData(item.movie_id, 'tv')}
+              >
+                {tab === 'watchlist' && (
+                  <p className="text-xs text-muted-foreground mt-1">Added {format(new Date(item.added_at), 'MMM d, yyyy')}</p>
+                )}
+                {tab === 'favorites' && (
+                  <div className="flex items-center gap-1 mt-1"><Heart className="h-3.5 w-3.5 text-cinema-red fill-cinema-red" /><span className="text-xs text-muted-foreground">Favorited</span></div>
+                )}
+                {tab === 'watched' && (
+                  <div className="flex items-center gap-1 mt-1"><Eye className="h-3.5 w-3.5 text-cinema-gold" /><span className="text-xs text-muted-foreground">Watched</span></div>
+                )}
+              </TVShowCollectionCard>
+            );
+          }
+
+          return (
+            <CollectionMediaCard
+              key={item.id || `${item.source}-${item.movie_id}`}
+              id={item.id}
+              movieId={item.movie_id}
+              title={item.movie_title}
+              poster={item.movie_poster}
+              mediaType="movie"
+              userRating={item.rating}
+              onDelete={tab === 'watchlist' ? async () => { await removeItem(item.id); refetchUserState(); }
+                : tab === 'favorites' ? async () => { await removeFavorite(item.movie_id); refetchUserState(); }
+                : () => deleteAllMediaData(item.movie_id, 'movie')}
+            >
+              {tab === 'watchlist' && (
+                <p className="text-xs text-muted-foreground mt-1">Added {format(new Date(item.added_at), 'MMM d, yyyy')}</p>
+              )}
+              {tab === 'favorites' && (
+                <div className="flex items-center gap-1 mt-1"><Heart className="h-3.5 w-3.5 text-cinema-red fill-cinema-red" /><span className="text-xs text-muted-foreground">Favorited</span></div>
+              )}
+              {tab === 'watched' && (
+                <div className="flex items-center gap-1 mt-1"><Eye className="h-3.5 w-3.5 text-cinema-gold" /><span className="text-xs text-muted-foreground">Watched</span></div>
+              )}
+            </CollectionMediaCard>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24 2xl:pb-12">
@@ -365,7 +528,6 @@ const Collection = () => {
               </div>
             </div>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1.5 mb-0.5">
@@ -396,7 +558,6 @@ const Collection = () => {
               </div>
             </div>
 
-            {/* Level Progress */}
             <div>
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
                 <span className="flex items-center gap-1">
@@ -415,34 +576,67 @@ const Collection = () => {
           </div>
         </div>
 
-        {/* Media Type Filter */}
-        <div className="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-          <Button
-            size="sm"
-            variant={mediaFilter === 'all' ? 'default' : 'outline'}
-            onClick={() => setMediaFilter('all')}
-            className="text-[10px] sm:text-xs h-8 sm:h-10 px-2 sm:px-3 touch-manipulation active:scale-95"
-          >
-            All
-          </Button>
-          <Button
-            size="sm"
-            variant={mediaFilter === 'movies' ? 'default' : 'outline'}
-            onClick={() => setMediaFilter('movies')}
-            className="text-[10px] sm:text-xs h-8 sm:h-10 px-2 sm:px-3 touch-manipulation active:scale-95"
-          >
-            <Film className="h-3 w-3 mr-1" />
-            Movies
-          </Button>
-          <Button
-            size="sm"
-            variant={mediaFilter === 'tv' ? 'default' : 'outline'}
-            onClick={() => setMediaFilter('tv')}
-            className="text-[10px] sm:text-xs h-8 sm:h-10 px-2 sm:px-3 touch-manipulation active:scale-95"
-          >
-            <Tv className="h-3 w-3 mr-1" />
-            TV
-          </Button>
+        {/* Controls Row: Media Filter + View Toggle + Sort + Rating Filter */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {/* Media type filter */}
+          <div className="flex gap-1">
+            {(['all', 'movies', 'tv'] as MediaFilter[]).map(f => (
+              <Button
+                key={f}
+                size="sm"
+                variant={mediaFilter === f ? 'default' : 'outline'}
+                onClick={() => setMediaFilter(f)}
+                className="text-[10px] sm:text-xs h-8 px-2 sm:px-3 touch-manipulation active:scale-95"
+              >
+                {f === 'all' ? 'All' : f === 'movies' ? <><Film className="h-3 w-3 mr-1" />Movies</> : <><Tv className="h-3 w-3 mr-1" />TV</>}
+              </Button>
+            ))}
+          </div>
+
+          <div className="flex-1" />
+
+          {/* Sort dropdown */}
+          <Select value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
+            <SelectTrigger className="h-8 w-[110px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Recent</SelectItem>
+              <SelectItem value="rating">Rating</SelectItem>
+              <SelectItem value="title">Title</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Rating filter */}
+          <Select value={ratingFilter} onValueChange={setRatingFilter}>
+            <SelectTrigger className="h-8 w-[90px] text-xs">
+              <SelectValue placeholder="Rating" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All ★</SelectItem>
+              <SelectItem value="5">★★★★★</SelectItem>
+              <SelectItem value="4">★★★★</SelectItem>
+              <SelectItem value="3">★★★</SelectItem>
+              <SelectItem value="2">★★</SelectItem>
+              <SelectItem value="1">★</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* View toggle */}
+          <div className="flex border border-border rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-accent'}`}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-accent'}`}
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <Tabs defaultValue="watchlist" className="w-full">
@@ -469,7 +663,7 @@ const Collection = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Search Bar for adding movies */}
+          {/* Search Bar */}
           <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
@@ -505,254 +699,80 @@ const Collection = () => {
           {/* Watchlist Tab */}
           <TabsContent value="watchlist" className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />)}</div>
             ) : getUnwatchedItems().length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {getUnwatchedItems().map(item => {
-                  const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
-                  
-                  if (itemMediaType === 'tv') {
-                    return (
-                      <TVShowCollectionCard
-                        key={item.id}
-                        id={item.id}
-                        tvId={item.movie_id}
-                        title={item.movie_title}
-                        poster={item.movie_poster}
-                        onDelete={async () => { await removeItem(item.id); refetchUserState(); }}
-                      >
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Added {format(new Date(item.added_at), 'MMM d, yyyy')}
-                        </p>
-                      </TVShowCollectionCard>
-                    );
-                  }
-                  
-                  return (
-                    <CollectionMediaCard
-                      key={item.id}
-                      id={item.id}
-                      movieId={item.movie_id}
-                      title={item.movie_title}
-                      poster={item.movie_poster}
-                      mediaType="movie"
-                      onDelete={async () => { await removeItem(item.id); refetchUserState(); }}
-                    >
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Added {format(new Date(item.added_at), 'MMM d, yyyy')}
-                      </p>
-                    </CollectionMediaCard>
-                  );
-                })}
-              </div>
+              viewMode === 'grid' ? (
+                <CollectionPosterGrid
+                  items={toGridItems(
+                    getUnwatchedItems(),
+                    item => (item as any).media_type || 'movie',
+                    item => async () => { await removeItem(item.id); refetchUserState(); }
+                  )}
+                />
+              ) : (
+                renderListView(getUnwatchedItems(), 'watchlist')
+              )
             ) : (
-              <Card className="p-8 sm:p-12 text-center border-dashed">
-                <Clock className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-lg font-semibold text-foreground mb-1">Your watchlist is empty</p>
-                <p className="text-sm text-muted-foreground mb-5">Start building your watchlist by browsing movies and TV shows</p>
-                <div className="flex gap-3 justify-center">
-                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
-                    <Film className="h-4 w-4" /> Browse Movies
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
-                    <Tv className="h-4 w-4" /> Browse TV
-                  </Button>
-                </div>
-              </Card>
+              renderEmptyState(<Clock className="h-14 w-14" />, 'Your watchlist is empty', 'Start building your watchlist by browsing movies and TV shows')
             )}
           </TabsContent>
 
           {/* Favorites Tab */}
           <TabsContent value="favorites" className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />)}</div>
             ) : getFilteredFavorites().length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {getFilteredFavorites().map(item => {
-                  const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
-                  
-                  if (itemMediaType === 'tv') {
-                    return (
-                      <TVShowCollectionCard
-                        key={item.id}
-                        id={item.id}
-                        tvId={item.movie_id}
-                        title={item.movie_title}
-                        poster={item.movie_poster}
-                        onDelete={async () => { await removeFavorite(item.movie_id); refetchUserState(); }}
-                      >
-                        <div className="flex items-center gap-1 mt-1">
-                          <Heart className="h-3.5 w-3.5 text-cinema-red fill-cinema-red" />
-                          <span className="text-xs text-muted-foreground">Favorited</span>
-                        </div>
-                      </TVShowCollectionCard>
-                    );
-                  }
-                  
-                  return (
-                    <CollectionMediaCard
-                      key={item.id}
-                      id={item.id}
-                      movieId={item.movie_id}
-                      title={item.movie_title}
-                      poster={item.movie_poster}
-                      mediaType="movie"
-                      onDelete={async () => { await removeFavorite(item.movie_id); refetchUserState(); }}
-                    >
-                      <div className="flex items-center gap-1 mt-1">
-                        <Heart className="h-3.5 w-3.5 text-cinema-red fill-cinema-red" />
-                        <span className="text-xs text-muted-foreground">Favorited</span>
-                      </div>
-                    </CollectionMediaCard>
-                  );
-                })}
-              </div>
+              viewMode === 'grid' ? (
+                <CollectionPosterGrid
+                  items={toGridItems(
+                    getFilteredFavorites(),
+                    item => (item as any).media_type || 'movie',
+                    item => async () => { await removeFavorite(item.movie_id); refetchUserState(); }
+                  )}
+                />
+              ) : (
+                renderListView(getFilteredFavorites(), 'favorites')
+              )
             ) : (
-              <Card className="p-8 sm:p-12 text-center border-dashed">
-                <Heart className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-lg font-semibold text-foreground mb-1">No favorites yet</p>
-                <p className="text-sm text-muted-foreground mb-5">Like movies and TV shows to add them here</p>
-                <div className="flex gap-3 justify-center">
-                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
-                    <Film className="h-4 w-4" /> Browse Movies
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
-                    <Tv className="h-4 w-4" /> Browse TV
-                  </Button>
-                </div>
-              </Card>
+              renderEmptyState(<Heart className="h-14 w-14" />, 'No favorites yet', 'Like movies and TV shows to add them here')
             )}
           </TabsContent>
 
           {/* Watched Tab */}
           <TabsContent value="watched" className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />)}</div>
             ) : getWatchedItems().length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {getWatchedItems().map(item => {
-                  if (item.media_type === 'tv') {
-                    return (
-                      <TVShowCollectionCard
-                        key={`${item.source}-${item.id}`}
-                        id={item.id}
-                        tvId={item.movie_id}
-                        title={item.movie_title}
-                        poster={item.movie_poster}
-                        userRating={item.rating}
-                        onDelete={() => deleteAllMediaData(item.movie_id, 'tv')}
-                        showWatchedOverlay
-                      >
-                        <div className="flex items-center gap-1 mt-1">
-                          <Eye className="h-3.5 w-3.5 text-cinema-gold" />
-                          <span className="text-xs text-muted-foreground">Watched</span>
-                        </div>
-                      </TVShowCollectionCard>
-                    );
-                  }
-                  return (
-                    <CollectionMediaCard
-                      key={`${item.source}-${item.id}`}
-                      id={item.id}
-                      movieId={item.movie_id}
-                      title={item.movie_title}
-                      poster={item.movie_poster}
-                      mediaType="movie"
-                      userRating={item.rating}
-                      onDelete={() => deleteAllMediaData(item.movie_id, 'movie')}
-                      showWatchedOverlay
-                    >
-                      <div className="flex items-center gap-1 mt-1">
-                        <Eye className="h-3.5 w-3.5 text-cinema-gold" />
-                        <span className="text-xs text-muted-foreground">Watched</span>
-                      </div>
-                    </CollectionMediaCard>
-                  );
-                })}
-              </div>
+              viewMode === 'grid' ? (
+                <CollectionPosterGrid
+                  items={toGridItems(
+                    getWatchedItems(),
+                    item => item.media_type || 'movie',
+                    item => () => deleteAllMediaData(item.movie_id, item.media_type || 'movie')
+                  )}
+                />
+              ) : (
+                renderListView(getWatchedItems(), 'watched')
+              )
             ) : (
-              <Card className="p-8 sm:p-12 text-center border-dashed">
-                <Eye className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-lg font-semibold text-foreground mb-1">Nothing watched yet</p>
-                <p className="text-sm text-muted-foreground mb-5">Rate movies and TV shows to mark them as watched</p>
-                <div className="flex gap-3 justify-center">
-                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
-                    <Film className="h-4 w-4" /> Browse Movies
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
-                    <Tv className="h-4 w-4" /> Browse TV
-                  </Button>
-                </div>
-              </Card>
+              renderEmptyState(<Eye className="h-14 w-14" />, 'Nothing watched yet', 'Rate movies and TV shows to mark them as watched')
             )}
           </TabsContent>
 
           {/* Diary Tab */}
           <TabsContent value="diary" className="space-y-4">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />)}</div>
             ) : getCombinedDiary().length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {getCombinedDiary().map(entry => {
-                  const isMovie = entry.type === 'movie';
-                  const id = isMovie ? (entry as any).movie_id : (entry as any).tv_id;
-                  const title = isMovie ? (entry as any).movie_title : (entry as any).tv_title;
-                  const poster = isMovie ? (entry as any).movie_poster : (entry as any).tv_poster;
-                  
-                  if (!isMovie) {
-                      return (
-                        <TVShowCollectionCard
-                          key={entry.id}
-                          id={entry.id}
-                          tvId={id}
-                          title={title}
-                          poster={poster}
-                          userRating={entry.rating}
-                          defaultExpanded={true}
-                          onDelete={() => deleteDiaryEntry((entry as any).tv_id, 'tv')}
-                          onEdit={() => handleEditDiaryEntry(entry, 'tv')}
-                        />
-                      );
-                  }
-                  
-                  return (
-                    <CollectionMediaCard
-                      key={entry.id}
-                      id={entry.id}
-                      movieId={id}
-                      title={title}
-                      poster={poster}
-                      mediaType="movie"
-                      userRating={entry.rating}
-                      onDelete={() => deleteDiaryEntry((entry as any).movie_id, 'movie')}
-                      onEdit={() => handleEditDiaryEntry(entry, 'movie')}
-                    >
-                      <p className="text-xs text-muted-foreground mt-1.5">
-                        {format(new Date(entry.watched_date), 'MMMM d, yyyy')}
-                      </p>
-                      {entry.notes && (
-                        <div className="mt-2 pl-3 border-l-2 border-primary/30">
-                          <p className="text-xs text-muted-foreground line-clamp-2 italic">"{entry.notes}"</p>
-                        </div>
-                      )}
-                    </CollectionMediaCard>
-                  );
-                })}
-              </div>
-            ) : (
-              <Card className="p-8 sm:p-12 text-center border-dashed">
-                <BookOpen className="h-14 w-14 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-lg font-semibold text-foreground mb-1">No diary entries yet</p>
-                <p className="text-sm text-muted-foreground mb-5">Log when you watched movies and TV shows with notes and ratings</p>
-                <div className="flex gap-3 justify-center">
-                  <Button variant="default" onClick={() => navigate('/movies')} className="gap-2">
-                    <Film className="h-4 w-4" /> Browse Movies
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate('/tv-shows')} className="gap-2">
-                    <Tv className="h-4 w-4" /> Browse TV
-                  </Button>
+              viewMode === 'grid' ? (
+                <div className="bg-card rounded-xl border border-border overflow-hidden">
+                  <DiaryTable items={toDiaryItems(getCombinedDiary())} />
                 </div>
-              </Card>
+              ) : (
+                renderListView(getCombinedDiary(), 'diary')
+              )
+            ) : (
+              renderEmptyState(<BookOpen className="h-14 w-14" />, 'No diary entries yet', 'Log when you watched movies and TV shows with notes and ratings')
             )}
           </TabsContent>
         </Tabs>
