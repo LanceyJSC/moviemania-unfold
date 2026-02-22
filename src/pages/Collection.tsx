@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Film, Tv, Star, Clock, Heart, Eye, 
-  Plus, Search, Trophy, BookOpen, TrendingUp,
+  Plus, Search, Trophy, TrendingUp,
   LayoutGrid, List
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,11 +24,11 @@ import { DesktopHeader } from '@/components/DesktopHeader';
 import { CollectionMediaCard } from '@/components/CollectionMediaCard';
 import { TVShowCollectionCard } from '@/components/TVShowCollectionCard';
 import { CollectionPosterGrid, PosterGridItem } from '@/components/CollectionPosterGrid';
-import { DiaryTable, DiaryItem } from '@/components/DiaryTable';
+
 import { LogMediaModal } from '@/components/LogMediaModal';
 import { CollectionReviewsList } from '@/components/CollectionReviewsList';
 import { CollectionListsGrid } from '@/components/CollectionListsGrid';
-import { DiaryHeatmap } from '@/components/DiaryHeatmap';
+
 import {
   Select,
   SelectContent,
@@ -52,8 +52,8 @@ const Collection = () => {
   const { items, loading: itemsLoading, removeItem, addItem } = useEnhancedWatchlist();
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites();
   const { stats, recalculateStats } = useUserStats();
-  const { movieDiary, tvDiary, isLoading: diaryLoading, deleteMovieDiaryEntry, deleteTVDiaryEntry, refetchAll: refetchDiary } = useDiary();
-  const { setRating, userState, refetch: refetchUserState } = useUserStateContext();
+  const { movieDiary, tvDiary, isLoading: diaryLoading, refetchAll: refetchDiary } = useDiary();
+  const { userState, refetch: refetchUserState } = useUserStateContext();
   const [movieSearchTerm, setMovieSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
@@ -295,59 +295,6 @@ const Collection = () => {
     return sortItems(result);
   };
 
-  const getCombinedDiary = () => {
-    const diaryMap = new Map<string, any>();
-    movieDiary.filter(entry => entry.notes && entry.notes.trim()).forEach(entry => {
-      const key = `movie-${entry.movie_id}`;
-      const existing = diaryMap.get(key);
-      if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
-        diaryMap.set(key, { ...entry, type: 'movie' as const });
-      }
-    });
-    const tvShowMap = new Map<number, any>();
-    tvDiary.filter(entry => entry.notes && entry.notes.trim()).forEach(entry => {
-      const existing = tvShowMap.get(entry.tv_id);
-      if (!existing || new Date(entry.watched_date) > new Date(existing.watched_date)) {
-        tvShowMap.set(entry.tv_id, { ...entry, type: 'tv' as const });
-      }
-    });
-    tvShowMap.forEach((entry, tvId) => {
-      diaryMap.set(`tv-${tvId}`, entry);
-    });
-    let result = Array.from(diaryMap.values());
-    if (mediaFilter === 'movies') result = result.filter(item => item.type === 'movie');
-    if (mediaFilter === 'tv') result = result.filter(item => item.type === 'tv');
-    return result.sort((a, b) =>
-      new Date(b.watched_date).getTime() - new Date(a.watched_date).getTime()
-    );
-  };
-
-  // Handler to open edit modal for a diary entry
-  const handleEditDiaryEntry = (entry: any, type: 'movie' | 'tv') => {
-    if (type === 'movie') {
-      setEditingEntry({
-        mediaId: entry.movie_id,
-        mediaTitle: entry.movie_title,
-        mediaPoster: entry.movie_poster,
-        mediaType: 'movie',
-        initialRating: entry.rating || 0,
-        initialNotes: entry.notes || '',
-      });
-    } else {
-      setEditingEntry({
-        mediaId: entry.tv_id,
-        mediaTitle: entry.tv_title,
-        mediaPoster: entry.tv_poster,
-        mediaType: 'tv',
-        initialRating: entry.rating || 0,
-        initialNotes: entry.notes || '',
-        seasonNumber: entry.season_number,
-        episodeNumber: entry.episode_number,
-      });
-    }
-    setEditModalOpen(true);
-  };
-
   const handleEditModalClose = () => {
     setEditModalOpen(false);
     setEditingEntry(null);
@@ -372,26 +319,6 @@ const Collection = () => {
     }));
   };
 
-  // Convert diary entries to DiaryItem format
-  const toDiaryItems = (entries: any[]): DiaryItem[] => {
-    return entries.map(entry => {
-      const isMovie = entry.type === 'movie';
-      return {
-        id: entry.id,
-        movieId: isMovie ? entry.movie_id : entry.tv_id,
-        title: isMovie ? entry.movie_title : entry.tv_title,
-        poster: isMovie ? entry.movie_poster : entry.tv_poster,
-        mediaType: entry.type as 'movie' | 'tv',
-        userRating: entry.rating,
-        notes: entry.notes,
-        watchedDate: entry.watched_date,
-        onDelete: () => deleteDiaryEntry(isMovie ? entry.movie_id : entry.tv_id, entry.type),
-        onEdit: () => handleEditDiaryEntry(entry, entry.type),
-      };
-    });
-  };
-
-  // Stats helpers
   const totalWatched = (stats?.total_movies_watched || 0) + (stats?.total_tv_shows_watched || 0);
   const totalHours = (stats?.total_hours_watched || 0) + (stats?.total_tv_hours_watched || 0);
   const level = stats?.level || 1;
@@ -416,56 +343,14 @@ const Collection = () => {
   );
 
   // Render list view (existing cards) for a tab
-  const renderListView = (items: any[], tab: 'watchlist' | 'favorites' | 'watched' | 'diary') => {
+  const renderListView = (items: any[], tab: 'watchlist' | 'favorites' | 'watched') => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {items.map(item => {
           const itemMediaType = ((item as any).media_type || 'movie') as 'movie' | 'tv';
 
-          if (tab === 'diary') {
-            const isMovie = item.type === 'movie';
-            const id = isMovie ? item.movie_id : item.tv_id;
-            const title = isMovie ? item.movie_title : item.tv_title;
-            const poster = isMovie ? item.movie_poster : item.tv_poster;
 
-            if (!isMovie) {
-              return (
-                <TVShowCollectionCard
-                  key={item.id}
-                  id={item.id}
-                  tvId={id}
-                  title={title}
-                  poster={poster}
-                  userRating={item.rating}
-                  defaultExpanded={true}
-                  onDelete={() => deleteDiaryEntry(item.tv_id, 'tv')}
-                  onEdit={() => handleEditDiaryEntry(item, 'tv')}
-                />
-              );
-            }
-            return (
-              <CollectionMediaCard
-                key={item.id}
-                id={item.id}
-                movieId={id}
-                title={title}
-                poster={poster}
-                mediaType="movie"
-                userRating={item.rating}
-                onDelete={() => deleteDiaryEntry(item.movie_id, 'movie')}
-                onEdit={() => handleEditDiaryEntry(item, 'movie')}
-              >
-                <p className="text-xs text-muted-foreground mt-1.5">
-                  {format(new Date(item.watched_date), 'MMMM d, yyyy')}
-                </p>
-                {item.notes && (
-                  <div className="mt-2 pl-3 border-l-2 border-primary/30">
-                    <p className="text-xs text-muted-foreground line-clamp-2 italic">"{item.notes}"</p>
-                  </div>
-                )}
-              </CollectionMediaCard>
-            );
-          }
+
 
           if (itemMediaType === 'tv') {
             return (
@@ -657,7 +542,7 @@ const Collection = () => {
 
         <Tabs defaultValue="watchlist" className="w-full">
           <div className="overflow-x-auto -mx-3 px-3 mb-4 sm:mb-6">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-6 h-10 sm:h-12">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-5 h-10 sm:h-12">
               <TabsTrigger value="watchlist" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
                 <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Watchlist</span>
@@ -672,11 +557,6 @@ const Collection = () => {
                 <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Watched</span>
                 <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getWatchedItems().length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="diary" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
-                <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Diary</span>
-                <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getCombinedDiary().length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="reviews" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
                 <Star className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -782,26 +662,6 @@ const Collection = () => {
               )
             ) : (
               renderEmptyState(<Eye className="h-14 w-14" />, 'Nothing watched yet', 'Rate movies and TV shows to mark them as watched')
-            )}
-          </TabsContent>
-
-          {/* Diary Tab */}
-          <TabsContent value="diary" className="space-y-4">
-            {isLoading ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />)}</div>
-            ) : getCombinedDiary().length > 0 ? (
-              <>
-                <DiaryHeatmap movieDiary={movieDiary} tvDiary={tvDiary} />
-                {viewMode === 'grid' ? (
-                  <div className="bg-card rounded-xl border border-border overflow-hidden">
-                    <DiaryTable items={toDiaryItems(getCombinedDiary())} />
-                  </div>
-                ) : (
-                  renderListView(getCombinedDiary(), 'diary')
-                )}
-              </>
-            ) : (
-              renderEmptyState(<BookOpen className="h-14 w-14" />, 'No diary entries yet', 'Log when you watched movies and TV shows with notes and ratings')
             )}
           </TabsContent>
 
