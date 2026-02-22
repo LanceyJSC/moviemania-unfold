@@ -85,9 +85,9 @@ export const CollectionMediaCard = ({
       <div className="flex gap-3 sm:gap-4">
         <Link to={linkPath} className="relative shrink-0">
           {poster ? (
-            <img src={getPosterUrl(poster) || ''} alt={title} className="w-24 h-36 object-cover rounded-md shadow-sm" />
+            <img src={getPosterUrl(poster) || ''} alt={title} width={96} height={144} className="w-[96px] min-w-[96px] h-[144px] min-h-[144px] object-cover rounded-md shadow-sm" />
           ) : (
-            <div className="w-24 h-36 bg-muted rounded-md flex items-center justify-center">
+            <div className="w-[96px] min-w-[96px] h-[144px] min-h-[144px] bg-muted rounded-md flex items-center justify-center">
               {mediaType === 'tv' ? <Tv className="h-8 w-8 text-muted-foreground" /> : <Film className="h-8 w-8 text-muted-foreground" />}
             </div>
           )}
