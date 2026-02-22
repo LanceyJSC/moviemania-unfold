@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Film, Tv, Star, Clock, Heart, Eye, 
   Plus, Search, Trophy, TrendingUp,
-  LayoutGrid, List
+  LayoutGrid, List, Layers
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
@@ -63,6 +63,7 @@ const Collection = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('recent');
   const [ratingFilter, setRatingFilter] = useState<string>('all');
+  const [reviewCount, setReviewCount] = useState(0);
   
   // Edit diary entry state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -561,9 +562,10 @@ const Collection = () => {
               <TabsTrigger value="reviews" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
                 <Star className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Reviews</span>
+                {reviewCount > 0 && <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{reviewCount}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="lists" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
-                <Film className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Layers className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Lists</span>
               </TabsTrigger>
             </TabsList>
@@ -667,7 +669,7 @@ const Collection = () => {
 
           {/* Reviews Tab */}
           <TabsContent value="reviews" className="space-y-4">
-            <CollectionReviewsList />
+            <CollectionReviewsList onCountChange={setReviewCount} />
           </TabsContent>
 
           {/* Lists Tab */}

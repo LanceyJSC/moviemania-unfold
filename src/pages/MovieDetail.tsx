@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, MessageCircle } from "lucide-react";
+import { Play, Heart, Plus, Loader2, MoreHorizontal, BookOpen, Eye, MessageCircle, ListPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FunFacts } from "@/components/FunFacts";
 import { LogMediaModal } from "@/components/LogMediaModal";
@@ -10,6 +10,7 @@ import { SimilarContent } from "@/components/SimilarContent";
 import { MovieCollectionBanner } from "@/components/MovieCollectionBanner";
 import { SEOHead } from "@/components/SEOHead";
 import { MovieSchema } from "@/components/MovieSchema";
+import { AddToListButton } from "@/components/AddToListButton";
 
 import { ActorCard } from "@/components/ActorCard";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -257,7 +258,7 @@ const MovieDetail = () => {
         </div>
 
         {/* Action Buttons with Labels - Compact on mobile */}
-        <div className="grid grid-cols-5 gap-1.5 mb-4 2xl:mb-6">
+        <div className="grid grid-cols-6 gap-1.5 mb-4 2xl:mb-6">
           <Button 
             variant="outline" 
             className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
@@ -310,6 +311,15 @@ const MovieDetail = () => {
               <span className="text-[10px] 2xl:text-xs">Reviews</span>
             </Link>
           </Button>
+
+          {user && (
+            <AddToListButton
+              movie={{ id: movieId, title, poster: movie.poster_path || undefined }}
+              variant="outline"
+              size="sm"
+              className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
+            />
+          )}
         </div>
 
         {/* Tag Selector - Pro Feature */}
