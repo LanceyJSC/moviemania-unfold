@@ -1,44 +1,64 @@
 
+# Fix Collection Page: Reviews Count, Lists Functionality, and Review Categorization
 
-# Fix Collection Reviews - Letterboxd-Style Behavior
+## Issues Found
 
-## Problems Found
-
-1. **Reviews link to movie page, not reviews page** - Clicking a poster/title in the Reviews tab navigates to `/movie/:id` instead of `/movie/:id/reviews`. On Letterboxd, clicking a review takes you to the review/reviews page, not the general movie page.
-
-2. **No media_type on user_reviews** - The `user_reviews` table has no `media_type` column, so TV show reviews always link to `/movie/:id` instead of `/tv/:id`. This is the "wrong show/movie" bug.
-
-3. **Diary vs Reviews redundancy** - Diary tracks *when* you watched something (dates, rewatches, personal notes/log). Reviews are your published opinions with text and ratings. On Letterboxd these are separate concepts: the diary is your viewing log, reviews are your written thoughts. They complement each other, so both should stay -- but you could consider merging the diary tab *into* a timeline view if you prefer fewer tabs.
+1. **Reviews tab has no count badge** - Watchlist, Favorites, and Watched all show counts, but Reviews doesn't
+2. **Lists tab - can't create lists** - The CreateListModal exists and works, but may be blocked by the `canCreateList` check tied to subscription status. Need to verify the subscription hook isn't incorrectly blocking free users who haven't hit the limit yet.
+3. **No way to add movies/shows to lists** - The `AddToListButton` component exists but is NOT used anywhere in the app (not on MovieDetail, TVShowDetail, or any other page). Users literally cannot add items to their lists.
+4. **Reviews tab doesn't separate movie vs TV vs episode reviews** - All reviews are dumped in one flat list with no categorization
 
 ---
 
 ## Plan
 
-### Step 1: Add `media_type` column to `user_reviews`
-- Add a `media_type` text column defaulting to `'movie'` so existing rows are unaffected
-- TV show reviews will be stored with `media_type = 'tv'`
+### 1. Add review count badge to Reviews tab
+- Fetch review count from `user_reviews` table
+- Display count badge next to "Reviews" tab trigger, matching the style of other tabs
 
-### Step 2: Fix `CollectionReviewsList` navigation
-- Use `media_type` to build the correct link: `/movie/:id/reviews` or `/tv/:id/reviews`
-- Poster and title clicks go to the **reviews page**, not the detail page (matching Letterboxd behavior)
+### 2. Add "Add to List" button on movie and TV show detail pages
+- Import and place `AddToListButton` on `MovieDetail.tsx` and `TVShowDetail.tsx` pages alongside the existing watchlist/favorite buttons
+- This is the primary way users add content to lists (just like Letterboxd)
 
-### Step 3: Update review creation to pass `media_type`
-- Find where reviews are inserted (likely `LogMediaModal` or similar) and ensure `media_type` is saved
+### 3. Add review type filter tabs inside Reviews tab
+- Add sub-filter pills inside the Reviews tab: **All | Movies | TV Shows**
+- Filter reviews by `media_type` column (`movie` vs `tv`)
+- Show a small badge icon (Film or TV icon) next to each review title so users can tell at a glance
+
+### 4. Add list count badge to Lists tab
+- Show the number of lists next to the Lists tab trigger
+
+### 5. Fix CreateListModal if blocked
+- Verify the `canCreateList` logic works for free users with fewer than 3 lists
+- The `useSubscription` hook's `loading` state may cause `canCreateList` to be false during loading, which would disable the create button
 
 ---
 
 ## Technical Details
 
-### Database migration
-```sql
-ALTER TABLE public.user_reviews 
-ADD COLUMN media_type text DEFAULT 'movie';
-```
+### Files to modify:
+- `src/pages/Collection.tsx` - Add review count state, fetch count, add badge to Reviews and Lists tabs, add sub-filter inside Reviews tab
+- `src/components/CollectionReviewsList.tsx` - Accept a `mediaTypeFilter` prop to filter reviews, expose review count
+- `src/pages/MovieDetail.tsx` - Add `AddToListButton` component
+- `src/pages/TVShowDetail.tsx` - Add `AddToListButton` component
+- `src/components/CollectionListsGrid.tsx` - Minor: expose list count for parent
 
-### CollectionReviewsList changes
-- Change `Link to={/movie/${review.movie_id}}` to use `media_type` for correct routing
-- Link to `/movie/:id/reviews` or `/tv/:id/reviews` instead of the detail page
+### Key changes:
 
-### Review insert locations
-- Search for `.insert` on `user_reviews` to find all places that create reviews and add `media_type` field
+**Collection.tsx - Reviews tab with count and filter:**
+- Fetch review count with a lightweight query on mount
+- Add sub-filter state (`reviewFilter: 'all' | 'movie' | 'tv'`)
+- Pass filter to `CollectionReviewsList`
+- Show count badge on tab
 
+**CollectionReviewsList.tsx - Filter support:**
+- Accept `mediaTypeFilter` prop
+- Filter the fetched reviews by media_type
+- Show Film/TV icon badge next to each review title
+- Expose count via callback or internal count display
+
+**MovieDetail.tsx / TVShowDetail.tsx:**
+- Add `AddToListButton` in the action buttons area (next to watchlist, favorite, etc.)
+
+### No database changes needed
+All data and columns already exist.
