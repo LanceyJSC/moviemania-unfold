@@ -199,22 +199,52 @@ export const LogMediaModal = ({
 
       // Save to user_reviews if notes are provided (for public reviews)
       if (notes.trim()) {
-        const { error: reviewError } = await supabase
+        // Use manual check + insert/update instead of upsert since we have a functional unique index
+        let query = supabase
           .from('user_reviews')
-          .upsert({
-            user_id: user.id,
-            movie_id: mediaId,
-            movie_title: mediaTitle,
-            movie_poster: mediaPoster,
-            rating: rating > 0 ? rating : null,
-            review_text: notes,
-            is_spoiler: isSpoiler,
-            media_type: mediaType,
-            season_number: seasonNumber || null,
-            episode_number: episodeNumber || null,
-          } as any, {
-            onConflict: 'user_id,movie_id'
-          });
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('movie_id', mediaId);
+        
+        if (seasonNumber) {
+          query = query.eq('season_number', seasonNumber);
+        } else {
+          query = query.is('season_number', null);
+        }
+        if (episodeNumber) {
+          query = query.eq('episode_number', episodeNumber);
+        } else {
+          query = query.is('episode_number', null);
+        }
+
+        const { data: existing } = await query.maybeSingle();
+
+        const reviewData = {
+          user_id: user.id,
+          movie_id: mediaId,
+          movie_title: mediaTitle,
+          movie_poster: mediaPoster,
+          rating: rating > 0 ? rating : null,
+          review_text: notes,
+          is_spoiler: isSpoiler,
+          media_type: mediaType,
+          season_number: seasonNumber || null,
+          episode_number: episodeNumber || null,
+        };
+
+        let reviewError;
+        if (existing) {
+          const { error } = await supabase
+            .from('user_reviews')
+            .update(reviewData as any)
+            .eq('id', existing.id);
+          reviewError = error;
+        } else {
+          const { error } = await supabase
+            .from('user_reviews')
+            .insert(reviewData as any);
+          reviewError = error;
+        }
 
         if (reviewError) {
           console.error('Error saving review:', reviewError);
@@ -225,16 +255,29 @@ export const LogMediaModal = ({
             movie_id: mediaId,
             movie_title: mediaTitle,
             movie_poster: mediaPoster,
-            metadata: { rating, media_type: mediaType }
+            metadata: { rating, media_type: mediaType, season_number: seasonNumber, episode_number: episodeNumber }
           });
         }
       } else {
-        // If notes are cleared/empty, remove the review
-        await supabase
+        // If notes are cleared/empty, remove the specific review (not all reviews for this media)
+        let deleteQuery = supabase
           .from('user_reviews')
           .delete()
           .eq('user_id', user.id)
           .eq('movie_id', mediaId);
+        
+        if (seasonNumber) {
+          deleteQuery = deleteQuery.eq('season_number', seasonNumber);
+        } else {
+          deleteQuery = deleteQuery.is('season_number', null);
+        }
+        if (episodeNumber) {
+          deleteQuery = deleteQuery.eq('episode_number', episodeNumber);
+        } else {
+          deleteQuery = deleteQuery.is('episode_number', null);
+        }
+        
+        await deleteQuery;
       }
 
       // Log activity for diary entry
