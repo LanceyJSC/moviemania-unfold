@@ -38,14 +38,14 @@ export const CollectionPosterGrid = ({ items }: CollectionPosterGridProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-3">
+      <div className="flex flex-wrap gap-3">
         {items.map(item => (
           <button
             key={item.id}
             onClick={() => handlePosterTap(item)}
             className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
           >
-            <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted shadow-sm group-hover:shadow-md transition-shadow relative">
+            <div className="w-32 h-48 rounded-lg overflow-hidden bg-muted shadow-sm group-hover:shadow-md transition-shadow relative flex-shrink-0">
               {item.poster ? (
                 <img
                   src={getPosterUrl(item.poster) || ''}
@@ -62,7 +62,6 @@ export const CollectionPosterGrid = ({ items }: CollectionPosterGridProps) => {
                   )}
                 </div>
               )}
-              {/* Hover overlay */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
             </div>
             {/* Rating below poster */}
