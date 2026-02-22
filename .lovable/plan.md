@@ -1,80 +1,44 @@
 
 
-# Letterboxd-Style Collection Page Enhancements
+# Fix Collection Reviews - Letterboxd-Style Behavior
 
-Here's what's currently missing compared to Letterboxd, and what we can add to close the gap:
+## Problems Found
+
+1. **Reviews link to movie page, not reviews page** - Clicking a poster/title in the Reviews tab navigates to `/movie/:id` instead of `/movie/:id/reviews`. On Letterboxd, clicking a review takes you to the review/reviews page, not the general movie page.
+
+2. **No media_type on user_reviews** - The `user_reviews` table has no `media_type` column, so TV show reviews always link to `/movie/:id` instead of `/tv/:id`. This is the "wrong show/movie" bug.
+
+3. **Diary vs Reviews redundancy** - Diary tracks *when* you watched something (dates, rewatches, personal notes/log). Reviews are your published opinions with text and ratings. On Letterboxd these are separate concepts: the diary is your viewing log, reviews are your written thoughts. They complement each other, so both should stay -- but you could consider merging the diary tab *into* a timeline view if you prefer fewer tabs.
 
 ---
 
-## 1. Reviews Tab
-Letterboxd has a dedicated "Reviews" section showing all your written reviews in a clean list. Currently, reviews are buried inside the Diary tab.
+## Plan
 
-- Add a 5th tab called "Reviews" with a speech bubble icon
-- Show each review with: poster thumbnail, title, flame rating, review text, and date
-- Include edit and delete actions on each review
+### Step 1: Add `media_type` column to `user_reviews`
+- Add a `media_type` text column defaulting to `'movie'` so existing rows are unaffected
+- TV show reviews will be stored with `media_type = 'tv'`
 
-## 2. Lists Tab
-Letterboxd prominently features your custom lists. You already have a Lists system (`useUserLists`) but it's not on the Collection page.
+### Step 2: Fix `CollectionReviewsList` navigation
+- Use `media_type` to build the correct link: `/movie/:id/reviews` or `/tv/:id/reviews`
+- Poster and title clicks go to the **reviews page**, not the detail page (matching Letterboxd behavior)
 
-- Add a 6th tab called "Lists" with a layers/stack icon
-- Show all user-created lists as cards with cover art (first 4 posters as a mini-grid)
-- Include a "Create New List" button
-- Tapping a list navigates to the existing `/list/:id` page
-
-## 3. Poster Hover Overlay (Desktop)
-On Letterboxd, hovering a poster shows quick-action icons (rate, like, add to watchlist) without navigating away.
-
-- On desktop hover, show a semi-transparent overlay with 3 icon buttons: flame rating, heart (favorite), and bookmark (watchlist)
-- On mobile, keep the current tap-to-navigate behavior
-
-## 4. "Liked" Heart Badge on Posters
-Letterboxd shows a small green heart on posters you've liked/favorited.
-
-- Check if each poster item is in the user's favorites
-- If yes, show a small flame-colored heart icon in the bottom-left corner of the poster
-
-## 5. Diary Calendar/Heatmap View
-Letterboxd shows a contribution-graph-style heatmap of your viewing activity.
-
-- Add a small calendar heatmap above or below the Diary tab content
-- Show intensity by number of films logged per day (light to dark shading)
-- Clicking a day filters the diary to that date
-
-## 6. Genre and Decade Filters
-Letterboxd lets you filter your collection by genre and release decade.
-
-- Add a "Genre" dropdown filter next to the existing sort/rating filters
-- Add a "Decade" dropdown (2020s, 2010s, 2000s, etc.)
-- These require fetching genre/year data from TMDB for each item (can be cached)
-
-## 7. Rewatch Indicator
-Letterboxd marks entries where a film was rewatched with a small circular arrow icon.
-
-- In the Diary table, if a movie appears more than once, show a rewatch icon
-- On poster grid items, show a small rewatch badge if logged multiple times
+### Step 3: Update review creation to pass `media_type`
+- Find where reviews are inserted (likely `LogMediaModal` or similar) and ensure `media_type` is saved
 
 ---
 
 ## Technical Details
 
-### New Components
-- `src/components/CollectionReviewsList.tsx` - Reviews tab content
-- `src/components/CollectionListsGrid.tsx` - Lists tab content  
-- `src/components/DiaryHeatmap.tsx` - Calendar heatmap for diary
-- `src/components/PosterOverlay.tsx` - Hover overlay with quick actions
+### Database migration
+```sql
+ALTER TABLE public.user_reviews 
+ADD COLUMN media_type text DEFAULT 'movie';
+```
 
-### Modified Files
-- `src/pages/Collection.tsx` - Add Reviews, Lists tabs; add genre/decade filters; integrate heatmap
-- `src/components/CollectionPosterGrid.tsx` - Add hover overlay, liked badge, rewatch indicator
-- `src/components/DiaryTable.tsx` - Add rewatch indicator, switch from stars to flames
+### CollectionReviewsList changes
+- Change `Link to={/movie/${review.movie_id}}` to use `media_type` for correct routing
+- Link to `/movie/:id/reviews` or `/tv/:id/reviews` instead of the detail page
 
-### Data Requirements
-- Reviews data: already available via `user_reviews` table
-- Lists data: already available via `useUserLists` hook
-- Favorites lookup: already available via `useFavorites` hook
-- Genre/year data: will need to store or fetch from TMDB per item (can use existing cached data)
-- Rewatch detection: count diary entries per movie_id
-
-### No database changes needed
-All data already exists in the current schema. This is purely a frontend enhancement.
+### Review insert locations
+- Search for `.insert` on `user_reviews` to find all places that create reviews and add `media_type` field
 
