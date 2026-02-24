@@ -18,7 +18,7 @@ const SeasonReviews = () => {
   const [tvShow, setTVShow] = useState<TVShow | null>(null);
   const [seasonData, setSeasonData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
 
   const tvId = Number(id);
   const seasonNum = Number(seasonNumber);
@@ -43,7 +43,6 @@ const SeasonReviews = () => {
     load();
   }, [id, tvId, seasonNum]);
 
-  // Fetch episode review counts for this season
   const { data: episodeReviewCounts } = useQuery({
     queryKey: ['season-episode-review-counts', tvId, seasonNum],
     queryFn: async () => {
@@ -54,9 +53,7 @@ const SeasonReviews = () => {
         .eq('media_type', 'tv')
         .eq('season_number', seasonNum)
         .not('episode_number', 'is', null);
-
       if (error) throw error;
-
       const counts = new Map<number, number>();
       for (const r of data) {
         if (r.episode_number != null) {
@@ -94,9 +91,10 @@ const SeasonReviews = () => {
     );
   }
 
-  
+  // Use the same poster logic as SeasonDetail
   const seasonPosterUrl = tmdbService.getPosterUrl(seasonData.poster_path, 'w500');
   
+  // Use the same backdrop logic as SeasonDetail
   const getSeasonBackdrop = () => {
     if (seasonData.backdrop_path) {
       return tmdbService.getBackdropUrl(seasonData.backdrop_path, 'original');
@@ -112,7 +110,6 @@ const SeasonReviews = () => {
   const backdropUrl = getSeasonBackdrop();
 
   const episodes = seasonData.episodes || [];
-  // Only show episodes that have reviews
   const episodesWithReviews = episodes.filter(
     (ep: any) => episodeReviewCounts?.has(ep.episode_number)
   );
@@ -122,19 +119,19 @@ const SeasonReviews = () => {
       <DesktopHeader />
       <MobileHeader title={`Season ${seasonNum} Reviews`} />
 
-      {/* Hero Section */}
+      {/* Hero Section - Matching SeasonDetail */}
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
         <div className="relative overflow-hidden aspect-video md:rounded-2xl">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${backdropUrl})`, backgroundColor: 'hsl(var(--background))' }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/50 via-transparent to-transparent" />
           </div>
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
           <div className="absolute bottom-6 left-4 z-30">
-            <img src={seasonPosterUrl} alt={`Season ${seasonNum}`} className="w-24 h-36 rounded-lg shadow-lg object-cover border-2 border-white/20" />
+            <img src={seasonPosterUrl} alt={`Season ${seasonNum}`} className="w-24 h-36 rounded-lg shadow-cinematic object-cover border-2 border-white/20" />
           </div>
           <div className="absolute bottom-6 left-32 right-4 z-30">
             <span className="text-xs text-white/80">{tvShow.name}</span>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, ChevronRight, Tv } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, ChevronRight, Tv, Play, Heart, Plus, BookOpen, Eye, MessageCircle, MoreHorizontal } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,9 +9,14 @@ import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { MobileActionSheet } from "@/components/MobileActionSheet";
+import { RatingComparisonCard } from "@/components/RatingComparisonCard";
+import { SynopsisModal } from "@/components/SynopsisModal";
+import { AddToListButton } from "@/components/AddToListButton";
 import { tmdbService, TVShow, Review } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserStateContext } from "@/contexts/UserStateContext";
+import { useTrailerContext } from "@/contexts/TrailerContext";
 import { ReviewLikes } from "@/components/ReviewLikes";
 import { format } from "date-fns";
 
@@ -35,16 +40,30 @@ type SortOption = 'recent' | 'oldest' | 'highest' | 'lowest';
 
 const TVShowReviews = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [tvShow, setTVShow] = useState<TVShow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showSynopsis, setShowSynopsis] = useState(false);
   const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
   const [showSpoilers, setShowSpoilers] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [showSortSheet, setShowSortSheet] = useState(false);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const { user } = useAuth();
+  const { toggleLike, toggleWatchlist, setRating, markAsWatched, isLiked, isInWatchlist, isWatched, getRating } = useUserStateContext();
+  const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
 
   const tvId = Number(id);
+  const isTVShowLiked = isLiked(tvId);
+  const isTVShowInWatchlist = isInWatchlist(tvId);
+  const isTVShowWatched = isWatched(tvId);
+  const userRating = getRating(tvId);
+
+  const requireAuth = (action: () => void) => {
+    if (!user) { navigate('/auth'); return; }
+    action();
+  };
 
   useEffect(() => {
     const loadTVShow = async () => {
@@ -53,6 +72,8 @@ const TVShowReviews = () => {
       try {
         const data = await tmdbService.getTVShowDetails(tvId);
         setTVShow(data);
+        const trailer = data.videos?.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+        if (trailer) setTrailerKey(trailer.key);
       } catch (error) {
         console.error('Failed to load TV show:', error);
       } finally {
@@ -62,7 +83,6 @@ const TVShowReviews = () => {
     loadTVShow();
   }, [id, tvId]);
 
-  // Fetch TMDB Reviews
   const { data: tmdbReviews } = useQuery({
     queryKey: ['tv-reviews', tvId],
     queryFn: async () => {
@@ -72,7 +92,6 @@ const TVShowReviews = () => {
     enabled: !!tvId
   });
 
-  // Fetch ALL community reviews to separate series-level vs episode
   const { data: allCommunityReviews, refetch: refetchCommunityReviews } = useQuery({
     queryKey: ['community-reviews', tvId],
     queryFn: async () => {
@@ -81,17 +100,13 @@ const TVShowReviews = () => {
         .select('id, user_id, review_text, rating, is_spoiler, created_at, episode_number, season_number')
         .eq('movie_id', tvId)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
-
       const userIds = [...new Set(data.map((r) => r.user_id))];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, username, avatar_url, full_name')
         .in('id', userIds);
-
       const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
-
       return data.map((review) => ({
         ...review,
         profile: profileMap.get(review.user_id) || null,
@@ -100,11 +115,9 @@ const TVShowReviews = () => {
     enabled: !!tvId
   });
 
-  // Split into series-level and episode reviews
   const seriesReviews = allCommunityReviews?.filter(r => r.episode_number == null) || [];
   const episodeReviews = allCommunityReviews?.filter(r => r.episode_number != null) || [];
 
-  // Group episode reviews by season for the season cards
   const seasonReviewCounts = new Map<number, number>();
   for (const r of episodeReviews) {
     const s = r.season_number ?? 0;
@@ -177,38 +190,125 @@ const TVShowReviews = () => {
 
   const backdropUrl = tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
   const posterUrl = tmdbService.getPosterUrl(tvShow.poster_path, 'w500');
+  const logoUrl = tvShow.images?.logos?.[0]?.file_path 
+    ? tmdbService.getImageUrl(tvShow.images.logos[0].file_path, 'w500')
+    : null;
+  const releaseYear = tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : 'TBA';
+  const genres = tvShow.genres?.map(g => g.name).join(', ') || 'Unknown';
   const sortedCommunityReviews = getSortedReviews();
+
+  const handleWatchTrailer = () => {
+    if (trailerKey) {
+      setGlobalTrailerKey(trailerKey);
+      setMovieTitle(tvShow.name);
+      setIsTrailerOpen(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-32 2xl:pb-12">
       <DesktopHeader />
-      <MobileHeader title="Reviews" />
+      <MobileHeader title={tvShow.name} />
 
-      {/* Hero Section */}
+      {/* Hero Section - Matching TVShowDetail */}
       <div className="md:max-w-7xl md:mx-auto md:px-6 md:pt-6">
         <div className="relative overflow-hidden aspect-video md:rounded-2xl">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${backdropUrl})`, backgroundColor: 'hsl(var(--background))' }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-cinema-black/40 via-cinema-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-cinema-black/50 via-transparent to-transparent" />
           </div>
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none z-20" />
-          <div className="absolute bottom-6 left-4 z-30">
-            <img src={posterUrl} alt={tvShow.name} className="w-24 h-36 rounded-lg shadow-lg object-cover border-2 border-white/20" />
+          <div className="absolute bottom-6 left-4 z-30 iphone-65:left-3">
+            <img src={posterUrl} alt={tvShow.name} className="w-24 h-36 iphone-65:w-28 iphone-65:h-42 iphone-67:w-32 iphone-67:h-48 rounded-lg shadow-cinematic object-cover border-2 border-white/20" />
           </div>
-          <div className="absolute bottom-6 left-32 right-4 z-30">
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="text-amber-500 font-semibold text-xs">TMDB {tvShow.vote_average.toFixed(1)}</span>
-              <span className="text-white/80 text-xs">TV Series</span>
+          <div className="absolute bottom-6 left-32 right-4 z-30 iphone-65:left-36 iphone-67:left-40">
+            {logoUrl && (
+              <div className="mb-3">
+                <img src={logoUrl} alt={`${tvShow.name} logo`} className="h-8 iphone-65:h-10 iphone-67:h-12 max-w-36 iphone-65:max-w-44 iphone-67:max-w-48 object-contain" />
+              </div>
+            )}
+            <div className="flex items-center space-x-2 iphone-65:space-x-3 mb-1 flex-wrap gap-y-1">
+              <span className="text-cinema-gold font-semibold text-xs iphone-65:text-sm">TMDB {tvShow.vote_average.toFixed(1)}</span>
+              <span className="text-white/80 text-xs iphone-65:text-sm">{releaseYear}</span>
+              <span className="text-white/80 text-xs iphone-65:text-sm">TV Series</span>
+              {tvShow.number_of_seasons && (
+                <span className="text-white/80 text-xs iphone-65:text-sm">{tvShow.number_of_seasons} Season{tvShow.number_of_seasons > 1 ? 's' : ''}</span>
+              )}
             </div>
-            <h1 className="font-bold text-white text-lg leading-tight">Reviews for {tvShow.name}</h1>
+            {!logoUrl && (
+              <h1 className="font-cinematic text-white mb-2 tracking-wide text-lg iphone-65:text-xl leading-tight">{tvShow.name}</h1>
+            )}
+            <p className="text-white/70 mb-3 text-xs iphone-65:text-sm">{genres}</p>
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-6 md:max-w-7xl md:mx-auto md:px-6">
+      {/* Synopsis Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-4 relative z-30">
+        <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+          <p className="text-white leading-relaxed text-sm line-clamp-3">{tvShow.overview || "No synopsis available."}</p>
+          {tvShow.overview && tvShow.overview.length > 120 && (
+            <button onClick={() => setShowSynopsis(true)} className="mt-2 inline-flex items-center gap-1 text-cinema-gold hover:text-cinema-gold/80 transition-colors text-sm font-semibold">
+              <MoreHorizontal className="h-4 w-4" />Read More
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Action Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 2xl:py-6">
+        {/* Watch Trailer */}
+        <div className="mb-3">
+          {trailerKey ? (
+            <Button className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-2.5 text-sm h-11" onClick={handleWatchTrailer}>
+              <Play className="mr-2 h-4 w-4" />Watch Trailer
+            </Button>
+          ) : (
+            <Button className="w-full bg-cinema-red hover:bg-cinema-red/90 text-white font-semibold px-4 py-2.5 text-sm h-11" disabled>
+              <Play className="mr-2 h-4 w-4" />No Trailer
+            </Button>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-6 gap-1.5 mb-4 2xl:mb-6">
+          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''}`} onClick={() => requireAuth(() => toggleWatchlist(tvId, tvShow.name, posterUrl, 'tv'))}>
+            <Plus className="h-4 w-4 2xl:h-5 2xl:w-5" /><span className="text-[10px] 2xl:text-xs">Watchlist</span>
+          </Button>
+          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''}`} onClick={() => requireAuth(() => toggleLike(tvId, tvShow.name, posterUrl, 'tv'))}>
+            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowLiked ? 'fill-current' : ''}`} /><span className="text-[10px] 2xl:text-xs">Favorites</span>
+          </Button>
+          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''}`} onClick={() => requireAuth(() => markAsWatched(tvId, tvShow.name, posterUrl, 'tv'))}>
+            <Eye className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowWatched ? 'fill-current' : ''}`} /><span className="text-[10px] 2xl:text-xs">Watched</span>
+          </Button>
+          <Button variant="outline" className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation" onClick={() => requireAuth(() => setShowLogModal(true))}>
+            <BookOpen className="h-4 w-4 2xl:h-5 2xl:w-5" /><span className="text-[10px] 2xl:text-xs">Log</span>
+          </Button>
+          <Button variant="outline" className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation bg-primary/10 border-primary/30" disabled>
+            <MessageCircle className="h-4 w-4 2xl:h-5 2xl:w-5" /><span className="text-[10px] 2xl:text-xs">Reviews</span>
+          </Button>
+          {user && (
+            <AddToListButton movie={{ id: tvId, title: tvShow.name, poster: tvShow.poster_path || undefined }} variant="outline" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation" />
+          )}
+        </div>
+
+        {/* Rating Comparison Card */}
+        <RatingComparisonCard
+          mediaId={tvId}
+          mediaType="tv"
+          tmdbRating={tvShow.vote_average}
+          userRating={userRating}
+          onRatingChange={(rating) => requireAuth(() => setRating(tvId, rating, tvShow.name, posterUrl, 'tv'))}
+          mediaTitle={tvShow.name}
+          mediaPoster={tvShow.poster_path}
+        />
+      </div>
+
+      {/* Reviews Content */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
         {/* Season Episode Reviews Section */}
         {seasonsWithReviews.length > 0 && (
           <div>
@@ -218,7 +318,7 @@ const TVShowReviews = () => {
                 const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
                 const seasonPoster = season?.poster_path
                   ? tmdbService.getPosterUrl(season.poster_path, 'w500')
-                  : null;
+                  : posterUrl;
 
                 return (
                   <Link key={seasonNum} to={`/tv/${tvId}/season/${seasonNum}/reviews`} className="block">
@@ -253,15 +353,12 @@ const TVShowReviews = () => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">
-              Series Reviews
-              <span className="text-sm font-normal text-muted-foreground ml-2">({seriesReviews.length})</span>
+              Series Reviews <span className="text-sm font-normal text-muted-foreground ml-2">({seriesReviews.length})</span>
             </h2>
             {seriesReviews.length > 1 && (
               <Button variant="outline" size="sm" onClick={() => setShowSortSheet(true)} className="h-9 px-3 rounded-lg gap-1.5">
                 <ArrowUpDown className="h-3.5 w-3.5" />
-                <span className="text-xs">
-                  {sortBy === 'recent' ? 'Recent' : sortBy === 'oldest' ? 'Oldest' : sortBy === 'highest' ? 'Highest' : 'Lowest'}
-                </span>
+                <span className="text-xs">{sortBy === 'recent' ? 'Recent' : sortBy === 'oldest' ? 'Oldest' : sortBy === 'highest' ? 'Highest' : 'Lowest'}</span>
               </Button>
             )}
           </div>
@@ -292,8 +389,7 @@ const TVShowReviews = () => {
                           {isOwnReview && <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">You</span>}
                           {review.rating && (
                             <div className="flex items-center gap-1 text-amber-500 text-sm">
-                              <Star className="h-3.5 w-3.5 fill-current" />
-                              <span>{review.rating}/10</span>
+                              <Star className="h-3.5 w-3.5 fill-current" /><span>{review.rating}/10</span>
                             </div>
                           )}
                           <span className="text-xs text-muted-foreground">{format(new Date(review.created_at), 'MMM d, yyyy')}</span>
@@ -324,9 +420,7 @@ const TVShowReviews = () => {
           ) : (
             <div className="text-center py-8 bg-card rounded-xl border border-border">
               <p className="text-muted-foreground text-sm mb-2">No series reviews yet.</p>
-              {user && (
-                <Button variant="outline" size="sm" onClick={() => setShowLogModal(true)}>Be the first to review</Button>
-              )}
+              {user && <Button variant="outline" size="sm" onClick={() => setShowLogModal(true)}>Be the first to review</Button>}
             </div>
           )}
         </div>
@@ -352,8 +446,7 @@ const TVShowReviews = () => {
                         <span className="font-medium text-foreground">{review.author_details.username || review.author}</span>
                         {review.author_details.rating && (
                           <div className="flex items-center gap-1 text-amber-500 text-sm">
-                            <Star className="h-3.5 w-3.5 fill-current" />
-                            <span>{review.author_details.rating}/10</span>
+                            <Star className="h-3.5 w-3.5 fill-current" /><span>{review.author_details.rating}/10</span>
                           </div>
                         )}
                         <span className="text-xs text-muted-foreground">{format(new Date(review.created_at), 'MMM d, yyyy')}</span>
@@ -368,6 +461,7 @@ const TVShowReviews = () => {
         )}
       </div>
 
+      {/* Modals */}
       {showLogModal && tvShow && (
         <LogMediaModal
           isOpen={showLogModal}
@@ -376,7 +470,12 @@ const TVShowReviews = () => {
           mediaTitle={tvShow.name}
           mediaPoster={tvShow.poster_path}
           mediaType="tv"
+          initialRating={userRating}
         />
+      )}
+
+      {showSynopsis && (
+        <SynopsisModal isOpen={showSynopsis} onClose={() => setShowSynopsis(false)} title={tvShow.name} synopsis={tvShow.overview || ""} posterUrl={posterUrl} />
       )}
 
       <MobileActionSheet
