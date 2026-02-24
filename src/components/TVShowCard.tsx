@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Heart, Eye, Bookmark, Flame } from "lucide-react";
+import { Heart, Eye, Plus, Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useState } from "react";
@@ -88,7 +88,7 @@ export const TVShowCard = ({ tvShow, variant = "carousel" }: TVShowCardProps) =>
             {/* Bottom-right: On Watchlist */}
             {onWatchlist && (
               <div className="absolute bottom-1.5 right-1.5 bg-black/70 backdrop-blur-sm rounded-full p-1">
-                <Bookmark className="h-3 w-3 text-blue-400 fill-blue-400" />
+                <Plus className="h-3 w-3 text-primary" />
               </div>
             )}
           </div>
