@@ -219,7 +219,7 @@ const TVShowReviews = () => {
                   : null;
 
                 return (
-                  <Link key={seasonNum} to={`/tv/${tvId}/season/${seasonNum}`} className="block">
+                  <Link key={seasonNum} to={`/tv/${tvId}/season/${seasonNum}/reviews`} className="block">
                     <div className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors">
                       <div className="w-12 h-[72px] rounded overflow-hidden bg-muted shrink-0">
                         {seasonPoster ? (
