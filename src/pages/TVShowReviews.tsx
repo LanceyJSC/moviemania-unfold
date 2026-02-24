@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, ChevronRight, Tv, Play, Heart, Plus, BookOpen, Eye, MessageCircle, MoreHorizontal } from "lucide-react";
+import { Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown, ChevronRight, Tv, Play, Heart, Plus, BookOpen, Eye, MessageCircle, MoreHorizontal, Flame } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +19,7 @@ import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { ReviewLikes } from "@/components/ReviewLikes";
 import { format } from "date-fns";
+import { useDiary } from "@/hooks/useDiary";
 
 interface CommunityReview {
   id: string;
@@ -53,6 +54,7 @@ const TVShowReviews = () => {
   const { user } = useAuth();
   const { toggleLike, toggleWatchlist, setRating, markAsWatched, isLiked, isInWatchlist, isWatched, getRating } = useUserStateContext();
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
+  const { tvDiary } = useDiary();
 
   const tvId = Number(id);
   const isTVShowLiked = isLiked(tvId);
@@ -123,7 +125,35 @@ const TVShowReviews = () => {
     const s = r.season_number ?? 0;
     seasonReviewCounts.set(s, (seasonReviewCounts.get(s) || 0) + 1);
   }
-  const seasonsWithReviews = [...seasonReviewCounts.entries()].sort((a, b) => a[0] - b[0]);
+
+  // Calculate season ratings from tv_diary episode ratings
+  const getSeasonRating = (seasonNumber: number) => {
+    const episodeRatings = tvDiary
+      .filter(entry => 
+        entry.tv_id === tvId && 
+        entry.season_number === seasonNumber && 
+        entry.episode_number !== null &&
+        entry.rating !== null
+      )
+      .map(entry => entry.rating as number);
+    
+    if (episodeRatings.length === 0) return null;
+    return Math.round(episodeRatings.reduce((a, b) => a + b, 0) / episodeRatings.length);
+  };
+
+  const getWatchedEpisodesForSeason = (seasonNumber: number) => {
+    return tvDiary.filter(
+      entry => entry.tv_id === tvId && entry.season_number === seasonNumber && entry.episode_number !== null
+    ).length;
+  };
+
+  // Merge seasons from reviews and diary data
+  const allSeasonNumbers = new Set<number>();
+  for (const [s] of seasonReviewCounts) allSeasonNumbers.add(s);
+  tvDiary
+    .filter(entry => entry.tv_id === tvId && entry.season_number !== null && entry.season_number > 0)
+    .forEach(entry => allSeasonNumbers.add(entry.season_number!));
+  const allSeasonsWithData = [...allSeasonNumbers].sort((a, b) => a - b);
 
   const toggleExpanded = (reviewId: string) => {
     setExpandedReviews((prev) => {
@@ -309,12 +339,15 @@ const TVShowReviews = () => {
 
       {/* Reviews Content */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
-        {/* Season Episode Reviews Section */}
-        {seasonsWithReviews.length > 0 && (
+        {/* Season Episode Reviews & Ratings Section */}
+        {allSeasonsWithData.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-foreground mb-3">Episode Reviews by Season</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-3">Your Seasons & Episode Reviews</h2>
             <div className="space-y-2">
-              {seasonsWithReviews.map(([seasonNum, count]) => {
+              {allSeasonsWithData.map((seasonNum) => {
+                const count = seasonReviewCounts.get(seasonNum) || 0;
+                const seasonRating = getSeasonRating(seasonNum);
+                const watchedEps = getWatchedEpisodesForSeason(seasonNum);
                 const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
                 const seasonPoster = season?.poster_path
                   ? tmdbService.getPosterUrl(season.poster_path, 'w500')
@@ -335,10 +368,23 @@ const TVShowReviews = () => {
                       <div className="flex-1 min-w-0 flex items-center">
                         <div>
                           <p className="text-sm font-medium text-foreground">Season {seasonNum}</p>
-                          <p className="text-[11px] text-muted-foreground">{count} episode review{count !== 1 ? 's' : ''}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {watchedEps > 0 && (
+                              <span className="text-[11px] text-muted-foreground">{watchedEps} ep{watchedEps !== 1 ? 's' : ''} watched</span>
+                            )}
+                            {count > 0 && (
+                              <span className="text-[11px] text-muted-foreground">{count} review{count !== 1 ? 's' : ''}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="shrink-0 flex items-center">
+                      <div className="shrink-0 flex items-center gap-2">
+                        {seasonRating && (
+                          <span className="px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red text-xs font-semibold flex items-center gap-1">
+                            <Flame className="h-3 w-3 fill-current" />
+                            {seasonRating}/5
+                          </span>
+                        )}
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     </div>
