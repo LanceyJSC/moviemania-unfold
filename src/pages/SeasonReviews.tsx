@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Tv, MessageCircle, ChevronRight, Flame } from "lucide-react";
+import { Tv, MessageCircle, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { tmdbService, TVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,22 +70,26 @@ const SeasonReviews = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background 2xl:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Loading..." />
-        <div className="px-4 py-6 space-y-3">
+        <div className="px-4 py-6 space-y-3 md:max-w-7xl md:mx-auto md:px-6">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full rounded-lg" />)}
         </div>
+        <Navigation />
       </div>
     );
   }
 
   if (!tvShow || !seasonData) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background 2xl:pb-12">
+        <DesktopHeader />
         <MobileHeader title="Not Found" />
         <div className="flex items-center justify-center h-96">
           <p className="text-muted-foreground">Season not found</p>
         </div>
+        <Navigation />
       </div>
     );
   }
@@ -102,7 +107,8 @@ const SeasonReviews = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <DesktopHeader />
       <MobileHeader title={`Season ${seasonNum} Reviews`} />
 
       {/* Hero Section */}
@@ -128,7 +134,7 @@ const SeasonReviews = () => {
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-6 md:max-w-7xl md:mx-auto md:px-6">
         <h2 className="text-lg font-semibold text-foreground uppercase tracking-wider">
           Episodes ({episodesWithReviews.length})
         </h2>
@@ -162,7 +168,9 @@ const SeasonReviews = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{ep.name}</p>
+                        <p className="text-sm font-medium text-foreground truncate">
+                          S{seasonNum}E{ep.episode_number} · {ep.name}
+                        </p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           {ep.air_date && new Date(ep.air_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                           {ep.runtime && ` · ${ep.runtime}m`}
