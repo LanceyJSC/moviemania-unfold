@@ -141,11 +141,6 @@ const TVShowReviews = () => {
     return Math.round(episodeRatings.reduce((a, b) => a + b, 0) / episodeRatings.length);
   };
 
-  const getWatchedEpisodesForSeason = (seasonNumber: number) => {
-    return tvDiary.filter(
-      entry => entry.tv_id === tvId && entry.season_number === seasonNumber && entry.episode_number !== null
-    ).length;
-  };
 
   // Merge seasons from reviews and diary data
   const allSeasonNumbers = new Set<number>();
@@ -337,48 +332,49 @@ const TVShowReviews = () => {
         />
       </div>
 
-      {/* Reviews Content */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
-        {/* Season Episode Reviews & Ratings Section */}
+        {/* Reviews Content */}
+        <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
+        {/* Your Ratings by Season - shows all scored episodes from diary */}
         {allSeasonsWithData.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold text-foreground mb-3">Your Seasons & Episode Reviews</h2>
-            <div className="space-y-2">
-              {allSeasonsWithData.map((seasonNum) => {
-                const count = seasonReviewCounts.get(seasonNum) || 0;
-                const seasonRating = getSeasonRating(seasonNum);
-                const watchedEps = getWatchedEpisodesForSeason(seasonNum);
-                const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
-                const seasonPoster = season?.poster_path
-                  ? tmdbService.getPosterUrl(season.poster_path, 'w500')
-                  : posterUrl;
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold text-foreground">Your Ratings by Season</h2>
+            {allSeasonsWithData.map((seasonNum) => {
+              const seasonRating = getSeasonRating(seasonNum);
+              const seasonEpisodes = tvDiary
+                .filter(entry => 
+                  entry.tv_id === tvId && 
+                  entry.season_number === seasonNum && 
+                  entry.episode_number !== null
+                )
+                .sort((a, b) => (a.episode_number || 0) - (b.episode_number || 0));
+              const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
+              const seasonPoster = season?.poster_path
+                ? tmdbService.getPosterUrl(season.poster_path, 'w500')
+                : posterUrl;
 
-                return (
-                  <Link key={seasonNum} to={`/tv/${tvId}/season/${seasonNum}/reviews`} className="block">
-                    <div className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors">
-                      <div className="w-12 h-[72px] rounded overflow-hidden bg-muted shrink-0">
-                        {seasonPoster ? (
-                          <img src={seasonPoster} alt={`Season ${seasonNum}`} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Tv className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0 flex items-center">
+              return (
+                <div key={seasonNum} className="bg-card rounded-xl border border-border overflow-hidden">
+                  {/* Season Header */}
+                  <Link to={`/tv/${tvId}/season/${seasonNum}/reviews`} className="block">
+                    <div className="p-3 bg-muted/30 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-12 rounded overflow-hidden bg-muted shrink-0">
+                          {seasonPoster ? (
+                            <img src={seasonPoster} alt={`Season ${seasonNum}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Tv className="h-3 w-3 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
                         <div>
-                          <p className="text-sm font-medium text-foreground">Season {seasonNum}</p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            {watchedEps > 0 && (
-                              <span className="text-[11px] text-muted-foreground">{watchedEps} ep{watchedEps !== 1 ? 's' : ''} watched</span>
-                            )}
-                            {count > 0 && (
-                              <span className="text-[11px] text-muted-foreground">{count} review{count !== 1 ? 's' : ''}</span>
-                            )}
-                          </div>
+                          <span className="font-medium text-sm">Season {seasonNum}</span>
+                          <p className="text-[11px] text-muted-foreground">
+                            {seasonEpisodes.length} ep{seasonEpisodes.length !== 1 ? 's' : ''} rated
+                          </p>
                         </div>
                       </div>
-                      <div className="shrink-0 flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         {seasonRating && (
                           <span className="px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red text-xs font-semibold flex items-center gap-1">
                             <Flame className="h-3 w-3 fill-current" />
@@ -389,9 +385,33 @@ const TVShowReviews = () => {
                       </div>
                     </div>
                   </Link>
-                );
-              })}
-            </div>
+
+                  {/* Episode List */}
+                  {seasonEpisodes.length > 0 && (
+                    <div className="divide-y divide-border">
+                      {seasonEpisodes.map(ep => (
+                        <div key={`${ep.season_number}-${ep.episode_number}`} className="p-3 flex items-center justify-between">
+                          <div>
+                            <span className="text-sm">Episode {ep.episode_number}</span>
+                            {ep.watched_date && (
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(ep.watched_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </p>
+                            )}
+                          </div>
+                          {ep.rating && (
+                            <span className="px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red text-xs font-semibold flex items-center gap-1">
+                              <Flame className="h-3 w-3 fill-current" />
+                              {ep.rating}/5
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
