@@ -1,150 +1,89 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, User, AlertTriangle, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
+import { Tv, MessageCircle, ChevronRight, Flame } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Navigation } from "@/components/Navigation";
 import { tmdbService, TVShow } from "@/lib/tmdb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ReviewLikes } from "@/components/ReviewLikes";
-import { MobileActionSheet } from "@/components/MobileActionSheet";
-import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
 
-interface CommunityReview {
-  id: string;
-  user_id: string;
-  review_text: string | null;
-  rating: number | null;
-  is_spoiler: boolean | null;
-  created_at: string;
-  episode_number: number | null;
-  season_number: number | null;
-  profile: {
-    username: string | null;
-    avatar_url: string | null;
-    full_name: string | null;
-  } | null;
-}
-
-type SortOption = 'recent' | 'oldest' | 'highest' | 'lowest';
+const IMAGE_BASE = 'https://image.tmdb.org/t/p/';
 
 const SeasonReviews = () => {
   const { id, seasonNumber } = useParams<{ id: string; seasonNumber: string }>();
   const [tvShow, setTVShow] = useState<TVShow | null>(null);
+  const [seasonData, setSeasonData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
-  const [showSpoilers, setShowSpoilers] = useState<Set<string>>(new Set());
-  const [sortBy, setSortBy] = useState<SortOption>('recent');
-  const [showSortSheet, setShowSortSheet] = useState(false);
   const { user } = useAuth();
 
   const tvId = Number(id);
   const seasonNum = Number(seasonNumber);
 
   useEffect(() => {
-    const loadTVShow = async () => {
+    const load = async () => {
       if (!id) return;
       setIsLoading(true);
       try {
-        const data = await tmdbService.getTVShowDetails(tvId);
-        setTVShow(data);
+        const [show, season] = await Promise.all([
+          tmdbService.getTVShowDetails(tvId),
+          tmdbService.getSeasonDetails(tvId, seasonNum),
+        ]);
+        setTVShow(show);
+        setSeasonData(season);
       } catch (error) {
-        console.error('Failed to load TV show:', error);
+        console.error('Failed to load:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadTVShow();
-  }, [id, tvId]);
+    load();
+  }, [id, tvId, seasonNum]);
 
-  // Fetch episode reviews for this season
-  const { data: communityReviews } = useQuery({
-    queryKey: ['season-episode-reviews', tvId, seasonNum],
+  // Fetch episode review counts for this season
+  const { data: episodeReviewCounts } = useQuery({
+    queryKey: ['season-episode-review-counts', tvId, seasonNum],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('user_reviews')
-        .select('id, user_id, review_text, rating, is_spoiler, created_at, episode_number, season_number')
+        .select('episode_number')
         .eq('movie_id', tvId)
         .eq('media_type', 'tv')
         .eq('season_number', seasonNum)
-        .not('episode_number', 'is', null)
-        .order('episode_number', { ascending: true });
+        .not('episode_number', 'is', null);
 
       if (error) throw error;
 
-      const userIds = [...new Set(data.map((r) => r.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, username, avatar_url, full_name')
-        .in('id', userIds);
-
-      const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
-
-      return data.map((review) => ({
-        ...review,
-        profile: profileMap.get(review.user_id) || null,
-      })) as CommunityReview[];
+      const counts = new Map<number, number>();
+      for (const r of data) {
+        if (r.episode_number != null) {
+          counts.set(r.episode_number, (counts.get(r.episode_number) || 0) + 1);
+        }
+      }
+      return counts;
     },
-    enabled: !!tvId && !!seasonNum
+    enabled: !!tvId && !!seasonNum,
   });
-
-  const toggleExpanded = (reviewId: string) => {
-    setExpandedReviews((prev) => {
-      const next = new Set(prev);
-      if (next.has(reviewId)) next.delete(reviewId);
-      else next.add(reviewId);
-      return next;
-    });
-  };
-
-  const revealSpoiler = (reviewId: string) => {
-    setShowSpoilers((prev) => new Set(prev).add(reviewId));
-  };
-
-  const getSortedReviews = () => {
-    if (!communityReviews) return [];
-    const sorted = [...communityReviews];
-
-    switch (sortBy) {
-      case 'recent':
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      case 'oldest':
-        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
-      case 'highest':
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'lowest':
-        sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-        break;
-    }
-    return sorted;
-  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <MobileHeader title="Loading..." />
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="px-4 py-6 space-y-3">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full rounded-lg" />)}
         </div>
       </div>
     );
   }
 
-  if (!tvShow) {
+  if (!tvShow || !seasonData) {
     return (
       <div className="min-h-screen bg-background">
         <MobileHeader title="Not Found" />
         <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-4">TV Show not found</h1>
-            <Link to="/tv-shows"><Button>Back to TV Shows</Button></Link>
-          </div>
+          <p className="text-muted-foreground">Season not found</p>
         </div>
       </div>
     );
@@ -155,17 +94,12 @@ const SeasonReviews = () => {
     ? tmdbService.getPosterUrl(season.poster_path, 'w500')
     : tmdbService.getPosterUrl(tvShow.poster_path, 'w500');
   const backdropUrl = tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
-  const sortedReviews = getSortedReviews();
 
-  // Group reviews by episode
-  const episodeGroups = new Map<number, CommunityReview[]>();
-  for (const r of sortedReviews) {
-    if (r.episode_number == null) continue;
-    const arr = episodeGroups.get(r.episode_number) || [];
-    arr.push(r);
-    episodeGroups.set(r.episode_number, arr);
-  }
-  const episodes = [...episodeGroups.entries()].sort((a, b) => a[0] - b[0]);
+  const episodes = seasonData.episodes || [];
+  // Only show episodes that have reviews
+  const episodesWithReviews = episodes.filter(
+    (ep: any) => episodeReviewCounts?.has(ep.episode_number)
+  );
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -195,110 +129,67 @@ const SeasonReviews = () => {
       </div>
 
       <div className="px-4 py-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">
-            Episode Reviews
-            <span className="text-sm font-normal text-muted-foreground ml-2">({sortedReviews.length})</span>
-          </h2>
-          {sortedReviews.length > 1 && (
-            <Button variant="outline" size="sm" onClick={() => setShowSortSheet(true)} className="h-9 px-3 rounded-lg gap-1.5">
-              <ArrowUpDown className="h-3.5 w-3.5" />
-              <span className="text-xs">
-                {sortBy === 'recent' ? 'Recent' : sortBy === 'oldest' ? 'Oldest' : sortBy === 'highest' ? 'Highest' : 'Lowest'}
-              </span>
-            </Button>
-          )}
-        </div>
+        <h2 className="text-lg font-semibold text-foreground uppercase tracking-wider">
+          Episodes ({episodesWithReviews.length})
+        </h2>
 
-        {episodes.length > 0 ? (
-          <div className="space-y-6">
-            {episodes.map(([epNum, reviews]) => (
-              <div key={epNum}>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  Episode {epNum}
-                </h3>
-                <div className="space-y-3">
-                  {reviews.map((review) => {
-                    const isExpanded = expandedReviews.has(review.id);
-                    const isSpoilerVisible = showSpoilers.has(review.id);
-                    const reviewText = review.review_text || '';
-                    const isLong = reviewText.length > 300;
-                    const isOwnReview = user?.id === review.user_id;
+        {episodesWithReviews.length > 0 ? (
+          <div className="space-y-3">
+            {episodesWithReviews.map((ep: any) => {
+              const reviewCount = episodeReviewCounts?.get(ep.episode_number) || 0;
+              const stillUrl = ep.still_path
+                ? `${IMAGE_BASE}w300${ep.still_path}`
+                : null;
 
-                    return (
-                      <div
-                        key={review.id}
-                        className={`bg-card rounded-xl p-4 border ${isOwnReview ? 'border-primary/30 bg-primary/5' : 'border-border'}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <Link to={`/user/${review.profile?.username || review.user_id}`}>
-                            <Avatar className="h-10 w-10 flex-shrink-0">
-                              <AvatarImage src={review.profile?.avatar_url || undefined} />
-                              <AvatarFallback className="bg-muted">
-                                <User className="h-5 w-5 text-muted-foreground" />
-                              </AvatarFallback>
-                            </Avatar>
-                          </Link>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-2">
-                              <Link to={`/user/${review.profile?.username || review.user_id}`} className="font-medium text-foreground hover:underline">
-                                {review.profile?.username || review.profile?.full_name || 'Anonymous'}
-                              </Link>
-                              {isOwnReview && <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">You</span>}
-                              {review.rating && (
-                                <div className="flex items-center gap-1 text-amber-500 text-sm">
-                                  <Star className="h-3.5 w-3.5 fill-current" />
-                                  <span>{review.rating}/10</span>
-                                </div>
-                              )}
-                              <span className="text-xs text-muted-foreground">{format(new Date(review.created_at), 'MMM d, yyyy')}</span>
-                            </div>
-                            {review.is_spoiler && !isSpoilerVisible ? (
-                              <Button variant="outline" size="sm" onClick={() => revealSpoiler(review.id)} className="mt-2">
-                                <AlertTriangle className="h-4 w-4 mr-1" />Show Spoiler
-                              </Button>
-                            ) : (
-                              <div>
-                                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                                  {isLong && !isExpanded ? `${reviewText.slice(0, 300)}...` : reviewText}
-                                </p>
-                                {isLong && (
-                                  <Button variant="ghost" size="sm" onClick={() => toggleExpanded(review.id)} className="mt-1 h-auto p-0 text-muted-foreground hover:text-foreground">
-                                    {isExpanded ? <><ChevronUp className="h-4 w-4 mr-1" />Show less</> : <><ChevronDown className="h-4 w-4 mr-1" />Read more</>}
-                                  </Button>
-                                )}
-                              </div>
-                            )}
-                            <div className="mt-3"><ReviewLikes reviewId={review.id} compact /></div>
+              return (
+                <Link
+                  key={ep.episode_number}
+                  to={`/tv/${tvId}/season/${seasonNum}/episode/${ep.episode_number}`}
+                  className="block"
+                >
+                  <Card className="p-3 hover:bg-accent/5 transition-colors">
+                    <div className="flex gap-3">
+                      <div className="w-24 h-14 rounded overflow-hidden bg-muted shrink-0 relative">
+                        {stillUrl ? (
+                          <img src={stillUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Tv className="h-4 w-4 text-muted-foreground" />
                           </div>
+                        )}
+                        <div className="absolute top-0.5 left-0.5 bg-black/70 text-white text-[10px] font-bold px-1 rounded">
+                          {ep.episode_number}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{ep.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {ep.air_date && new Date(ep.air_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {ep.runtime && ` · ${ep.runtime}m`}
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <MessageCircle className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-[11px] text-muted-foreground">
+                            {reviewCount} review{reviewCount !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 flex items-center">
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         ) : (
-          <div className="text-center py-8 bg-card rounded-xl border border-border">
-            <p className="text-muted-foreground text-sm">No episode reviews for this season yet.</p>
-          </div>
+          <Card className="p-8 text-center border-dashed">
+            <MessageCircle className="h-14 w-14 mx-auto mb-4 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">No episode reviews for this season yet.</p>
+          </Card>
         )}
       </div>
-
-      <MobileActionSheet
-        isOpen={showSortSheet}
-        onClose={() => setShowSortSheet(false)}
-        title="Sort Reviews"
-        options={[
-          { value: 'recent', label: 'Most Recent' },
-          { value: 'oldest', label: 'Oldest First' },
-          { value: 'highest', label: 'Highest Rated' },
-          { value: 'lowest', label: 'Lowest Rated' },
-        ]}
-        selectedValue={sortBy}
-        onSelect={(v) => setSortBy(v as SortOption)}
-      />
 
       <Navigation />
     </div>
