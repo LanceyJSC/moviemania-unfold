@@ -132,7 +132,7 @@ export const SeasonProgressCard = ({
         {/* Season Poster */}
         <div className="relative flex-shrink-0">
           <img 
-            src={tmdbService.getPosterUrl(season.poster_path, 'w300')}
+            src={tmdbService.getPosterUrl(season.poster_path || tvShowPoster, 'w300')}
             alt={season.name}
             className="w-16 h-24 rounded object-cover"
           />
