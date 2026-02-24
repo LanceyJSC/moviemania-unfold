@@ -19,7 +19,16 @@ import { useUserStateContext } from "@/contexts/UserStateContext";
 import { useTrailerContext } from "@/contexts/TrailerContext";
 import { ReviewLikes } from "@/components/ReviewLikes";
 import { format } from "date-fns";
-import { useDiary } from "@/hooks/useDiary";
+
+
+interface EpisodeRatingEntry {
+  tv_id: number;
+  season_number: number | null;
+  episode_number: number | null;
+  rating: number | null;
+  user_id: string;
+  watched_date: string;
+}
 
 interface CommunityReview {
   id: string;
@@ -54,9 +63,26 @@ const TVShowReviews = () => {
   const { user } = useAuth();
   const { toggleLike, toggleWatchlist, setRating, markAsWatched, isLiked, isInWatchlist, isWatched, getRating } = useUserStateContext();
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
-  const { tvDiary } = useDiary();
+  
 
   const tvId = Number(id);
+
+  // Fetch ALL users' episode ratings for this TV show
+  const { data: allEpisodeRatings } = useQuery({
+    queryKey: ['all-episode-ratings', tvId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tv_diary')
+        .select('tv_id, season_number, episode_number, rating, user_id, watched_date')
+        .eq('tv_id', tvId)
+        .not('rating', 'is', null)
+        .not('episode_number', 'is', null);
+      if (error) throw error;
+      return data as EpisodeRatingEntry[];
+    },
+    enabled: !!tvId,
+  });
+
   const isTVShowLiked = isLiked(tvId);
   const isTVShowInWatchlist = isInWatchlist(tvId);
   const isTVShowWatched = isWatched(tvId);
@@ -126,27 +152,28 @@ const TVShowReviews = () => {
     seasonReviewCounts.set(s, (seasonReviewCounts.get(s) || 0) + 1);
   }
 
-  // Calculate season ratings from tv_diary episode ratings
+  // Calculate season ratings from ALL users' tv_diary episode ratings
   const getSeasonRating = (seasonNumber: number) => {
-    const episodeRatings = tvDiary
-      .filter(entry => 
-        entry.tv_id === tvId && 
-        entry.season_number === seasonNumber && 
-        entry.episode_number !== null &&
-        entry.rating !== null
-      )
+    const ratings = (allEpisodeRatings || [])
+      .filter(entry => entry.season_number === seasonNumber)
       .map(entry => entry.rating as number);
     
-    if (episodeRatings.length === 0) return null;
-    return Math.round(episodeRatings.reduce((a, b) => a + b, 0) / episodeRatings.length);
+    if (ratings.length === 0) return null;
+    return Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length);
   };
 
+  // Get all episode ratings for a season (from ALL users)
+  const getSeasonEpisodeRatings = (seasonNumber: number) => {
+    return (allEpisodeRatings || [])
+      .filter(entry => entry.season_number === seasonNumber)
+      .sort((a, b) => (a.episode_number || 0) - (b.episode_number || 0));
+  };
 
-  // Merge seasons from reviews and diary data - only include seasons with rated episodes
+  // Merge seasons from reviews and ALL users' diary data
   const allSeasonNumbers = new Set<number>();
   for (const [s] of seasonReviewCounts) allSeasonNumbers.add(s);
-  tvDiary
-    .filter(entry => entry.tv_id === tvId && entry.season_number !== null && entry.season_number > 0 && entry.rating !== null)
+  (allEpisodeRatings || [])
+    .filter(entry => entry.season_number !== null && entry.season_number > 0)
     .forEach(entry => allSeasonNumbers.add(entry.season_number!));
   const allSeasonsWithData = [...allSeasonNumbers].sort((a, b) => a - b);
 
@@ -334,20 +361,31 @@ const TVShowReviews = () => {
 
         {/* Reviews Content */}
         <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
-        {/* Your Ratings by Season - shows all scored episodes from diary */}
+        {/* Community Ratings by Season - shows all users' scored episodes */}
         {allSeasonsWithData.length > 0 && (
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-foreground">Your Ratings by Season</h2>
+            <h2 className="text-lg font-semibold text-foreground">Ratings by Season</h2>
             {allSeasonsWithData.map((seasonNum) => {
               const seasonRating = getSeasonRating(seasonNum);
-              const seasonEpisodes = tvDiary
-                .filter(entry => 
-                  entry.tv_id === tvId && 
-                  entry.season_number === seasonNum && 
-                  entry.episode_number !== null &&
-                  entry.rating !== null
-                )
-                .sort((a, b) => (a.episode_number || 0) - (b.episode_number || 0));
+              const seasonEpRatings = getSeasonEpisodeRatings(seasonNum);
+              
+              // Aggregate by episode: calculate average rating and count per episode
+              const episodeMap = new Map<number, { totalRating: number; count: number }>();
+              for (const ep of seasonEpRatings) {
+                if (ep.episode_number == null) continue;
+                const existing = episodeMap.get(ep.episode_number) || { totalRating: 0, count: 0 };
+                existing.totalRating += ep.rating as number;
+                existing.count += 1;
+                episodeMap.set(ep.episode_number, existing);
+              }
+              const aggregatedEpisodes = [...episodeMap.entries()]
+                .sort(([a], [b]) => a - b)
+                .map(([epNum, data]) => ({
+                  episode_number: epNum,
+                  avgRating: Math.round((data.totalRating / data.count) * 10) / 10,
+                  ratingCount: data.count,
+                }));
+
               const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
               const seasonPoster = season?.poster_path
                 ? tmdbService.getPosterUrl(season.poster_path, 'w500')
@@ -371,7 +409,7 @@ const TVShowReviews = () => {
                         <div>
                           <span className="font-medium text-sm">Season {seasonNum}</span>
                           <p className="text-[11px] text-muted-foreground">
-                            {seasonEpisodes.length} ep{seasonEpisodes.length !== 1 ? 's' : ''} rated
+                            {aggregatedEpisodes.length} ep{aggregatedEpisodes.length !== 1 ? 's' : ''} rated
                           </p>
                         </div>
                       </div>
@@ -388,24 +426,20 @@ const TVShowReviews = () => {
                   </Link>
 
                   {/* Episode List */}
-                  {seasonEpisodes.length > 0 && (
+                  {aggregatedEpisodes.length > 0 && (
                     <div className="divide-y divide-border">
-                      {seasonEpisodes.map(ep => (
-                        <div key={`${ep.season_number}-${ep.episode_number}`} className="p-3 flex items-center justify-between">
+                      {aggregatedEpisodes.map(ep => (
+                        <div key={ep.episode_number} className="p-3 flex items-center justify-between">
                           <div>
                             <span className="text-sm">Episode {ep.episode_number}</span>
-                            {ep.watched_date && (
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(ep.watched_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              </p>
-                            )}
+                            <p className="text-xs text-muted-foreground">
+                              {ep.ratingCount} rating{ep.ratingCount !== 1 ? 's' : ''}
+                            </p>
                           </div>
-                          {ep.rating && (
-                            <span className="px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red text-xs font-semibold flex items-center gap-1">
-                              <Flame className="h-3 w-3 fill-current" />
-                              {ep.rating}/5
-                            </span>
-                          )}
+                          <span className="px-2 py-0.5 bg-cinema-red/20 rounded text-cinema-red text-xs font-semibold flex items-center gap-1">
+                            <Flame className="h-3 w-3 fill-current" />
+                            {ep.avgRating}/5
+                          </span>
                         </div>
                       ))}
                     </div>
