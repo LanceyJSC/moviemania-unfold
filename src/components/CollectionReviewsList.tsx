@@ -90,7 +90,7 @@ const StandaloneReviewRow = ({ review, onDelete }: { review: Review; onDelete: (
   const posterUrl = getPosterUrl(review.movie_poster);
   return (
     <div className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors">
-      <Link to={`/${review.media_type === 'tv' ? 'tv' : 'movie'}/${review.movie_id}`} className="shrink-0">
+      <Link to={`/${review.media_type === 'tv' ? 'tv' : 'movie'}/${review.movie_id}/reviews`} className="shrink-0">
         <div className="w-12 h-[72px] rounded overflow-hidden bg-muted">
           {posterUrl ? (
             <img src={posterUrl} alt="" className="w-full h-full object-cover" />
@@ -102,7 +102,7 @@ const StandaloneReviewRow = ({ review, onDelete }: { review: Review; onDelete: (
         </div>
       </Link>
       <div className="flex-1 min-w-0">
-        <Link to={`/${review.media_type === 'tv' ? 'tv' : 'movie'}/${review.movie_id}`} className="hover:underline">
+        <Link to={`/${review.media_type === 'tv' ? 'tv' : 'movie'}/${review.movie_id}/reviews`} className="hover:underline">
           <div className="flex items-center gap-1.5">
             {review.media_type === 'tv' ? (
               <Tv className="h-3 w-3 text-muted-foreground shrink-0" />
@@ -142,7 +142,7 @@ const TVGroupRow = ({ seriesReview, episodeReviews, onDelete }: { seriesReview: 
   const totalReviews = (seriesReview ? 1 : 0) + episodeReviews.length;
 
   return (
-    <Link to={`/tv/${representative.movie_id}`} className="block">
+    <Link to={`/tv/${representative.movie_id}/reviews`} className="block">
       <div className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors">
         <div className="shrink-0">
           <div className="w-12 h-[72px] rounded overflow-hidden bg-muted">
