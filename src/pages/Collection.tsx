@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Film, Tv, Star, Clock, Heart, Eye, 
+  Film, Tv, Star, Heart, Eye, 
   Plus, Search, Trophy, TrendingUp,
-  LayoutGrid, List, Layers
+  LayoutGrid, List, Layers, Clock
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnhancedWatchlist } from '@/hooks/useEnhancedWatchlist';
@@ -558,7 +558,7 @@ const Collection = () => {
           <div className="overflow-x-auto -mx-3 px-3 mb-4 sm:mb-6">
             <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-5 h-10 sm:h-12">
               <TabsTrigger value="watchlist" className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm h-8 sm:h-10 touch-manipulation px-2 sm:px-2">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Watchlist</span>
                 <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs h-4 sm:h-5 px-1">{getUnwatchedItems().length}</Badge>
               </TabsTrigger>
@@ -634,7 +634,7 @@ const Collection = () => {
                 renderListView(getUnwatchedItems(), 'watchlist')
               )
             ) : (
-              renderEmptyState(<Clock className="h-14 w-14" />, 'Your watchlist is empty', 'Start building your watchlist by browsing movies and TV shows')
+              renderEmptyState(<Plus className="h-14 w-14" />, 'Your watchlist is empty', 'Start building your watchlist by browsing movies and TV shows')
             )}
           </TabsContent>
 
