@@ -344,7 +344,8 @@ const TVShowReviews = () => {
                 .filter(entry => 
                   entry.tv_id === tvId && 
                   entry.season_number === seasonNum && 
-                  entry.episode_number !== null
+                  entry.episode_number !== null &&
+                  entry.rating !== null
                 )
                 .sort((a, b) => (a.episode_number || 0) - (b.episode_number || 0));
               const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
