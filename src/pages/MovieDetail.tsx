@@ -278,7 +278,7 @@ const MovieDetail = () => {
             onClick={() => requireAuth(() => toggleWatchlist(movieId, title, posterUrl))}
           >
             <Plus className="h-4 w-4 2xl:h-5 2xl:w-5" />
-            <span className="text-[10px] 2xl:text-xs">List</span>
+            <span className="text-[10px] 2xl:text-xs">Watchlist</span>
           </Button>
 
           <Button 
