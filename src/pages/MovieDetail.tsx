@@ -262,17 +262,6 @@ const MovieDetail = () => {
           <Button 
             variant="outline" 
             className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
-              isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
-            }`}
-            onClick={() => requireAuth(() => toggleLike(movieId, title, posterUrl))}
-          >
-            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Like</span>
-          </Button>
-
-          <Button 
-            variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
               isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
             }`}
             onClick={() => requireAuth(() => toggleWatchlist(movieId, title, posterUrl))}
@@ -284,12 +273,23 @@ const MovieDetail = () => {
           <Button 
             variant="outline" 
             className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+              isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
+            }`}
+            onClick={() => requireAuth(() => toggleLike(movieId, title, posterUrl))}
+          >
+            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
+            <span className="text-[10px] 2xl:text-xs">Favorites</span>
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
               isMovieWatched ? 'bg-green-600 border-green-600 text-white' : ''
             }`}
             onClick={() => requireAuth(() => markAsWatched(movieId, title, posterUrl))}
           >
             <Eye className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isMovieWatched ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Seen</span>
+            <span className="text-[10px] 2xl:text-xs">Watched</span>
           </Button>
 
           <Button 
