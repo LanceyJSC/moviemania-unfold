@@ -10,17 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navigation } from '@/components/Navigation';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { toast } from 'sonner';
-import { Film } from 'lucide-react';
+import { Film, ArrowLeft, Mail } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
+  const { signIn, signUp, resetPassword, user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -30,7 +31,6 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
       const { error } = await signIn(email, password);
       if (error) {
@@ -39,7 +39,7 @@ const Auth = () => {
         toast.success('Welcome back!');
         navigate('/');
       }
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -49,7 +49,6 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
       const { error } = await signUp(email, password, username);
       if (error) {
@@ -59,14 +58,116 @@ const Auth = () => {
           toast.error(error.message);
         }
       } else {
-        navigate('/');
+        setShowVerifyEmail(true);
       }
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await resetPassword(email);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password reset email sent! Check your inbox.');
+        setShowForgotPassword(false);
+      }
+    } catch {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (showVerifyEmail) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex flex-col">
+        <DesktopHeader />
+        <div className="flex-1 flex items-center justify-center p-4 pb-32 2xl:pb-12">
+          <Card className="w-full max-w-md bg-background/80 backdrop-blur border-border text-center">
+            <CardHeader>
+              <div className="flex justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Mail className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl">Check Your Email</CardTitle>
+              <CardDescription className="mt-2">
+                We've sent a verification link to <strong className="text-foreground">{email}</strong>. Please click the link in the email to verify your account and get started.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground">
+                Didn't receive it? Check your spam folder or try signing up again.
+              </p>
+              <Button variant="outline" onClick={() => { setShowVerifyEmail(false); }} className="w-full h-12 touch-manipulation">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Sign In
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+        <Navigation />
+      </div>
+    );
+  }
+
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex flex-col">
+        <DesktopHeader />
+        <div className="flex-1 flex items-center justify-center p-4 pb-32 2xl:pb-12">
+          <Card className="w-full max-w-md bg-background/80 backdrop-blur border-border">
+            <CardHeader className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Film className="h-8 w-8 text-primary" />
+                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  SceneBurn
+                </span>
+              </div>
+              <CardTitle className="text-2xl">Reset Password</CardTitle>
+              <CardDescription>
+                Enter your email and we'll send you a reset link
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full h-12 touch-manipulation active:scale-95" disabled={isLoading}>
+                  {isLoading ? 'Sending...' : 'Send Reset Link'}
+                </Button>
+                <Button variant="ghost" onClick={() => setShowForgotPassword(false)} className="w-full h-12 touch-manipulation">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Sign In
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+        <Navigation />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex flex-col">
@@ -123,6 +224,13 @@ const Auth = () => {
                   >
                     {isLoading ? 'Signing in...' : 'Sign In'}
                   </Button>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Forgot your password?
+                  </button>
                 </form>
               </TabsContent>
               
@@ -170,6 +278,12 @@ const Auth = () => {
                   >
                     {isLoading ? 'Creating account...' : 'Sign Up'}
                   </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    By signing up, you agree to our{' '}
+                    <a href="/terms" className="text-primary hover:underline">Terms of Service</a>{' '}
+                    and{' '}
+                    <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
+                  </p>
                 </form>
               </TabsContent>
             </Tabs>
@@ -177,7 +291,6 @@ const Auth = () => {
         </Card>
       </div>
       
-      {/* Mobile Navigation */}
       <Navigation />
     </div>
   );
