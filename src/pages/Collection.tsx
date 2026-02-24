@@ -682,7 +682,7 @@ const Collection = () => {
 
           {/* Reviews Tab */}
           <TabsContent value="reviews" className="space-y-4">
-            <CollectionReviewsList onCountChange={setReviewCount} />
+            <CollectionReviewsList onCountChange={setReviewCount} viewMode={viewMode} />
           </TabsContent>
 
           {/* Lists Tab */}
