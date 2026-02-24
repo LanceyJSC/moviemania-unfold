@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Navigation } from "@/components/Navigation";
 import { LogMediaModal } from "@/components/LogMediaModal";
 import { MobileActionSheet } from "@/components/MobileActionSheet";
@@ -179,7 +180,8 @@ const TVShowReviews = () => {
   const sortedCommunityReviews = getSortedReviews();
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <DesktopHeader />
       <MobileHeader title="Reviews" />
 
       {/* Hero Section */}
@@ -206,7 +208,7 @@ const TVShowReviews = () => {
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-6 md:max-w-7xl md:mx-auto md:px-6">
         {/* Season Episode Reviews Section */}
         {seasonsWithReviews.length > 0 && (
           <div>
