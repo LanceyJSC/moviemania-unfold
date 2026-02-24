@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Tv, Star, Trash2, Pencil, ChevronDown, BookOpen, Flame } from 'lucide-react';
+import { Tv, Star, Trash2, Pencil, ChevronDown, BookOpen, Flame, Heart, Eye, Plus } from 'lucide-react';
+import { useUserStateContext } from '@/contexts/UserStateContext';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,13 @@ export const TVShowCollectionCard = ({
   showWatchedOverlay = false,
 }: TVShowCollectionCardProps) => {
   const { user } = useAuth();
+  const { isLiked, isWatched, isInWatchlist, getRating: getScoreRating } = useUserStateContext();
   const [tmdbRating, setTmdbRating] = useState<number | null>(null);
+
+  const liked = isLiked(tvId);
+  const watched = isWatched(tvId);
+  const onWatchlist = isInWatchlist(tvId);
+  const scoreRating = getScoreRating(tvId);
   const [showTitle, setShowTitle] = useState(title);
   const [showDetailsSheet, setShowDetailsSheet] = useState(false);
   const [seriesRating, setSeriesRating] = useState<number | null>(null);
@@ -247,7 +254,7 @@ export const TVShowCollectionCard = ({
     <>
       <Card className="p-3 sm:p-4 hover:bg-accent/5 transition-colors">
         <div className="flex gap-3 sm:gap-4">
-          <Link to={`/tv/${tvId}`} className="relative shrink-0">
+          <Link to={`/tv/${tvId}`} className="relative shrink-0 group">
             {poster ? (
               <img src={getPosterUrl(poster) || ''} alt={title} width={96} height={144} className="w-[96px] min-w-[96px] h-[144px] min-h-[144px] object-cover rounded-md shadow-sm" />
             ) : (
@@ -255,6 +262,32 @@ export const TVShowCollectionCard = ({
                 <Tv className="h-8 w-8 text-muted-foreground" />
               </div>
             )}
+            {/* Hover overlay */}
+            <div className="absolute inset-0 rounded-md bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
+            {/* Hover badges */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+              {scoreRating > 0 && (
+                <div className="absolute top-1 left-1 bg-black/70 backdrop-blur-sm rounded-full px-1.5 py-0.5 flex items-center gap-0.5">
+                  <Flame className="h-2.5 w-2.5 text-cinema-red fill-current" />
+                  <span className="text-white font-semibold text-[9px]">{scoreRating}/5</span>
+                </div>
+              )}
+              {liked && (
+                <div className="absolute top-1 right-1 bg-black/70 backdrop-blur-sm rounded-full p-0.5">
+                  <Heart className="h-2.5 w-2.5 text-cinema-red fill-cinema-red" />
+                </div>
+              )}
+              {watched && (
+                <div className="absolute bottom-1 left-1 bg-black/70 backdrop-blur-sm rounded-full p-0.5">
+                  <Eye className="h-2.5 w-2.5 text-emerald-400" />
+                </div>
+              )}
+              {onWatchlist && (
+                <div className="absolute bottom-1 right-1 bg-black/70 backdrop-blur-sm rounded-full p-0.5">
+                  <Plus className="h-2.5 w-2.5 text-primary" />
+                </div>
+              )}
+            </div>
           </Link>
           
           <div className="flex-1 min-w-0">
