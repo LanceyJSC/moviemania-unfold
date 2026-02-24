@@ -64,6 +64,19 @@ const Collection = () => {
   const [sortOption, setSortOption] = useState<SortOption>('recent');
   const [ratingFilter, setRatingFilter] = useState<string>('all');
   const [reviewCount, setReviewCount] = useState(0);
+
+  // Eagerly fetch review count so badge shows without clicking the tab
+  useEffect(() => {
+    const fetchReviewCount = async () => {
+      if (!user) return;
+      const { count } = await supabase
+        .from('user_reviews')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      setReviewCount(count || 0);
+    };
+    fetchReviewCount();
+  }, [user]);
   
   // Edit diary entry state
   const [editModalOpen, setEditModalOpen] = useState(false);

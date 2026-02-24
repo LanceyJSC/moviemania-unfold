@@ -38,7 +38,7 @@ interface CollectionPosterGridProps {
 
 export const CollectionPosterGrid = ({ items }: CollectionPosterGridProps) => {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
       {items.map(item => {
         const linkPath = item.mediaType === 'tv' ? `/tv/${item.movieId}` : `/movie/${item.movieId}`;
         return (
@@ -47,7 +47,7 @@ export const CollectionPosterGrid = ({ items }: CollectionPosterGridProps) => {
             to={linkPath}
             className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg block"
           >
-            <div className="w-32 h-48 rounded-lg overflow-hidden bg-muted shadow-sm group-hover:shadow-md transition-shadow relative flex-shrink-0">
+            <div className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-muted shadow-sm group-hover:shadow-md transition-shadow relative">
               {item.poster ? (
                 <img
                   src={getPosterUrl(item.poster) || ''}
