@@ -1,64 +1,47 @@
 
-# Fix Collection Page: Reviews Count, Lists Functionality, and Review Categorization
 
-## Issues Found
+## Group Episode Reviews by Series
 
-1. **Reviews tab has no count badge** - Watchlist, Favorites, and Watched all show counts, but Reviews doesn't
-2. **Lists tab - can't create lists** - The CreateListModal exists and works, but may be blocked by the `canCreateList` check tied to subscription status. Need to verify the subscription hook isn't incorrectly blocking free users who haven't hit the limit yet.
-3. **No way to add movies/shows to lists** - The `AddToListButton` component exists but is NOT used anywhere in the app (not on MovieDetail, TVShowDetail, or any other page). Users literally cannot add items to their lists.
-4. **Reviews tab doesn't separate movie vs TV vs episode reviews** - All reviews are dumped in one flat list with no categorization
+Right now, every episode review shows as a separate row with the same poster repeated. When you review 10+ episodes of "The Rookie," that's 10 identical-looking rows cluttering the list. The fix: **group episode reviews under their parent series** with a collapsible accordion.
 
----
+### How it will look
 
-## Plan
+```text
++--------------------------------------------------+
+| [Poster] The Rookie          3 episode reviews  v |
+|   +----------------------------------------------+
+|   | S6E1 - 🔥🔥🔥  "sdfsadfsda..."   Feb 24    x |
+|   | S1E2 - 🔥🔥    "episode"          Feb 22    x |
+|   +----------------------------------------------+
+| [Poster] The Rookie (series review)              |
+|   🔥🔥  "ddd"                        Feb 22    x |
++--------------------------------------------------+
+```
 
-### 1. Add review count badge to Reviews tab
-- Fetch review count from `user_reviews` table
-- Display count badge next to "Reviews" tab trigger, matching the style of other tabs
+- Series-level and movie reviews stay as flat rows (unchanged)
+- Episode reviews for the same `movie_id` get grouped into a collapsible section
+- The group header shows the series poster, title, and episode count badge
+- Clicking the header expands/collapses the episode list
+- Each episode row inside is compact: just the S#E# tag, flames, review snippet, date, and delete button
+- The "Episodes" filter pill still works, just shows the grouped view
 
-### 2. Add "Add to List" button on movie and TV show detail pages
-- Import and place `AddToListButton` on `MovieDetail.tsx` and `TVShowDetail.tsx` pages alongside the existing watchlist/favorite buttons
-- This is the primary way users add content to lists (just like Letterboxd)
+### Technical details
 
-### 3. Add review type filter tabs inside Reviews tab
-- Add sub-filter pills inside the Reviews tab: **All | Movies | TV Shows**
-- Filter reviews by `media_type` column (`movie` vs `tv`)
-- Show a small badge icon (Film or TV icon) next to each review title so users can tell at a glance
+**File: `src/components/CollectionReviewsList.tsx`**
 
-### 4. Add list count badge to Lists tab
-- Show the number of lists next to the Lists tab trigger
+1. After filtering, partition `filteredReviews` into two buckets:
+   - `standaloneReviews`: movies (`media_type === 'movie'`) and series-level TV reviews (`media_type === 'tv'` with `episode_number == null`)
+   - `episodeReviews`: TV reviews with `episode_number != null`
 
-### 5. Fix CreateListModal if blocked
-- Verify the `canCreateList` logic works for free users with fewer than 3 lists
-- The `useSubscription` hook's `loading` state may cause `canCreateList` to be false during loading, which would disable the create button
+2. Group `episodeReviews` by `movie_id` into a `Map<number, Review[]>`, sorting episodes within each group by season then episode number
 
----
+3. Render standalone reviews as current flat rows (no change)
 
-## Technical Details
+4. For each episode group, render a collapsible section using `@radix-ui/react-collapsible`:
+   - **Trigger**: poster thumbnail, series title, episode count badge, chevron icon
+   - **Content**: compact episode rows with S#E# badge, flames, review text snippet, date, delete button
+   - Groups are interleaved with standalone reviews in chronological order (by most recent review in the group)
 
-### Files to modify:
-- `src/pages/Collection.tsx` - Add review count state, fetch count, add badge to Reviews and Lists tabs, add sub-filter inside Reviews tab
-- `src/components/CollectionReviewsList.tsx` - Accept a `mediaTypeFilter` prop to filter reviews, expose review count
-- `src/pages/MovieDetail.tsx` - Add `AddToListButton` component
-- `src/pages/TVShowDetail.tsx` - Add `AddToListButton` component
-- `src/components/CollectionListsGrid.tsx` - Minor: expose list count for parent
+5. Import `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` from existing `@/components/ui/collapsible` and `ChevronDown` from lucide-react
 
-### Key changes:
-
-**Collection.tsx - Reviews tab with count and filter:**
-- Fetch review count with a lightweight query on mount
-- Add sub-filter state (`reviewFilter: 'all' | 'movie' | 'tv'`)
-- Pass filter to `CollectionReviewsList`
-- Show count badge on tab
-
-**CollectionReviewsList.tsx - Filter support:**
-- Accept `mediaTypeFilter` prop
-- Filter the fetched reviews by media_type
-- Show Film/TV icon badge next to each review title
-- Expose count via callback or internal count display
-
-**MovieDetail.tsx / TVShowDetail.tsx:**
-- Add `AddToListButton` in the action buttons area (next to watchlist, favorite, etc.)
-
-### No database changes needed
-All data and columns already exist.
+No database changes needed. No new dependencies.
