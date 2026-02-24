@@ -92,8 +92,6 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
         ?.filter(item => item.list_type === 'liked')
         .map(item => item.movie_id) || [];
       
-      const watchlist = enhancedData?.map(item => item.movie_id) || [];
-      
       const currentlyWatching = watchlistData
         ?.filter(item => item.list_type === 'currently_watching')
         .map(item => item.movie_id) || [];
@@ -104,6 +102,12 @@ export const UserStateProvider = ({ children }: { children: ReactNode }) => {
       }, {} as Record<number, number>) || {};
 
       const watchedItems = userRatingsData?.map(item => item.movie_id) || [];
+
+      // Filter watchlist to exclude items already marked as watched (prevents desync)
+      const watchedSet = new Set(watchedItems);
+      const watchlist = enhancedData
+        ?.map(item => item.movie_id)
+        .filter(id => !watchedSet.has(id)) || [];
 
       console.log('[UserStateContext] loadUserData - likedMovies:', likedMovies);
       console.log('[UserStateContext] loadUserData - watchlist:', watchlist);
