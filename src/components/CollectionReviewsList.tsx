@@ -129,14 +129,29 @@ const StandaloneReviewRow = ({ review, onDelete }: { review: Review; onDelete: (
   );
 };
 
+const getSeriesName = (title: string) => {
+  // Strip episode suffixes like " - S6E1" or " S1E2"
+  return title.replace(/\s*[-–]\s*S\d+E\d+.*$/i, '').replace(/\s+S\d+E\d+.*$/i, '').trim();
+};
+
 const EpisodeGroupRow = ({ reviews, onDelete }: { reviews: Review[]; onDelete: (id: string) => void }) => {
   const first = reviews[0];
   const posterUrl = getPosterUrl(first.movie_poster);
-  const sorted = [...reviews].sort((a, b) => {
-    const sa = a.season_number ?? 0, sb = b.season_number ?? 0;
-    if (sa !== sb) return sa - sb;
-    return (a.episode_number ?? 0) - (b.episode_number ?? 0);
-  });
+  const seriesName = getSeriesName(first.movie_title);
+
+  // Group by season
+  const seasonMap = new Map<number, Review[]>();
+  for (const r of reviews) {
+    const s = r.season_number ?? 0;
+    const arr = seasonMap.get(s) || [];
+    arr.push(r);
+    seasonMap.set(s, arr);
+  }
+  const seasons = [...seasonMap.entries()].sort((a, b) => a[0] - b[0]);
+  // Sort episodes within each season
+  for (const [, eps] of seasons) {
+    eps.sort((a, b) => (a.episode_number ?? 0) - (b.episode_number ?? 0));
+  }
 
   return (
     <Collapsible>
@@ -156,31 +171,42 @@ const EpisodeGroupRow = ({ reviews, onDelete }: { reviews: Review[]; onDelete: (
           <div className="flex-1 min-w-0 text-left">
             <div className="flex items-center gap-1.5">
               <Tv className="h-3 w-3 text-muted-foreground shrink-0" />
-              <p className="text-sm font-medium text-foreground truncate">{first.movie_title}</p>
+              <p className="text-sm font-medium text-foreground truncate">{seriesName}</p>
             </div>
             <span className="text-[11px] text-muted-foreground mt-0.5 inline-block">
-              {reviews.length} episode review{reviews.length !== 1 ? 's' : ''}
+              {reviews.length} episode review{reviews.length !== 1 ? 's' : ''} · {seasons.length} season{seasons.length !== 1 ? 's' : ''}
             </span>
           </div>
           <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="border-t border-border divide-y divide-border">
-            {sorted.map(review => (
-              <div key={review.id} className="flex items-center gap-2 px-3 py-2 pl-[72px]">
-                <span className="text-[10px] text-muted-foreground shrink-0 bg-muted px-1.5 py-0.5 rounded font-medium">
-                  S{review.season_number}E{review.episode_number}
-                </span>
-                <div className="flex-1 min-w-0">
-                  {review.rating != null && review.rating > 0 && <FlameRating rating={review.rating} />}
-                  {review.review_text && (
-                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{review.review_text}</p>
-                  )}
+          <div className="border-t border-border">
+            {seasons.map(([seasonNum, eps]) => (
+              <div key={seasonNum}>
+                <div className="px-3 py-1.5 pl-[72px] bg-muted/30">
+                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    Season {seasonNum}
+                  </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground/70 shrink-0">
-                  {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </p>
-                <DeleteReviewButton review={review} onDelete={onDelete} />
+                <div className="divide-y divide-border">
+                  {eps.map(review => (
+                    <div key={review.id} className="flex items-center gap-2 px-3 py-2 pl-[84px]">
+                      <span className="text-[10px] text-muted-foreground shrink-0 bg-muted px-1.5 py-0.5 rounded font-medium">
+                        E{review.episode_number}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        {review.rating != null && review.rating > 0 && <FlameRating rating={review.rating} />}
+                        {review.review_text && (
+                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{review.review_text}</p>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/70 shrink-0">
+                        {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </p>
+                      <DeleteReviewButton review={review} onDelete={onDelete} />
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
