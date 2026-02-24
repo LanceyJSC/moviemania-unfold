@@ -340,7 +340,14 @@ export const CollectionReviewsList = ({ onCountChange, viewMode = 'list' }: Coll
             </p>
           </Card>
         ) : (
-          <CollectionPosterGrid items={gridItems} />
+          <>
+            <CollectionPosterGrid items={gridItems} />
+            {gridItems.length < filteredReviews.length && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                {gridItems.length} {gridItems.length === 1 ? 'title' : 'titles'} · {filteredReviews.length} {filteredReviews.length === 1 ? 'review' : 'reviews'} total
+              </p>
+            )}
+          </>
         )
       ) : (
         <>
