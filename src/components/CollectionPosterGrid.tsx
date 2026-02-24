@@ -74,12 +74,6 @@ export const CollectionPosterGrid = ({ items }: CollectionPosterGridProps) => {
                   <Heart className="h-4 w-4 fill-cinema-red text-cinema-red drop-shadow" />
                 </div>
               )}
-              {/* Rewatch indicator */}
-              {item.isRewatch && (
-                <div className="absolute top-1.5 right-1.5 bg-black/50 rounded-full p-0.5">
-                  <RotateCcw className="h-3 w-3 text-white" />
-                </div>
-              )}
             </div>
             {/* Flame rating below poster */}
             <div className="mt-1 flex items-center gap-0.5 min-h-[18px]">
