@@ -217,7 +217,7 @@ const TVShowReviews = () => {
               {seasonsWithReviews.map(([seasonNum, count]) => {
                 const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
                 const seasonPoster = season?.poster_path
-                  ? tmdbService.getPosterUrl(season.poster_path, 'w300')
+                  ? tmdbService.getPosterUrl(season.poster_path, 'w500')
                   : null;
 
                 return (

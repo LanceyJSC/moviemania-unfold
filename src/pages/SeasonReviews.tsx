@@ -94,9 +94,9 @@ const SeasonReviews = () => {
     );
   }
 
-  const season = tvShow.seasons?.find(s => s.season_number === seasonNum);
-  const seasonPosterUrl = season?.poster_path
-    ? tmdbService.getPosterUrl(season.poster_path, 'w500')
+  
+  const seasonPosterUrl = seasonData.poster_path
+    ? tmdbService.getPosterUrl(seasonData.poster_path, 'w500')
     : tmdbService.getPosterUrl(tvShow.poster_path, 'w500');
   const backdropUrl = tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
 
