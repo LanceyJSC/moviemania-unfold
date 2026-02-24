@@ -95,10 +95,21 @@ const SeasonReviews = () => {
   }
 
   
-  const seasonPosterUrl = seasonData.poster_path
-    ? tmdbService.getPosterUrl(seasonData.poster_path, 'w500')
-    : tmdbService.getPosterUrl(tvShow.poster_path, 'w500');
-  const backdropUrl = tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
+  const seasonPosterUrl = tmdbService.getPosterUrl(seasonData.poster_path, 'w500');
+  
+  const getSeasonBackdrop = () => {
+    if (seasonData.backdrop_path) {
+      return tmdbService.getBackdropUrl(seasonData.backdrop_path, 'original');
+    }
+    if (tvShow.images?.backdrops && tvShow.images.backdrops.length > 0) {
+      const sortedBackdrops = tvShow.images.backdrops
+        .sort((a: any, b: any) => b.vote_average - a.vote_average);
+      const backdropIndex = (seasonNum - 1) % sortedBackdrops.length;
+      return tmdbService.getBackdropUrl(sortedBackdrops[backdropIndex].file_path, 'original');
+    }
+    return tmdbService.getBackdropUrl(tvShow.backdrop_path, 'original');
+  };
+  const backdropUrl = getSeasonBackdrop();
 
   const episodes = seasonData.episodes || [];
   // Only show episodes that have reviews
