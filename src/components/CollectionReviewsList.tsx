@@ -51,7 +51,7 @@ interface CollectionReviewsListProps {
 
 type RenderItem =
   | { type: 'standalone'; review: Review; sortDate: string }
-  | { type: 'episode-group'; movieId: number; reviews: Review[]; sortDate: string };
+  | { type: 'tv-group'; movieId: number; seriesReview: Review | null; episodeReviews: Review[]; sortDate: string };
 
 const getPosterUrl = (poster: string | null) => {
   if (!poster) return null;
@@ -134,60 +134,86 @@ const getSeriesName = (title: string) => {
   return title.replace(/\s*[-–]\s*S\d+E\d+.*$/i, '').replace(/\s+S\d+E\d+.*$/i, '').trim();
 };
 
-const EpisodeGroupRow = ({ reviews, onDelete }: { reviews: Review[]; onDelete: (id: string) => void }) => {
-  const first = reviews[0];
-  const posterUrl = getPosterUrl(first.movie_poster);
-  const seriesName = getSeriesName(first.movie_title);
+const TVGroupRow = ({ seriesReview, episodeReviews, onDelete }: { seriesReview: Review | null; episodeReviews: Review[]; onDelete: (id: string) => void }) => {
+  const representative = seriesReview || episodeReviews[0];
+  if (!representative) return null;
+  const posterUrl = getPosterUrl(representative.movie_poster);
+  const seriesName = getSeriesName(representative.movie_title);
 
-  // Group by season
+  // Group episodes by season
   const seasonMap = new Map<number, Review[]>();
-  for (const r of reviews) {
+  for (const r of episodeReviews) {
     const s = r.season_number ?? 0;
     const arr = seasonMap.get(s) || [];
     arr.push(r);
     seasonMap.set(s, arr);
   }
   const seasons = [...seasonMap.entries()].sort((a, b) => a[0] - b[0]);
-  // Sort episodes within each season
   for (const [, eps] of seasons) {
     eps.sort((a, b) => (a.episode_number ?? 0) - (b.episode_number ?? 0));
   }
 
+  const hasEpisodes = episodeReviews.length > 0;
+
   return (
-    <Collapsible>
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
-        <CollapsibleTrigger className="w-full flex items-center gap-3 p-3 hover:bg-accent/5 transition-colors cursor-pointer group">
-          <Link to={`/tv/${first.movie_id}/reviews`} className="shrink-0" onClick={e => e.stopPropagation()}>
-            <div className="w-12 h-[72px] rounded overflow-hidden bg-muted">
-              {posterUrl ? (
-                <img src={posterUrl} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Tv className="h-4 w-4 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          </Link>
-          <div className="flex-1 min-w-0 text-left">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      {/* Series header with poster */}
+      <div className="flex gap-3 p-3">
+        <Link to={`/tv/${representative.movie_id}/reviews`} className="shrink-0">
+          <div className="w-12 h-[72px] rounded overflow-hidden bg-muted">
+            {posterUrl ? (
+              <img src={posterUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Tv className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        </Link>
+        <div className="flex-1 min-w-0">
+          <Link to={`/tv/${representative.movie_id}/reviews`} className="hover:underline">
             <div className="flex items-center gap-1.5">
               <Tv className="h-3 w-3 text-muted-foreground shrink-0" />
               <p className="text-sm font-medium text-foreground truncate">{seriesName}</p>
             </div>
+          </Link>
+          {/* Series-level review inline */}
+          {seriesReview && (
+            <div className="mt-1">
+              {seriesReview.rating != null && seriesReview.rating > 0 && (
+                <FlameRating rating={seriesReview.rating} />
+              )}
+              {seriesReview.review_text && (
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{seriesReview.review_text}</p>
+              )}
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                {new Date(seriesReview.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+          )}
+          {!seriesReview && hasEpisodes && (
             <span className="text-[11px] text-muted-foreground mt-0.5 inline-block">
-              {reviews.length} episode review{reviews.length !== 1 ? 's' : ''} · {seasons.length} season{seasons.length !== 1 ? 's' : ''}
+              {episodeReviews.length} episode review{episodeReviews.length !== 1 ? 's' : ''}
             </span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="border-t border-border">
-            {seasons.map(([seasonNum, eps]) => (
-              <div key={seasonNum}>
-                <div className="px-3 py-1.5 pl-[72px] bg-muted/30">
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                    Season {seasonNum}
-                  </span>
-                </div>
+          )}
+        </div>
+        <div className="shrink-0 flex flex-col gap-1">
+          {seriesReview && <DeleteReviewButton review={seriesReview} onDelete={onDelete} />}
+        </div>
+      </div>
+
+      {/* Seasons dropdown */}
+      {hasEpisodes && (
+        <div className="border-t border-border">
+          {seasons.map(([seasonNum, eps]) => (
+            <Collapsible key={seasonNum}>
+              <CollapsibleTrigger className="w-full flex items-center gap-2 px-3 py-2 pl-[72px] hover:bg-accent/5 transition-colors cursor-pointer group">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide flex-1 text-left">
+                  Season {seasonNum} · {eps.length} ep{eps.length !== 1 ? 's' : ''}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
                 <div className="divide-y divide-border">
                   {eps.map(review => (
                     <div key={review.id} className="flex items-center gap-2 px-3 py-2 pl-[84px]">
@@ -207,12 +233,12 @@ const EpisodeGroupRow = ({ reviews, onDelete }: { reviews: Review[]; onDelete: (
                     </div>
                   ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
+              </CollapsibleContent>
+            </Collapsible>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -301,14 +327,41 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
     episodeGroups.set(r.movie_id, arr);
   }
 
-  // Build unified render list sorted by most recent date
-  const renderItems: RenderItem[] = [];
+  // Merge series-level TV reviews with their episode groups
+  const tvGroups = new Map<number, { seriesReview: Review | null; episodeReviews: Review[] }>();
+  
+  // First add episode groups
+  for (const [movieId, group] of episodeGroups) {
+    tvGroups.set(movieId, { seriesReview: null, episodeReviews: group });
+  }
+  
+  // Then merge series-level TV reviews
+  const movieStandaloneReviews: Review[] = [];
   for (const review of standaloneReviews) {
+    if (review.media_type === 'tv') {
+      const existing = tvGroups.get(review.movie_id);
+      if (existing) {
+        existing.seriesReview = review;
+      } else {
+        tvGroups.set(review.movie_id, { seriesReview: review, episodeReviews: [] });
+      }
+    } else {
+      movieStandaloneReviews.push(review);
+    }
+  }
+
+  // Build unified render list
+  const renderItems: RenderItem[] = [];
+  for (const review of movieStandaloneReviews) {
     renderItems.push({ type: 'standalone', review, sortDate: review.created_at });
   }
-  for (const [movieId, group] of episodeGroups) {
-    const mostRecent = group.reduce((a, b) => (a.created_at > b.created_at ? a : b));
-    renderItems.push({ type: 'episode-group', movieId, reviews: group, sortDate: mostRecent.created_at });
+  for (const [movieId, group] of tvGroups) {
+    const allDates = [
+      ...(group.seriesReview ? [group.seriesReview.created_at] : []),
+      ...group.episodeReviews.map(r => r.created_at),
+    ];
+    const mostRecent = allDates.reduce((a, b) => (a > b ? a : b));
+    renderItems.push({ type: 'tv-group', movieId, seriesReview: group.seriesReview, episodeReviews: group.episodeReviews, sortDate: mostRecent });
   }
   renderItems.sort((a, b) => b.sortDate.localeCompare(a.sortDate));
 
@@ -330,7 +383,7 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
         item.type === 'standalone' ? (
           <StandaloneReviewRow key={item.review.id} review={item.review} onDelete={deleteReview} />
         ) : (
-          <EpisodeGroupRow key={`group-${item.movieId}`} reviews={item.reviews} onDelete={deleteReview} />
+          <TVGroupRow key={`tv-${item.movieId}`} seriesReview={item.seriesReview} episodeReviews={item.episodeReviews} onDelete={deleteReview} />
         )
       )}
     </div>
