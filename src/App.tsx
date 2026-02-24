@@ -45,6 +45,9 @@ import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
 import News from "./pages/News";
 import NewsArticle from "./pages/NewsArticle";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import { CookieConsent } from "@/components/CookieConsent";
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -113,10 +116,13 @@ const App = () => {
                             <Route path="/news" element={<News />} />
                             <Route path="/news/:slug" element={<NewsArticle />} />
                             <Route path="/auth" element={<Auth />} />
+                            <Route path="/terms" element={<Terms />} />
+                            <Route path="/privacy" element={<Privacy />} />
                             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </BrowserRouter>
+                        <CookieConsent />
                       </div>
                     </TrailerProvider>
                   </UserStateProvider>
