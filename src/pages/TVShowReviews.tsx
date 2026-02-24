@@ -142,11 +142,11 @@ const TVShowReviews = () => {
   };
 
 
-  // Merge seasons from reviews and diary data
+  // Merge seasons from reviews and diary data - only include seasons with rated episodes
   const allSeasonNumbers = new Set<number>();
   for (const [s] of seasonReviewCounts) allSeasonNumbers.add(s);
   tvDiary
-    .filter(entry => entry.tv_id === tvId && entry.season_number !== null && entry.season_number > 0)
+    .filter(entry => entry.tv_id === tvId && entry.season_number !== null && entry.season_number > 0 && entry.rating !== null)
     .forEach(entry => allSeasonNumbers.add(entry.season_number!));
   const allSeasonsWithData = [...allSeasonNumbers].sort((a, b) => a - b);
 
