@@ -311,13 +311,15 @@ export const CollectionReviewsList = ({ onCountChange, viewMode = 'list' }: Coll
     for (const review of filteredReviews) {
       if (seen.has(review.movie_id)) continue;
       seen.add(review.movie_id);
+      const mediaType = (review.media_type === 'tv' ? 'tv' : 'movie') as 'movie' | 'tv';
       items.push({
         id: review.id,
         movieId: review.movie_id,
         title: review.movie_title.replace(/\s*[-–]\s*S\d+E\d+.*$/i, '').replace(/\s+S\d+E\d+.*$/i, '').trim(),
         poster: review.movie_poster,
-        mediaType: (review.media_type === 'tv' ? 'tv' : 'movie') as 'movie' | 'tv',
+        mediaType,
         userRating: review.rating,
+        linkPath: `/${mediaType === 'tv' ? 'tv' : 'movie'}/${review.movie_id}/reviews`,
       });
     }
     return items;

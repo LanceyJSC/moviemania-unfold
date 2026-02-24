@@ -30,6 +30,7 @@ export interface PosterGridItem {
   onEdit?: () => void;
   isLiked?: boolean;
   isRewatch?: boolean;
+  linkPath?: string;
 }
 
 interface CollectionPosterGridProps {
@@ -40,7 +41,7 @@ export const CollectionPosterGrid = ({ items }: CollectionPosterGridProps) => {
   return (
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
       {items.map(item => {
-        const linkPath = item.mediaType === 'tv' ? `/tv/${item.movieId}` : `/movie/${item.movieId}`;
+        const linkPath = item.linkPath || (item.mediaType === 'tv' ? `/tv/${item.movieId}` : `/movie/${item.movieId}`);
         return (
           <Link
             key={item.id}
