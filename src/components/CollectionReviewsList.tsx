@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { MobileFilterPills } from '@/components/MobileFilterPills';
+import { CollectionPosterGrid, PosterGridItem } from '@/components/CollectionPosterGrid';
 
 import {
   AlertDialog,
@@ -47,6 +48,7 @@ interface Review {
 
 interface CollectionReviewsListProps {
   onCountChange?: (count: number) => void;
+  viewMode?: 'grid' | 'list';
 }
 
 type RenderItem =
@@ -179,7 +181,7 @@ const TVGroupRow = ({ seriesReview, episodeReviews, onDelete }: { seriesReview: 
   );
 };
 
-export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListProps) => {
+export const CollectionReviewsList = ({ onCountChange, viewMode = 'list' }: CollectionReviewsListProps) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,8 +226,8 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-lg" />)}
+      <div className={viewMode === 'grid' ? 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2' : 'space-y-3'}>
+        {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className={viewMode === 'grid' ? 'aspect-[2/3] w-full rounded-lg' : 'h-24 w-full rounded-lg'} />)}
       </div>
     );
   }
@@ -302,6 +304,25 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
   }
   renderItems.sort((a, b) => b.sortDate.localeCompare(a.sortDate));
 
+  // Build poster grid items for grid view - deduplicate by movie_id
+  const gridItems: PosterGridItem[] = (() => {
+    const seen = new Set<number>();
+    const items: PosterGridItem[] = [];
+    for (const review of filteredReviews) {
+      if (seen.has(review.movie_id)) continue;
+      seen.add(review.movie_id);
+      items.push({
+        id: review.id,
+        movieId: review.movie_id,
+        title: review.movie_title.replace(/\s*[-–]\s*S\d+E\d+.*$/i, '').replace(/\s+S\d+E\d+.*$/i, '').trim(),
+        poster: review.movie_poster,
+        mediaType: (review.media_type === 'tv' ? 'tv' : 'movie') as 'movie' | 'tv',
+        userRating: review.rating,
+      });
+    }
+    return items;
+  })();
+
   return (
     <div className="space-y-3">
       <MobileFilterPills
@@ -309,19 +330,33 @@ export const CollectionReviewsList = ({ onCountChange }: CollectionReviewsListPr
         selectedValue={mediaTypeFilter}
         onSelect={setMediaTypeFilter}
       />
-      {renderItems.length === 0 && reviews.length > 0 ? (
-        <Card className="p-6 text-center border-dashed">
-          <p className="text-sm text-muted-foreground">
-            No {mediaTypeFilter === 'movie' ? 'movie' : mediaTypeFilter === 'episode' ? 'episode' : 'TV show'} reviews yet
-          </p>
-        </Card>
-      ) : null}
-      {renderItems.map(item =>
-        item.type === 'standalone' ? (
-          <StandaloneReviewRow key={item.review.id} review={item.review} onDelete={deleteReview} />
+      {viewMode === 'grid' ? (
+        gridItems.length === 0 && reviews.length > 0 ? (
+          <Card className="p-6 text-center border-dashed">
+            <p className="text-sm text-muted-foreground">
+              No {mediaTypeFilter === 'movie' ? 'movie' : mediaTypeFilter === 'episode' ? 'episode' : 'TV show'} reviews yet
+            </p>
+          </Card>
         ) : (
-          <TVGroupRow key={`tv-${item.movieId}`} seriesReview={item.seriesReview} episodeReviews={item.episodeReviews} onDelete={deleteReview} />
+          <CollectionPosterGrid items={gridItems} />
         )
+      ) : (
+        <>
+          {renderItems.length === 0 && reviews.length > 0 ? (
+            <Card className="p-6 text-center border-dashed">
+              <p className="text-sm text-muted-foreground">
+                No {mediaTypeFilter === 'movie' ? 'movie' : mediaTypeFilter === 'episode' ? 'episode' : 'TV show'} reviews yet
+              </p>
+            </Card>
+          ) : null}
+          {renderItems.map(item =>
+            item.type === 'standalone' ? (
+              <StandaloneReviewRow key={item.review.id} review={item.review} onDelete={deleteReview} />
+            ) : (
+              <TVGroupRow key={`tv-${item.movieId}`} seriesReview={item.seriesReview} episodeReviews={item.episodeReviews} onDelete={deleteReview} />
+            )
+          )}
+        </>
       )}
     </div>
   );
