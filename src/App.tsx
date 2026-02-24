@@ -18,6 +18,7 @@ import TVShowDetail from "./pages/TVShowDetail";
 import SeasonDetail from "./pages/SeasonDetail";
 import EpisodeDetail from "./pages/EpisodeDetail";
 import TVShowReviews from "./pages/TVShowReviews";
+import SeasonReviews from "./pages/SeasonReviews";
 import MovieReviews from "./pages/MovieReviews";
 import ActorDetail from "./pages/ActorDetail";
 import CategoryPage from "./pages/CategoryPage";
@@ -85,6 +86,7 @@ const App = () => {
                             <Route path="/movie/:id/cast" element={<CastCrew />} />
                             <Route path="/movie/:id" element={<MovieDetail />} />
                             <Route path="/tv/:id/reviews" element={<TVShowReviews />} />
+                            <Route path="/tv/:id/season/:seasonNumber/reviews" element={<SeasonReviews />} />
                             <Route path="/tv/:id/cast" element={<CastCrew />} />
                             <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
                             <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
