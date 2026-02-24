@@ -306,17 +306,6 @@ const TVShowDetail = () => {
           <Button 
             variant="outline" 
             className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
-              isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
-            }`}
-            onClick={() => requireAuth(() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv'))}
-          >
-            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowLiked ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Like</span>
-          </Button>
-
-          <Button 
-            variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
             }`}
             onClick={() => requireAuth(() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv'))}
@@ -328,12 +317,23 @@ const TVShowDetail = () => {
           <Button 
             variant="outline" 
             className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+              isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
+            }`}
+            onClick={() => requireAuth(() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv'))}
+          >
+            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowLiked ? 'fill-current' : ''}`} />
+            <span className="text-[10px] 2xl:text-xs">Favorites</span>
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''
             }`}
             onClick={() => requireAuth(() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv'))}
           >
             <Eye className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowWatched ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Seen</span>
+            <span className="text-[10px] 2xl:text-xs">Watched</span>
           </Button>
 
           <Button 
