@@ -1,5 +1,5 @@
 
-import { X, Maximize, Minimize } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useTrailerContext } from "@/contexts/TrailerContext";
@@ -13,119 +13,11 @@ interface TrailerModalProps {
 
 export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: TrailerModalProps) => {
   const [videoError, setVideoError] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLandscapeMobile, setIsLandscapeMobile] = useState(false);
   const { setIsTrailerOpen } = useTrailerContext();
 
   const handleClose = () => {
-    if (isFullscreen) {
-      exitFullscreen();
-    }
-    // Restore navigation bar when closing
-    const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
-    if (navigation) {
-      navigation.style.display = 'block';
-    }
     setIsTrailerOpen(false);
     onClose();
-  };
-
-  const enterFullscreen = async () => {
-    try {
-      console.log('Entering fullscreen...');
-      
-      // Force immediate fullscreen state
-      setIsFullscreen(true);
-      
-      // Direct fullscreen API call on the document element
-      const element = document.documentElement;
-      
-      if (element.requestFullscreen) {
-        await element.requestFullscreen({ navigationUI: "hide" });
-      } else if ((element as any).webkitRequestFullscreen) {
-        await (element as any).webkitRequestFullscreen();
-      } else if ((element as any).webkitRequestFullScreen) {
-        await (element as any).webkitRequestFullScreen();
-      } else if ((element as any).mozRequestFullScreen) {
-        await (element as any).mozRequestFullScreen();
-      } else if ((element as any).msRequestFullscreen) {
-        await (element as any).msRequestFullscreen();
-      }
-      
-      console.log('Fullscreen API called');
-      
-    } catch (error) {
-      console.error('Fullscreen failed:', error);
-      setIsFullscreen(true); // Still set state for styling
-    }
-  };
-
-  const exitFullscreen = async () => {
-    try {
-      if (document.exitFullscreen) {
-        await document.exitFullscreen();
-      } else if ((document as any).webkitExitFullscreen) {
-        await (document as any).webkitExitFullscreen();
-      } else if ((document as any).webkitCancelFullScreen) {
-        await (document as any).webkitCancelFullScreen();
-      } else if ((document as any).mozCancelFullScreen) {
-        await (document as any).mozCancelFullScreen();
-      } else if ((document as any).msExitFullscreen) {
-        await (document as any).msExitFullscreen();
-      }
-      
-      // Restore all modified styles completely
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      document.body.style.height = '';
-      document.documentElement.style.height = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.bottom = '';
-      document.body.style.width = '';
-      document.documentElement.style.width = '';
-      document.body.style.margin = '';
-      document.body.style.padding = '';
-      document.documentElement.style.margin = '';
-      document.documentElement.style.padding = '';
-      
-      // Restore viewport meta tag
-      const viewport = document.querySelector('meta[name="viewport"]');
-      if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
-      }
-      
-      setIsFullscreen(false);
-    } catch (error) {
-      console.error('Failed to exit fullscreen:', error);
-      // Still restore styles even if fullscreen API failed
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      document.body.style.height = '';
-      document.documentElement.style.height = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.bottom = '';
-      document.body.style.width = '';
-      document.documentElement.style.width = '';
-      document.body.style.margin = '';
-      document.body.style.padding = '';
-      document.documentElement.style.margin = '';
-      document.documentElement.style.padding = '';
-      setIsFullscreen(false);
-    }
-  };
-
-  const toggleFullscreen = () => {
-    if (isFullscreen) {
-      exitFullscreen();
-    } else {
-      enterFullscreen();
-    }
   };
 
   useEffect(() => {
@@ -140,183 +32,69 @@ export const TrailerModal = ({ isOpen, onClose, trailerKey, movieTitle }: Traile
     };
   }, [isOpen]);
 
-  // Handle orientation change for mobile devices
+  // Close on ESC
   useEffect(() => {
-  const handleOrientationChange = () => {
-    const isLandscape = window.innerHeight < window.innerWidth;
-    const isMobile = window.innerWidth <= 768;
-    const landscapeMobile = isLandscape && isMobile;
-    
-    setIsLandscapeMobile(landscapeMobile);
-    
-    if (landscapeMobile && isOpen) {
-      // Immediately set fullscreen state for UI hiding
-      setIsFullscreen(true);
-      // Auto-enter fullscreen in landscape on mobile
-      setTimeout(() => enterFullscreen(), 100);
-      // Hide navigation bar in landscape
-      const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
-      if (navigation) {
-        navigation.style.display = 'none';
-      }
-    } else if (!landscapeMobile && isOpen) {
-      // Show navigation bar in portrait
-      const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
-      if (navigation) {
-        navigation.style.display = 'block';
-      }
-      // Exit fullscreen in portrait if currently fullscreen
-      if (isFullscreen) {
-        setTimeout(() => exitFullscreen(), 100);
-      }
-    }
-  };
-
-    // Initial check
-    handleOrientationChange();
-
-    // Also check immediately when modal opens
-    if (isOpen) {
-      handleOrientationChange();
-    }
-
-    window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
-
-    return () => {
-      window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleOrientationChange);
-      // Restore navigation bar when component unmounts
-      const navigation = document.querySelector('nav[class*="fixed bottom-0"]') as HTMLElement;
-      if (navigation) {
-        navigation.style.display = 'block';
-      }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
     };
-  }, [isOpen, isFullscreen]);
-
-  // Handle fullscreen state changes - enhanced detection
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      const isCurrentlyFullscreen = !!(
-        document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).webkitCurrentFullScreenElement ||
-        (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement
-      );
-      
-      console.log('Fullscreen state changed:', isCurrentlyFullscreen);
-      setIsFullscreen(isCurrentlyFullscreen);
-      
-      // If we exited fullscreen but modal is still open, try to re-enter
-      if (!isCurrentlyFullscreen && isOpen) {
-        const isLandscape = window.innerHeight < window.innerWidth;
-        const isMobile = window.innerWidth <= 768;
-        if (isLandscape && isMobile) {
-          setTimeout(() => enterFullscreen(), 100);
-        }
-      }
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('msfullscreenchange', handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
-    };
+    if (isOpen) window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleVideoError = () => {
-    setVideoError(true);
-  };
-
   const youtubeEmbedUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=1&showinfo=0`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-cinema-black/95 backdrop-blur-sm">
-      {/* Close Button - Always visible, positioned below safe area */}
-      <button
-        onClick={handleClose}
-        className="fixed z-[9999] top-16 right-4 flex items-center justify-center w-14 h-14 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-2xl touch-manipulation active:scale-95 transition-transform"
-        style={{ WebkitTapHighlightColor: 'transparent' }}
-        aria-label="Close trailer"
-      >
-        <X className="h-8 w-8" strokeWidth={3} />
-      </button>
+    <div className="fixed inset-0 z-[9999] bg-background/95 backdrop-blur-sm flex flex-col">
+      {/* Header bar */}
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)' }}>
+        <h2 className="text-sm md:text-lg font-semibold text-foreground truncate pr-4">
+          {movieTitle}
+        </h2>
+        <button
+          onClick={handleClose}
+          className="flex items-center justify-center w-10 h-10 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full touch-manipulation active:scale-95 transition-transform flex-shrink-0"
+          aria-label="Close trailer"
+        >
+          <X className="h-5 w-5" strokeWidth={3} />
+        </button>
+      </div>
 
-      <div className={`relative h-full flex flex-col ${isLandscapeMobile ? 'landscape-mobile' : ''}`}>
-        {/* Video Container - Full screen in landscape mobile */}
-        <div className={`${isFullscreen ? 'fixed inset-0 z-40' : 'flex-1 flex items-center justify-center p-4'}`}>
-          <div className={`${isFullscreen ? 'w-screen h-screen' : 'w-full max-w-4xl aspect-video'} bg-cinema-charcoal ${isFullscreen ? '' : 'rounded-lg'} overflow-hidden`}>
-            {videoError ? (
-              <div className="w-full h-full flex items-center justify-center text-center">
-                <div>
-                  <p className="text-muted-foreground mb-4">Unable to load trailer</p>
-                  <Button 
-                    onClick={() => window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank')}
-                    className="bg-cinema-red hover:bg-cinema-red/90"
-                  >
-                    Open in YouTube
-                  </Button>
-                </div>
+      {/* Video container - fills remaining space */}
+      <div className="flex-1 flex items-center justify-center px-2 pb-2 md:px-8 md:pb-8 min-h-0">
+        <div className="w-full h-full max-w-6xl max-h-full aspect-video bg-card rounded-lg overflow-hidden">
+          {videoError ? (
+            <div className="w-full h-full flex items-center justify-center text-center">
+              <div>
+                <p className="text-muted-foreground mb-4">Unable to load trailer</p>
+                <Button 
+                  onClick={() => window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank')}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  Open in YouTube
+                </Button>
               </div>
-            ) : (
-              <iframe
-                src={youtubeEmbedUrl}
-                title={`${movieTitle} Trailer`}
-                className="w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
-                onError={handleVideoError}
-              />
-            )}
-          </div>
-        </div>
-
-      {/* Header - Hidden in landscape mobile */}
-      {!isLandscapeMobile && (
-        <div className="absolute top-0 left-0 right-16 z-10 flex items-center p-4 bg-gradient-to-r from-cinema-charcoal/80 via-cinema-charcoal/60 to-transparent backdrop-blur-sm">
-          <h2 className="text-lg font-semibold text-foreground truncate pr-4">
-            {movieTitle} - Trailer
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleFullscreen}
-            className="text-muted-foreground hover:text-foreground p-2 md:flex hidden ml-auto"
-          >
-            {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-          </Button>
-        </div>
-      )}
-
-        {/* Hints - Only show in portrait */}
-        {!isLandscapeMobile && (
-          <>
-            {/* Mobile hint */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-center md:hidden">
-              <p className="text-sm text-muted-foreground">
-                Rotate your device for fullscreen experience
-              </p>
             </div>
+          ) : (
+            <iframe
+              src={youtubeEmbedUrl}
+              title={`${movieTitle} Trailer`}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowFullScreen
+              onError={() => setVideoError(true)}
+            />
+          )}
+        </div>
+      </div>
 
-            {/* Desktop close hint */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-center hidden md:block">
-              <p className="text-sm text-muted-foreground">
-                Press ESC or click X to close
-              </p>
-            </div>
-          </>
-        )}
-
+      {/* Bottom hint */}
+      <div className="text-center pb-2 md:pb-4 flex-shrink-0" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
+        <p className="text-xs text-muted-foreground">
+          Use the YouTube fullscreen button for full experience • ESC to close
+        </p>
       </div>
     </div>
   );
