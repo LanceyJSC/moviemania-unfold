@@ -194,7 +194,7 @@ const MovieReviews = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
       <DesktopHeader />
       <MobileHeader title={title} />
       
@@ -237,7 +237,7 @@ const MovieReviews = () => {
       </div>
 
       {/* Action Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 2xl:py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
         {/* Watch Trailer */}
         <div className="mb-3">
           {trailerKey ? (
@@ -252,24 +252,24 @@ const MovieReviews = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-6 gap-1.5 mb-4 2xl:mb-6">
-          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''}`} onClick={() => requireAuth(() => toggleWatchlist(movieId, title, posterUrl))}>
-            <Plus className="h-4 w-4 2xl:h-5 2xl:w-5" /><span className="text-[10px] 2xl:text-xs">Watchlist</span>
+        <div className="grid grid-cols-6 gap-1.5 mb-4 md:mb-6">
+          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''}`} onClick={() => requireAuth(() => toggleWatchlist(movieId, title, posterUrl))}>
+            <Plus className="h-4 w-4 md:h-5 md:w-5" /><span className="text-[10px] md:text-xs">Watchlist</span>
           </Button>
-          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''}`} onClick={() => requireAuth(() => toggleLike(movieId, title, posterUrl))}>
-            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isMovieLiked ? 'fill-current' : ''}`} /><span className="text-[10px] 2xl:text-xs">Favorites</span>
+          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''}`} onClick={() => requireAuth(() => toggleLike(movieId, title, posterUrl))}>
+            <Heart className={`h-4 w-4 md:h-5 md:w-5 ${isMovieLiked ? 'fill-current' : ''}`} /><span className="text-[10px] md:text-xs">Favorites</span>
           </Button>
-          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${isMovieWatched ? 'bg-green-600 border-green-600 text-white' : ''}`} onClick={() => requireAuth(() => markAsWatched(movieId, title, posterUrl))}>
-            <Eye className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isMovieWatched ? 'fill-current' : ''}`} /><span className="text-[10px] 2xl:text-xs">Watched</span>
+          <Button variant="outline" className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${isMovieWatched ? 'bg-green-600 border-green-600 text-white' : ''}`} onClick={() => requireAuth(() => markAsWatched(movieId, title, posterUrl))}>
+            <Eye className={`h-4 w-4 md:h-5 md:w-5 ${isMovieWatched ? 'fill-current' : ''}`} /><span className="text-[10px] md:text-xs">Watched</span>
           </Button>
-          <Button variant="outline" className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation" onClick={() => requireAuth(() => setShowLogModal(true))}>
-            <BookOpen className="h-4 w-4 2xl:h-5 2xl:w-5" /><span className="text-[10px] 2xl:text-xs">Log</span>
+          <Button variant="outline" className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation" onClick={() => requireAuth(() => setShowLogModal(true))}>
+            <BookOpen className="h-4 w-4 md:h-5 md:w-5" /><span className="text-[10px] md:text-xs">Log</span>
           </Button>
-          <Button variant="outline" className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation bg-primary/10 border-primary/30" disabled>
-            <MessageCircle className="h-4 w-4 2xl:h-5 2xl:w-5" /><span className="text-[10px] 2xl:text-xs">Reviews</span>
+          <Button variant="outline" className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation bg-primary/10 border-primary/30" disabled>
+            <MessageCircle className="h-4 w-4 md:h-5 md:w-5" /><span className="text-[10px] md:text-xs">Reviews</span>
           </Button>
           {user && (
-            <AddToListButton movie={{ id: movieId, title, poster: movie.poster_path || undefined }} variant="outline" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation" />
+            <AddToListButton movie={{ id: movieId, title, poster: movie.poster_path || undefined }} variant="outline" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation" />
           )}
         </div>
 

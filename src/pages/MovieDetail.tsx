@@ -160,7 +160,7 @@ const MovieDetail = () => {
     : `${title} (${releaseYear}) - Watch trailers, read reviews, and track on SceneBurn.`;
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
       <SEOHead 
         title={`${title} (${releaseYear}) - SceneBurn`}
         description={seoDescription}
@@ -238,7 +238,7 @@ const MovieDetail = () => {
       </div>
 
       {/* Action Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 2xl:py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
         {/* Watch Trailer Button */}
         <div className="mb-3">
           {trailerKey ? (
@@ -258,57 +258,57 @@ const MovieDetail = () => {
         </div>
 
         {/* Action Buttons with Labels - Compact on mobile */}
-        <div className="grid grid-cols-6 gap-1.5 mb-4 2xl:mb-6">
+        <div className="grid grid-cols-6 gap-1.5 mb-4 md:mb-6">
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${
               isMovieInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
             }`}
             onClick={() => requireAuth(() => toggleWatchlist(movieId, title, posterUrl))}
           >
-            <Plus className="h-4 w-4 2xl:h-5 2xl:w-5" />
-            <span className="text-[10px] 2xl:text-xs">Watchlist</span>
+            <Plus className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-xs">Watchlist</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${
               isMovieLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
             }`}
             onClick={() => requireAuth(() => toggleLike(movieId, title, posterUrl))}
           >
-            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Favorites</span>
+            <Heart className={`h-4 w-4 md:h-5 md:w-5 ${isMovieLiked ? 'fill-current' : ''}`} />
+            <span className="text-[10px] md:text-xs">Favorites</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${
               isMovieWatched ? 'bg-green-600 border-green-600 text-white' : ''
             }`}
             onClick={() => requireAuth(() => markAsWatched(movieId, title, posterUrl))}
           >
-            <Eye className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isMovieWatched ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Watched</span>
+            <Eye className={`h-4 w-4 md:h-5 md:w-5 ${isMovieWatched ? 'fill-current' : ''}`} />
+            <span className="text-[10px] md:text-xs">Watched</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation"
             onClick={() => requireAuth(() => setShowLogModal(true))}
           >
-            <BookOpen className="h-4 w-4 2xl:h-5 2xl:w-5" />
-            <span className="text-[10px] 2xl:text-xs">Log</span>
+            <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-xs">Log</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation"
             asChild
           >
             <Link to={`/movie/${movieId}/reviews`}>
-              <MessageCircle className="h-4 w-4 2xl:h-5 2xl:w-5" />
-              <span className="text-[10px] 2xl:text-xs">Reviews</span>
+              <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="text-[10px] md:text-xs">Reviews</span>
             </Link>
           </Button>
 
@@ -317,7 +317,7 @@ const MovieDetail = () => {
               movie={{ id: movieId, title, poster: movie.poster_path || undefined }}
               variant="outline"
               size="sm"
-              className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
+              className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation"
             />
           )}
         </div>
@@ -372,11 +372,11 @@ const MovieDetail = () => {
       </div>
 
       {/* Additional Content */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6 2xl:space-y-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6 md:space-y-8">
         {/* Key Crew Section */}
         {keyCrewMembers.length > 0 && (
           <div>
-            <h2 className="text-lg 2xl:text-2xl font-cinematic text-foreground mb-4 tracking-wide">
+            <h2 className="text-lg md:text-2xl font-cinematic text-foreground mb-4 tracking-wide">
               KEY CREW
             </h2>
             <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-3">
@@ -391,14 +391,14 @@ const MovieDetail = () => {
         {cast && cast.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg 2xl:text-2xl font-cinematic text-foreground tracking-wide">
+              <h2 className="text-lg md:text-2xl font-cinematic text-foreground tracking-wide">
                 CAST
               </h2>
               <Button 
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowCastCrewModal(true)}
-                className="text-cinema-gold hover:text-cinema-gold/80 text-xs 2xl:text-sm font-medium touch-manipulation h-auto p-0"
+                className="text-cinema-gold hover:text-cinema-gold/80 text-xs md:text-sm font-medium touch-manipulation h-auto p-0"
               >
                 View All ({fullCast.length}) →
               </Button>

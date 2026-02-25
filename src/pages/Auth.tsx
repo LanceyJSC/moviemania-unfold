@@ -93,7 +93,7 @@ const Auth = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex flex-col">
         <DesktopHeader />
-        <div className="flex-1 flex items-center justify-center p-4 pb-32 2xl:pb-12">
+        <div className="flex-1 flex items-center justify-center p-4 pb-32 md:pb-12">
           <Card className="w-full max-w-md bg-background/80 backdrop-blur border-border text-center">
             <CardHeader>
               <div className="flex justify-center mb-4">
@@ -126,7 +126,7 @@ const Auth = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex flex-col">
         <DesktopHeader />
-        <div className="flex-1 flex items-center justify-center p-4 pb-32 2xl:pb-12">
+        <div className="flex-1 flex items-center justify-center p-4 pb-32 md:pb-12">
           <Card className="w-full max-w-md bg-background/80 backdrop-blur border-border">
             <CardHeader className="text-center">
               <div className="flex items-center justify-center gap-2 mb-4">
@@ -172,7 +172,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 flex flex-col">
       <DesktopHeader />
-      <div className="flex-1 flex items-center justify-center p-4 pb-32 2xl:pb-12">
+      <div className="flex-1 flex items-center justify-center p-4 pb-32 md:pb-12">
         <Card className="w-full max-w-md bg-background/80 backdrop-blur border-border">
           <CardHeader className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">

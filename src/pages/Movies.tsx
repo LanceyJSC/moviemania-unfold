@@ -66,8 +66,8 @@ const Movies = () => {
         <FeaturedHero type="movie" />
 
         <div className="relative">
-          <div className="px-4 2xl:px-6 pt-2 pb-32 2xl:pb-12 space-y-4 2xl:space-y-6 max-w-7xl mx-auto">
-            <div className="sticky top-0 2xl:top-16 z-40 bg-background/95 backdrop-blur-sm py-3 2xl:py-4">
+          <div className="px-4 md:px-6 pt-2 pb-32 md:pb-12 space-y-4 md:space-y-6 max-w-7xl mx-auto">
+            <div className="sticky top-0 md:top-16 z-40 bg-background/95 backdrop-blur-sm py-3 md:py-4">
               <div className="flex gap-1.5">
                 {filterButtons.map((filter) => {
                   const Icon = filter.icon;
@@ -76,7 +76,7 @@ const Movies = () => {
                        key={filter.id}
                        variant={activeFilter === filter.id ? "default" : "outline"}
                        size="sm"
-                       className={`flex-1 h-9 2xl:h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-lg 2xl:rounded-xl touch-manipulation ${
+                       className={`flex-1 h-9 md:h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-lg md:rounded-xl touch-manipulation ${
                          activeFilter === filter.id 
                            ? "bg-cinema-red text-white shadow-md" 
                            : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
@@ -86,8 +86,8 @@ const Movies = () => {
                          setSelectedGenres([]);
                        }}
                      >
-                      <Icon className="h-3.5 w-3.5 2xl:mr-1" />
-                      <span className="hidden 2xl:inline text-xs">{filter.label}</span>
+                      <Icon className="h-3.5 w-3.5 md:mr-1" />
+                      <span className="hidden md:inline text-xs">{filter.label}</span>
                     </Button>
                   );
                 })}
@@ -97,14 +97,14 @@ const Movies = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFiltersModal(true)}
-                  className={`flex-1 h-9 2xl:h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-lg 2xl:rounded-xl touch-manipulation ${
+                  className={`flex-1 h-9 md:h-10 text-xs font-medium transition-all duration-200 active:scale-95 rounded-lg md:rounded-xl touch-manipulation ${
                     selectedGenres.length > 0
                       ? "bg-cinema-gold text-cinema-black border-cinema-gold"
                       : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
                   }`}
                 >
-                  <Filter className="h-3.5 w-3.5 2xl:mr-1" />
-                  <span className="hidden 2xl:inline text-xs">Filters</span>
+                  <Filter className="h-3.5 w-3.5 md:mr-1" />
+                  <span className="hidden md:inline text-xs">Filters</span>
                   {selectedGenres.length > 0 && (
                     <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-cinema-red text-white">
                       {selectedGenres.length}

@@ -153,7 +153,7 @@ export const Recommendations = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
       <SEOHead 
         title="Personalized Movie Recommendations | SceneBurn"
         description="Get personalized movie and TV show recommendations based on your ratings and favorites. Discover your next watch on SceneBurn."

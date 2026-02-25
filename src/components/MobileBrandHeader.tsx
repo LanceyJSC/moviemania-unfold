@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export const MobileBrandHeader = () => {
   return (
     <header 
-      className="2xl:hidden sticky top-0 z-50 bg-cinema-black border-b border-border"
+      className="md:hidden sticky top-0 z-50 bg-cinema-black border-b border-border"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="flex items-center justify-start h-11 px-3">

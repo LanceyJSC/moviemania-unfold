@@ -100,7 +100,7 @@ const ActorDetail = () => {
     : `${actor.name} - Known for ${actor.known_for_department}. View filmography on SceneBurn.`;
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
       <SEOHead 
         title={`${actor.name} - SceneBurn`}
         description={seoDescription}

@@ -148,7 +148,7 @@ const ListDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24 2xl:pb-12">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
         <DesktopHeader />
         <MobileHeader title="List" />
         <div className="max-w-4xl mx-auto px-4 md:px-6 pt-4">
@@ -167,7 +167,7 @@ const ListDetail = () => {
 
   if (!list) {
     return (
-      <div className="min-h-screen bg-background pb-24 2xl:pb-12">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
         <DesktopHeader />
         <MobileHeader title="List Not Found" />
         <div className="max-w-4xl mx-auto px-4 md:px-6 pt-4">
@@ -185,7 +185,7 @@ const ListDetail = () => {
   const isOwner = user?.id === list.user_id;
 
   return (
-    <div className="min-h-screen bg-background pb-24 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-24 md:pb-12">
       <DesktopHeader />
       <MobileHeader title={list.name} />
 

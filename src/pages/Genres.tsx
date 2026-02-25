@@ -110,7 +110,7 @@ export default function Genres() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12 overflow-y-auto">
+    <div className="min-h-screen bg-background pb-32 md:pb-12 overflow-y-auto">
       <SEOHead 
         title="Explore Genres - Action, Comedy, Horror, Sci-Fi & More | SceneBurn"
         description="Browse movies and TV shows by genre. Find the best action, comedy, horror, sci-fi, drama, and more on SceneBurn."
@@ -120,8 +120,8 @@ export default function Genres() {
       <MobileHeader title="Browse Genres" />
       
       {/* Header Section - Compact on mobile */}
-      <div className="max-w-7xl mx-auto px-4 pt-4 2xl:pt-6 pb-3">
-        <h1 className="font-cinematic text-2xl 2xl:text-3xl text-foreground tracking-wide mb-1">
+      <div className="max-w-7xl mx-auto px-4 pt-4 md:pt-6 pb-3">
+        <h1 className="font-cinematic text-2xl md:text-3xl text-foreground tracking-wide mb-1">
           EXPLORE BY GENRE
         </h1>
         <div className="w-12 h-0.5 bg-cinema-red mb-2"></div>
@@ -129,7 +129,7 @@ export default function Genres() {
       </div>
 
       {/* Search and Tabs - Compact on mobile */}
-      <div className="max-w-7xl mx-auto px-4 space-y-3 mb-4 2xl:mb-6">
+      <div className="max-w-7xl mx-auto px-4 space-y-3 mb-4 md:mb-6">
         {/* Search bar */}
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -164,13 +164,13 @@ export default function Genres() {
         </div>
 
         {/* Genre Pills - Horizontal scroll on mobile */}
-        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 2xl:flex-wrap 2xl:overflow-visible 2xl:mx-0 2xl:px-0">
+        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:flex-wrap md:overflow-visible md:mx-0 md:px-0">
           {filteredGenres.map((genre) => (
             <button
               key={genre.id}
               onClick={() => handleGenreClick(genre.id)}
               className={cn(
-                "flex-shrink-0 flex items-center gap-1 py-1.5 px-2.5 rounded-full text-xs 2xl:text-sm",
+                "flex-shrink-0 flex items-center gap-1 py-1.5 px-2.5 rounded-full text-xs md:text-sm",
                 "bg-card/80 border border-border/50",
                 "hover:bg-card hover:border-primary/50",
                 "transition-all duration-200 active:scale-95 touch-manipulation"
@@ -184,14 +184,14 @@ export default function Genres() {
       </div>
 
       {/* Genre Content Sections */}
-      <div className="max-w-7xl mx-auto px-4 space-y-6 2xl:space-y-10">
+      <div className="max-w-7xl mx-auto px-4 space-y-6 md:space-y-10">
         {loading ? (
           <div className="text-center py-8 text-muted-foreground text-sm">Loading genres...</div>
         ) : (
           genreContents.map((genreContent) => (
             <div key={genreContent.genreId} className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-base 2xl:text-xl font-semibold text-foreground flex items-center gap-1.5">
+                <h2 className="text-base md:text-xl font-semibold text-foreground flex items-center gap-1.5">
                   <span>{genreContent.emoji}</span>
                   {genreContent.genreName}
                 </h2>
@@ -205,7 +205,7 @@ export default function Genres() {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 2xl:gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-4">
                 {genreContent.items.map((item) => (
                   <MovieCard 
                     key={item.id} 
