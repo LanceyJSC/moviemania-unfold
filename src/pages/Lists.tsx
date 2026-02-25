@@ -117,7 +117,7 @@ const Lists = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-24 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-24 md:pb-12">
       <SEOHead 
         title="Movie & TV Show Lists - Curated Collections | SceneBurn"
         description="Browse and create curated movie and TV show lists. Discover popular community lists and share your own favorites on SceneBurn."

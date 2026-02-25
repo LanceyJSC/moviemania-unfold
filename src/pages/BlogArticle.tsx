@@ -27,7 +27,7 @@ const BlogArticle = () => {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-background pb-24 2xl:pb-0">
+      <div className="min-h-screen bg-background pb-24 md:pb-0">
         <SEOHead 
           title="Article Not Found - SceneBurn"
           description="The requested article could not be found."
@@ -58,7 +58,7 @@ const BlogArticle = () => {
   const seoDescription = post.seo_description || post.excerpt || post.title;
 
   return (
-    <div className="min-h-screen bg-background pb-24 2xl:pb-0">
+    <div className="min-h-screen bg-background pb-24 md:pb-0">
       <SEOHead 
         title={seoTitle}
         description={seoDescription}

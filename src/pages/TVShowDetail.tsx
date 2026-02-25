@@ -193,7 +193,7 @@ const TVShowDetail = () => {
     : `${tvShow.name} (${releaseYear}) - Watch trailers, read reviews, and track on SceneBurn.`;
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
       <SEOHead 
         title={`${tvShow.name} (${releaseYear}) - SceneBurn`}
         description={seoDescription}
@@ -282,7 +282,7 @@ const TVShowDetail = () => {
       </div>
 
       {/* Action Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 2xl:py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
         {/* Watch Trailer Button */}
         <div className="mb-3">
           {trailerKey ? (
@@ -302,57 +302,57 @@ const TVShowDetail = () => {
         </div>
 
         {/* Action Buttons with Labels - Compact on mobile */}
-        <div className="grid grid-cols-6 gap-1.5 mb-4 2xl:mb-6">
+        <div className="grid grid-cols-6 gap-1.5 mb-4 md:mb-6">
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowInWatchlist ? 'bg-cinema-gold border-cinema-gold text-cinema-black' : ''
             }`}
             onClick={() => requireAuth(() => toggleWatchlist(tvShowId, tvShow.name, posterUrl, 'tv'))}
           >
-            <Plus className="h-4 w-4 2xl:h-5 2xl:w-5" />
-            <span className="text-[10px] 2xl:text-xs">Watchlist</span>
+            <Plus className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-xs">Watchlist</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowLiked ? 'bg-cinema-red border-cinema-red text-white' : ''
             }`}
             onClick={() => requireAuth(() => toggleLike(tvShowId, tvShow.name, posterUrl, 'tv'))}
           >
-            <Heart className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowLiked ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Favorites</span>
+            <Heart className={`h-4 w-4 md:h-5 md:w-5 ${isTVShowLiked ? 'fill-current' : ''}`} />
+            <span className="text-[10px] md:text-xs">Favorites</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className={`flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation ${
+            className={`flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation ${
               isTVShowWatched ? 'bg-green-600 border-green-600 text-white' : ''
             }`}
             onClick={() => requireAuth(() => markAsWatched(tvShowId, tvShow.name, posterUrl, 'tv'))}
           >
-            <Eye className={`h-4 w-4 2xl:h-5 2xl:w-5 ${isTVShowWatched ? 'fill-current' : ''}`} />
-            <span className="text-[10px] 2xl:text-xs">Watched</span>
+            <Eye className={`h-4 w-4 md:h-5 md:w-5 ${isTVShowWatched ? 'fill-current' : ''}`} />
+            <span className="text-[10px] md:text-xs">Watched</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation"
             onClick={() => requireAuth(() => setShowLogModal(true))}
           >
-            <BookOpen className="h-4 w-4 2xl:h-5 2xl:w-5" />
-            <span className="text-[10px] 2xl:text-xs">Log</span>
+            <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-xs">Log</span>
           </Button>
 
           <Button 
             variant="outline" 
-            className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation"
             asChild
           >
             <Link to={`/tv/${tvShowId}/reviews`}>
-              <MessageCircle className="h-4 w-4 2xl:h-5 2xl:w-5" />
-              <span className="text-[10px] 2xl:text-xs">Reviews</span>
+              <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="text-[10px] md:text-xs">Reviews</span>
             </Link>
           </Button>
 
@@ -361,7 +361,7 @@ const TVShowDetail = () => {
               movie={{ id: tvShowId, title: tvShow.name, poster: tvShow.poster_path || undefined }}
               variant="outline"
               size="sm"
-              className="flex flex-col items-center gap-0.5 h-auto py-2 2xl:py-3 border-border hover:bg-card touch-manipulation"
+              className="flex flex-col items-center gap-0.5 h-auto py-2 md:py-3 border-border hover:bg-card touch-manipulation"
             />
           )}
         </div>

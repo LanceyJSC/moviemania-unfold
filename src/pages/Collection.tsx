@@ -142,7 +142,7 @@ const Collection = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-24 2xl:pb-12">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
         <DesktopHeader />
         <MobileBrandHeader />
         <Navigation />
@@ -422,7 +422,7 @@ const Collection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-24 md:pb-12">
       <DesktopHeader />
       <MobileBrandHeader />
       <Navigation />

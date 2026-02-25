@@ -66,7 +66,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
       <DesktopHeader />
       <MobileHeader title="Notifications" />
       

@@ -264,7 +264,7 @@ export const Stats = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+      <div className="min-h-screen bg-background pb-32 md:pb-12">
         <DesktopHeader />
         <MobileHeader title="Stats" />
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
@@ -282,7 +282,7 @@ export const Stats = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32 2xl:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12">
       <DesktopHeader />
       <MobileHeader title="Your Stats" />
       

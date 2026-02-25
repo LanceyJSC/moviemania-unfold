@@ -286,12 +286,12 @@ const Search = () => {
       <DesktopHeader />
       <MobileBrandHeader />
       
-      <div className="px-4 2xl:px-6 pb-32 2xl:pb-12 space-y-4 2xl:space-y-6 max-w-7xl mx-auto">
+      <div className="px-4 md:px-6 pb-32 md:pb-12 space-y-4 md:space-y-6 max-w-7xl mx-auto">
         {/* Search Section */}
-        <div className="pt-4 2xl:pt-6">
+        <div className="pt-4 md:pt-6">
           {/* Title - Only on desktop or when no results */}
           {!searchTerm && !genreParam && filterResults.length === 0 && (
-            <div className="hidden 2xl:block mb-6">
+            <div className="hidden md:block mb-6">
               <h1 className="font-cinematic text-3xl md:text-4xl text-foreground tracking-wider mb-2">
                 DISCOVER
               </h1>
@@ -308,7 +308,7 @@ const Search = () => {
               placeholder="Search movies, TV shows..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded-xl pl-11 pr-10 h-12 2xl:h-14 text-base bg-card border-border/50 focus:border-primary/50"
+              className="rounded-xl pl-11 pr-10 h-12 md:h-14 text-base bg-card border-border/50 focus:border-primary/50"
             />
             <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             {searchTerm && (
@@ -448,7 +448,7 @@ const Search = () => {
                     <p className="text-xs text-muted-foreground">{filterResults.length} found</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 2xl:gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 md:gap-4">
                   {filterResults.map((item) => renderMediaCard(item))}
                 </div>
               </div>
@@ -458,7 +458,7 @@ const Search = () => {
 
         {/* Search Results - Optimized grid for mobile */}
         {(searchTerm || genreParam) && (
-          <div className="py-4 2xl:py-6 space-y-6">
+          <div className="py-4 md:py-6 space-y-6">
             {/* Matched People Section */}
             {!isSearching && matchedPeople.length > 0 && searchTerm && (
               <div>
@@ -473,7 +473,7 @@ const Search = () => {
                       onClick={() => navigate(`/actor/${person.id}`)}
                       className="flex-shrink-0 text-center group"
                     >
-                      <div className="w-24 h-24 2xl:w-28 2xl:h-28 rounded-full overflow-hidden bg-muted mb-2 ring-2 ring-transparent group-hover:ring-primary transition-all">
+                      <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-muted mb-2 ring-2 ring-transparent group-hover:ring-primary transition-all">
                         {person.profile_path ? (
                           <img
                             src={`https://image.tmdb.org/t/p/w185${person.profile_path}`}
@@ -486,8 +486,8 @@ const Search = () => {
                           </div>
                         )}
                       </div>
-                      <p className="text-sm font-medium text-foreground truncate w-24 2xl:w-28">{person.name}</p>
-                      <p className="text-xs text-muted-foreground truncate w-24 2xl:w-28">{person.known_for_department}</p>
+                      <p className="text-sm font-medium text-foreground truncate w-24 md:w-28">{person.name}</p>
+                      <p className="text-xs text-muted-foreground truncate w-24 md:w-28">{person.known_for_department}</p>
                     </button>
                   ))}
                 </div>
@@ -523,7 +523,7 @@ const Search = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 2xl:gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 md:gap-4">
                   {searchResults.map((item) => renderMediaCard(item))}
                 </div>
               </div>
