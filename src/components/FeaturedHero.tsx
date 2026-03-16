@@ -19,7 +19,7 @@ export const FeaturedHero = ({ type }: FeaturedHeroProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
   
-  const rotationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const rotationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startRotation = (itemCount: number) => {
     if (rotationIntervalRef.current) {

@@ -8,6 +8,8 @@ interface ArticleSchemaProps {
   modifiedTime?: string;
   authorName?: string;
   slug: string;
+  pathPrefix?: '/blog' | '/news';
+  schemaType?: 'BlogPosting' | 'NewsArticle';
 }
 
 export const ArticleSchema = ({
@@ -17,36 +19,39 @@ export const ArticleSchema = ({
   publishedTime,
   modifiedTime,
   authorName,
-  slug
+  slug,
+  pathPrefix = '/blog',
+  schemaType = 'BlogPosting'
 }: ArticleSchemaProps) => {
+  const canonicalUrl = `https://sceneburn.com${pathPrefix}/${slug}`;
   const schema = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": schemaType,
     "headline": title,
     "description": description,
-    "image": image || "https://sceneburn.com/sceneburn-logo.png",
+    "image": image || 'https://sceneburn.com/sceneburn-logo.png',
     "datePublished": publishedTime,
     "dateModified": modifiedTime || publishedTime,
     "author": authorName ? {
-      "@type": "Person",
+      "@type": 'Person',
       "name": authorName
     } : {
-      "@type": "Organization",
-      "name": "SceneBurn"
+      "@type": 'Organization',
+      "name": 'SceneBurn'
     },
     "publisher": {
-      "@type": "Organization",
-      "name": "SceneBurn",
+      "@type": 'Organization',
+      "name": 'SceneBurn',
       "logo": {
-        "@type": "ImageObject",
-        "url": "https://sceneburn.com/sceneburn-logo.png"
+        "@type": 'ImageObject',
+        "url": 'https://sceneburn.com/sceneburn-logo.png'
       }
     },
     "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `https://sceneburn.com/blog/${slug}`
+      "@type": 'WebPage',
+      "@id": canonicalUrl
     },
-    "url": `https://sceneburn.com/blog/${slug}`
+    "url": canonicalUrl
   };
 
   return (

@@ -81,6 +81,8 @@ const NewsArticle = () => {
           modifiedTime={article.updated_at}
           image={article.featured_image || undefined}
           slug={article.slug}
+          pathPrefix="/news"
+          schemaType="NewsArticle"
         />
       )}
       <DesktopHeader />
