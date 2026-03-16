@@ -11,6 +11,16 @@ interface SEOHeadProps {
   author?: string;
 }
 
+const SITE_URL = 'https://sceneburn.com';
+
+const toAbsoluteUrl = (value: string) => {
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  return `${SITE_URL}${value.startsWith('/') ? value : `/${value}`}`;
+};
+
 export const SEOHead = ({
   title,
   description,
@@ -21,24 +31,19 @@ export const SEOHead = ({
   modifiedTime,
   author
 }: SEOHeadProps) => {
-  const siteUrl = 'https://sceneburn.com';
-  const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
-  const truncatedDescription = description.length > 155 
-    ? description.substring(0, 152) + '...' 
+  const fullUrl = url ? toAbsoluteUrl(url) : SITE_URL;
+  const truncatedDescription = description.length > 155
+    ? `${description.substring(0, 152)}...`
     : description;
-  
-  // Default OG image
-  const ogImage = image || `${siteUrl}/sceneburn-logo.png`;
+  const ogImage = image ? toAbsoluteUrl(image) : `${SITE_URL}/sceneburn-logo.png`;
 
   return (
     <Helmet>
-      {/* Primary Meta Tags */}
       <title>{title}</title>
       <meta name="title" content={title} />
       <meta name="description" content={truncatedDescription} />
       <link rel="canonical" href={fullUrl} />
 
-      {/* Open Graph / Facebook */}
       <meta property="og:type" content={type === 'movie' || type === 'tv_show' ? 'video.movie' : type} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:title" content={title} />
@@ -46,14 +51,12 @@ export const SEOHead = ({
       <meta property="og:image" content={ogImage} />
       <meta property="og:site_name" content="SceneBurn" />
 
-      {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:url" content={fullUrl} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={truncatedDescription} />
       <meta name="twitter:image" content={ogImage} />
 
-      {/* Article specific */}
       {publishedTime && <meta property="article:published_time" content={publishedTime} />}
       {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
       {author && <meta property="article:author" content={author} />}

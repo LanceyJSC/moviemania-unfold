@@ -18,8 +18,8 @@ export const HeroSection = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   const isMobile = useIsMobile();
-  const rotationIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const rotationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { setIsTrailerOpen, setTrailerKey: setGlobalTrailerKey, setMovieTitle } = useTrailerContext();
 
