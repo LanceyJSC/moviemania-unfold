@@ -126,7 +126,7 @@ export const CollectionReviewsList = ({ onCountChange, viewMode = 'list' }: Coll
   return (
     <div className="space-y-4">
       <MobileFilterPills
-        options={reviewFilterOptions}
+        options={[...reviewFilterOptions]}
         selectedValue={mediaTypeFilter}
         onSelect={setMediaTypeFilter}
       />
