@@ -60,7 +60,18 @@ const Activity = () => {
                   </Button>
                 </Link>
               </div>
-              <ActivityFeed />
+
+              <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                <div className="min-w-0 space-y-4">
+                  <div className="lg:hidden">
+                    <SuggestedMembers title="Suggested members" limit={6} />
+                  </div>
+                  <ActivityFeed />
+                </div>
+                <aside className="hidden lg:block space-y-4">
+                  <SuggestedMembers title="Suggested members" limit={6} variant="list" />
+                </aside>
+              </div>
             </>
           )}
         </div>
