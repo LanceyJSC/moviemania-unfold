@@ -124,7 +124,6 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       }
-    }),
     })
   ].filter(Boolean),
   resolve: {
