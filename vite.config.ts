@@ -125,7 +125,7 @@ export default defineConfig(({ mode }) => ({
         ]
       }
     }),
-    prerenderStaticPagesPlugin()
+    })
   ].filter(Boolean),
   resolve: {
     alias: {
