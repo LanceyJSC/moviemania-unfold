@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useActivityFeed } from "@/hooks/useActivityFeed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { SuggestedMembers } from "@/components/SuggestedMembers";
 
 const ACTIVITY_META: Record<string, { label: string; icon: typeof Eye }> = {
   watched: { label: "watched", icon: Eye },
@@ -61,18 +62,7 @@ export const NetworkActivity = () => {
   if (items.length === 0) {
     return (
       <section className="mb-6 sm:mb-12">
-        <div className="rounded-2xl border border-border bg-card/40 p-5 sm:p-8 text-center">
-          <Users className="mx-auto mb-3 h-8 w-8 text-cinema-red" />
-          <h2 className="font-cinematic text-xl sm:text-2xl tracking-wide text-foreground mb-2">
-            YOUR NETWORK IS QUIET
-          </h2>
-          <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-            Follow members to see what they're watching, rating and reviewing in real time.
-          </p>
-          <Button asChild variant="outline">
-            <Link to="/members">Discover Members</Link>
-          </Button>
-        </div>
+        <SuggestedMembers title="Find your people" />
       </section>
     );
   }
