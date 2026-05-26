@@ -7,6 +7,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { Card } from "@/components/ui/card";
 import { Activity as ActivityIcon, Users } from "lucide-react";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { SuggestedMembers } from "@/components/SuggestedMembers";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
