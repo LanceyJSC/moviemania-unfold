@@ -59,6 +59,10 @@ const Index = () => {
             </ErrorBoundary>
 
             <ErrorBoundary>
+              <NetworkActivity />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
               <NewThisMonth />
             </ErrorBoundary>
             
