@@ -14,6 +14,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { SEOHead } from "@/components/SEOHead";
+import { NetworkActivity } from "@/components/NetworkActivity";
 
 const Index = () => {
   const [hasError, setHasError] = useState(false);
