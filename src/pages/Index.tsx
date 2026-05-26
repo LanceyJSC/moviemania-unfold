@@ -14,6 +14,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { SEOHead } from "@/components/SEOHead";
+import { NetworkActivity } from "@/components/NetworkActivity";
 
 const Index = () => {
   const [hasError, setHasError] = useState(false);
@@ -55,6 +56,10 @@ const Index = () => {
           <div className="px-3 sm:px-4 md:px-6 pt-1 sm:pt-2 pb-28 sm:pb-32 md:pb-12 space-y-4 sm:space-y-8 max-w-7xl mx-auto">
             <ErrorBoundary>
               <BecauseYouLoved />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <NetworkActivity />
             </ErrorBoundary>
 
             <ErrorBoundary>
