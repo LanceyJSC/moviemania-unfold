@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useActivityFeed } from "@/hooks/useActivityFeed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { SuggestedMembers } from "@/components/SuggestedMembers";
 
 const ACTIVITY_META: Record<string, { label: string; icon: typeof Eye }> = {
   watched: { label: "watched", icon: Eye },
