@@ -13,7 +13,6 @@ import {
   CollectionReview,
   buildGroupedTVReviews,
   buildReviewTimeline,
-  getSeriesName,
   reviewFilterOptions,
 } from '@/components/collection-reviews/utils';
 

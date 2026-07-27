@@ -6,6 +6,7 @@ import { useActivityFeed } from "@/hooks/useActivityFeed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { SuggestedMembers } from "@/components/SuggestedMembers";
+import { tmdbService } from "@/lib/tmdb";
 
 const ACTIVITY_META: Record<string, { label: string; icon: typeof Eye }> = {
   watched: { label: "watched", icon: Eye },
@@ -98,7 +99,7 @@ export const NetworkActivity = () => {
                 <div className="aspect-[2/3] bg-muted overflow-hidden">
                   {a.movie_poster && (
                     <img
-                      src={`https://image.tmdb.org/t/p/w342${a.movie_poster}`}
+                      src={tmdbService.getPosterUrl(a.movie_poster, "w300")}
                       alt={a.movie_title || ""}
                       loading="lazy"
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -113,13 +114,9 @@ export const NetworkActivity = () => {
                         {username.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <Link
-                      to={`/user/${a.user_id}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-[11px] font-medium text-foreground truncate hover:text-cinema-red"
-                    >
+                    <span className="text-[11px] font-medium text-foreground truncate">
                       {username}
-                    </Link>
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                     <Icon className="h-3 w-3 text-cinema-red shrink-0" />
