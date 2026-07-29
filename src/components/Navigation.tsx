@@ -68,11 +68,15 @@ export const Navigation = () => {
     { path: "/pro", icon: Crown, label: "Pro" },
     ...(role === 'admin' ? [{ path: "/admin", icon: Shield, label: "Admin" }] : []),
   ] : [
+    { path: "/activity", icon: Activity, label: "Activity" },
+    { path: "/members", icon: Users, label: "Members" },
+    { path: "/lists", icon: ListChecks, label: "Lists" },
+    { path: "/genres", icon: Film, label: "Genres" },
     { path: "/news", icon: Newspaper, label: "News" },
     { path: "/blog", icon: BookOpen, label: "Blog" },
-    { path: "/members", icon: Users, label: "Members" },
-    { path: "/genres", icon: Film, label: "Genres" },
+    { path: "/pro", icon: Crown, label: "Pro" },
   ];
+
 
   const isMoreActive = moreItems.some(item => location.pathname === item.path);
 
