@@ -48,6 +48,8 @@ import NewsArticle from "./pages/NewsArticle";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { CookieConsent } from "@/components/CookieConsent";
+import { SiteFooter } from "@/components/SiteFooter";
+
 
 // Import MovieDetail separately to resolve bundling issue
 import MovieDetail from "./pages/MovieDetail";
@@ -121,7 +123,9 @@ const App = () => {
                             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                             <Route path="*" element={<NotFound />} />
                           </Routes>
+                          <SiteFooter />
                         </BrowserRouter>
+
                         <CookieConsent />
                       </div>
                     </TrailerProvider>
