@@ -53,6 +53,18 @@ export const LogMediaModal = ({
   const [notes, setNotes] = useState(initialNotes);
   const [rating, setRating] = useState<number>(initialRating);
   const [isSpoiler, setIsSpoiler] = useState(false);
+  const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
+
+  // Scope a user_reviews query to this exact title/season/episode
+  const scopeReviewQuery = (q: any) => {
+    q = q.eq('movie_id', mediaId);
+    q = mediaType === 'movie'
+      ? q.or('media_type.eq.movie,media_type.is.null')
+      : q.eq('media_type', 'tv');
+    q = seasonNumber ? q.eq('season_number', seasonNumber) : q.is('season_number', null);
+    q = episodeNumber ? q.eq('episode_number', episodeNumber) : q.is('episode_number', null);
+    return q;
+  };
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [runtime, setRuntime] = useState<number | null>(null);
@@ -62,8 +74,21 @@ export const LogMediaModal = ({
     if (isOpen) {
       setRating(initialRating);
       setNotes(initialNotes);
+      setExistingReviewId(null);
+      if (user && mediaId) {
+        scopeReviewQuery(
+          supabase.from('user_reviews').select('id, review_text, is_spoiler').eq('user_id', user.id)
+        ).maybeSingle().then(({ data }: any) => {
+          if (data) {
+            setExistingReviewId(data.id);
+            setIsSpoiler(!!data.is_spoiler);
+            if (!initialNotes) setNotes(data.review_text || '');
+          }
+        });
+      }
     }
-  }, [isOpen, initialRating, initialNotes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialRating, initialNotes, user?.id, mediaId, mediaType, seasonNumber, episodeNumber]);
 
   // Fetch runtime when modal opens
   useEffect(() => {
@@ -111,6 +136,12 @@ export const LogMediaModal = ({
     }
 
     const sanitizedNotes = sanitizeString(notes, 5000);
+
+    // Only delete a review if one existed and the user explicitly cleared it
+    const shouldDeleteReview = !!existingReviewId && !notes.trim();
+    if (shouldDeleteReview && !window.confirm('Remove your review?')) {
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -197,27 +228,17 @@ export const LogMediaModal = ({
         .eq('user_id', user.id)
         .eq('movie_id', mediaId);
 
-      // Save to user_reviews if notes are provided (for public reviews)
-      if (notes.trim()) {
-        // Use manual check + insert/update instead of upsert since we have a functional unique index
-        let query = supabase
-          .from('user_reviews')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('movie_id', mediaId);
-        
-        if (seasonNumber) {
-          query = query.eq('season_number', seasonNumber);
-        } else {
-          query = query.is('season_number', null);
-        }
-        if (episodeNumber) {
-          query = query.eq('episode_number', episodeNumber);
-        } else {
-          query = query.is('episode_number', null);
-        }
+      const reviewMeta = {
+        rating,
+        media_type: mediaType,
+        season_number: seasonNumber ?? null,
+        episode_number: episodeNumber ?? null,
+      };
 
-        const { data: existing } = await query.maybeSingle();
+      if (notes.trim()) {
+        const { data: existing } = await scopeReviewQuery(
+          supabase.from('user_reviews').select('id').eq('user_id', user.id)
+        ).maybeSingle();
 
         const reviewData = {
           user_id: user.id,
@@ -232,70 +253,71 @@ export const LogMediaModal = ({
           episode_number: episodeNumber || null,
         };
 
-        let reviewError;
-        if (existing) {
-          const { error } = await supabase
-            .from('user_reviews')
-            .update(reviewData as any)
-            .eq('id', existing.id);
-          reviewError = error;
-        } else {
-          const { error } = await supabase
-            .from('user_reviews')
-            .insert(reviewData as any);
-          reviewError = error;
-        }
+        const { error: reviewError } = existing
+          ? await supabase.from('user_reviews').update(reviewData as any).eq('id', existing.id)
+          : await supabase.from('user_reviews').insert(reviewData as any);
 
         if (reviewError) {
           console.error('Error saving review:', reviewError);
         } else {
-          await supabase.from('activity_feed').insert({
-            user_id: user.id,
-            activity_type: 'reviewed',
-            movie_id: mediaId,
-            movie_title: mediaTitle,
-            movie_poster: mediaPoster,
-            metadata: { rating, media_type: mediaType, season_number: seasonNumber, episode_number: episodeNumber }
+          // Find an existing "reviewed" activity for this exact title/season/episode
+          const { data: prior } = await supabase
+            .from('activity_feed')
+            .select('id, target_type, metadata')
+            .eq('user_id', user.id)
+            .eq('movie_id', mediaId)
+            .eq('activity_type', 'reviewed')
+            .order('created_at', { ascending: false });
+          const match = (prior || []).find((a: any) => {
+            const m = a.metadata || {};
+            const t = m.media_type || a.target_type || 'movie';
+            return t === mediaType &&
+              (m.season_number ?? null) === (seasonNumber ?? null) &&
+              (m.episode_number ?? null) === (episodeNumber ?? null);
           });
+          if (existing && match) {
+            const { error } = await supabase
+              .from('activity_feed')
+              .update({ metadata: reviewMeta, movie_title: mediaTitle, movie_poster: mediaPoster, target_type: mediaType })
+              .eq('id', match.id);
+            if (error) console.error('Error updating review activity:', error);
+          } else if (!match) {
+            await supabase.from('activity_feed').insert({
+              user_id: user.id,
+              activity_type: 'reviewed',
+              target_type: mediaType,
+              movie_id: mediaId,
+              movie_title: mediaTitle,
+              movie_poster: mediaPoster,
+              metadata: reviewMeta,
+            });
+          }
         }
       } else {
-        // If notes are cleared/empty, remove the specific review (not all reviews for this media)
-        let deleteQuery = supabase
-          .from('user_reviews')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('movie_id', mediaId);
-        
-        if (seasonNumber) {
-          deleteQuery = deleteQuery.eq('season_number', seasonNumber);
-        } else {
-          deleteQuery = deleteQuery.is('season_number', null);
+        if (shouldDeleteReview && existingReviewId) {
+          await supabase.from('user_reviews').delete().eq('id', existingReviewId).eq('user_id', user.id);
         }
-        if (episodeNumber) {
-          deleteQuery = deleteQuery.eq('episode_number', episodeNumber);
-        } else {
-          deleteQuery = deleteQuery.is('episode_number', null);
-        }
-        
-        await deleteQuery;
+        // Rewatch / log without review: single "watched" activity
+        await supabase.from('activity_feed').insert({
+          user_id: user.id,
+          activity_type: 'watched',
+          target_type: mediaType,
+          movie_id: mediaId,
+          movie_title: mediaTitle,
+          movie_poster: mediaPoster,
+          metadata: { ...reviewMeta, runtime },
+        });
       }
-
-      // Log activity for diary entry
-      await supabase.from('activity_feed').insert({
-        user_id: user.id,
-        activity_type: 'watched',
-        movie_id: mediaId,
-        movie_title: mediaTitle,
-        movie_poster: mediaPoster,
-        metadata: { rating, media_type: mediaType, runtime }
-      });
 
       // Recalculate stats after logging
       await recalculateStats();
 
       // Invalidate all relevant queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['average-user-rating', mediaId, mediaType] });
-      queryClient.invalidateQueries({ queryKey: ['community-reviews', mediaId] });
+      queryClient.invalidateQueries({ queryKey: ['community-reviews', mediaType, mediaId] });
+      if (mediaType === 'tv' && seasonNumber) {
+        queryClient.invalidateQueries({ queryKey: ['season-episode-review-counts', mediaId, seasonNumber] });
+      }
       queryClient.invalidateQueries({ queryKey: ['movie-diary'] });
       queryClient.invalidateQueries({ queryKey: ['tv-diary'] });
       queryClient.invalidateQueries({ queryKey: ['user-ratings'] });

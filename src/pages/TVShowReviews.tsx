@@ -121,12 +121,13 @@ const TVShowReviews = () => {
   });
 
   const { data: allCommunityReviews, refetch: refetchCommunityReviews } = useQuery({
-    queryKey: ['community-reviews', tvId],
+    queryKey: ['community-reviews', 'tv', tvId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('user_reviews')
         .select('id, user_id, review_text, rating, is_spoiler, created_at, episode_number, season_number')
         .eq('movie_id', tvId)
+        .eq('media_type', 'tv')
         .order('created_at', { ascending: false });
       if (error) throw error;
       const userIds = [...new Set(data.map((r) => r.user_id))];
@@ -143,7 +144,7 @@ const TVShowReviews = () => {
     enabled: !!tvId
   });
 
-  const seriesReviews = allCommunityReviews?.filter(r => r.episode_number == null) || [];
+  const seriesReviews = allCommunityReviews?.filter(r => r.season_number == null && r.episode_number == null) || [];
   const episodeReviews = allCommunityReviews?.filter(r => r.episode_number != null) || [];
 
   const seasonReviewCounts = new Map<number, number>();

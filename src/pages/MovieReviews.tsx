@@ -91,12 +91,15 @@ const MovieReviews = () => {
   });
 
   const { data: communityReviews, refetch: refetchCommunityReviews } = useQuery({
-    queryKey: ['community-reviews', movieId],
+    queryKey: ['community-reviews', 'movie', movieId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('user_reviews')
         .select('id, user_id, review_text, rating, is_spoiler, created_at')
         .eq('movie_id', movieId)
+        .or('media_type.eq.movie,media_type.is.null')
+        .is('season_number', null)
+        .is('episode_number', null)
         .order('created_at', { ascending: false });
       if (error) throw error;
       const userIds = data.map((r) => r.user_id);

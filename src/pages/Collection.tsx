@@ -191,7 +191,7 @@ const Collection = () => {
         ? supabase.from('tv_diary').delete().eq('tv_id', mediaId).eq('user_id', user.id)
         : supabase.from('movie_diary').delete().eq('movie_id', mediaId).eq('user_id', user.id),
     ]);
-    queryClient.invalidateQueries({ queryKey: ['community-reviews', mediaId] });
+    queryClient.invalidateQueries({ queryKey: ['community-reviews'] });
     refetchDiary();
   };
 

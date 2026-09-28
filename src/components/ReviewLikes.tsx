@@ -44,34 +44,9 @@ export const ReviewLikes = ({ reviewId, compact = false }: ReviewLikesProps) => 
     );
   }
 
-  if (compact) {
-    return (
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleLike}
-          className={isLikedByUser ? "text-red-500" : "text-muted-foreground"}
-        >
-          <Heart className={`h-4 w-4 mr-1 ${isLikedByUser ? "fill-current" : ""}`} />
-          {likeCount}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowComments(!showComments)}
-          className="text-muted-foreground"
-        >
-          <MessageCircle className="h-4 w-4 mr-1" />
-          {commentCount}
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
+    <div className={compact ? "space-y-3" : "space-y-4"}>
+      <div className={compact ? "flex items-center gap-3" : "flex items-center gap-4"}>
         <Button
           variant="ghost"
           size="sm"
@@ -79,7 +54,7 @@ export const ReviewLikes = ({ reviewId, compact = false }: ReviewLikesProps) => 
           className={`flex items-center gap-1 ${isLikedByUser ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}
         >
           <Heart className={`h-5 w-5 ${isLikedByUser ? "fill-current" : ""}`} />
-          <span>{likeCount} {likeCount === 1 ? 'like' : 'likes'}</span>
+          <span>{compact ? likeCount : `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`}</span>
         </Button>
         
         <Button
@@ -89,7 +64,7 @@ export const ReviewLikes = ({ reviewId, compact = false }: ReviewLikesProps) => 
           className="text-muted-foreground hover:text-foreground"
         >
           <MessageCircle className="h-5 w-5 mr-1" />
-          <span>{commentCount} {commentCount === 1 ? 'comment' : 'comments'}</span>
+          <span>{compact ? commentCount : `${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}`}</span>
         </Button>
       </div>
 
