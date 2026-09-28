@@ -56,8 +56,14 @@ export const ActivityCard = ({ activity }: { activity: ActivityItem }) => {
   const [draft, setDraft] = useState("");
 
   const Icon = ICONS[activity.activity_type] || Film;
-  const mediaType = activity.target_type === "tv" ? "tv" : "movie";
-  const mediaHref = activity.movie_id ? `/${mediaType}/${activity.movie_id}` : "#";
+  const mediaType = (activity.metadata?.media_type || activity.target_type) === "tv" ? "tv" : "movie";
+  const season = activity.metadata?.season_number;
+  const episode = activity.metadata?.episode_number;
+  const mediaHref = !activity.movie_id
+    ? "#"
+    : mediaType === "tv" && season != null && episode != null
+      ? `/tv/${activity.movie_id}/season/${season}/episode/${episode}`
+      : `/${mediaType}/${activity.movie_id}`;
   const userHref = `/user/${activity.profile?.username || activity.user_id}`;
 
   const submit = async (e: React.FormEvent) => {

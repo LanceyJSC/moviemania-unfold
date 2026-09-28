@@ -11,12 +11,15 @@ export const useAverageUserRating = (mediaId: number, mediaType: 'movie' | 'tv' 
     queryKey: ['average-user-rating', mediaId, mediaType],
     queryFn: async (): Promise<AverageRating> => {
       // Query user_ratings table for all ratings of this media
-      const { data: ratings, error } = await supabase
+      let q = supabase
         .from('user_ratings')
         .select('rating')
-        .eq('movie_id', mediaId)
-        .eq('media_type', mediaType)
-        .not('rating', 'is', null);
+        .eq('movie_id', mediaId);
+      // Legacy rows with null media_type are treated as movies
+      q = mediaType === 'movie'
+        ? q.or('media_type.eq.movie,media_type.is.null')
+        : q.eq('media_type', 'tv');
+      const { data: ratings, error } = await q.not('rating', 'is', null);
 
       if (error) throw error;
 

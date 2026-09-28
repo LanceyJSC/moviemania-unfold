@@ -19,6 +19,8 @@ import { ReviewLikes } from '@/components/ReviewLikes';
 
 interface CommunityReviewsProps {
   movieId: number;
+  mediaType?: 'movie' | 'tv';
+  seasonNumber?: number;
   onWriteReview?: () => void;
 }
 
@@ -38,19 +40,27 @@ interface ReviewWithProfile {
 
 type SortOption = 'recent' | 'oldest' | 'highest' | 'lowest';
 
-export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsProps) => {
+export const CommunityReviews = ({ movieId, mediaType = 'movie', seasonNumber, onWriteReview }: CommunityReviewsProps) => {
   const { user } = useAuth();
   const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
   const [showSpoilers, setShowSpoilers] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>('recent');
 
   const { data: reviews, isLoading } = useQuery({
-    queryKey: ['community-reviews', movieId],
+    queryKey: seasonNumber
+      ? ['community-reviews', mediaType, movieId, seasonNumber]
+      : ['community-reviews', mediaType, movieId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from('user_reviews')
         .select('id, user_id, review_text, rating, is_spoiler, created_at')
-        .eq('movie_id', movieId)
+        .eq('movie_id', movieId);
+      q = mediaType === 'movie'
+        ? q.or('media_type.eq.movie,media_type.is.null')
+        : q.eq('media_type', 'tv');
+      q = seasonNumber ? q.eq('season_number', seasonNumber) : q.is('season_number', null);
+      const { data, error } = await q
+        .is('episode_number', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -202,7 +212,7 @@ export const CommunityReviews = ({ movieId, onWriteReview }: CommunityReviewsPro
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Link 
-                          to={`/user/${review.user_id}`}
+                          to={`/user/${review.profile?.username || review.user_id}`}
                           className="font-medium hover:underline"
                         >
                           {review.profile?.username || review.profile?.full_name || 'Anonymous'}
